@@ -9,6 +9,7 @@
 #include <iostream>
 #include "GLScene.hpp"
 #include <GLFW/glfw3.h>
+#include <cmath>
 
 std::ostream& operator<<(std::ostream& out, const GLS::Matrix4x4& m) {
     out << m(0, 0) << ' ' << m(0, 1) << ' ' << m(0, 2) << ' ' << m(0, 3) << '\n';
@@ -42,17 +43,28 @@ int launch(const char *name) {
     GLS::Shader vertexShader(vertexFile, GL_VERTEX_SHADER);
     GLS::ShaderProgram shdprgm(vertexShader, fragmentShader);
     
+    glfwWindowShouldClose(window);
     glfwMakeContextCurrent(window); // make context to draw to
     
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     GLS::Scene scene;
     
+    std::shared_ptr<GLS::Node> planeNode = std::make_shared<GLS::Node>();
+    planeNode->setName("plane");
+    planeNode->setMesh(GLS::Mesh::plane(0.3, 0.3));
+    planeNode->mesh()->setColor(GLS::Color(0.8, 0, 0));
+    planeNode->setPosition(GLS::Vector(0, 0, 0));
+    scene.rootNode().addChildNode(planeNode);
+    
+    double time = 0.0f;
     while (!glfwWindowShouldClose(window)) { // loop while not closed
         
+        time += 1.0 / 60.0;
         scene.renderInContextWithShader(shdprgm);
         /* do some drawing */
         
         glfwSwapBuffers(window); // draw the new image to the buffer
+        
         glfwPollEvents(); // check a loop turn
     }
     

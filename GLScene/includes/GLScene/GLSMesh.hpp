@@ -76,11 +76,11 @@ namespace GLS {
         
         // Prefabs
         
-        static Mesh plane(GLfloat width, GLfloat height);
-        static Mesh cube(GLfloat width, GLfloat height, GLfloat length);
-        static Mesh sphere(GLfloat radius, unsigned int ringCount = 12);
-        static Mesh objModel(const char *filename, int options);
-        static Mesh objModel(std::istream& file, int options);
+        static std::shared_ptr<Mesh> plane(GLfloat width, GLfloat height, bool generateBuffers = true);
+        static std::shared_ptr<Mesh> cube(GLfloat width, GLfloat height, GLfloat length, bool generateBuffers = true);
+        static std::shared_ptr<Mesh> sphere(GLfloat radius, unsigned int ringCount = 12, bool generateBuffers = true);
+        static std::shared_ptr<Mesh> objModel(const char *filename, int options, bool generateBuffers = true);
+        static std::shared_ptr<Mesh> objModel(std::istream& file, int options, bool generateBuffers = true);
         
     };
     

@@ -136,6 +136,10 @@ namespace GLS {
     
     // Hierarchy
     
+    std::vector<std::shared_ptr<Node> >& Node::childNodes() {
+        return _childs;
+    }
+    
     void Node::addChildNode(std::shared_ptr<Node> node) {
         _childs.push_back(node);
     }

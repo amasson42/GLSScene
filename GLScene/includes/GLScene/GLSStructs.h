@@ -87,7 +87,7 @@ namespace GLS {
         GLfloat rgb[3];
         GLfloat texture[2];
         
-        Vertex(Vector o, Vector n, Color c);
+        Vertex(Vector o, Vector n, Color c, Vector u);
         
         Vector getPosition() const;
         void setPosition(Vector newPosition);

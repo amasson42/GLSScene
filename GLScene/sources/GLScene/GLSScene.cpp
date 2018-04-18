@@ -10,22 +10,6 @@
 
 namespace GLS {
     
-//    class Scene {
-//        
-//        Node *_rootNode;
-//        std::weak_ptr<Node> _cameraNode;
-//        
-//    public:
-//        
-//        Color backgroundColor;
-//        
-//        Color lightAmbiant;
-//        
-//        Vector lightOmniPos;
-//        Color lightOmniColor;
-//        
-//    public:
-//        
     Scene::Scene() :
     _rootNode(new Node), _cameraNode(nullptr)
     {

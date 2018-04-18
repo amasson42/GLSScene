@@ -92,7 +92,6 @@
 		8E9C085A207FEC4E00D7F944 /* GLScene */ = {
 			isa = PBXGroup;
 			children = (
-				8E9C085B207FEC4E00D7F944 /* main.cpp */,
 				8E9C0865207FECB500D7F944 /* includes */,
 				8E9C0867207FED8300D7F944 /* sources */,
 			);
@@ -112,6 +111,24 @@
 		8E9C0865207FECB500D7F944 /* includes */ = {
 			isa = PBXGroup;
 			children = (
+				8EA235E120873D3100E8FA20 /* GLScene */,
+				8E9C08762080069F00D7F944 /* stb_image.h */,
+			);
+			path = includes;
+			sourceTree = "<group>";
+		};
+		8E9C0867207FED8300D7F944 /* sources */ = {
+			isa = PBXGroup;
+			children = (
+				8E9C085B207FEC4E00D7F944 /* main.cpp */,
+				8EA235E220873D3D00E8FA20 /* GLScene */,
+			);
+			path = sources;
+			sourceTree = "<group>";
+		};
+		8EA235E120873D3100E8FA20 /* GLScene */ = {
+			isa = PBXGroup;
+			children = (
 				8E9C08772080993500D7F944 /* GLScene.hpp */,
 				8EA235E020849D6400E8FA20 /* GLSStructs.h */,
 				8E9C0866207FECDE00D7F944 /* GLSScene.hpp */,
@@ -120,12 +137,11 @@
 				8E9C086C207FF01900D7F944 /* GLSMesh.hpp */,
 				8E9C086D207FF0EF00D7F944 /* GLSTexture.hpp */,
 				8E9C086F207FF20000D7F944 /* GLSShader.hpp */,
-				8E9C08762080069F00D7F944 /* stb_image.h */,
 			);
-			path = includes;
+			path = GLScene;
 			sourceTree = "<group>";
 		};
-		8E9C0867207FED8300D7F944 /* sources */ = {
+		8EA235E220873D3D00E8FA20 /* GLScene */ = {
 			isa = PBXGroup;
 			children = (
 				8E9C08802080B3F300D7F944 /* GLSStructs.cpp */,
@@ -137,7 +153,7 @@
 				8E9C087E2080B3A700D7F944 /* GLSTexture.cpp */,
 				8E9C08822080B3FD00D7F944 /* GLSShader.cpp */,
 			);
-			path = sources;
+			path = GLScene;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

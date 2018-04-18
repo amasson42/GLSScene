@@ -22,12 +22,12 @@ namespace GLS {
         
     }
     
-    Vertex::Vertex(Vector o, Vector n, Color c) {
+    Vertex::Vertex(Vector o, Vector n, Color c, Vector u) {
         setPosition(o);
         setNormal(n);
         setColor(c);
-        texture[0] = 0;
-        texture[1] = 0;
+        texture[0] = u.x;
+        texture[1] = u.y;
     }
     
     Vector Vertex::getPosition() const {

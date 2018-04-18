@@ -63,6 +63,7 @@ namespace GLS {
         
         // Hierarchy
         
+        std::vector<std::shared_ptr<Node> >& childNodes();
         void addChildNode(std::shared_ptr<Node> node);
         void removeChildNode(Node *node);
         
