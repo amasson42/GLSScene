@@ -53,11 +53,11 @@ namespace GLS {
         return _indices;
     }
     
-    static void calculNormal_normeWith(Vertex& v, Vector n, int *c) {
-        Vector average = v.getNormal() * (*c) + n;
+    static void calculNormal_normeWith(Vertex& v, Vector n, int& c) {
+        Vector average = v.getNormal() * c + n;
         average = average.normalized();
         v.setNormal(average);
-        (*c)++;
+        c++;
     }
     
     void Mesh::calculNormals() {
@@ -71,19 +71,19 @@ namespace GLS {
             v[0] = p[1]->getPosition() - p[0]->getPosition();
             v[1] = p[2]->getPosition() - p[0]->getPosition();
             v[2] = Vector::vectorialProduct(v[0], v[1]);
-            calculNormal_normeWith(*p[0], v[2], &(coeffs[_indices[i + 0]]));
-            calculNormal_normeWith(*p[1], v[2], &(coeffs[_indices[i + 1]]));
-            calculNormal_normeWith(*p[2], v[2], &(coeffs[_indices[i + 2]]));
+            calculNormal_normeWith(*p[0], v[2], coeffs[_indices[i + 0]]);
+            calculNormal_normeWith(*p[1], v[2], coeffs[_indices[i + 1]]);
+            calculNormal_normeWith(*p[2], v[2], coeffs[_indices[i + 2]]);
         }
     }
     
-    std::pair<Vector, Vector> Mesh::getBounds() const {
+    std::pair<Vector, Vector> Mesh::getBounds(Matrix4x4 transform) const {
         if (_vertices.empty())
             return std::pair<Vector, Vector>();
         Vector min;
         Vector max;
-        for (int i = 0; i < _vertices.size(); i++) {
-            Vector p = _vertices[i].getPosition();
+        for (size_t i = 0; i < _vertices.size(); i++) {
+            Vector p = transform.transform(_vertices[i].getPosition());
             if (p.x < min.x)
                 min.x = p.x;
             if (p.y < min.y)
@@ -126,8 +126,19 @@ namespace GLS {
             deleteBuffers();
         
         glGenVertexArrays(1, &_elementsBuffer);
+        if (_elementsBuffer == 0)
+            return ; // throw creating buffer error
         glGenBuffers(1, &_verticesBuffer);
+        if (_verticesBuffer == 0) {
+            glDeleteVertexArrays(1, &_elementsBuffer);
+            return ; // throw creating buffer error
+        }
         glGenBuffers(1, &_indicesBuffer);
+        if (_indicesBuffer == 0) {
+            glDeleteVertexArrays(1, &_elementsBuffer);
+            glDeleteBuffers(1, &_verticesBuffer);
+            return ; // throw creating buffer error
+        }
         
         glBindVertexArray(_elementsBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, _verticesBuffer);
@@ -191,19 +202,32 @@ namespace GLS {
     // Rendering
     
     void Mesh::renderInContext(ShaderProgram& program, Matrix4x4 view, Matrix4x4 model) {
+        if (!_bufferGenerated)
+            return ;
         program.use();
         glUniformMatrix4fv(program.getLocation("view"), 1, GL_FALSE, view.m);
         glUniformMatrix4fv(program.getLocation("model"), 1, GL_FALSE, model.m);
-        int txtBitMask = 0;
-        if (_mask)
-            txtBitMask |= (1 << 2);
-        if (_diffuse)
-            txtBitMask |= (1 << 1);
-        txtBitMask = txtBitMask ? txtBitMask : 1;
+        
+        int txbitmask = 0;
+        if (_diffuse) {
+            txbitmask |= 1 << 1;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _diffuse->buffer());
+            glUniform1i(program.getLocation("texture_diffuse"), 0);
+        }
+        if (_mask) {
+            txbitmask |= 1 << 2;
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, _mask->buffer());
+            glUniform1i(program.getLocation("texture_mask"), 1);
+        }
+        txbitmask = txbitmask ? txbitmask : 1;
+        
         glUniform1f(program.getLocation("shininess"), _shininess);
-        glUniform1i(program.getLocation("texturebitmask"), txtBitMask);
+        glUniform1i(program.getLocation("texturebitmask"), txbitmask);
         glBindVertexArray(_elementsBuffer);
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()),
+        glDrawElements(GL_TRIANGLES,
+                       static_cast<GLsizei>(_indices.size()),
                        GL_UNSIGNED_INT, 0);
     }
     
@@ -231,13 +255,17 @@ namespace GLS {
                                              Vector(0, 0, 1),
                                              Color(),
                                              Vector(1, 1)));
-        const GLuint indices[] = {0, 2, 3, 0, 3, 1};
+        const GLuint indices[] = {0, 2, 3, 0, 1, 3}; // reverse last two
         mesh->indicesRef() = std::vector<GLuint>(indices, indices + sizeof(indices) / sizeof(*indices));
         if (generateBuffers)
             mesh->generateBuffers();
         return mesh;
     }
-//    Mesh Mesh::cube(GLfloat width, GLfloat height, GLfloat length);
+    
+//    Mesh Mesh::cube(GLfloat width, GLfloat height, GLfloat length) {
+//        
+//    }
+    
 //    Mesh Mesh::sphere(GLfloat radius, unsigned int ringCount = 12);
 //    Mesh Mesh::objModel(const char *filename, int options);
 //    Mesh Mesh::objModel(std::istream& file, int options);

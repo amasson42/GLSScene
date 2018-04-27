@@ -9,9 +9,7 @@
 #ifndef GLScene_h
 #define GLScene_h
 
-#pragma clang diagnostic ignored "-Wdocumentation"
 #include <OpenGL/gl3.h>
-#pragma clang diagnostic pop
 
 #include "GLSStructs.h"
 

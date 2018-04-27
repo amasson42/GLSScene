@@ -63,12 +63,15 @@ namespace GLS {
     }
     
     void Scene::renderInContextWithShader(ShaderProgram& program) {
+        
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        glUniform1f(program.getLocation("texture_intensity"), 1.0f);
         glClearColor(backgroundColor.r, backgroundColor.g,
                      backgroundColor.b, backgroundColor.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
+        // positions matrices
         Matrix4x4 proj;
         Matrix4x4 view;
         Vector p;
@@ -85,6 +88,7 @@ namespace GLS {
             proj = Matrix4x4::identity();
         }
         
+        // light using
         glUniform3f(program.getLocation("light_ambiant"),
                     lightAmbiant.r, lightAmbiant.g, lightAmbiant.b);
         glUniformMatrix4fv(program.getLocation("projection"), 1, GL_FALSE, proj.m);
@@ -96,6 +100,7 @@ namespace GLS {
         glUniform3f(program.getLocation("omnilight_color"),
                     lightOmniColor.r, lightOmniColor.g, lightOmniColor.b);
         
+        // node renders
         _rootNode->renderInContext(program, view);
     }
     

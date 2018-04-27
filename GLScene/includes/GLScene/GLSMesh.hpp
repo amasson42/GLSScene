@@ -47,7 +47,7 @@ namespace GLS {
         
         void calculNormals();
         
-        std::pair<Vector, Vector> getBounds() const;
+        std::pair<Vector, Vector> getBounds(Matrix4x4 transform = Matrix4x4::identity()) const;
         
         void setColor(Color color);
         

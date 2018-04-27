@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#pragma clang diagnostic ignored "-Wdocumentation"
 #include "GLScene.hpp"
 #include <GLFW/glfw3.h>
 #include <cmath>
@@ -19,52 +20,70 @@ std::ostream& operator<<(std::ostream& out, const GLS::Matrix4x4& m) {
     return out;
 }
 
-int launch(const char *name);
+int launch(std::vector<std::string>& modelNames);
 
 int main(int argc, const char * argv[]) {
-    launch("coucou");
+    
+    std::vector<std::string> args;
+    for (int i = 1; i < argc; i++)
+        args.push_back(argv[i]);
+    launch(args);
     return 0;
 }
 
-int launch(const char *name) {
+int launch(std::vector<std::string>& modelNames) {
     
     if (!glfwInit()) // init the lib once
         return (EXIT_FAILURE);
     
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_DEPTH_BITS, 32);
+    
     GLFWwindow *window = nullptr; // create a window pointer
     
-    window = glfwCreateWindow(1200, 800, name, nullptr, nullptr); // create the window
-    
-    std::ifstream fragmentFile;
-    fragmentFile.open("/Users/arthur/Documents/testProg/C/openGL/glscene/shaders/fragment.glsl");
-    GLS::Shader fragmentShader(fragmentFile, GL_FRAGMENT_SHADER);
-    std::ifstream vertexFile;
-    vertexFile.open("/Users/arthur/Documents/testProg/C/openGL/glscene/shaders/vertex.glsl");
-    GLS::Shader vertexShader(vertexFile, GL_VERTEX_SHADER);
-    GLS::ShaderProgram shdprgm(vertexShader, fragmentShader);
-    
-    glfwWindowShouldClose(window);
+    window = glfwCreateWindow(1200, 800, "openGL", nullptr, nullptr); // create the window
+    if (window == nullptr) {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return EXIT_FAILURE;
+    }
     glfwMakeContextCurrent(window); // make context to draw to
     
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-    GLS::Scene scene;
     
-    std::shared_ptr<GLS::Node> planeNode = std::make_shared<GLS::Node>();
-    planeNode->setName("plane");
-    planeNode->setMesh(GLS::Mesh::plane(0.3, 0.3));
-    planeNode->mesh()->setColor(GLS::Color(0.8, 0, 0));
-    planeNode->setPosition(GLS::Vector(0, 0, 0));
-    scene.rootNode().addChildNode(planeNode);
+    /* create mesh */
     
-    double time = 0.0f;
+    std::ifstream vertexFile;
+    vertexFile.open("/Users/arthur/Documents/testProg/C/openGL/glscene/shaders/vertex.glsl");
+    GLS::Shader vertexShader(vertexFile, GL_VERTEX_SHADER);
+    std::ifstream fragmentFile;
+    fragmentFile.open("/Users/arthur/Documents/testProg/C/openGL/glscene/shaders/fragment.glsl");
+    GLS::Shader fragmentShader(fragmentFile, GL_FRAGMENT_SHADER);
+    GLS::ShaderProgram program(vertexShader, fragmentShader);
+    
+    GLS::Mesh triangle;
+    triangle.verticesRef().push_back(GLS::Vertex(GLS::Vector(0, 0, 0), GLS::Vector(0, 0, -1), GLS::Color(), GLS::Vector(0, 0)));
+    triangle.verticesRef().push_back(GLS::Vertex(GLS::Vector(1, 0, 0), GLS::Vector(0, 0, -1), GLS::Color(), GLS::Vector(1, 0)));
+    triangle.verticesRef().push_back(GLS::Vertex(GLS::Vector(0, 1, 0), GLS::Vector(0, 0, -1), GLS::Color(), GLS::Vector(0, 1)));
+    
+    triangle.indicesRef().push_back(0);
+    triangle.indicesRef().push_back(1);
+    triangle.indicesRef().push_back(2);
+    
+    triangle.generateBuffers();
+    //
+    
     while (!glfwWindowShouldClose(window)) { // loop while not closed
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
         
-        time += 1.0 / 60.0;
-        scene.renderInContextWithShader(shdprgm);
         /* do some drawing */
         
         glfwSwapBuffers(window); // draw the new image to the buffer
-        
         glfwPollEvents(); // check a loop turn
     }
     

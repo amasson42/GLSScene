@@ -29,7 +29,7 @@ namespace GLS {
     {
         if (copy._transformUpdated)
             updateTransformMatrix();
-        for (int i = 0; i < copy._childs.size(); i++)
+        for (size_t i = 0; i < copy._childs.size(); i++)
             addChildNode(std::make_shared<Node>(*copy._childs[i]));
     }
     
@@ -48,7 +48,7 @@ namespace GLS {
         _mesh = copy._mesh;
         if (copy._transformUpdated)
             updateTransformMatrix();
-        for (int i = 0; i < copy._childs.size(); i++)
+        for (size_t i = 0; i < copy._childs.size(); i++)
             addChildNode(std::make_shared<Node>(*copy._childs[i]));
         return *this;
     }
@@ -193,7 +193,7 @@ namespace GLS {
     
     void Node::renderInContext(ShaderProgram& program, Matrix4x4 view) {
         updateTransformMatrix();
-        for (int i = 0; i < _childs.size(); i++) {
+        for (size_t i = 0; i < _childs.size(); i++) {
             _childs[i]->renderInContext(program, view * _transform);
         }
         if (_mesh)

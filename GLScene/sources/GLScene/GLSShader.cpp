@@ -12,7 +12,8 @@
 namespace GLS {
     
     void Shader::compile() {
-        if ((_shader = glCreateShader(_type)) == 0) {
+        _shader = glCreateShader(_type);
+        if (_shader == 0) {
             // TODO: throw shader creation error
             return ;
         }
@@ -63,7 +64,8 @@ namespace GLS {
     }
     
     ShaderProgram::ShaderProgram(const Shader& vertex, const Shader& fragment) {
-        if ((_program = glCreateProgram()) == 0) {
+        _program = glCreateProgram();
+        if (_program == 0) {
             // TODO: throw program creation error
         }
         glAttachShader(_program, vertex._shader);
