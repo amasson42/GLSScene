@@ -39,7 +39,7 @@ clean:
 	rm -fr $(O_FILES) $(OBJS)
 
 fclean: clean
-	rm -f $(NAME)
+	rm -f $(NAME).dylib
 
 re: fclean all
 
