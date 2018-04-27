@@ -11,13 +11,13 @@
 
 #include <OpenGL/gl3.h>
 
-#include "GLSStructs.h"
+#include "GLScene/GLSStructs.h"
 
-#include "GLSCamera.hpp"
-#include "GLSTexture.hpp"
-#include "GLSMesh.hpp"
-#include "GLSShader.hpp"
-#include "GLSNode.hpp"
-#include "GLSScene.hpp"
+#include "GLScene/GLSCamera.hpp"
+#include "GLScene/GLSTexture.hpp"
+#include "GLScene/GLSMesh.hpp"
+#include "GLScene/GLSShader.hpp"
+#include "GLScene/GLSNode.hpp"
+#include "GLScene/GLSScene.hpp"
 
 #endif /* GLScene_h */

@@ -7,11 +7,20 @@
 //
 
 #include <iostream>
-#pragma clang diagnostic ignored "-Wdocumentation"
-#include "GLScene.hpp"
+
+#ifdef __APPLE__
+# define __gl_h_
+# define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
+#endif
+
+//#include "GLScene.hpp"
+#include <OpenGL/gl3.h>
+#include <vector>
+
 #include <GLFW/glfw3.h>
 #include <cmath>
 
+/*
 std::ostream& operator<<(std::ostream& out, const GLS::Matrix4x4& m) {
     out << m(0, 0) << ' ' << m(0, 1) << ' ' << m(0, 2) << ' ' << m(0, 3) << '\n';
     out << m(1, 0) << ' ' << m(1, 1) << ' ' << m(1, 2) << ' ' << m(1, 3) << '\n';
@@ -19,6 +28,7 @@ std::ostream& operator<<(std::ostream& out, const GLS::Matrix4x4& m) {
     out << m(3, 0) << ' ' << m(3, 1) << ' ' << m(3, 2) << ' ' << m(3, 3) << '\n';
     return out;
 }
+*/
 
 int launch(std::vector<std::string>& modelNames);
 
@@ -33,6 +43,8 @@ int main(int argc, const char * argv[]) {
 
 int launch(std::vector<std::string>& modelNames) {
     
+	static_cast<void>(modelNames);
+	
     if (!glfwInit()) // init the lib once
         return (EXIT_FAILURE);
     
@@ -57,7 +69,7 @@ int launch(std::vector<std::string>& modelNames) {
     
     /* create mesh */
     
-    std::ifstream vertexFile;
+/*    std::ifstream vertexFile;
     vertexFile.open("/Users/arthur/Documents/testProg/C/openGL/glscene/shaders/vertex.glsl");
     GLS::Shader vertexShader(vertexFile, GL_VERTEX_SHADER);
     std::ifstream fragmentFile;
@@ -75,6 +87,8 @@ int launch(std::vector<std::string>& modelNames) {
     triangle.indicesRef().push_back(2);
     
     triangle.generateBuffers();
+*/
+	
     //
     
     while (!glfwWindowShouldClose(window)) { // loop while not closed

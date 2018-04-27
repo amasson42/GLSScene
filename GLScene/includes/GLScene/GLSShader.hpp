@@ -16,6 +16,8 @@
 
 namespace GLS {
     
+	class ShaderProgram;
+	
     class Shader {
         
         std::string _src;
@@ -28,7 +30,7 @@ namespace GLS {
         
         void compile();
         
-        friend ShaderProgram;
+        friend class ShaderProgram;
         
     public:
         
