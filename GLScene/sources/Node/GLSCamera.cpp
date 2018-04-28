@@ -73,21 +73,21 @@ namespace GLS {
         _projectionUpdated = false;
     }
     
-    Matrix4x4 Camera::projectionMatrix() const {
+    glm::mat4 Camera::projectionMatrix() const {
         if (_projectionUpdated)
             return _projection;
         else
-            return Matrix4x4::projection(_fov, _aspect, _nearZ, _farZ);
+            return glm::perspective(_fov, _aspect, _nearZ, _farZ);
     }
     
-    Matrix4x4 Camera::projectionMatrix() {
+    glm::mat4 Camera::projectionMatrix() {
         if (!_projectionUpdated)
             updateProjectionMatrix();
         return _projection;
     }
     
     void Camera::updateProjectionMatrix() {
-        _projection = Matrix4x4::projection(_fov, _aspect, _nearZ, _farZ);
+        _projection = glm::perspective(_fov, _aspect, _nearZ, _farZ);
         _projectionUpdated = true;
     }
     

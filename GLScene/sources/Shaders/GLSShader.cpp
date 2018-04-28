@@ -11,11 +11,22 @@
 
 namespace GLS {
     
+    const char *Shader::CreationException::what() const throw() {
+        return "can't create shader";
+    }
+    
+    const char *Shader::CompilationException::what() const throw() {
+        return "shader compilation failed";
+    }
+    
+    const char *Shader::CompilationException::infoLog() const {
+        return _infoLogBuffer;
+    }
+    
     void Shader::compile() {
         _shader = glCreateShader(_type);
         if (_shader == 0) {
-            // TODO: throw shader creation error
-            return ;
+            throw CreationException();
         }
         
         const char* rstr = _src.c_str();
@@ -23,14 +34,12 @@ namespace GLS {
         glCompileShader(_shader);
         
         GLint success;
-        GLchar infolog[1024];
         glGetShaderiv(_shader, GL_COMPILE_STATUS, &success);
         if (!success) {
-            glGetShaderInfoLog(_shader, 1024, NULL, infolog);
-            std::cerr << "compile shader error :" << infolog << std::endl;
-            // TODO: throw compile error
-        } else {
-            std::cout << "shader compile success" << std::endl;
+            CompilationException e;
+            glGetShaderInfoLog(_shader, 1024, NULL, e._infoLogBuffer);
+            glDeleteShader(_shader);
+            throw e;
         }
     }
     
@@ -57,29 +66,41 @@ namespace GLS {
     
     GLenum Shader::type() const {
         return _type;
+        
     }
     
     void Shader::clearSrcs() {
         _src.clear();
     }
     
+    const char *ShaderProgram::CreationException::what() const throw() {
+        return "can't create program";
+    }
+    
+    const char *ShaderProgram::LinkException::what() const throw() {
+        return "can't link the shaders";
+    }
+    
+    const char *ShaderProgram::LinkException::infoLog() const {
+        return _infoLogBuffer;
+    }
+    
     ShaderProgram::ShaderProgram(const Shader& vertex, const Shader& fragment) {
         _program = glCreateProgram();
         if (_program == 0) {
-            // TODO: throw program creation error
+            throw CreationException();
         }
         glAttachShader(_program, vertex._shader);
         glAttachShader(_program, fragment._shader);
         glLinkProgram(_program);
         
         GLint success;
-        GLchar infolog[1024];
         glGetProgramiv(_program, GL_LINK_STATUS, &success);
         if (!success) {
-            glGetProgramInfoLog(_program, 1024, NULL, infolog);
-            std::cerr << "links program error: " << infolog << std::endl;
+            LinkException e;
+            glGetProgramInfoLog(_program, 1024, NULL, e._infoLogBuffer);
             glDeleteProgram(_program);
-            // TODO: throw program link error
+            throw e;
         }
     }
     

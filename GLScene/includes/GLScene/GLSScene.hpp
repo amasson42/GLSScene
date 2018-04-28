@@ -20,13 +20,13 @@ namespace GLS {
         
 	public:
 		
-        Color backgroundColor;
+        glm::vec4 backgroundColor;
         
-		Color lightAmbiant;
+		glm::vec3 lightAmbiant;
 		
 		bool useLightOmni;
-        Vector lightOmniPos;
-        Color lightOmniColor;
+        glm::vec3 lightOmniPos;
+        glm::vec3 lightOmniColor;
         
     public:
         

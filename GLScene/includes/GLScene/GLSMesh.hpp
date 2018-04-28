@@ -47,9 +47,9 @@ namespace GLS {
         
         void calculNormals();
         
-        std::pair<Vector, Vector> getBounds(Matrix4x4 transform = Matrix4x4::identity()) const;
+        std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
         
-        void setColor(Color color);
+        void setColor(glm::vec4 color);
         
         
         // Material utilities (shall be extern)
@@ -71,7 +71,7 @@ namespace GLS {
         
         // Rendering
         
-        void renderInContext(ShaderProgram& program, Matrix4x4 view, Matrix4x4 model);
+        void renderInContext(ShaderProgram& program, glm::mat4 view, glm::mat4 model);
         
         
         // Prefabs

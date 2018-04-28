@@ -16,8 +16,8 @@
 
 namespace GLS {
     
-	class ShaderProgram;
-	
+    class ShaderProgram;
+    
     class Shader {
         
         std::string _src;
@@ -34,6 +34,19 @@ namespace GLS {
         
     public:
         
+        class CreationException : public std::exception {
+        public:
+            const char *what() const throw();
+        };
+        
+        class CompilationException : public std::exception {
+            friend class Shader;
+            char _infoLogBuffer[1024];
+        public:
+            const char *what() const throw();
+            const char *infoLog() const;
+        };
+        
         Shader(std::ifstream& file, GLenum type);
         Shader(std::string src, GLenum type);
         virtual ~Shader();
@@ -41,6 +54,9 @@ namespace GLS {
         GLenum type() const;
         
         void clearSrcs();
+        
+        static std::shared_ptr<Shader> standardVertex();
+        static std::shared_ptr<Shader> standardFragment();
         
     };
     
@@ -53,6 +69,19 @@ namespace GLS {
         ShaderProgram& operator=(const ShaderProgram& copy);
         
     public:
+        
+        class CreationException : public std::exception {
+        public:
+            const char *what() const throw();
+        };
+        
+        class LinkException : public std::exception {
+            friend class ShaderProgram;
+            char _infoLogBuffer[1024];
+        public:
+            const char *what() const throw();
+            const char *infoLog() const;
+        };
         
         ShaderProgram(const Shader& vertex, const Shader& fragment);
         virtual ~ShaderProgram();

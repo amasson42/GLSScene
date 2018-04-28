@@ -20,7 +20,7 @@ namespace GLS {
         GLfloat _nearZ;
         GLfloat _farZ;
         
-        Matrix4x4 _projection;
+        glm::mat4 _projection;
         bool _projectionUpdated;
         
     public:
@@ -44,8 +44,8 @@ namespace GLS {
         GLfloat farZ() const;
         void setFarZ(GLfloat farZ);
         
-        Matrix4x4 projectionMatrix() const;
-        Matrix4x4 projectionMatrix();
+        glm::mat4 projectionMatrix() const;
+        glm::mat4 projectionMatrix();
         void updateProjectionMatrix();
         
     };

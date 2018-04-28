@@ -9,14 +9,16 @@ OBJS := objs
 
 SHELL := /bin/bash
 
-INCLUDES := -I$(INCS) -I$(INCS)/GLScene
+INCLUDES := -I$(INCS) -I$(INCS)/GLScene \
+			`pkg-config glm --cflags-only-I`
 
 LIBS := -L/usr/lib \
-		-framework OpenGL
+		-framework OpenGL \
+		`pkg-config --static --libs glm`
 
 CPP_FILES := $(shell find $(SRCS) -type f -name "*.cpp")
 CPP_DIRS := $(shell find $(SRCS) -depth -type d)
-CPP_FLAGS += -Wall -Wextra -Werror -O2
+CPP_FLAGS += -std=c++11 -Wall -Wextra -Werror -O2
 
 O_DIRS := $(addprefix $(OBJS)/,$(CPP_DIRS))
 O_FILES_TMP := $(CPP_FILES:%.cpp=$(OBJS)/%.o)
@@ -27,10 +29,14 @@ DEPS := $(O_FILES:.o=.d)
 $(shell mkdir -p $(O_DIRS) $(OBJS))
 
 all:
-	make $(NAME)
+	make $(NAME).a
+	make $(NAME).dylib
 
-$(NAME): $(O_FILES)
-	$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@.dylib $(O_FILES)
+$(NAME).dylib: $(O_FILES)
+	$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
+
+$(NAME).a: $(O_FILES)
+	ar rcs $@ $^
 
 $(OBJS)/%.o: %.cpp
 	clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $<
@@ -40,6 +46,7 @@ clean:
 
 fclean: clean
 	rm -f $(NAME).dylib
+	rm -f $(NAME).a
 
 re: fclean all
 

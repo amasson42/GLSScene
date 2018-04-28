@@ -13,27 +13,17 @@
 # define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
 #endif
 
-//#include "GLScene.hpp"
+#include "GLScene.hpp"
 #include <OpenGL/gl3.h>
 #include <vector>
 
 #include <GLFW/glfw3.h>
 #include <cmath>
 
-/*
-std::ostream& operator<<(std::ostream& out, const GLS::Matrix4x4& m) {
-    out << m(0, 0) << ' ' << m(0, 1) << ' ' << m(0, 2) << ' ' << m(0, 3) << '\n';
-    out << m(1, 0) << ' ' << m(1, 1) << ' ' << m(1, 2) << ' ' << m(1, 3) << '\n';
-    out << m(2, 0) << ' ' << m(2, 1) << ' ' << m(2, 2) << ' ' << m(2, 3) << '\n';
-    out << m(3, 0) << ' ' << m(3, 1) << ' ' << m(3, 2) << ' ' << m(3, 3) << '\n';
-    return out;
-}
-*/
-
 int launch(std::vector<std::string>& modelNames);
 
 int main(int argc, const char * argv[]) {
-    
+	
     std::vector<std::string> args;
     for (int i = 1; i < argc; i++)
         args.push_back(argv[i]);
@@ -69,25 +59,20 @@ int launch(std::vector<std::string>& modelNames) {
     
     /* create mesh */
     
-/*    std::ifstream vertexFile;
-    vertexFile.open("/Users/arthur/Documents/testProg/C/openGL/glscene/shaders/vertex.glsl");
-    GLS::Shader vertexShader(vertexFile, GL_VERTEX_SHADER);
-    std::ifstream fragmentFile;
-    fragmentFile.open("/Users/arthur/Documents/testProg/C/openGL/glscene/shaders/fragment.glsl");
-    GLS::Shader fragmentShader(fragmentFile, GL_FRAGMENT_SHADER);
-    GLS::ShaderProgram program(vertexShader, fragmentShader);
-    
+	std::shared_ptr<GLS::Shader> vertexShader = GLS::Shader::standardFragment();
+	std::shared_ptr<GLS::Shader> fragmentShader = GLS::Shader::standardVertex();
+    GLS::ShaderProgram program(*vertexShader, *fragmentShader);
+	
     GLS::Mesh triangle;
-    triangle.verticesRef().push_back(GLS::Vertex(GLS::Vector(0, 0, 0), GLS::Vector(0, 0, -1), GLS::Color(), GLS::Vector(0, 0)));
-    triangle.verticesRef().push_back(GLS::Vertex(GLS::Vector(1, 0, 0), GLS::Vector(0, 0, -1), GLS::Color(), GLS::Vector(1, 0)));
-    triangle.verticesRef().push_back(GLS::Vertex(GLS::Vector(0, 1, 0), GLS::Vector(0, 0, -1), GLS::Color(), GLS::Vector(0, 1)));
-    
+    triangle.verticesRef().push_back(GLS::Vertex(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec4(1), glm::vec2(0, 0)));
+    triangle.verticesRef().push_back(GLS::Vertex(glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec4(1), glm::vec2(1, 0)));
+    triangle.verticesRef().push_back(GLS::Vertex(glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec4(1), glm::vec2(0, 1)));
+	
     triangle.indicesRef().push_back(0);
     triangle.indicesRef().push_back(1);
     triangle.indicesRef().push_back(2);
     
     triangle.generateBuffers();
-*/
 	
     //
     

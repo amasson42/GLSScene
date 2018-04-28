@@ -19,10 +19,10 @@ namespace GLS {
         
         std::string _name;
         
-        Vector _position;
-        Vector _rotation;
-        Vector _scale;
-        Matrix4x4 _transform;
+        glm::vec3 _position;
+        glm::quat _rotation;
+        glm::vec3 _scale;
+        glm::mat4 _transform;
         bool _transformUpdated;
         
         Node *_parent;
@@ -41,23 +41,23 @@ namespace GLS {
         
         std::string name() const;
         void setName(std::string name);
-        
+
         
         // Transformation
         
-        Vector position() const;
-        void setPosition(Vector position);
+        glm::vec3 position() const;
+        void setPosition(glm::vec3 position);
         
-        Vector rotation() const;
-        void setRotation(Vector rotation);
+        glm::quat rotation() const;
+        void setRotation(glm::quat rotation);
         
-        Vector scale() const;
-        void setScale(Vector scale);
+        glm::vec3 scale() const;
+        void setScale(glm::vec3 scale);
         
-        Matrix4x4 getTransformMatrix();
-        Matrix4x4 getTransformMatrix() const;
-        Matrix4x4 getWorldTransformMatrix();
-        Matrix4x4 getWorldTransformMatrix() const;
+        glm::mat4 getTransformMatrix();
+        glm::mat4 getTransformMatrix() const;
+        glm::mat4 getWorldTransformMatrix();
+        glm::mat4 getWorldTransformMatrix() const;
         void updateTransformMatrix();
         
         
@@ -76,7 +76,7 @@ namespace GLS {
         std::shared_ptr<Mesh> mesh();
         void setMesh(std::shared_ptr<Mesh> mesh);
         
-        std::pair<Vector, Vector> getBounds() const;
+        std::pair<glm::vec3, glm::vec3> getBounds() const;
         
         const std::shared_ptr<const Camera> camera() const;
         std::shared_ptr<Camera> camera();
@@ -84,7 +84,7 @@ namespace GLS {
         
         // SOON: Lights
         
-        void renderInContext(ShaderProgram& program, Matrix4x4 view);
+        void renderInContext(ShaderProgram& program, glm::mat4 view);
         
     };
     

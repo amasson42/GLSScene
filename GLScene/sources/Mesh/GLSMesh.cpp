@@ -53,37 +53,37 @@ namespace GLS {
         return _indices;
     }
     
-    static void calculNormal_normeWith(Vertex& v, Vector n, int& c) {
-        Vector average = v.getNormal() * c + n;
-        average = average.normalized();
-        v.setNormal(average);
+    static void calculNormal_normeWith(Vertex& v, glm::vec3 n, int& c) {
+        glm::vec3 average = v.normal * c + n;
+        average = glm::normalize(average);
+        v.normal = average;
         c++;
     }
     
     void Mesh::calculNormals() {
         std::vector<int> coeffs(_vertices.size(), 0);
         Vertex *p[3];
-        Vector v[3];
+        glm::vec3 v[3];
         for (size_t i = 0; i + 2 < _indices.size(); i += 3) {
             p[0] = &(_vertices[_indices[i + 0]]);
             p[1] = &(_vertices[_indices[i + 1]]);
             p[2] = &(_vertices[_indices[i + 2]]);
-            v[0] = p[1]->getPosition() - p[0]->getPosition();
-            v[1] = p[2]->getPosition() - p[0]->getPosition();
-            v[2] = Vector::vectorialProduct(v[0], v[1]);
+            v[0] = p[1]->position - p[0]->position;
+            v[1] = p[2]->position - p[0]->position;
+            v[2] = glm::cross(v[0], v[1]);
             calculNormal_normeWith(*p[0], v[2], coeffs[_indices[i + 0]]);
             calculNormal_normeWith(*p[1], v[2], coeffs[_indices[i + 1]]);
             calculNormal_normeWith(*p[2], v[2], coeffs[_indices[i + 2]]);
         }
     }
     
-    std::pair<Vector, Vector> Mesh::getBounds(Matrix4x4 transform) const {
+    std::pair<glm::vec3, glm::vec3> Mesh::getBounds(glm::mat4 transform) const {
         if (_vertices.empty())
-            return std::pair<Vector, Vector>();
-        Vector min;
-        Vector max;
+            return std::pair<glm::vec3, glm::vec3>();
+        glm::vec3 min;
+        glm::vec3 max;
         for (size_t i = 0; i < _vertices.size(); i++) {
-            Vector p = transform.transform(_vertices[i].getPosition());
+            glm::vec3 p = glm::vec3(transform * glm::vec4(_vertices[i].position, 1));
             if (p.x < min.x)
                 min.x = p.x;
             if (p.y < min.y)
@@ -97,12 +97,12 @@ namespace GLS {
             if (p.z > max.z)
                 max.z = p.z;
         }
-        return std::pair<Vector, Vector>(min, max);
+        return std::pair<glm::vec3, glm::vec3>(min, max);
     }
     
-    void Mesh::setColor(Color color) {
+    void Mesh::setColor(glm::vec4 color) {
         for (size_t i = 0; i < _vertices.size(); i++)
-            _vertices[i].setColor(color);
+            _vertices[i].color = color;
         if (bufferGenerated())
             generateBuffers();
     }
@@ -201,12 +201,12 @@ namespace GLS {
     
     // Rendering
     
-    void Mesh::renderInContext(ShaderProgram& program, Matrix4x4 view, Matrix4x4 model) {
+    void Mesh::renderInContext(ShaderProgram& program, glm::mat4 view, glm::mat4 model) {
         if (!_bufferGenerated)
             return ;
         program.use();
-        glUniformMatrix4fv(program.getLocation("view"), 1, GL_FALSE, view.m);
-        glUniformMatrix4fv(program.getLocation("model"), 1, GL_FALSE, model.m);
+        glUniformMatrix4fv(program.getLocation("view"), 1, GL_FALSE, &view[0][0]);
+        glUniformMatrix4fv(program.getLocation("model"), 1, GL_FALSE, &model[0][0]);
         
         int txbitmask = 0;
         if (_diffuse) {
@@ -239,22 +239,22 @@ namespace GLS {
         std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
         width /= 2.0f;
         height /= 2.0f;
-        mesh->verticesRef().push_back(Vertex(Vector(-width, -height, 0),
-                                             Vector(0, 0, 1),
-                                             Color(),
-                                             Vector(0, 0)));
-        mesh->verticesRef().push_back(Vertex(Vector(-width, height, 0),
-                                             Vector(0, 0, 1),
-                                             Color(),
-                                             Vector(0, 1)));
-        mesh->verticesRef().push_back(Vertex(Vector(width, -height, 0),
-                                             Vector(0, 0, 1),
-                                             Color(),
-                                             Vector(1, 0)));
-        mesh->verticesRef().push_back(Vertex(Vector(width, height, 0),
-                                             Vector(0, 0, 1),
-                                             Color(),
-                                             Vector(1, 1)));
+        mesh->verticesRef().push_back(Vertex(glm::vec3(-width, -height, 0),
+                                             glm::vec3(0, 0, 1),
+                                             glm::vec4(1),
+                                             glm::vec2(0, 0)));
+        mesh->verticesRef().push_back(Vertex(glm::vec3(-width, height, 0),
+                                             glm::vec3(0, 0, 1),
+                                             glm::vec4(1),
+                                             glm::vec2(0, 1)));
+        mesh->verticesRef().push_back(Vertex(glm::vec3(width, -height, 0),
+                                             glm::vec3(0, 0, 1),
+                                             glm::vec4(1),
+                                             glm::vec2(1, 0)));
+        mesh->verticesRef().push_back(Vertex(glm::vec3(width, height, 0),
+                                             glm::vec3(0, 0, 1),
+                                             glm::vec4(1),
+                                             glm::vec2(1, 1)));
         const GLuint indices[] = {0, 2, 3, 0, 1, 3}; // reverse last two
         mesh->indicesRef() = std::vector<GLuint>(indices, indices + sizeof(indices) / sizeof(*indices));
         if (generateBuffers)
@@ -262,10 +262,7 @@ namespace GLS {
         return mesh;
     }
     
-//    Mesh Mesh::cube(GLfloat width, GLfloat height, GLfloat length) {
-//        
-//    }
-    
+//    Mesh Mesh::cube(GLfloat width, GLfloat height, GLfloat length);
 //    Mesh Mesh::sphere(GLfloat radius, unsigned int ringCount = 12);
 //    Mesh Mesh::objModel(const char *filename, int options);
 //    Mesh Mesh::objModel(std::istream& file, int options);

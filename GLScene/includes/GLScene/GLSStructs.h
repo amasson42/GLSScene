@@ -9,6 +9,18 @@
 #ifndef GLSStructs_h
 #define GLSStructs_h
 
+#include <glm/glm.hpp>
+#include <glm/ext.hpp>
+#include <glm/vec2.hpp> // glm::vec2
+#include <glm/vec3.hpp> // glm::vec3
+#include <glm/vec4.hpp> // glm::vec4
+#include <glm/mat4x4.hpp> // glm::mat4
+#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+#include <glm/geometric.hpp>// glm::cross, glm::normalize
+#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 namespace GLS {
     
     class Scene;
@@ -19,84 +31,13 @@ namespace GLS {
     class Shader;
     class ShaderProgram;
     
-    struct Vector {
-        GLfloat x;
-        GLfloat y;
-        GLfloat z;
-        
-        Vector(GLfloat vx = 0, GLfloat vy = 0, GLfloat vz = 0);
-        
-        GLfloat norme() const;
-        GLfloat sqrNorme() const;
-        Vector normalized() const;
-        
-        static Vector vectorialProduct(Vector a, Vector b);
-        static GLfloat scalarProduct(Vector a, Vector b);
-    };
-    
-    Vector operator+(Vector lhs, Vector rhs);
-    Vector operator-(Vector lhs, Vector rhs);
-    Vector operator*(Vector v, GLfloat t);
-    Vector operator*(GLfloat t, Vector v);
-    
-    struct Matrix4x4 {
-        GLfloat m[16];
-        
-        Matrix4x4();
-        Matrix4x4(GLfloat mvs[16]);
-        
-        GLfloat& operator()(int l, int c);
-        const GLfloat& operator()(int l, int c) const;
-        
-        Matrix4x4 transform(Matrix4x4 mat) const;
-        Vector transform(Vector v, bool useOffset = true) const;
-        
-        GLfloat determinant() const;
-        Matrix4x4 inverse() const;
-        Matrix4x4 transpose() const;
-        
-        static Matrix4x4 zero();
-        static Matrix4x4 identity();
-        static Matrix4x4 translation(Vector translation);
-        static Matrix4x4 translation(GLfloat x, GLfloat y, GLfloat z);
-        static Matrix4x4 scale(Vector scale);
-        static Matrix4x4 scale(GLfloat x, GLfloat y, GLfloat z);
-        static Matrix4x4 rotx(GLfloat alpha);
-        static Matrix4x4 roty(GLfloat alpha);
-        static Matrix4x4 rotz(GLfloat alpha);
-        static Matrix4x4 rotaxe(Vector axe, GLfloat alpha);
-        static Matrix4x4 projection(GLfloat fov, GLfloat aspect,
-                                    GLfloat near, GLfloat far);
-    };
-    
-    Matrix4x4 operator*(const Matrix4x4& lhs, const Matrix4x4& rhs);
-    
-    struct Color {
-        GLfloat r;
-        GLfloat g;
-        GLfloat b;
-        GLfloat a;
-        
-        Color();
-        Color(GLfloat cr, GLfloat cg, GLfloat cb, GLfloat ca = 1);
-    };
-    
     struct Vertex {
-        GLfloat position[3];
-        GLfloat normal[3];
-        GLfloat rgb[3];
-        GLfloat texture[2];
+        glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec4 color;
+        glm::vec2 texture;
         
-        Vertex(Vector o, Vector n, Color c, Vector u);
-        
-        Vector getPosition() const;
-        void setPosition(Vector newPosition);
-        
-        Vector getNormal() const;
-        void setNormal(Vector newNormal);
-        
-        Color getColor() const;
-        void setColor(Color color);
+        Vertex(glm::vec3 o, glm::vec3 n, glm::vec4 c, glm::vec2 u);
     };
     
 }
