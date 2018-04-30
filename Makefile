@@ -31,4 +31,4 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all install clean fclean re
+.PHONY: all $(NAME) install clean fclean re

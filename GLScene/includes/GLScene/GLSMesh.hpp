@@ -15,7 +15,7 @@
 
 namespace GLS {
     
-    class Mesh {
+    class Mesh : public Renderable {
         
         std::vector<Vertex> _vertices;
         std::vector<GLuint> _indices;
@@ -24,6 +24,8 @@ namespace GLS {
         GLuint _indicesBuffer;
         GLuint _elementsBuffer;
         bool _bufferGenerated;
+        
+        std::shared_ptr<ShaderProgram> _shaderProgram;
         
         // TODO: material using here
         std::shared_ptr<Texture> _diffuse;
@@ -71,7 +73,9 @@ namespace GLS {
         
         // Rendering
         
-        void renderInContext(ShaderProgram& program, glm::mat4 view, glm::mat4 model);
+        void setProgram(std::shared_ptr<ShaderProgram> shaderProgram);
+
+        virtual void renderInContext(const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model);
         
         
         // Prefabs

@@ -15,7 +15,7 @@ namespace GLS {
     _position(0), _rotation(), _scale(1),
     _transformUpdated(false),
     _parent(nullptr), _childs(),
-    _camera(nullptr), _mesh(nullptr)
+    _camera(nullptr), _renderables()
     {
         updateTransformMatrix();
     }
@@ -25,7 +25,7 @@ namespace GLS {
     _position(copy._position), _rotation(copy._rotation), _scale(copy._scale),
     _transformUpdated(false),
     _parent(nullptr), _childs(),
-    _camera(copy._camera), _mesh(copy._mesh)
+    _camera(copy._camera), _renderables(copy._renderables)
     {
         if (copy._transformUpdated)
             updateTransformMatrix();
@@ -45,7 +45,7 @@ namespace GLS {
         _transformUpdated = copy._transformUpdated;
         _parent = nullptr;
         _camera = copy._camera;
-        _mesh = copy._mesh;
+        _renderables = copy._renderables;
         if (copy._transformUpdated)
             updateTransformMatrix();
         for (size_t i = 0; i < copy._childs.size(); i++)
@@ -160,21 +160,25 @@ namespace GLS {
     
     // Node functionalities
     
-    const std::shared_ptr<const Mesh> Node::mesh() const {
-        return _mesh;
+    const std::vector<std::shared_ptr<Renderable> >& Node::renderables() const {
+        return _renderables;
     }
-    
-    std::shared_ptr<Mesh> Node::mesh() {
-        return _mesh;
+
+    void Node::addRenderable(std::shared_ptr<Renderable> renderable) {
+        _renderables.push_back(renderable);
     }
-    
-    void Node::setMesh(std::shared_ptr<Mesh> mesh) {
-        _mesh = mesh;
+
+    void Node::removeRenderableIndex(size_t i) {
+        if (i < _renderables.size() - 1) {
+            _renderables.erase(_renderables.begin() + i);
+        } else if (i == _renderables.size() - 1) {
+            _renderables.pop_back();
+        }
     }
     
     std::pair<glm::vec3, glm::vec3> Node::getBounds() const {
         // TODO: this shit
-        return _mesh->getBounds();
+        return std::pair<glm::vec3, glm::vec3>();
     }
     
     const std::shared_ptr<const Camera> Node::camera() const {
@@ -191,13 +195,14 @@ namespace GLS {
     
     // SOON: Lights
     
-    void Node::renderInContext(ShaderProgram& program, glm::mat4 view) {
+    void Node::renderInContext(const glm::mat4& projection, const glm::mat4& view) {
         updateTransformMatrix();
         for (size_t i = 0; i < _childs.size(); i++) {
-            _childs[i]->renderInContext(program, view * _transform);
+            _childs[i]->renderInContext(projection, view * _transform);
         }
-        if (_mesh)
-            _mesh->renderInContext(program, view, _transform);
+        for (size_t i = 0; i < _renderables.size(); i++) {
+            _renderables[i]->renderInContext(projection, view, _transform);
+        }
     }
     
 }

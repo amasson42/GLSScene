@@ -12,8 +12,6 @@
 #include <string>
 #include "GLScene.hpp"
 
-// TODO: throw errors when shaders aren't created
-
 namespace GLS {
     
     class ShaderProgram;
@@ -68,6 +66,8 @@ namespace GLS {
         ShaderProgram(const ShaderProgram& copy);
         ShaderProgram& operator=(const ShaderProgram& copy);
         
+        static std::shared_ptr<ShaderProgram> _standardShaderProgram;
+
     public:
         
         class CreationException : public std::exception {
@@ -91,6 +91,8 @@ namespace GLS {
         
         void use() const;
         
+        static std::shared_ptr<ShaderProgram> standardShaderProgram();
+
     };
     
 }

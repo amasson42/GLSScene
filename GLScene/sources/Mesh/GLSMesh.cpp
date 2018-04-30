@@ -12,6 +12,7 @@ namespace GLS {
     
     Mesh::Mesh() : _vertices(), _indices(),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
+    _shaderProgram(nullptr),
     _diffuse(nullptr), _mask(nullptr), _shininess(0.0f)
     {
         
@@ -20,6 +21,7 @@ namespace GLS {
     Mesh::Mesh(const Mesh& copy) :
     _vertices(copy._vertices), _indices(copy._indices),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
+    _shaderProgram(nullptr),
     _diffuse(copy._diffuse), _mask(copy._mask), _shininess(copy._shininess)
     {
         if (copy.bufferGenerated())
@@ -124,7 +126,9 @@ namespace GLS {
     void Mesh::generateBuffers() {
         if (bufferGenerated())
             deleteBuffers();
-        
+        if (_vertices.empty() || _indices.empty())
+            return ;
+
         glGenVertexArrays(1, &_elementsBuffer);
         if (_elementsBuffer == 0)
             return ; // throw creating buffer error
@@ -143,10 +147,10 @@ namespace GLS {
         glBindVertexArray(_elementsBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, _verticesBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vertices.size(),
-                     &(_vertices[0]), GL_STATIC_DRAW);
+                     &_vertices.front(), GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * _indices.size(),
-                     &(_indices[0]), GL_STATIC_DRAW);
+                     &_indices.front(), GL_STATIC_DRAW);
         
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                               sizeof(Vertex), (void*)(0 * sizeof(GLfloat)));
@@ -201,30 +205,43 @@ namespace GLS {
     
     // Rendering
     
-    void Mesh::renderInContext(ShaderProgram& program, glm::mat4 view, glm::mat4 model) {
+    void Mesh::setProgram(std::shared_ptr<ShaderProgram> shaderProgram) {
+        _shaderProgram = shaderProgram;
+    }
+
+    void Mesh::renderInContext(const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) {
         if (!_bufferGenerated)
             return ;
-        program.use();
-        glUniformMatrix4fv(program.getLocation("view"), 1, GL_FALSE, &view[0][0]);
-        glUniformMatrix4fv(program.getLocation("model"), 1, GL_FALSE, &model[0][0]);
+        
+        std::shared_ptr<ShaderProgram> program;
+        if (_shaderProgram) {
+            program = _shaderProgram;
+            program->use();
+            glUniformMatrix4fv(program->getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        } else {
+            program = ShaderProgram::standardShaderProgram();
+            program->use();
+        }
+        glUniformMatrix4fv(program->getLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(program->getLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
         
         int txbitmask = 0;
         if (_diffuse) {
             txbitmask |= 1 << 1;
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, _diffuse->buffer());
-            glUniform1i(program.getLocation("texture_diffuse"), 0);
+            glUniform1i(program->getLocation("texture_diffuse"), 0);
         }
         if (_mask) {
             txbitmask |= 1 << 2;
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, _mask->buffer());
-            glUniform1i(program.getLocation("texture_mask"), 1);
+            glUniform1i(program->getLocation("texture_mask"), 1);
         }
         txbitmask = txbitmask ? txbitmask : 1;
         
-        glUniform1f(program.getLocation("shininess"), _shininess);
-        glUniform1i(program.getLocation("texturebitmask"), txbitmask);
+        glUniform1f(program->getLocation("shininess"), _shininess);
+        glUniform1i(program->getLocation("texturebitmask"), txbitmask);
         glBindVertexArray(_elementsBuffer);
         glDrawElements(GL_TRIANGLES,
                        static_cast<GLsizei>(_indices.size()),
@@ -255,7 +272,7 @@ namespace GLS {
                                              glm::vec3(0, 0, 1),
                                              glm::vec4(1),
                                              glm::vec2(1, 1)));
-        const GLuint indices[] = {0, 2, 3, 0, 1, 3}; // reverse last two
+        const GLuint indices[] = {0, 2, 3, 0, 3, 1};
         mesh->indicesRef() = std::vector<GLuint>(indices, indices + sizeof(indices) / sizeof(*indices));
         if (generateBuffers)
             mesh->generateBuffers();

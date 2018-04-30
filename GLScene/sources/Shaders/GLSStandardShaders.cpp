@@ -10,7 +10,7 @@
 #include <iostream>
 
 namespace GLS {
-    
+
     std::shared_ptr<Shader> Shader::standardVertex() {
         std::string src =
         "#version 330 core\n"
@@ -52,7 +52,6 @@ namespace GLS {
         "uniform sampler2D texture_diffuse;"
         "uniform sampler2D texture_mask;"
         "uniform int texturebitmask;"
-        "uniform float texture_intensity;"
         
         "uniform vec3 view_pos;"
         "uniform vec3 light_ambiant;"
@@ -71,7 +70,7 @@ namespace GLS {
         "    if ((texturebitmask & 3) == 3)"
         "        FragColor = mix(texture(texture_diffuse, texCoord), vec4(ourColor, 1.0), 0.5);"
         "    else if ((texturebitmask & 2) != 0)"
-        "        FragColor = mix(vec4(ourColor, 1.0), texture(texture_diffuse, texCoord), texture_intensity);"
+        "        FragColor = texture(texture_diffuse, texCoord);"
         "    else if ((texturebitmask & 1) != 0)"
         "        FragColor = vec4(ourColor, 1.0);"
         "    else"
@@ -94,4 +93,16 @@ namespace GLS {
         "}";
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);
     }
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgram = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgram() {
+        if (_standardShaderProgram == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertex();
+            std::shared_ptr<Shader> fragment = Shader::standardFragment();
+            _standardShaderProgram = std::make_shared<ShaderProgram>(*vertex, *fragment);
+        }
+        return _standardShaderProgram;
+    }
+
 }

@@ -62,13 +62,10 @@ namespace GLS {
         _cameraNode = &node;
     }
     
-    void Scene::renderInContextWithShader(ShaderProgram& program) {
+    void Scene::renderInContext() {
         
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        glUniform1f(program.getLocation("texture_intensity"), 1.0f);
-        glClearColor(backgroundColor.x, backgroundColor.y,
-                     backgroundColor.z, backgroundColor.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // positions matrices
@@ -88,22 +85,23 @@ namespace GLS {
             proj = glm::mat4(1);
         }
 
-        program.use();
+        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgram();
+        program->use();
 
         // light using
-        glUniform3f(program.getLocation("light_ambiant"),
+        glUniform3f(program->getLocation("light_ambiant"),
                     lightAmbiant.x, lightAmbiant.y, lightAmbiant.z);
-        glUniformMatrix4fv(program.getLocation("projection"), 1, GL_FALSE, &proj[0][0]);
-        glUniform3f(program.getLocation("view_pos"), p.x, p.y, p.z);
+        glUniformMatrix4fv(program->getLocation("projection"), 1, GL_FALSE, glm::value_ptr(proj));
+        glUniform3f(program->getLocation("view_pos"), p.x, p.y, p.z);
         
         glm::vec3 lop = glm::vec3(view * glm::vec4(lightOmniPos, 1.0));
-        glUniform1i(program.getLocation("omnilight_isactivated"), useLightOmni);
-        glUniform3f(program.getLocation("omnilight_position"), lop.x, lop.y, lop.z);
-        glUniform3f(program.getLocation("omnilight_color"),
+        glUniform1i(program->getLocation("omnilight_isactivated"), useLightOmni);
+        glUniform3f(program->getLocation("omnilight_position"), lop.x, lop.y, lop.z);
+        glUniform3f(program->getLocation("omnilight_color"),
                     lightOmniColor.x, lightOmniColor.y, lightOmniColor.z);
         
         // node renders
-        _rootNode->renderInContext(program, view);
+        _rootNode->renderInContext(proj, view);
     }
     
 }

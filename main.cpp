@@ -23,7 +23,6 @@
 int launch(std::vector<std::string>& modelNames);
 
 int main(int argc, const char * argv[]) {
-	
     std::vector<std::string> args;
     for (int i = 1; i < argc; i++)
         args.push_back(argv[i]);

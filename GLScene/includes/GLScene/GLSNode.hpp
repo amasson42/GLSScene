@@ -29,7 +29,7 @@ namespace GLS {
         std::vector<std::shared_ptr<Node> > _childs;
         
         std::shared_ptr<Camera> _camera;
-        std::shared_ptr<Mesh> _mesh;
+        std::vector<std::shared_ptr<Renderable> > _renderables;
         
     public:
         
@@ -72,6 +72,9 @@ namespace GLS {
         
         // Node functionalities
         
+        const std::vector<std::shared_ptr<Renderable> >& renderables() const;
+        void addRenderable(std::shared_ptr<Renderable> renderable);
+        void removeRenderableIndex(size_t i);
         const std::shared_ptr<const Mesh> mesh() const;
         std::shared_ptr<Mesh> mesh();
         void setMesh(std::shared_ptr<Mesh> mesh);
@@ -84,7 +87,7 @@ namespace GLS {
         
         // SOON: Lights
         
-        void renderInContext(ShaderProgram& program, glm::mat4 view);
+        void renderInContext(const glm::mat4& projection, const glm::mat4& view);
         
     };
     

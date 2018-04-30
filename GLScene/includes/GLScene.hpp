@@ -15,6 +15,7 @@
 
 #include "GLScene/GLSCamera.hpp"
 #include "GLScene/GLSTexture.hpp"
+#include "GLScene/GLSRenderable.hpp"
 #include "GLScene/GLSMesh.hpp"
 #include "GLScene/GLSShader.hpp"
 #include "GLScene/GLSNode.hpp"

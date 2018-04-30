@@ -42,7 +42,7 @@ namespace GLS {
 		Node *cameraNode() const;
 		void setCameraNode(Node& node);
 		
-		void renderInContextWithShader(ShaderProgram& program);
+		void renderInContext();
         
     };
     
