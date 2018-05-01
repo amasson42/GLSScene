@@ -7,6 +7,7 @@
 //
 
 #include "GLSNode.hpp"
+#include <iostream>
 
 namespace GLS {
     
@@ -64,34 +65,34 @@ namespace GLS {
     
     // Transformation
     
-    glm::vec3 Node::position() const {
+    const glm::vec3& Node::position() const {
         return _position;
     }
     
-    void Node::setPosition(glm::vec3 position) {
+    void Node::setPosition(const glm::vec3& position) {
         _position = position;
         _transformUpdated = false;
     }
     
-    glm::quat Node::rotation() const {
+    const glm::quat& Node::rotation() const {
         return _rotation;
     }
     
-    void Node::setRotation(glm::quat rotation) {
+    void Node::setRotation(const glm::quat& rotation) {
         _rotation = rotation;
         _transformUpdated = false;
     }
     
-    glm::vec3 Node::scale() const {
+    const glm::vec3& Node::scale() const {
         return _scale;
     }
     
-    void Node::setScale(glm::vec3 scale) {
+    void Node::setScale(const glm::vec3& scale) {
         _scale = scale;
         _transformUpdated = false;
     }
     
-    static glm::mat4 calculTransformMatrix(glm::vec3 position, glm::quat rotation, glm::vec3 scale) {
+    static const glm::mat4 calculTransformMatrix(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
         glm::mat4 mat;
         mat = glm::translate(mat, position);
         mat = mat * glm::toMat4(rotation);
@@ -99,27 +100,27 @@ namespace GLS {
         return mat;
     }
     
-    glm::mat4 Node::getTransformMatrix() {
+    const glm::mat4& Node::getTransformMatrix() {
         if (!_transformUpdated)
             updateTransformMatrix();
         return _transform;
     }
     
-    glm::mat4 Node::getTransformMatrix() const {
+    const glm::mat4 Node::getTransformMatrix() const {
         if (_transformUpdated)
             return _transform;
         else
             return calculTransformMatrix(_position, _rotation, _scale);
     }
     
-    glm::mat4 Node::getWorldTransformMatrix() {
+    const glm::mat4 Node::getWorldTransformMatrix() {
         if (_parent)
             return _parent->getWorldTransformMatrix() * getTransformMatrix();
         else
             return getTransformMatrix();
     }
     
-    glm::mat4 Node::getWorldTransformMatrix() const {
+    const glm::mat4 Node::getWorldTransformMatrix() const {
         if (_parent)
             return _parent->getWorldTransformMatrix() * getTransformMatrix();
         else
@@ -160,11 +161,11 @@ namespace GLS {
     
     // Node functionalities
     
-    const std::vector<std::shared_ptr<Renderable> >& Node::renderables() const {
+    const std::vector<std::shared_ptr<IRenderable> >& Node::renderables() const {
         return _renderables;
     }
 
-    void Node::addRenderable(std::shared_ptr<Renderable> renderable) {
+    void Node::addRenderable(std::shared_ptr<IRenderable> renderable) {
         _renderables.push_back(renderable);
     }
 
@@ -195,13 +196,13 @@ namespace GLS {
     
     // SOON: Lights
     
-    void Node::renderInContext(const glm::mat4& projection, const glm::mat4& view) {
+    void Node::renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view) {
         updateTransformMatrix();
         for (size_t i = 0; i < _childs.size(); i++) {
-            _childs[i]->renderInContext(projection, view * _transform);
+            _childs[i]->renderInContext(scene, projection, view * _transform);
         }
         for (size_t i = 0; i < _renderables.size(); i++) {
-            _renderables[i]->renderInContext(projection, view, _transform);
+            _renderables[i]->renderInContext(scene, projection, view, _transform);
         }
     }
     

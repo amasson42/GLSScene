@@ -66,7 +66,6 @@ namespace GLS {
     
     GLenum Shader::type() const {
         return _type;
-        
     }
     
     void Shader::clearSrcs() {

@@ -42,6 +42,8 @@ namespace GLS {
 		Node *cameraNode() const;
 		void setCameraNode(Node& node);
 		
+        void sendLightsValueToShader(std::shared_ptr<ShaderProgram> program);
+
 		void renderInContext();
         
     };

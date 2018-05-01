@@ -1,5 +1,5 @@
 //
-//  GLSStructs.h
+//  GLSStructs.hpp
 //  GLScene
 //
 //  Created by Arthur Masson on 16/04/2018.

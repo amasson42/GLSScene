@@ -15,7 +15,7 @@
 
 namespace GLS {
     
-    class Mesh : public Renderable {
+    class Mesh : public IRenderable {
         
         std::vector<Vertex> _vertices;
         std::vector<GLuint> _indices;
@@ -74,8 +74,8 @@ namespace GLS {
         // Rendering
         
         void setProgram(std::shared_ptr<ShaderProgram> shaderProgram);
-
-        virtual void renderInContext(const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model);
+        
+        virtual void renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model);
         
         
         // Prefabs

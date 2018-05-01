@@ -15,11 +15,11 @@
 
 namespace GLS {
     
-    class Renderable {
+    class IRenderable {
         
     public:
 
-        virtual void renderInContext(const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) = 0;
+        virtual void renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) = 0;
         
     };
     

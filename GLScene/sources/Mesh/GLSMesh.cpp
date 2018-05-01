@@ -209,7 +209,7 @@ namespace GLS {
         _shaderProgram = shaderProgram;
     }
 
-    void Mesh::renderInContext(const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) {
+    void Mesh::renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) {
         if (!_bufferGenerated)
             return ;
         
@@ -217,6 +217,8 @@ namespace GLS {
         if (_shaderProgram) {
             program = _shaderProgram;
             program->use();
+            // TODO: send the scene informations to shader
+            scene.sendLightsValueToShader(program);
             glUniformMatrix4fv(program->getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
         } else {
             program = ShaderProgram::standardShaderProgram();

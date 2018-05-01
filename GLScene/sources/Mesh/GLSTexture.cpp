@@ -42,4 +42,9 @@ namespace GLS {
         return _buffer;
     }
 
+    void Texture::setParameter(GLenum pname, GLint param) {
+        glBindTexture(GL_TEXTURE_2D, _buffer);
+        glTexParameteri(GL_TEXTURE_2D, pname, param);
+    }
+    
 }

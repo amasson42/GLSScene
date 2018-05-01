@@ -18,7 +18,6 @@ namespace GLS {
     class Node {
         
         std::string _name;
-        
         glm::vec3 _position;
         glm::quat _rotation;
         glm::vec3 _scale;
@@ -29,7 +28,7 @@ namespace GLS {
         std::vector<std::shared_ptr<Node> > _childs;
         
         std::shared_ptr<Camera> _camera;
-        std::vector<std::shared_ptr<Renderable> > _renderables;
+        std::vector<std::shared_ptr<IRenderable> > _renderables;
         
     public:
         
@@ -45,19 +44,19 @@ namespace GLS {
         
         // Transformation
         
-        glm::vec3 position() const;
-        void setPosition(glm::vec3 position);
+        const glm::vec3& position() const;
+        void setPosition(const glm::vec3& position);
         
-        glm::quat rotation() const;
-        void setRotation(glm::quat rotation);
+        const glm::quat& rotation() const;
+        void setRotation(const glm::quat& rotation);
         
-        glm::vec3 scale() const;
-        void setScale(glm::vec3 scale);
+        const glm::vec3& scale() const;
+        void setScale(const glm::vec3& scale);
         
-        glm::mat4 getTransformMatrix();
-        glm::mat4 getTransformMatrix() const;
-        glm::mat4 getWorldTransformMatrix();
-        glm::mat4 getWorldTransformMatrix() const;
+        const glm::mat4& getTransformMatrix();
+        const glm::mat4 getTransformMatrix() const;
+        const glm::mat4 getWorldTransformMatrix();
+        const glm::mat4 getWorldTransformMatrix() const;
         void updateTransformMatrix();
         
         
@@ -72,8 +71,8 @@ namespace GLS {
         
         // Node functionalities
         
-        const std::vector<std::shared_ptr<Renderable> >& renderables() const;
-        void addRenderable(std::shared_ptr<Renderable> renderable);
+        const std::vector<std::shared_ptr<IRenderable> >& renderables() const;
+        void addRenderable(std::shared_ptr<IRenderable> renderable);
         void removeRenderableIndex(size_t i);
         const std::shared_ptr<const Mesh> mesh() const;
         std::shared_ptr<Mesh> mesh();
@@ -87,7 +86,7 @@ namespace GLS {
         
         // SOON: Lights
         
-        void renderInContext(const glm::mat4& projection, const glm::mat4& view);
+        void renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view);
         
     };
     

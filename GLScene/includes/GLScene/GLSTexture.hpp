@@ -35,6 +35,7 @@ namespace GLS {
         
         void clearData();
         GLuint buffer() const;
+        void setParameter(GLenum pname, GLint param);
         
     };
     

@@ -61,11 +61,26 @@ namespace GLS {
     void Scene::setCameraNode(Node& node) {
         _cameraNode = &node;
     }
+
+    void Scene::sendLightsValueToShader(std::shared_ptr<ShaderProgram> program) {
+        program->use();
+        glm::mat4 view;
+        if (_cameraNode) {
+            view = _cameraNode->getWorldTransformMatrix();
+            view = glm::inverse(view);
+        }
+        glm::vec3 lop = glm::vec3(view * glm::vec4(lightOmniPos, 1));
+        glUniform3f(program->getLocation("light_ambiant"), lightAmbiant.x, lightAmbiant.y, lightAmbiant.z);
+        glUniform1i(program->getLocation("omnilight_isactivated"), useLightOmni);
+        glUniform3f(program->getLocation("omnilight_position"), lop.x, lop.y, lop.z);
+        glUniform3f(program->getLocation("omnilight_color"), lightOmniColor.x, lightOmniColor.y, lightOmniColor.z);
+    }
     
     void Scene::renderInContext() {
         
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
+        glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // positions matrices
@@ -74,6 +89,7 @@ namespace GLS {
         glm::vec3 p;
         if (_cameraNode) {
             view = _cameraNode->getWorldTransformMatrix();
+            view = glm::inverse(view);
             p = glm::vec3(view * glm::vec4(_cameraNode->position(), 1));
             if (_cameraNode->camera() != nullptr)
                 proj = _cameraNode->camera()->projectionMatrix();
@@ -84,24 +100,14 @@ namespace GLS {
             p = glm::vec3(0);
             proj = glm::mat4(1);
         }
-
+        
         std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgram();
-        program->use();
-
-        // light using
-        glUniform3f(program->getLocation("light_ambiant"),
-                    lightAmbiant.x, lightAmbiant.y, lightAmbiant.z);
+        sendLightsValueToShader(program);
         glUniformMatrix4fv(program->getLocation("projection"), 1, GL_FALSE, glm::value_ptr(proj));
         glUniform3f(program->getLocation("view_pos"), p.x, p.y, p.z);
         
-        glm::vec3 lop = glm::vec3(view * glm::vec4(lightOmniPos, 1.0));
-        glUniform1i(program->getLocation("omnilight_isactivated"), useLightOmni);
-        glUniform3f(program->getLocation("omnilight_position"), lop.x, lop.y, lop.z);
-        glUniform3f(program->getLocation("omnilight_color"),
-                    lightOmniColor.x, lightOmniColor.y, lightOmniColor.z);
-        
         // node renders
-        _rootNode->renderInContext(proj, view);
+        _rootNode->renderInContext(*this, proj, view);
     }
     
 }
