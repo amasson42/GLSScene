@@ -13,6 +13,7 @@
 
 #include "GLScene/GLSStructs.hpp"
 
+// #include "GLScene/GLSTransform.hpp"
 #include "GLScene/GLSCamera.hpp"
 #include "GLScene/GLSTexture.hpp"
 #include "GLScene/GLSIRenderable.hpp"

@@ -45,7 +45,7 @@ int main(int argc, const char * argv[]) {
 }
 
 void printNodePosition(const GLS::Node& node) {
-    std::cout << "node position: " << node.position() << std::endl;
+    std::cout << "node position: " << node.transform().position() << std::endl;
     std::cout << "node transform: " << std::endl << node.getTransformMatrix() << std::endl;
 }
 
@@ -101,11 +101,6 @@ int launch(std::vector<std::string>& modelNames) {
         triangleMesh->generateBuffers();
         triangleNode->addRenderable(triangleMesh);
     }
-    std::cout << "triangle position: " << triangleNode->position() << std::endl;
-    glm::vec3 v(3, 3, 3);
-    std::cout << "v = " << v << std::endl;
-    triangleNode->setPosition(v);
-    std::cout << "triangle position: " << triangleNode->position() << std::endl;
     
     scene.rootNode().addChildNode(triangleNode);
 
@@ -151,23 +146,18 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
         glm::vec3 cameraFront = glm::vec3(cameraMat * glm::vec4(0, 0, -1, 0));
         glm::vec3 cameraRight = glm::vec3(cameraMat * glm::vec4(1, 0, 0, 0));
         glm::vec3 cameraUp = glm::vec3(cameraMat * glm::vec4(0, 1, 0, 0));
-        // std::cout << "front: " << cameraSpeed * cameraFront << std::endl;
-        // std::cout << "right: " << cameraSpeed * cameraRight << std::endl;
-        // std::cout << "up: " << cameraSpeed * cameraUp << std::endl;
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cam.setPosition(cam.position() + cameraSpeed * cameraFront);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cam.setPosition(cam.position() - cameraSpeed * cameraFront);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            cam.setPosition(cam.position() - cameraSpeed * cameraRight);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            cam.setPosition(cam.position() + cameraSpeed * cameraRight);
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            cam.setPosition(cam.position() + cameraSpeed * cameraUp);
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-            cam.setPosition(cam.position() - cameraSpeed * cameraUp);
         
-        std::cout << deltaTime << " cameraPosition: " << cam.position() << std::endl;
+        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+            cam.transform().setPosition(cam.transform().position() + cameraSpeed * cameraFront);
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+            cam.transform().setPosition(cam.transform().position() - cameraSpeed * cameraFront);
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+            cam.transform().setPosition(cam.transform().position() - cameraSpeed * cameraRight);
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+            cam.transform().setPosition(cam.transform().position() + cameraSpeed * cameraRight);
+        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+            cam.transform().setPosition(cam.transform().position() + cameraSpeed * cameraUp);
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+            cam.transform().setPosition(cam.transform().position() - cameraSpeed * cameraUp);
     }
 }

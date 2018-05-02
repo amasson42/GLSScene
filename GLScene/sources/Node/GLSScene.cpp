@@ -90,7 +90,7 @@ namespace GLS {
         if (_cameraNode) {
             view = _cameraNode->getWorldTransformMatrix();
             view = glm::inverse(view);
-            p = glm::vec3(view * glm::vec4(_cameraNode->position(), 1));
+            p = glm::vec3(view * glm::vec4(_cameraNode->transform().position(), 1));
             if (_cameraNode->camera() != nullptr)
                 proj = _cameraNode->camera()->projectionMatrix();
             else

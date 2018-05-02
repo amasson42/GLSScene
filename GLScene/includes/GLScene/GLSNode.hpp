@@ -18,11 +18,7 @@ namespace GLS {
     class Node {
         
         std::string _name;
-        glm::vec3 _position;
-        glm::quat _rotation;
-        glm::vec3 _scale;
-        glm::mat4 _transform;
-        bool _transformUpdated;
+        Transform _transform;
         
         Node *_parent;
         std::vector<std::shared_ptr<Node> > _childs;
@@ -44,22 +40,15 @@ namespace GLS {
         
         // Transformation
         
-        const glm::vec3& position() const;
-        void setPosition(const glm::vec3& position);
-        
-        const glm::quat& rotation() const;
-        void setRotation(const glm::quat& rotation);
-        
-        const glm::vec3& scale() const;
-        void setScale(const glm::vec3& scale);
-        
+        Transform& transform();
+        const Transform& transform() const;
+
         const glm::mat4& getTransformMatrix();
         const glm::mat4 getTransformMatrix() const;
         const glm::mat4 getWorldTransformMatrix();
         const glm::mat4 getWorldTransformMatrix() const;
-        void updateTransformMatrix();
-        
-        
+
+
         // Hierarchy
         
         std::vector<std::shared_ptr<Node> >& childNodes();

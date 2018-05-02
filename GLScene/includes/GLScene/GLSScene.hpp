@@ -20,6 +20,7 @@ namespace GLS {
         
 	public:
 		
+        // TODO: use the node to set the lights
         glm::vec4 backgroundColor;
         
 		glm::vec3 lightAmbiant;

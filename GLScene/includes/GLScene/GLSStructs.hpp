@@ -9,20 +9,11 @@
 #ifndef GLSStructs_h
 #define GLSStructs_h
 
-#include <glm/glm.hpp>
-#include <glm/ext.hpp>
-#include <glm/vec2.hpp> // glm::vec2
-#include <glm/vec3.hpp> // glm::vec3
-#include <glm/vec4.hpp> // glm::vec4
-#include <glm/mat4x4.hpp> // glm::mat4
-#include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
-#include <glm/geometric.hpp>// glm::cross, glm::normalize
-#include <glm/gtc/type_ptr.hpp> // glm::value_ptr
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
+#include "GLScene/GLSTransform.hpp"
 
 namespace GLS {
     
+    class Transform;
     class Scene;
     class Node;
     class Camera;
@@ -37,7 +28,10 @@ namespace GLS {
         glm::vec4 color;
         glm::vec2 texture;
         
-        Vertex(glm::vec3 o, glm::vec3 n, glm::vec4 c, glm::vec2 u);
+        Vertex(const glm::vec3& o,
+                const glm::vec3& n,
+                const glm::vec4& c,
+                const glm::vec2& u);
     };
     
 }

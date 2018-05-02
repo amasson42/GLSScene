@@ -13,23 +13,19 @@ namespace GLS {
     
     Node::Node() :
     _name("empty_node"),
-    _position(0), _rotation(), _scale(1),
-    _transformUpdated(false),
+    _transform(),
     _parent(nullptr), _childs(),
     _camera(nullptr), _renderables()
     {
-        updateTransformMatrix();
+
     }
     
     Node::Node(const Node& copy) :
     _name(copy._name),
-    _position(copy._position), _rotation(copy._rotation), _scale(copy._scale),
-    _transformUpdated(false),
+    _transform(copy._transform),
     _parent(nullptr), _childs(),
     _camera(copy._camera), _renderables(copy._renderables)
     {
-        if (copy._transformUpdated)
-            updateTransformMatrix();
         for (size_t i = 0; i < copy._childs.size(); i++)
             addChildNode(std::make_shared<Node>(*copy._childs[i]));
     }
@@ -40,15 +36,10 @@ namespace GLS {
     
     Node& Node::operator=(const Node& copy) {
         _name = copy._name;
-        _position = copy._position;
-        _rotation = copy._rotation;
-        _scale = copy._scale;
-        _transformUpdated = copy._transformUpdated;
+        _transform = copy._transform;
         _parent = nullptr;
         _camera = copy._camera;
         _renderables = copy._renderables;
-        if (copy._transformUpdated)
-            updateTransformMatrix();
         for (size_t i = 0; i < copy._childs.size(); i++)
             addChildNode(std::make_shared<Node>(*copy._childs[i]));
         return *this;
@@ -65,54 +56,22 @@ namespace GLS {
     
     // Transformation
     
-    const glm::vec3& Node::position() const {
-        return _position;
-    }
-    
-    void Node::setPosition(const glm::vec3& position) {
-        _position = position;
-        _transformUpdated = false;
-    }
-    
-    const glm::quat& Node::rotation() const {
-        return _rotation;
-    }
-    
-    void Node::setRotation(const glm::quat& rotation) {
-        _rotation = rotation;
-        _transformUpdated = false;
-    }
-    
-    const glm::vec3& Node::scale() const {
-        return _scale;
-    }
-    
-    void Node::setScale(const glm::vec3& scale) {
-        _scale = scale;
-        _transformUpdated = false;
-    }
-    
-    static const glm::mat4 calculTransformMatrix(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
-        glm::mat4 mat;
-        mat = glm::translate(mat, position);
-        mat = mat * glm::toMat4(rotation);
-        mat = glm::scale(mat, scale);
-        return mat;
-    }
-    
-    const glm::mat4& Node::getTransformMatrix() {
-        if (!_transformUpdated)
-            updateTransformMatrix();
+    Transform& Node::transform() {
         return _transform;
     }
-    
-    const glm::mat4 Node::getTransformMatrix() const {
-        if (_transformUpdated)
-            return _transform;
-        else
-            return calculTransformMatrix(_position, _rotation, _scale);
+
+    const Transform& Node::transform() const {
+        return _transform;
     }
-    
+
+    const glm::mat4& Node::getTransformMatrix() {
+        return _transform.matrix();
+    }
+
+    const glm::mat4 Node::getTransformMatrix() const {
+        return _transform.matrix();
+    }
+
     const glm::mat4 Node::getWorldTransformMatrix() {
         if (_parent)
             return _parent->getWorldTransformMatrix() * getTransformMatrix();
@@ -126,15 +85,7 @@ namespace GLS {
         else
             return getTransformMatrix();
     }
-    
-    void Node::updateTransformMatrix() {
-        if (!_transformUpdated) {
-            _transform = calculTransformMatrix(_position, _rotation, _scale);
-            _transformUpdated = true;
-        }
-    }
-    
-    
+
     // Hierarchy
     
     std::vector<std::shared_ptr<Node> >& Node::childNodes() {
@@ -197,12 +148,12 @@ namespace GLS {
     // SOON: Lights
     
     void Node::renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view) {
-        updateTransformMatrix();
+        _transform.updateMatrix();
         for (size_t i = 0; i < _childs.size(); i++) {
-            _childs[i]->renderInContext(scene, projection, view * _transform);
+            _childs[i]->renderInContext(scene, projection, view * getTransformMatrix());
         }
         for (size_t i = 0; i < _renderables.size(); i++) {
-            _renderables[i]->renderInContext(scene, projection, view, _transform);
+            _renderables[i]->renderInContext(scene, projection, view, getTransformMatrix());
         }
     }
     

@@ -10,7 +10,10 @@
 
 namespace GLS {
     
-    Vertex::Vertex(glm::vec3 o, glm::vec3 n, glm::vec4 c, glm::vec2 u) {
+    Vertex::Vertex(const glm::vec3& o,
+                    const glm::vec3& n,
+                    const glm::vec4& c,
+                    const glm::vec2& u) {
         position = o;
         normal = n;
         color = c;
