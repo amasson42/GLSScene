@@ -9,6 +9,7 @@
 #ifndef GLSTransform_h
 #define GLSTransform_h
 
+#include <OpenGL/gl3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/vec2.hpp> // glm::vec2
@@ -39,18 +40,39 @@ namespace GLS {
 
         Transform& operator=(const Transform& copy);
 
+
+        // Position
+
         const glm::vec3& position() const;
         glm::vec3& position();
         void setPosition(const glm::vec3& position);
-        
+        void moveBy(const glm::vec3& offset);
+        void moveBy(GLfloat x, GLfloat y, GLfloat z);
+
+
+        // Rotation
+
         const glm::quat& rotation() const;
         glm::quat& rotation();
         void setRotation(const glm::quat& rotation);
-        
+        void rotateBy(const glm::quat& rotate);
+        void rotateBy(GLfloat x, GLfloat y, GLfloat z, GLfloat alpha);
+        const glm::vec3 eulerAngles() const;
+        void setEulerAngles(const glm::vec3& angles);
+        void setEulerAngles(GLfloat x, GLfloat y, GLfloat z);
+
+
+        // Scale
+
         const glm::vec3& scale() const;
         glm::vec3& scale();
         void setScale(const glm::vec3& scale);
-        
+        void scaleBy(const glm::vec3& scaler);
+        void scaleBy(GLfloat x, GLfloat y, GLfloat z);
+
+
+        // Matrix
+
         const glm::mat4& matrix();
         const glm::mat4 matrix() const;
         void updateMatrix();

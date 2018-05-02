@@ -101,14 +101,19 @@ int launch(std::vector<std::string>& modelNames) {
         triangleMesh->generateBuffers();
         triangleNode->addRenderable(triangleMesh);
     }
-    
     scene.rootNode().addChildNode(triangleNode);
+
+    std::shared_ptr<GLS::Node> planeNode = std::make_shared<GLS::Node>();
+    planeNode->addRenderable(GLS::Mesh::plane(1.0, 1.0));
+    scene.rootNode().addChildNode(planeNode);
 
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
+        camera->setAspect(1200.0 / 800.0);
         cameraNode->setCamera(camera);
     }
+    cameraNode->transform().moveBy(0, 0, 1);
     scene.setCameraNode(*cameraNode);
     scene.backgroundColor = glm::vec4(0.2, 0.5, 0.2, 1.0f);
 
@@ -123,6 +128,7 @@ int launch(std::vector<std::string>& modelNames) {
         if (true)
             processInput(window, deltaTime, scene);
 
+        planeNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
         scene.renderInContext();
         /* do some drawing */
         
@@ -148,16 +154,26 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
         glm::vec3 cameraUp = glm::vec3(cameraMat * glm::vec4(0, 1, 0, 0));
         
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cam.transform().setPosition(cam.transform().position() + cameraSpeed * cameraFront);
+            cam.transform().moveBy(cameraSpeed * cameraFront);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cam.transform().setPosition(cam.transform().position() - cameraSpeed * cameraFront);
+            cam.transform().moveBy(-cameraSpeed * cameraFront);
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            cam.transform().setPosition(cam.transform().position() - cameraSpeed * cameraRight);
+            cam.transform().moveBy(-cameraSpeed * cameraRight);
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            cam.transform().setPosition(cam.transform().position() + cameraSpeed * cameraRight);
+            cam.transform().moveBy(cameraSpeed * cameraRight);
         if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            cam.transform().setPosition(cam.transform().position() + cameraSpeed * cameraUp);
+            cam.transform().moveBy(cameraSpeed * cameraUp);
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-            cam.transform().setPosition(cam.transform().position() - cameraSpeed * cameraUp);
+            cam.transform().moveBy(-cameraSpeed * cameraUp);
+        
+        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+            cam.transform().rotateBy(0, -1, 0, cameraSpeed);
+        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+            cam.transform().rotateBy(0, 1, 0, cameraSpeed);
+        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+            cam.transform().rotateBy(-1, 0, 0, cameraSpeed);
+        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+            cam.transform().rotateBy(1, 0, 0, cameraSpeed);
+        
     }
 }

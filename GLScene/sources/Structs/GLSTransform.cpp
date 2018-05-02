@@ -36,6 +36,9 @@ namespace GLS {
         return *this;
     }
 
+
+    // Position
+
     const glm::vec3& Transform::position() const {
         return _position;
     }
@@ -49,7 +52,22 @@ namespace GLS {
         _position = position;
         _transformUpdated = false;
     }
-    
+
+    void Transform::moveBy(const glm::vec3& offset) {
+        _position += offset;
+        _transformUpdated = false;
+    }
+
+    void Transform::moveBy(GLfloat x, GLfloat y, GLfloat z) {
+        _position.x += x;
+        _position.y += y;
+        _position.z += z;
+        _transformUpdated = false;
+    }
+
+
+    // Rotation
+
     const glm::quat& Transform::rotation() const {
         return _rotation;
     }
@@ -63,7 +81,34 @@ namespace GLS {
         _rotation = rotation;
         _transformUpdated = false;
     }
-    
+
+    void Transform::rotateBy(const glm::quat& rotate) {
+        _rotation = rotate * _rotation;
+        _transformUpdated = false;
+    }
+
+    void Transform::rotateBy(GLfloat x, GLfloat y, GLfloat z, GLfloat alpha) {
+        _rotation = glm::quat(alpha, x, y, z) * _rotation;
+        _transformUpdated = false;
+    }
+
+    const glm::vec3 Transform::eulerAngles() const {
+        return glm::eulerAngles(_rotation);
+    }
+
+    void Transform::setEulerAngles(const glm::vec3& angles) {
+        _rotation = glm::quat(angles);
+        _transformUpdated = false;
+    }
+
+    void Transform::setEulerAngles(GLfloat x, GLfloat y, GLfloat z) {
+        _rotation = glm::quat(glm::vec3(x, y, z));
+        _transformUpdated = false;
+    }
+
+
+    // Scale
+
     const glm::vec3& Transform::scale() const {
         return _scale;
     }
@@ -75,7 +120,23 @@ namespace GLS {
 
     void Transform::setScale(const glm::vec3& scale) {
         _scale = scale;
+        _transformUpdated = false;
     }
+
+    void Transform::scaleBy(const glm::vec3& scaler) {
+        _scale *= scaler;
+        _transformUpdated = false;
+    }
+
+    void Transform::scaleBy(GLfloat x, GLfloat y, GLfloat z) {
+        _scale.x *= x;
+        _scale.y *= y;
+        _scale.z *= z;
+        _transformUpdated = false;
+    }
+
+
+    // Matrix
 
     static const glm::mat4 calculTransformMatrix(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
         glm::mat4 mat;

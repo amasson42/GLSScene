@@ -25,7 +25,7 @@ namespace GLS {
         
     public:
         
-        Camera(GLfloat fov = 60.0f, GLfloat aspect = 1.0f,
+        Camera(GLfloat fov = 1.5708, GLfloat aspect = 1.0f,
                GLfloat nearZ = 0.1f, GLfloat farZ = 100.0f);
         Camera(const Camera& copy);
         virtual ~Camera();
