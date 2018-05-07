@@ -9,7 +9,6 @@
 #ifndef GLSShader_h
 #define GLSShader_h
 
-#include <string>
 #include "GLScene.hpp"
 
 namespace GLS {
@@ -26,7 +25,7 @@ namespace GLS {
         Shader(const Shader& copy);
         Shader& operator=(const Shader& copy);
         
-        void compile();
+        void compile() throw(CreationException, CompilationException);
         
         friend class ShaderProgram;
         
@@ -45,8 +44,8 @@ namespace GLS {
             const char *infoLog() const;
         };
         
-        Shader(std::ifstream& file, GLenum type);
-        Shader(std::string src, GLenum type);
+        Shader(std::ifstream& file, GLenum type) throw(CreationException, CompilationException);
+        Shader(std::string src, GLenum type) throw(CreationException, CompilationException);
         virtual ~Shader();
         
         GLenum type() const;

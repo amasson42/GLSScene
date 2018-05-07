@@ -10,6 +10,10 @@
 
 namespace GLS {
     
+    const char* Mesh::BufferCreationException::what() const throw() {
+        return "can't create additional buffer";
+    }
+
     Mesh::Mesh() : _vertices(), _indices(),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
     _shaderProgram(nullptr),
@@ -123,7 +127,7 @@ namespace GLS {
     
     // OpenGL Buffers
     
-    void Mesh::generateBuffers() {
+    void Mesh::generateBuffers() throw(BufferCreationException) {
         if (bufferGenerated())
             deleteBuffers();
         if (_vertices.empty() || _indices.empty())
@@ -131,17 +135,17 @@ namespace GLS {
 
         glGenVertexArrays(1, &_elementsBuffer);
         if (_elementsBuffer == 0)
-            return ; // throw creating buffer error
+            throw BufferCreationException();
         glGenBuffers(1, &_verticesBuffer);
         if (_verticesBuffer == 0) {
             glDeleteVertexArrays(1, &_elementsBuffer);
-            return ; // throw creating buffer error
+            throw BufferCreationException();
         }
         glGenBuffers(1, &_indicesBuffer);
         if (_indicesBuffer == 0) {
             glDeleteVertexArrays(1, &_elementsBuffer);
             glDeleteBuffers(1, &_verticesBuffer);
-            return ; // throw creating buffer error
+            throw BufferCreationException();
         }
         
         glBindVertexArray(_elementsBuffer);

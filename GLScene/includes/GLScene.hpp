@@ -9,11 +9,14 @@
 #ifndef GLScene_h
 #define GLScene_h
 
+#include <exception>
+#include <string>
+#include <vector>
 #include <OpenGL/gl3.h>
 
 #include "GLScene/GLSStructs.hpp"
 
-// #include "GLScene/GLSTransform.hpp"
+#include "GLScene/GLSTransform.hpp"
 #include "GLScene/GLSCamera.hpp"
 #include "GLScene/GLSTexture.hpp"
 #include "GLScene/GLSIRenderable.hpp"

@@ -11,13 +11,25 @@
 #include "GLSTexture.hpp"
 
 namespace GLS {
+
+    const char* Texture::LoadingException::what() const throw() {
+        return "can't load the texture";
+    }
+
+    const char* Texture::CreationException::what() const throw() {
+        return "can't create additional texture";
+    }
     
     Texture::Texture(std::string filename, GLenum format) {
         _data = stbi_load(filename.c_str(), &_width, &_height, &_bpp, 0);
         if (_data == NULL) {
-            // TODO: throw can't create texture
+            throw LoadingException();
         }
         glGenTextures(1, &_buffer);
+        if (_buffer == 0) {
+            free(_data);
+            throw CreationException();
+        }
         glBindTexture(GL_TEXTURE_2D, _buffer);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -47,4 +59,12 @@ namespace GLS {
         glTexParameteri(GL_TEXTURE_2D, pname, param);
     }
     
+    void Texture::setParameters(std::vector<GLenum> pnames, std::vector<GLint> params) {
+        glBindTexture(GL_TEXTURE_2D, _buffer);
+        if (pnames.size() == params.size()) {
+            for (size_t i = 0; i < pnames.size(); i++) {
+                glTexParameteri(GL_TEXTURE_2D, pnames[i], params[i]);
+            }
+        }
+    }
 }

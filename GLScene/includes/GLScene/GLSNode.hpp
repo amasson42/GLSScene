@@ -9,8 +9,6 @@
 #ifndef GLSNode_h
 #define GLSNode_h
 
-#include <string>
-#include <vector>
 #include "GLScene.hpp"
 
 namespace GLS {

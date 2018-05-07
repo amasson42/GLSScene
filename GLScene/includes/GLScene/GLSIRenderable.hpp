@@ -9,8 +9,6 @@
 #ifndef GLSRenderable_h
 #define GLSRenderable_h
 
-#include <string>
-#include <vector>
 #include "GLScene.hpp"
 
 namespace GLS {

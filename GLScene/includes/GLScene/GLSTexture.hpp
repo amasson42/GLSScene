@@ -9,8 +9,6 @@
 #ifndef GLSTexture_h
 #define GLSTexture_h
 
-#include <stdlib.h>
-#include <string>
 #include "GLScene.hpp"
 
 namespace GLS {
@@ -30,13 +28,24 @@ namespace GLS {
         
     public:
         
+        class LoadingException : public std::exception {
+            public:
+            const char* what() const throw();
+        };
+
+        class CreationException : public std::exception {
+            public:
+            const char* what() const throw();
+        };
+
         Texture(std::string filename, GLenum format);
         virtual ~Texture();
         
         void clearData();
         GLuint buffer() const;
         void setParameter(GLenum pname, GLint param);
-        
+        void setParameters(std::vector<GLenum> pnames, std::vector<GLint> params);
+
     };
     
 }

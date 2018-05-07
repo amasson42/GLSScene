@@ -107,6 +107,20 @@ int launch(std::vector<std::string>& modelNames) {
     planeNode->addRenderable(GLS::Mesh::plane(1.0, 1.0));
     scene.rootNode().addChildNode(planeNode);
 
+    std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
+    {
+        std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1);
+        try {
+            std::shared_ptr<GLS::Texture> texture(new GLS::Texture("/Users/arthur/Documents/testProg/C/openGL/glscene/textures/container.jpg", GL_RGB));
+            cubeMesh->setTexture(texture);
+        } catch (std::exception& e) {
+            std::cerr << "error: " << e.what() << std::endl;
+        }
+        cubeNode->addRenderable(cubeMesh);
+        cubeNode->transform().setPosition(glm::vec3(4, 1, 0));
+    }
+    scene.rootNode().addChildNode(cubeNode);
+
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();

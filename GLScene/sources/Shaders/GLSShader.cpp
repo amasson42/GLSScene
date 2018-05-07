@@ -23,7 +23,7 @@ namespace GLS {
         return _infoLogBuffer;
     }
     
-    void Shader::compile() {
+    void Shader::compile() throw(CreationException, CompilationException) {
         _shader = glCreateShader(_type);
         if (_shader == 0) {
             throw CreationException();
@@ -43,7 +43,8 @@ namespace GLS {
         }
     }
     
-    Shader::Shader(std::ifstream& file, GLenum type) : _src(), _shader(0), _type(type) {
+    Shader::Shader(std::ifstream& file, GLenum type) throw(CreationException, CompilationException) :
+    _src(), _shader(0), _type(type) {
         file.seekg(0, file.end);
         size_t length = file.tellg();
         file.seekg(0, file.beg);
@@ -55,7 +56,8 @@ namespace GLS {
         compile();
     }
     
-    Shader::Shader(std::string src, GLenum type) : _src(src), _shader(0), _type(type) {
+    Shader::Shader(std::string src, GLenum type) throw(CreationException, CompilationException) :
+    _src(src), _shader(0), _type(type) {
         compile();
     }
     

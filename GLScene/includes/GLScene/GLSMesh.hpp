@@ -10,7 +10,6 @@
 #define GLSMesh_h
 
 #include <fstream>
-#include <vector>
 #include "GLScene.hpp"
 
 namespace GLS {
@@ -35,6 +34,11 @@ namespace GLS {
         
     public:
         
+        class BufferCreationException : public std::exception {
+            public:
+            const char* what() const throw();
+        };
+
         Mesh();
         Mesh(const Mesh& copy);
         virtual ~Mesh();
@@ -62,7 +66,7 @@ namespace GLS {
         
         // OpenGL Buffers
         
-        void generateBuffers();
+        void generateBuffers() throw(BufferCreationException);
         void deleteBuffers();
         
         GLuint verticesBuffer() const;
