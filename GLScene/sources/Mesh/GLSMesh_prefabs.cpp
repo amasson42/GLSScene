@@ -53,43 +53,12 @@ namespace GLS {
         vertices.push_back(Vertex(glm::vec3(w, -h, l), glm::vec3(1.0f, -1.0f, 1.0f), glm::vec4(1), glm::vec2(0, 1)));
         vertices.push_back(Vertex(glm::vec3(w, h, -l), glm::vec3(1.0f, 1.0f, -1.0f), glm::vec4(1), glm::vec2(1, 1)));
         vertices.push_back(Vertex(glm::vec3(w, h, l), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec4(1), glm::vec2(0, 0)));
-            // TODO: better way maybe
-        indices.push_back(1);
-        indices.push_back(5);
-        indices.push_back(3);
-        indices.push_back(5);
-        indices.push_back(7);
-        indices.push_back(3);
-        indices.push_back(2);
-        indices.push_back(4);
-        indices.push_back(0);
-        indices.push_back(2);
-        indices.push_back(6);
-        indices.push_back(4);
-        indices.push_back(0);
-        indices.push_back(1);
-        indices.push_back(2);
-        indices.push_back(1);
-        indices.push_back(3);
-        indices.push_back(2);
-        indices.push_back(6);
-        indices.push_back(5);
-        indices.push_back(4);
-        indices.push_back(6);
-        indices.push_back(7);
-        indices.push_back(5);
-        indices.push_back(2);
-        indices.push_back(3);
-        indices.push_back(6);
-        indices.push_back(6);
-        indices.push_back(3);
-        indices.push_back(7);
-        indices.push_back(4);
-        indices.push_back(1);
-        indices.push_back(0);
-        indices.push_back(5);
-        indices.push_back(1);
-        indices.push_back(4);
+        indices = {1, 5, 3, 5, 7, 3,
+                    2, 4, 0, 2, 6, 4,
+                    0, 1, 2, 1, 3, 2,
+                    6, 5, 4, 6, 7, 5,
+                    2, 3, 6, 6, 3, 7,
+                    4, 1, 0, 5, 1, 4};
         if (generateBuffers)
             mesh->generateBuffers();
         return mesh;
@@ -100,25 +69,33 @@ namespace GLS {
         std::vector<Vertex>& vertices(mesh->verticesRef());
         std::vector<GLuint>& indices(mesh->indicesRef());
         const float PI = 3.141592;
-        int r0 = 2 * ringCount + 1;
-        int r1 = ringCount + 2;
-        int indiceIndex;
-        for (int i = 0; i < r0; i++) {
-            for (int j = 0; j < r1; j++) {
-                float px = (float)i / (float)(r0 - 1) * PI;
-                float py = (float)j / (float)(r1 - 1) * PI;
-                Vertex v;
-                v.normal = glm::vec3(sin(px * 2) * sin(py), cos(py), sin(px * 2 + PI / 2) * sin(py);
+        int rx = 2 * ringCount + 1;
+        int ry = ringCount + 2;
+        vertices.resize(rx * ry);
+        for (int i = 0; i < rx; i++) {
+            for (int j = 0; j < ry; j++) {
+                float px = (float)i / (float)(rx - 1) * PI;
+                float py = (float)j / (float)(ry - 1) * PI;
+                Vertex& v(vertices[j * rx + i]);
+                v.normal = glm::vec3(sin(px * 2) * sin(py), cos(py), sin(px * 2 + PI / 2) * sin(py));
                 v.position = glm::vec3(v.normal.x * radius, v.normal.y * radius, v.normal.z * radius);
                 v.color = glm::vec4(1);
                 v.texture = glm::vec2(2 * px / PI, py / PI);
-                vertices[j * r0 + i] = Vertex(glm::vec3());
+                if (i > 0 && j > 0) {
+                    indices.push_back((j - 0) * rx + (i - 0));
+                    indices.push_back((j - 1) * rx + (i - 0));
+                    indices.push_back((j - 0) * rx + (i - 1));
+                    indices.push_back((j - 1) * rx + (i - 1));
+                    indices.push_back((j - 0) * rx + (i - 1));
+                    indices.push_back((j - 1) * rx + (i - 0));
+                }
             }
         }
         if (generateBuffers)
             mesh->generateBuffers();
         return mesh;
     }
+    
 //    Mesh Mesh::sphere(GLfloat radius, unsigned int ringCount = 12);
 //    Mesh Mesh::objModel(const char *filename, int options);
 //    Mesh Mesh::objModel(std::istream& file, int options);

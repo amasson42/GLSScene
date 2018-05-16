@@ -65,13 +65,16 @@ int launch(std::vector<std::string>& modelNames) {
     
     GLFWwindow *window = nullptr; // create a window pointer
     
-    window = glfwCreateWindow(1200, 800, "openGL", nullptr, nullptr); // create the window
+    const int win_width = 1200, win_height = 800, win_margin = 50;
+    window = glfwCreateWindow(win_width, win_height, "openGL", nullptr, nullptr); // create the window
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return EXIT_FAILURE;
     }
     glfwMakeContextCurrent(window); // make context to draw to
+    glViewport(win_margin, win_margin,
+            win_width - 2 * win_margin, win_height - 2 * win_margin);
     
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     
@@ -107,6 +110,14 @@ int launch(std::vector<std::string>& modelNames) {
     planeNode->addRenderable(GLS::Mesh::plane(1.0, 1.0));
     scene.rootNode().addChildNode(planeNode);
 
+    std::shared_ptr<GLS::Node> sphereNode = std::make_shared<GLS::Node>();
+    {
+        std::shared_ptr<GLS::Mesh> sphereMesh = GLS::Mesh::sphere(1.0);
+        sphereNode->addRenderable(sphereMesh);
+    }
+    planeNode->addChildNode(sphereNode);
+    sphereNode->transform().setPosition(glm::vec3(2, 1, 0));
+
     std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1);
@@ -129,7 +140,6 @@ int launch(std::vector<std::string>& modelNames) {
     }
     cameraNode->transform().moveBy(0, 0, 1);
     scene.setCameraNode(*cameraNode);
-    scene.backgroundColor = glm::vec4(0.2, 0.5, 0.2, 1.0f);
 
     //
     

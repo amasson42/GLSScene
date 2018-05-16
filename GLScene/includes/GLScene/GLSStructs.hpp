@@ -28,6 +28,7 @@ namespace GLS {
         glm::vec4 color;
         glm::vec2 texture;
         
+        Vertex();
         Vertex(const glm::vec3& o,
                 const glm::vec3& n,
                 const glm::vec4& c,

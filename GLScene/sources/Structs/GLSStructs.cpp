@@ -10,6 +10,10 @@
 
 namespace GLS {
     
+    Vertex::Vertex() {
+        
+    }
+
     Vertex::Vertex(const glm::vec3& o,
                     const glm::vec3& n,
                     const glm::vec4& c,
