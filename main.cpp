@@ -113,6 +113,8 @@ int launch(std::vector<std::string>& modelNames) {
     std::shared_ptr<GLS::Node> sphereNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Mesh> sphereMesh = GLS::Mesh::sphere(1.0);
+        sphereMesh->setColor(glm::vec4(0.5, 0.1, 0.2, 1));
+        sphereMesh->generateBuffers();
         sphereNode->addRenderable(sphereMesh);
     }
     planeNode->addChildNode(sphereNode);

@@ -21,6 +21,7 @@
 #include "GLScene/GLSTexture.hpp"
 #include "GLScene/GLSIRenderable.hpp"
 #include "GLScene/GLSMesh.hpp"
+#include "GLScene/GLSDotParticleSystem.hpp"
 #include "GLScene/GLSShader.hpp"
 #include "GLScene/GLSNode.hpp"
 #include "GLScene/GLSScene.hpp"

@@ -15,7 +15,8 @@ install:
 $(NAME):
 	clang++ \
 		$(FLAGS) \
-		-lm -framework OpenGL `pkg-config --static --libs glfw3` \
+		-lm -framework OpenGL \
+		`pkg-config --static --libs glfw3` \
 		`pkg-config --static --libs glm` \
 		`pkg-config glfw3 --cflags-only-I` \
 		`pkg-config glm --cflags-only-I` \

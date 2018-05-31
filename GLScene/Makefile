@@ -13,6 +13,7 @@ INCLUDES := -I$(INCS) -I$(INCS)/GLScene \
 			`pkg-config glm --cflags-only-I`
 
 LIBS := -L/usr/lib \
+		-framework OpenCL \
 		-framework OpenGL \
 		`pkg-config --static --libs glm`
 
