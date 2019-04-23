@@ -82,7 +82,7 @@ int launch(std::vector<std::string>& modelNames) {
     
     // try compilation of shaders
     try {
-        GLS::ShaderProgram::standardShaderProgram();
+        GLS::ShaderProgram::standardShaderProgramMesh();
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;
         std::cout << e.infoLog() << std::endl;
@@ -95,9 +95,9 @@ int launch(std::vector<std::string>& modelNames) {
     std::shared_ptr<GLS::Node> triangleNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Mesh> triangleMesh = std::make_shared<GLS::Mesh>();
-        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec4(1), glm::vec2(0, 0)));
-        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec4(1), glm::vec2(1, 0)));
-        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec4(1), glm::vec2(0, 1)));
+        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec2(0, 0)));
+        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0)));
+        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1)));
         triangleMesh->indicesRef().push_back(0);
         triangleMesh->indicesRef().push_back(1);
         triangleMesh->indicesRef().push_back(2);
@@ -113,7 +113,7 @@ int launch(std::vector<std::string>& modelNames) {
     std::shared_ptr<GLS::Node> sphereNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Mesh> sphereMesh = GLS::Mesh::sphere(1.0);
-        sphereMesh->setColor(glm::vec4(0.5, 0.1, 0.2, 1));
+        sphereMesh->getMaterial()->diffuse = glm::vec3(0.5, 0.1, 0.2);
         sphereMesh->generateBuffers();
         sphereNode->addRenderable(sphereMesh);
     }
@@ -125,7 +125,7 @@ int launch(std::vector<std::string>& modelNames) {
         std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1);
         try {
             std::shared_ptr<GLS::Texture> texture(new GLS::Texture("/Users/arthur/Documents/testProg/C/openGL/glscene/textures/container.jpg", GL_RGB));
-            cubeMesh->setTexture(texture);
+            cubeMesh->getMaterial()->texture_diffuse = texture;
         } catch (std::exception& e) {
             std::cerr << "error: " << e.what() << std::endl;
         }

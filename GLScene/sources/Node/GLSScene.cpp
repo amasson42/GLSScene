@@ -101,7 +101,7 @@ namespace GLS {
             proj = glm::mat4(1);
         }
         
-        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgram();
+        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMesh();
         sendLightsValueToShader(program);
         glUniformMatrix4fv(program->getLocation("projection"), 1, GL_FALSE, glm::value_ptr(proj));
         glUniform3f(program->getLocation("view_pos"), p.x, p.y, p.z);

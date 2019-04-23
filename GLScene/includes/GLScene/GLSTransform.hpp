@@ -24,11 +24,64 @@
 
 namespace GLS {
 
+    class Transform2D {
+
+        glm::vec2 _offset;
+        GLfloat _rotation;
+        glm::vec2 _scale;
+
+        glm::mat3 _transform;
+        bool _transformUpdated;
+
+    public:
+
+        Transform2D();
+        Transform2D(const Transform2D& copy);
+        virtual ~Transform2D();
+
+        Transform2D& operator=(const Transform2D& copy);
+
+
+        // Offset
+
+        const glm::vec2& offset() const;
+        glm::vec2& offset();
+        void setOffset(const glm::vec2& offset);
+        void moveBy(const glm::vec2& offset);
+        void moveBy(GLfloat x, GLfloat y);
+
+
+        // Rotation
+        
+        const GLfloat& rotation() const;
+        GLfloat& rotation();
+        void setRotation(GLfloat a);
+        void rotateBy(GLfloat a);
+
+
+        // Scale
+
+        const glm::vec2& scale() const;
+        glm::vec2& scale();
+        void setScale(const glm::vec2& scale);
+        void scaleBy(const glm::vec2& scaler);
+        void scaleBy(GLfloat x, GLfloat y);
+
+
+        // Matrix
+
+        const glm::mat3& matrix();
+        const glm::mat3 matrix() const;
+        void updateMatrix();
+
+    };
+
     class Transform {
 
         glm::vec3 _position;
         glm::quat _rotation;
         glm::vec3 _scale;
+
         glm::mat4 _transform;
         bool _transformUpdated;
 

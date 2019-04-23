@@ -17,7 +17,9 @@ namespace GLS {
     class Scene;
     class Node;
     class Camera;
+    class Material;
     class Mesh;
+    class MeshGroup;
     class Texture;
     class Shader;
     class ShaderProgram;
@@ -25,14 +27,22 @@ namespace GLS {
     struct Vertex {
         glm::vec3 position;
         glm::vec3 normal;
-        glm::vec4 color;
-        glm::vec2 texture;
+        glm::vec3 tangent;
+        glm::vec3 bitangent;
+        glm::vec2 uv;
         
         Vertex();
+        
+        Vertex(const glm::vec3 p,
+               const glm::vec3 n,
+               const glm::vec3 t,
+               const glm::vec3 b,
+               const glm::vec2 u);
+        
         Vertex(const glm::vec3& o,
-                const glm::vec3& n,
-                const glm::vec4& c,
-                const glm::vec2& u);
+               const glm::vec3& n,
+               const glm::vec2& u);
+        
     };
     
 }

@@ -17,16 +17,18 @@ namespace GLS {
     Mesh::Mesh() : _vertices(), _indices(),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
     _shaderProgram(nullptr),
-    _diffuse(nullptr), _mask(nullptr), _shininess(0.0f)
+    _material(nullptr)
     {
-        
+        if (_material == nullptr) {
+            _material = std::make_shared<Material>();
+        }
     }
     
     Mesh::Mesh(const Mesh& copy) :
     _vertices(copy._vertices), _indices(copy._indices),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
     _shaderProgram(nullptr),
-    _diffuse(copy._diffuse), _mask(copy._mask), _shininess(copy._shininess)
+    _material(copy._material)
     {
         if (copy.bufferGenerated())
             generateBuffers();
@@ -42,9 +44,7 @@ namespace GLS {
         deleteBuffers();
         if (copy.bufferGenerated())
             generateBuffers();
-        setTexture(copy._diffuse);
-        setMask(copy._mask);
-        _shininess = copy._shininess;
+        _material = copy._material;
         return *this;
     }
     
@@ -86,9 +86,9 @@ namespace GLS {
     std::pair<glm::vec3, glm::vec3> Mesh::getBounds(glm::mat4 transform) const {
         if (_vertices.empty())
             return std::pair<glm::vec3, glm::vec3>();
-        glm::vec3 min;
-        glm::vec3 max;
-        for (size_t i = 0; i < _vertices.size(); i++) {
+        glm::vec3 min = glm::vec3(transform * glm::vec4(_vertices[0].position, 1));
+        glm::vec3 max = min;
+        for (size_t i = 1; i < _vertices.size(); i++) {
             glm::vec3 p = glm::vec3(transform * glm::vec4(_vertices[i].position, 1));
             if (p.x < min.x)
                 min.x = p.x;
@@ -105,25 +105,15 @@ namespace GLS {
         }
         return std::pair<glm::vec3, glm::vec3>(min, max);
     }
-    
-    void Mesh::setColor(glm::vec4 color) {
-        for (size_t i = 0; i < _vertices.size(); i++)
-            _vertices[i].color = color;
-        if (bufferGenerated())
-            generateBuffers();
+
+    void Mesh::setMaterial(std::shared_ptr<Material> mat) {
+        _material = mat;
     }
-    
-    
-    // Material utilities (shall be extern)
-    
-    void Mesh::setTexture(std::shared_ptr<Texture> texture) {
-        _diffuse = texture;
+
+    std::shared_ptr<Material> Mesh::getMaterial() const {
+        return _material;
     }
-    
-    void Mesh::setMask(std::shared_ptr<Texture> mask) {
-        _mask = mask;
-    }
-    
+
     
     // OpenGL Buffers
     
@@ -168,10 +158,14 @@ namespace GLS {
                               sizeof(Vertex), (void*)(6 * sizeof(GLfloat)));
         glEnableVertexAttribArray(2);
         
-        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE,
                               sizeof(Vertex), (void*)(9 * sizeof(GLfloat)));
         glEnableVertexAttribArray(3);
-        
+
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
+                              sizeof(Vertex), (void*)(12 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(4);
+
         _bufferGenerated = true;
     }
     
@@ -221,33 +215,18 @@ namespace GLS {
         if (_shaderProgram) {
             program = _shaderProgram;
             program->use();
-            // TODO: send the scene informations to shader
             scene.sendLightsValueToShader(program);
-            glUniformMatrix4fv(program->getLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+            glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(projection));
         } else {
-            program = ShaderProgram::standardShaderProgram();
+            program = ShaderProgram::standardShaderProgramMesh();
             program->use();
         }
-        glUniformMatrix4fv(program->getLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(program->getLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+        glm::mat3 normalMatrix = glm::inverseTranspose(model);
+        glUniformMatrix3fv(program->getLocation("u_mat_normal"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
+        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(program->getLocation("u_mat_model"), 1, GL_FALSE, glm::value_ptr(model));
         
-        int txbitmask = 0;
-        if (_diffuse) {
-            txbitmask |= 1 << 1;
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, _diffuse->buffer());
-            glUniform1i(program->getLocation("texture_diffuse"), 0);
-        }
-        if (_mask) {
-            txbitmask |= 1 << 2;
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, _mask->buffer());
-            glUniform1i(program->getLocation("texture_mask"), 1);
-        }
-        txbitmask = txbitmask ? txbitmask : 1;
-        
-        glUniform1f(program->getLocation("shininess"), _shininess);
-        glUniform1i(program->getLocation("texturebitmask"), txbitmask);
+        _material->sendUniformToShaderProgram(program);
         glBindVertexArray(_elementsBuffer);
         glDrawElements(GL_TRIANGLES,
                        static_cast<GLsizei>(_indices.size()),

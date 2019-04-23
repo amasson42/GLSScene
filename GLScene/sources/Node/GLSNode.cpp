@@ -88,11 +88,19 @@ namespace GLS {
 
     // Hierarchy
     
-    std::vector<std::shared_ptr<Node> >& Node::childNodes() {
+    const std::vector<std::shared_ptr<Node> >& Node::childNodes() {
         return _childs;
+    }
+
+    std::shared_ptr<Node> Node::childNodeAt(size_t i) const {
+        if (i < _childs.size())
+            return _childs[i];
+        return nullptr;
     }
     
     void Node::addChildNode(std::shared_ptr<Node> node) {
+        if (node->hasParentNode(this) || this->hasParentNode(node.get()))
+            return;
         _childs.push_back(node);
     }
     
@@ -103,6 +111,16 @@ namespace GLS {
                 return static_cast<void>(_childs.erase(it));
     }
     
+    bool Node::hasParentNode(Node* node) const {
+        if (_parent == nullptr) {
+            return false;
+        } else if (_parent == node) {
+            return true;
+        } else {
+            return _parent->hasParentNode(node);
+        }
+    }
+
     void Node::removeFromParent() {
         if (_parent) {
             _parent->removeChildNode(this);
@@ -128,9 +146,27 @@ namespace GLS {
         }
     }
     
+    static std::pair<glm::vec3, glm::vec3> mergeBounds(std::pair<glm::vec3, glm::vec3> b1, std::pair<glm::vec3, glm::vec3> b2) {
+        std::pair<glm::vec3, glm::vec3> bounds;
+        bounds.first = glm::vec3(std::min(b1.first.x, b2.first.x),
+                                 std::min(b1.first.y, b2.first.y),
+                                 std::min(b1.first.z, b2.first.z));
+        bounds.second = glm::vec3(std::max(b1.second.x, b2.second.x),
+                                  std::max(b1.second.y, b2.second.y),
+                                  std::max(b1.second.z, b2.second.z));
+        return bounds;
+    }
+
     std::pair<glm::vec3, glm::vec3> Node::getBounds() const {
-        // TODO: this shit
-        return std::pair<glm::vec3, glm::vec3>();
+        glm::mat4 modelMatrix = getWorldTransformMatrix();
+        std::pair<glm::vec3, glm::vec3> bounds;
+        for (size_t i = 0; i < _renderables.size(); i++) {
+            bounds = mergeBounds(bounds, _renderables[i]->getBounds(modelMatrix));
+        }
+        for (size_t i = 0; i < _childs.size(); i++) {
+            bounds = mergeBounds(bounds, _childs[i]->getBounds());
+        }
+        return bounds;
     }
     
     const std::shared_ptr<const Camera> Node::camera() const {

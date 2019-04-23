@@ -13,6 +13,48 @@
 #include "GLScene.hpp"
 
 namespace GLS {
+
+    class Material {
+
+        public:
+
+        glm::vec3 diffuse;
+        glm::vec3 specular;
+        GLfloat roughness;
+        GLfloat metalness;
+        glm::vec3 occlusion;
+        GLfloat shininess;
+
+        std::shared_ptr<Texture> texture_diffuse;
+        std::shared_ptr<Texture> texture_specular;
+        std::shared_ptr<Texture> texture_roughness;
+        std::shared_ptr<Texture> texture_metalness;
+        std::shared_ptr<Texture> texture_occlusion;
+        std::shared_ptr<Texture> texture_shininess;
+        std::shared_ptr<Texture> texture_normal;
+        std::shared_ptr<Texture> texture_mask;
+
+        Transform2D diffuse_transform;
+        Transform2D specular_transform;
+        Transform2D roughness_transform;
+        Transform2D metalness_transform;
+        Transform2D occlusion_transform;
+        Transform2D shininess_transform;
+        Transform2D normal_transform;
+        Transform2D mask_transform;
+
+        Material();
+        Material(const Material& copy);
+        virtual ~Material();
+
+        Material& operator=(const Material& copy);
+
+
+        // Material utilities
+
+        void sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
+
+    };
     
     class Mesh : public IRenderable {
         
@@ -25,12 +67,7 @@ namespace GLS {
         bool _bufferGenerated;
         
         std::shared_ptr<ShaderProgram> _shaderProgram;
-        
-        // TODO: material using here
-        std::shared_ptr<Texture> _diffuse;
-        std::shared_ptr<Texture> _mask;
-        
-        float _shininess;
+        std::shared_ptr<Material> _material;
         
     public:
         
@@ -53,16 +90,10 @@ namespace GLS {
         
         void calculNormals();
         
-        std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
+        virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
         
-        void setColor(glm::vec4 color);
-        
-        
-        // Material utilities (shall be extern)
-        
-        void setTexture(std::shared_ptr<Texture> texture);
-        void setMask(std::shared_ptr<Texture> mask);
-        
+        void setMaterial(std::shared_ptr<Material> mat);
+        std::shared_ptr<Material> getMaterial() const;
         
         // OpenGL Buffers
         
@@ -92,6 +123,7 @@ namespace GLS {
         
     };
     
+
 }
 
 #endif /* GLSMesh_h */

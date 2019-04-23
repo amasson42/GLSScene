@@ -52,8 +52,8 @@ namespace GLS {
         
         void clearSrcs();
         
-        static std::shared_ptr<Shader> standardVertex();
-        static std::shared_ptr<Shader> standardFragment();
+        static std::shared_ptr<Shader> standardVertexMesh();
+        static std::shared_ptr<Shader> standardFragmentMesh();
         
     };
     
@@ -90,7 +90,7 @@ namespace GLS {
         
         void use() const;
         
-        static std::shared_ptr<ShaderProgram> standardShaderProgram();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramMesh();
 
     };
     
