@@ -23,7 +23,11 @@ namespace GLS {
         
         std::shared_ptr<Camera> _camera;
         std::vector<std::shared_ptr<IRenderable> > _renderables;
+        std::shared_ptr<Light> _light;
         
+        friend class Scene;
+        void _getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix);
+
     public:
         
         Node();
@@ -35,7 +39,7 @@ namespace GLS {
         std::string name() const;
         void setName(std::string name);
 
-        
+
         // Transformation
         
         Transform& transform();
@@ -64,9 +68,6 @@ namespace GLS {
         const std::vector<std::shared_ptr<IRenderable> >& renderables() const;
         void addRenderable(std::shared_ptr<IRenderable> renderable);
         void removeRenderableIndex(size_t i);
-        const std::shared_ptr<const Mesh> mesh() const;
-        std::shared_ptr<Mesh> mesh();
-        void setMesh(std::shared_ptr<Mesh> mesh);
         
         std::pair<glm::vec3, glm::vec3> getBounds() const;
         
@@ -74,9 +75,11 @@ namespace GLS {
         std::shared_ptr<Camera> camera();
         void setCamera(std::shared_ptr<Camera> camera);
         
-        // SOON: Lights
+        const std::shared_ptr<const Light> light() const;
+        std::shared_ptr<Light> light();
+        void setLight(std::shared_ptr<Light> light);
         
-        void renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view);
+        void renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model);
         
     };
     

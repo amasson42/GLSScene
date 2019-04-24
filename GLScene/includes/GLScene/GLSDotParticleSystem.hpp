@@ -18,7 +18,7 @@
 
 namespace GLS {
     
-    class DotParticleSystem : public IRenderable {
+    class DotParticleSystem : public IRenderable { // TODO
         
     public:
         

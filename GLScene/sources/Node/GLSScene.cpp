@@ -11,24 +11,19 @@
 namespace GLS {
     
     Scene::Scene() :
-    _rootNode(new Node), _cameraNode(nullptr)
+    _rootNode(new Node), _cameraNode(nullptr),
+    _size(100, 100),
+    _background(0.2)
     {
-        backgroundColor = glm::vec4(0.3, 0.3, 0.3, 1.0);
-        lightAmbiant = glm::vec3(0.02, 0.02, 0.02);
-        
-        useLightOmni = true;
-        lightOmniPos = glm::vec3(5, 10, 5);
-        lightOmniColor = glm::vec4(1);
+
     }
     
     Scene::Scene(const Scene& copy) :
-    _rootNode(new Node(copy.rootNode())), _cameraNode(nullptr)
+    _rootNode(new Node(copy.rootNode())), _cameraNode(nullptr),
+    _size(copy._size),
+    _background(copy._background)
     {
-        backgroundColor = copy.backgroundColor;
-        lightAmbiant = copy.lightAmbiant;
-        useLightOmni = copy.useLightOmni;
-        lightOmniPos = copy.lightOmniPos;
-        lightOmniColor = copy.lightOmniColor;
+
     }
     
     Scene::~Scene() {
@@ -38,11 +33,8 @@ namespace GLS {
     Scene& Scene::operator=(const Scene& copy) {
         _rootNode = copy._rootNode;
         _cameraNode = nullptr;
-        backgroundColor = copy.backgroundColor;
-        lightAmbiant = copy.lightAmbiant;
-        useLightOmni = copy.useLightOmni;
-        lightOmniPos = copy.lightOmniPos;
-        lightOmniColor = copy.lightOmniColor;
+        _size = copy._size;
+        _background = copy._background;
         return *this;
     }
     
@@ -62,28 +54,26 @@ namespace GLS {
         _cameraNode = &node;
     }
 
+    void Scene::_calculLights() {
+        _frameLights.clear();
+        _rootNode->_getAllLights(_frameLights, glm::mat4());
+    }
+
     void Scene::sendLightsValueToShader(std::shared_ptr<ShaderProgram> program) {
         program->use();
-        glm::mat4 view;
-        if (_cameraNode) {
-            view = _cameraNode->getWorldTransformMatrix();
-            view = glm::inverse(view);
+        for (size_t i = 0; i < _frameLights.size() && i < 16; i++) {
+            _frameLights[i].sendUniformToShaderProgram(program, static_cast<int>(i));
         }
-        glm::vec3 lop = glm::vec3(view * glm::vec4(lightOmniPos, 1));
-        glUniform3f(program->getLocation("light_ambiant"), lightAmbiant.x, lightAmbiant.y, lightAmbiant.z);
-        glUniform1i(program->getLocation("omnilight_isactivated"), useLightOmni);
-        glUniform3f(program->getLocation("omnilight_position"), lop.x, lop.y, lop.z);
-        glUniform3f(program->getLocation("omnilight_color"), lightOmniColor.x, lightOmniColor.y, lightOmniColor.z);
+        glUniform1i(program->getLocation("lights_count"), static_cast<int>(_frameLights.size()));
     }
     
     void Scene::renderInContext() {
         
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
-        glClearColor(backgroundColor.x, backgroundColor.y, backgroundColor.z, backgroundColor.w);
+        glClearColor(_background.x, _background.y, _background.z, _background.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
-        // positions matrices
         glm::mat4 proj;
         glm::mat4 view;
         glm::vec3 p;
@@ -102,12 +92,14 @@ namespace GLS {
         }
         
         std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMesh();
+        _calculLights();
         sendLightsValueToShader(program);
-        glUniformMatrix4fv(program->getLocation("projection"), 1, GL_FALSE, glm::value_ptr(proj));
-        glUniform3f(program->getLocation("view_pos"), p.x, p.y, p.z);
+
+        glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(proj));
+        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniform3f(program->getLocation("u_camera_position"), p.x, p.y, p.z);
         
-        // node renders
-        _rootNode->renderInContext(*this, proj, view);
+        _rootNode->renderInContext(*this, proj, view, glm::mat4());
     }
     
 }

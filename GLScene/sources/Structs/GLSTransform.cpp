@@ -247,6 +247,15 @@ namespace GLS {
         _transformUpdated = false;
     }
 
+    void Transform::rotateEulerAnglesBy(GLfloat x, GLfloat y, GLfloat z) {
+        glm::vec3 angles = eulerAngles();
+        angles.x += x;
+        angles.y += y;
+        angles.z += z;
+        setEulerAngles(angles);
+    }
+
+
 
     // Scale
 

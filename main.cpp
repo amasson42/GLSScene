@@ -65,7 +65,7 @@ int launch(std::vector<std::string>& modelNames) {
     
     GLFWwindow *window = nullptr; // create a window pointer
     
-    const int win_width = 1200, win_height = 800, win_margin = 50;
+    const int win_width = 1200, win_height = 800, win_margin = 10;
     window = glfwCreateWindow(win_width, win_height, "openGL", nullptr, nullptr); // create the window
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -86,6 +86,9 @@ int launch(std::vector<std::string>& modelNames) {
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;
         std::cout << e.infoLog() << std::endl;
+        glfwSetWindowShouldClose(window, true);
+        glfwTerminate();
+        return EXIT_FAILURE;
     }
 
     // create simple mesh
@@ -103,6 +106,7 @@ int launch(std::vector<std::string>& modelNames) {
         triangleMesh->indicesRef().push_back(2);
         triangleMesh->generateBuffers();
         triangleNode->addRenderable(triangleMesh);
+        triangleMesh->getMaterial()->diffuse = glm::vec3(1.0, 0.0, 0.0);
     }
     scene.rootNode().addChildNode(triangleNode);
 
@@ -120,18 +124,31 @@ int launch(std::vector<std::string>& modelNames) {
     planeNode->addChildNode(sphereNode);
     sphereNode->transform().setPosition(glm::vec3(2, 1, 0));
 
+    std::shared_ptr<GLS::Node> spotlightNode = std::make_shared<GLS::Node>();
+    std::shared_ptr<GLS::Light> spotlight = std::make_shared<GLS::Light>();
+    spotlight->setType(GLS::light_spot);
+    spotlight->setPosition(glm::vec3(0, 4, 0));
+    spotlight->setDirection(glm::vec3(4, -1, 0));
+    spotlight->setAngle(1.5);
+    spotlightNode->setLight(spotlight);
+    scene.rootNode().addChildNode(spotlightNode);
+
     std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
-    {
-        std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1);
-        try {
-            std::shared_ptr<GLS::Texture> texture(new GLS::Texture("/Users/arthur/Documents/testProg/C/openGL/glscene/textures/container.jpg", GL_RGB));
-            cubeMesh->getMaterial()->texture_diffuse = texture;
-        } catch (std::exception& e) {
-            std::cerr << "error: " << e.what() << std::endl;
-        }
-        cubeNode->addRenderable(cubeMesh);
-        cubeNode->transform().setPosition(glm::vec3(4, 1, 0));
+    std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1.5);
+    try {
+        std::shared_ptr<GLS::Texture> diffuse(new GLS::Texture("../textures/pavement/albedo.png", GL_RGB));
+        std::shared_ptr<GLS::Texture> normal(new GLS::Texture("../textures/pavement/normal.png", GL_RGB));
+        std::shared_ptr<GLS::Texture> occlusion(new GLS::Texture("../textures/pavement/occlusion.png", GL_RGB));
+        std::shared_ptr<GLS::Texture> roughness(new GLS::Texture("../textures/pavement/roughness.png", GL_RGB));
+        cubeMesh->getMaterial()->texture_diffuse = diffuse;
+        cubeMesh->getMaterial()->texture_normal = normal;
+        cubeMesh->getMaterial()->texture_occlusion = occlusion;
+        cubeMesh->getMaterial()->texture_roughness = roughness;
+    } catch (std::exception& e) {
+        std::cerr << "error: " << e.what() << std::endl;
     }
+    cubeNode->addRenderable(cubeMesh);
+    cubeNode->transform().setPosition(glm::vec3(4, 1, 0));
     scene.rootNode().addChildNode(cubeNode);
 
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
@@ -155,6 +172,9 @@ int launch(std::vector<std::string>& modelNames) {
             processInput(window, deltaTime, scene);
 
         planeNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
+        cubeMesh->getMaterial()->diffuse_transform.rotateBy(0.02);
+        spotlightNode->transform().setRotation(glm::angleAxis(currentTime / 10, glm::vec3(0, 1, 0)));
+
         scene.renderInContext();
         /* do some drawing */
         
@@ -193,13 +213,13 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
             cam.transform().moveBy(-cameraSpeed * cameraUp);
         
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-            cam.transform().rotateBy(0, -1, 0, cameraSpeed);
+            cam.transform().rotateEulerAnglesBy(0, cameraSpeed, 0);
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-            cam.transform().rotateBy(0, 1, 0, cameraSpeed);
+            cam.transform().rotateEulerAnglesBy(0, -cameraSpeed, 0);
         if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-            cam.transform().rotateBy(-1, 0, 0, cameraSpeed);
+            cam.transform().rotateEulerAnglesBy(-cameraSpeed, 0, 0);
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-            cam.transform().rotateBy(1, 0, 0, cameraSpeed);
+            cam.transform().rotateEulerAnglesBy(cameraSpeed, 0, 0);
         
     }
 }

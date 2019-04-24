@@ -7,7 +7,6 @@
 //
 
 #include "GLSNode.hpp"
-#include <iostream>
 
 namespace GLS {
     
@@ -181,15 +180,36 @@ namespace GLS {
         _camera = camera;
     }
     
-    // SOON: Lights
-    
-    void Node::renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view) {
-        _transform.updateMatrix();
+    const std::shared_ptr<const Light> Node::light() const {
+        return _light;
+    }
+
+    std::shared_ptr<Light> Node::light() {
+        return _light;
+    }
+
+    void Node::setLight(std::shared_ptr<Light> light) {
+        _light = light;
+    }
+
+    void Node::_getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix) {
+        glm::mat4 mat = parentMatrix * getTransformMatrix();
+        if (_light != nullptr)
+            container.push_back(_light->transformedBy(mat));
         for (size_t i = 0; i < _childs.size(); i++) {
-            _childs[i]->renderInContext(scene, projection, view * getTransformMatrix());
+            _childs[i]->_getAllLights(container, mat);
+        }
+    }
+    
+    void Node::renderInContext(Scene& scene, const glm::mat4& projection,
+                                const glm::mat4& view, const glm::mat4& model) {
+        _transform.updateMatrix();
+        glm::mat4 wModel = model * getTransformMatrix();
+        for (size_t i = 0; i < _childs.size(); i++) {
+            _childs[i]->renderInContext(scene, projection, view, wModel);
         }
         for (size_t i = 0; i < _renderables.size(); i++) {
-            _renderables[i]->renderInContext(scene, projection, view, getTransformMatrix());
+            _renderables[i]->renderInContext(scene, projection, view, wModel);
         }
     }
     

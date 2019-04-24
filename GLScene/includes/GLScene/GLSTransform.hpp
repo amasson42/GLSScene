@@ -113,6 +113,7 @@ namespace GLS {
         const glm::vec3 eulerAngles() const;
         void setEulerAngles(const glm::vec3& angles);
         void setEulerAngles(GLfloat x, GLfloat y, GLfloat z);
+        void rotateEulerAnglesBy(GLfloat x, GLfloat y, GLfloat z);
 
 
         // Scale

@@ -162,7 +162,7 @@ namespace GLS {
                               sizeof(Vertex), (void*)(9 * sizeof(GLfloat)));
         glEnableVertexAttribArray(3);
 
-        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE,
+        glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE,
                               sizeof(Vertex), (void*)(12 * sizeof(GLfloat)));
         glEnableVertexAttribArray(4);
 

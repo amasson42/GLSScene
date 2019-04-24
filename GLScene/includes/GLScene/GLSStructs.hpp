@@ -44,6 +44,17 @@ namespace GLS {
                const glm::vec2& u);
         
     };
+
+    struct DotParticle { // TODO
+        glm::vec3 position;
+        glm::vec3 velocity;
+        glm::vec4 color;
+
+        DotParticle();
+        
+        DotParticle(glm::vec3 p, glm::vec3 v, glm::vec4 c);
+
+    };
     
 }
 

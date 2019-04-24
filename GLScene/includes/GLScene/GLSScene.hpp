@@ -15,19 +15,13 @@ namespace GLS {
     
     class Scene {
         
-		Node *_rootNode;
-		Node *_cameraNode;
-        
-	public:
-		
-        // TODO: use the nodes to set the lights
-        glm::vec4 backgroundColor;
-        
-		glm::vec3 lightAmbiant;
-		
-		bool useLightOmni;
-        glm::vec3 lightOmniPos;
-        glm::vec3 lightOmniColor;
+		Node *_rootNode; // shared
+		Node *_cameraNode; // weak
+        glm::vec2 _size;
+        glm::vec4 _background;
+
+        std::vector<Light> _frameLights;
+        void _calculLights();
         
     public:
         

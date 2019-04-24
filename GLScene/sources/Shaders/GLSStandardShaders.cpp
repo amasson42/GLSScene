@@ -13,7 +13,7 @@ namespace GLS {
 
     std::shared_ptr<Shader> Shader::standardVertexMesh() {
         std::string src =
-        "#version 410 core\n"
+        "#version 400 core\n"
 
         "layout (location = 0) in vec3 vin_position;\n"
         "layout (location = 1) in vec3 vin_normal;\n"
@@ -28,9 +28,12 @@ namespace GLS {
         "out vec3 fin_wtangent;\n"
         "out vec3 fin_wbitangent;\n"
         
+        // sent by scene:
         "uniform mat3 u_mat_normal;\n"
         "uniform mat4 u_mat_projection;\n"
         "uniform mat4 u_mat_view;\n"
+
+        // sent by node:
         "uniform mat4 u_mat_model;\n"
         
         "void main()\n"
@@ -48,7 +51,7 @@ namespace GLS {
     
     std::shared_ptr<Shader> Shader::standardFragmentMesh() {
         std::string src =
-        "#version 410 core\n\n"
+        "#version 400 core\n\n"
 
         "out vec4 FragColor;\n"
         
@@ -80,6 +83,7 @@ namespace GLS {
         "    float shininess;\n"
         "};\n"
 
+        // sent by mesh material :
         "uniform sampler2D texture_diffuse;\n"    // 1
         "uniform sampler2D texture_specular;\n"   // 2
         "uniform sampler2D texture_roughness;\n"  // 4
@@ -89,7 +93,6 @@ namespace GLS {
         "uniform sampler2D texture_normal;\n"     // 64
         "uniform sampler2D texture_mask;\n"       // 128
         "uniform int texturebitmask;\n"
-
         "uniform mat3 diffuse_transform;\n"
         "uniform mat3 specular_transform;\n"
         "uniform mat3 roughness_transform;\n"
@@ -98,15 +101,14 @@ namespace GLS {
         "uniform mat3 shininess_transform;\n"
         "uniform mat3 normal_transform;\n"
         "uniform mat3 mask_transform;\n"
-
         "uniform Material material;\n"
 
+        // sent by scene :
         "uniform Light lights[16];\n"
         "uniform int lights_count;\n"
-        "uniform vec3 camera_position;\n"
+        "uniform vec3 u_camera_position;\n"
 
         "void main() {\n"
-
         "    if ((texturebitmask & 128) != 0) {\n"
         "       if (texture(texture_mask, (mask_transform * vec3(fin_uv, 1.0)).xy).a == 0.0)\n"
         "           discard;\n"
@@ -131,7 +133,7 @@ namespace GLS {
         "    vec3 diffuse_color = vec3(0);\n"
         "    vec3 ambient_color = vec3(0);\n"
         "    vec3 specular_color = vec3(0);\n"
-        "    vec3 fcamera_position = normalize(fin_wposition - camera_position);\n"
+        "    vec3 fcamera_position = normalize(fin_wposition - u_camera_position);\n"
 
         "    vec3 light_direction;\n"
         "    float diffuse_intensity;\n"

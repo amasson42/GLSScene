@@ -9,6 +9,7 @@
 #ifndef GLScene_h
 #define GLScene_h
 
+#include <iostream>
 #include <exception>
 #include <string>
 #include <vector>
@@ -18,9 +19,9 @@
 
 #include "GLScene/GLSTransform.hpp"
 #include "GLScene/GLSCamera.hpp"
+#include "GLScene/GLSLight.hpp"
 #include "GLScene/GLSTexture.hpp"
 #include "GLScene/GLSIRenderable.hpp"
-#include "GLScene/GLSLight.hpp"
 #include "GLScene/GLSMesh.hpp"
 #include "GLScene/GLSDotParticleSystem.hpp"
 #include "GLScene/GLSShader.hpp"
