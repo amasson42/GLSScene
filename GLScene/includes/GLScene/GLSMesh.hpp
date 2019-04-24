@@ -50,9 +50,11 @@ namespace GLS {
         Material& operator=(const Material& copy);
 
 
-        // Material utilities
+        // Utilities
 
         void sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
+
+        // TODO: read info from file
 
     };
     
@@ -96,7 +98,7 @@ namespace GLS {
         std::shared_ptr<Material> getMaterial() const;
         
         // OpenGL Buffers
-        
+         
         void generateBuffers() throw(BufferCreationException);
         void deleteBuffers();
         

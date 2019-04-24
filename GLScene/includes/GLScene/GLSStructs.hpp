@@ -17,9 +17,9 @@ namespace GLS {
     class Scene;
     class Node;
     class Camera;
+    class Light;
     class Material;
     class Mesh;
-    class MeshGroup;
     class Texture;
     class Shader;
     class ShaderProgram;

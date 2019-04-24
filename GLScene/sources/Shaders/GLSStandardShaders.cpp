@@ -13,7 +13,7 @@ namespace GLS {
 
     std::shared_ptr<Shader> Shader::standardVertexMesh() {
         std::string src =
-        "#version 330 core\n"
+        "#version 410 core\n"
 
         "layout (location = 0) in vec3 vin_position;\n"
         "layout (location = 1) in vec3 vin_normal;\n"
@@ -48,7 +48,7 @@ namespace GLS {
     
     std::shared_ptr<Shader> Shader::standardFragmentMesh() {
         std::string src =
-        "#version 330 core\n\n"
+        "#version 410 core\n\n"
 
         "out vec4 FragColor;\n"
         
