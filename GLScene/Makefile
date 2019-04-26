@@ -10,12 +10,14 @@ OBJS := objs
 SHELL := /bin/bash
 
 INCLUDES := -I$(INCS) -I$(INCS)/GLScene \
-			`pkg-config glm --cflags-only-I`
+			`pkg-config glm --cflags-only-I` \
+			`pkg-config assimp --cflags-only-I`
 
 LIBS := -L/usr/lib \
 		-framework OpenCL \
 		-framework OpenGL \
-		`pkg-config --static --libs glm`
+		`pkg-config --static --libs glm` \
+		`pkg-config --static --libs assimp`
 
 CPP_FILES := $(shell find $(SRCS) -type f -name "*.cpp")
 CPP_DIRS := $(shell find $(SRCS) -depth -type d)

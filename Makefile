@@ -8,9 +8,10 @@ all:
 
 install:
 	brew update
-	brew install pkg-config
-	brew install glfw
-	brew install glm
+	brew install pkg-config || brew upgrade pkg-config
+	brew install glfw || brew upgrade glfw
+	brew install glm || brew upgrade glm
+	brew install assimp || brew upgrade assimp
 
 $(NAME):
 	clang++ \
@@ -18,8 +19,10 @@ $(NAME):
 		-lm -framework OpenGL \
 		`pkg-config --static --libs glfw3` \
 		`pkg-config --static --libs glm` \
+		`pkg-config --static --libs assimp` \
 		`pkg-config glfw3 --cflags-only-I` \
 		`pkg-config glm --cflags-only-I` \
+		`pkg-config assimp --cflags-only-I` \
 		-I GLScene/includes \
 		main.cpp -o game \
 		GLScene/GLScene.a

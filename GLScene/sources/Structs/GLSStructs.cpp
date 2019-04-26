@@ -8,8 +8,43 @@
 
 #include "GLScene.hpp"
 
+std::ostream& operator<<(std::ostream& stream, glm::mat4 m) {
+    for (int i = 0; i < 16; i++) {
+        stream << GLS::mat4ValueAt(m, i % 4, i / 4) << ((i + 1) % 4 ? ' ' : '\n');
+    }
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, glm::mat3 m) {
+    for (int i = 0; i < 9; i++) {
+        stream << GLS::mat3ValueAt(m, i % 3, i / 3) << ((i + 1) % 3 ? ' ' : '\n');
+    }
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, glm::vec3 v) {
+    stream << '(' << v.x << ',' << v.y << ',' << v.z << ')';
+    return stream;
+}
+
+std::ostream& operator<<(std::ostream& stream, glm::quat q) {
+    stream << '(' << q.x << ',' << q.y << ',' << q.z << ',' << q.w << ')';
+    return stream;
+}
+
 namespace GLS {
     
+    float& mat4ValueAt(glm::mat4& m, int l, int c) {
+        float *values = glm::value_ptr(m);
+        return (values[4 * l + c]);
+    }
+
+    float& mat3ValueAt(glm::mat3& m, int l, int c) {
+        float *values = glm::value_ptr(m);
+        return (values[3 * l + c]);
+    }
+
+
     Vertex::Vertex() {
         position = glm::vec3(0);
         normal = glm::vec3(0, 0, -1);

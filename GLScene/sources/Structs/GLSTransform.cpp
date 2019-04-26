@@ -125,7 +125,7 @@ namespace GLS {
         (void)offset;
         (void)rotation;
         (void)scale;
-        return glm::mat3();
+        return glm::mat3(1);
     }
 
     const glm::mat3& Transform2D::matrix() {
@@ -289,7 +289,7 @@ namespace GLS {
     // Matrix
 
     static const glm::mat4 calculTransformMatrix(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
-        glm::mat4 mat;
+        glm::mat4 mat(1);
         mat = glm::translate(mat, position);
         mat = mat * glm::toMat4(rotation);
         mat = glm::scale(mat, scale);

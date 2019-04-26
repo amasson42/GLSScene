@@ -14,6 +14,12 @@ namespace GLS {
         return "can't create additional buffer";
     }
 
+    // Mesh::LoadMeshException::LoadMeshException(std::string filename) : _filename(filename) {}
+
+    // const char* Mesh::LoadMeshException::what() const throw() {
+    //     return ("can't load mesh from the file" + _filename).c_str();
+    // }
+
     Mesh::Mesh() : _vertices(), _indices(),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
     _shaderProgram(nullptr),
@@ -60,7 +66,7 @@ namespace GLS {
     }
     
     static void calculNormal_normeWith(Vertex& v, glm::vec3 n, int& c) {
-        glm::vec3 average = v.normal * c + n;
+        glm::vec3 average = (v.normal * GLfloat(c)) + n;
         average = glm::normalize(average);
         v.normal = average;
         c++;
@@ -221,6 +227,10 @@ namespace GLS {
             program = ShaderProgram::standardShaderProgramMesh();
             program->use();
         }
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glDepthFunc(GL_LESS);
+
         glm::mat3 normalMatrix = glm::inverseTranspose(model);
         glUniformMatrix3fv(program->getLocation("u_mat_normal"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
         glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(view));

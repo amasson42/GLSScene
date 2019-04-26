@@ -56,7 +56,7 @@ namespace GLS {
 
     void Scene::_calculLights() {
         _frameLights.clear();
-        _rootNode->_getAllLights(_frameLights, glm::mat4());
+        _rootNode->_getAllLights(_frameLights, glm::mat4(1));
     }
 
     void Scene::sendLightsValueToShader(std::shared_ptr<ShaderProgram> program) {
@@ -69,13 +69,11 @@ namespace GLS {
     
     void Scene::renderInContext() {
         
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
         glClearColor(_background.x, _background.y, _background.z, _background.w);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         
-        glm::mat4 proj;
-        glm::mat4 view;
+        glm::mat4 proj(1);
+        glm::mat4 view(1);
         glm::vec3 p;
         if (_cameraNode) {
             view = _cameraNode->getWorldTransformMatrix();
@@ -99,7 +97,7 @@ namespace GLS {
         glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniform3f(program->getLocation("u_camera_position"), p.x, p.y, p.z);
         
-        _rootNode->renderInContext(*this, proj, view, glm::mat4());
+        _rootNode->renderInContext(*this, proj, view, glm::mat4(1));
     }
     
 }

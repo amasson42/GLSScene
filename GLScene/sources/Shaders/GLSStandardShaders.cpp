@@ -108,6 +108,11 @@ namespace GLS {
         "uniform int lights_count;\n"
         "uniform vec3 u_camera_position;\n"
 
+        // "    float near = 0.1;"
+        // "    float far = 15.0;"
+        // "    float z = gl_FragCoord.z * 2.0 - 1.0;"
+        // "    float linearDepth = (2.0 * near * far) / (far + near - z * (far - near)) / far;"
+
         "void main() {\n"
         "    if ((texturebitmask & 128) != 0) {\n"
         "       if (texture(texture_mask, (mask_transform * vec3(fin_uv, 1.0)).xy).a == 0.0)\n"

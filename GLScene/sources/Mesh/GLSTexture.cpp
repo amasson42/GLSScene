@@ -20,11 +20,12 @@ namespace GLS {
         return "can't create additional texture";
     }
     
-    Texture::Texture(std::string filename, GLenum format) {
-        _data = stbi_load(filename.c_str(), &_width, &_height, &_bpp, 0);
+    Texture::Texture(std::string path, GLenum format) {
+        _data = stbi_load(path.c_str(), &_width, &_height, &_bpp, 0);
         if (_data == NULL) {
             throw LoadingException();
         }
+        _path = path;
         glGenTextures(1, &_buffer);
         if (_buffer == 0) {
             free(_data);

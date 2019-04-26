@@ -70,13 +70,21 @@ namespace GLS {
         
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
-        
+
     public:
-        
+
+        bool outline;
         class BufferCreationException : public std::exception {
             public:
             const char* what() const throw();
         };
+
+        // class LoadMeshException : public std::exception {
+        //     std::string _filename;
+        //     public:
+        //     LoadMeshException(std::string filename);
+        //     const char* what() const throw();
+        // };
 
         Mesh();
         Mesh(const Mesh& copy);
@@ -120,8 +128,7 @@ namespace GLS {
         static std::shared_ptr<Mesh> plane(GLfloat width, GLfloat height, bool generateBuffers = true);
         static std::shared_ptr<Mesh> cube(GLfloat width, GLfloat height, GLfloat length, bool generateBuffers = true);
         static std::shared_ptr<Mesh> sphere(GLfloat radius, unsigned int ringCount = 12, bool generateBuffers = true);
-        static std::shared_ptr<Mesh> objModel(const char *filename, int options, bool generateBuffers = true);
-        static std::shared_ptr<Mesh> objModel(std::istream& file, int options, bool generateBuffers = true);
+        static std::shared_ptr<Mesh> objModel(std::string path, int options, bool generateBuffers = true) /*throw(LoadMeshException)*/;
         
     };
     

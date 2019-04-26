@@ -71,6 +71,8 @@ namespace GLS {
         
         std::pair<glm::vec3, glm::vec3> getBounds() const;
         
+        void loadMeshFromFile(std::string path);
+
         const std::shared_ptr<const Camera> camera() const;
         std::shared_ptr<Camera> camera();
         void setCamera(std::shared_ptr<Camera> camera);

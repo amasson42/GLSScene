@@ -19,6 +19,7 @@ namespace GLS {
         int _height;
         int _bpp;
         uint8_t *_data;
+        std::string _path;
         
         GLuint _buffer;
         
@@ -38,7 +39,7 @@ namespace GLS {
             const char* what() const throw();
         };
 
-        Texture(std::string filename, GLenum format);
+        Texture(std::string path, GLenum format);
         virtual ~Texture();
         
         void clearData();

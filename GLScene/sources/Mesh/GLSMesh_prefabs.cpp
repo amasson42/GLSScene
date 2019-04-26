@@ -1,5 +1,5 @@
 //
-//  GLSMesh.cpp
+//  GLSMesh_prefabs.cpp
 //  GLScene
 //
 //  Created by Arthur Masson on 13/04/2018.
@@ -10,7 +10,6 @@
 
 namespace GLS {
     
-    // TODO: prefabs
     std::shared_ptr<Mesh> Mesh::plane(GLfloat width, GLfloat height, bool generateBuffers) {
         std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
         width /= 2.0f;
@@ -91,8 +90,5 @@ namespace GLS {
             mesh->generateBuffers();
         return mesh;
     }
-    
-//    Mesh Mesh::objModel(const char *filename, int options);
-//    Mesh Mesh::objModel(std::istream& file, int options);
     
 }

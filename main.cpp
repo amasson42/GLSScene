@@ -20,19 +20,6 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 
-std::ostream& operator<<(std::ostream& stream, glm::vec3 v) {
-    stream << '(' << v.x << ',' << v.y << ',' << v.z << ')';
-    return stream;
-}
-
-std::ostream& operator<<(std::ostream& stream, glm::mat4 m) {
-    const float *pSource = (const float*)glm::value_ptr(m);
-    for (int i = 0; i < 16; i++) {
-        stream << pSource[i] << ((i + 1) % 4 ? ' ' : '\n');
-    }
-    return stream;
-}
-
 void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene);
 int launch(std::vector<std::string>& modelNames);
 
@@ -50,7 +37,7 @@ void printNodePosition(const GLS::Node& node) {
 }
 
 int launch(std::vector<std::string>& modelNames) {
-    
+
 	static_cast<void>(modelNames);
 	
     if (!glfwInit()) // init the lib once
@@ -66,7 +53,7 @@ int launch(std::vector<std::string>& modelNames) {
     GLFWwindow *window = nullptr; // create a window pointer
     
     const int win_width = 1200, win_height = 800, win_margin = 10;
-    window = glfwCreateWindow(win_width, win_height, "openGL", nullptr, nullptr); // create the window
+    window = glfwCreateWindow(win_width, win_height, "openGL", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -91,6 +78,7 @@ int launch(std::vector<std::string>& modelNames) {
         return EXIT_FAILURE;
     }
 
+    std::cout << "mesh shaders compiled" << std::endl;
     // create simple mesh
 
     GLS::Scene scene;
@@ -124,6 +112,15 @@ int launch(std::vector<std::string>& modelNames) {
     planeNode->addChildNode(sphereNode);
     sphereNode->transform().setPosition(glm::vec3(2, 1, 0));
 
+    std::shared_ptr<GLS::Node> nsNode = std::make_shared<GLS::Node>();
+    nsNode->loadMeshFromFile("../models/nanosuit/nanosuit.obj");
+    scene.rootNode().addChildNode(nsNode);
+    std::cout << "the nanosuit node has " << nsNode->renderables().size() << " meshes" << std::endl;
+
+    std::shared_ptr<GLS::Node> ftNode = std::make_shared<GLS::Node>();
+    ftNode->loadMeshFromFile("../models/42.obj");
+    scene.rootNode().addChildNode(ftNode);
+
     std::shared_ptr<GLS::Node> spotlightNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Light> spotlight = std::make_shared<GLS::Light>();
     spotlight->setType(GLS::light_spot);
@@ -132,6 +129,13 @@ int launch(std::vector<std::string>& modelNames) {
     spotlight->setAngle(1.5);
     spotlightNode->setLight(spotlight);
     scene.rootNode().addChildNode(spotlightNode);
+
+    std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
+    std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
+    pointlight->setType(GLS::light_point);
+    pointlight->setPosition(glm::vec3(0, 15, -7));
+    pointLightNode->setLight(pointlight);
+    scene.rootNode().addChildNode(pointLightNode);
 
     std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1.5);
@@ -144,9 +148,11 @@ int launch(std::vector<std::string>& modelNames) {
         cubeMesh->getMaterial()->texture_normal = normal;
         cubeMesh->getMaterial()->texture_occlusion = occlusion;
         cubeMesh->getMaterial()->texture_roughness = roughness;
+        cubeMesh->outline = true;
     } catch (std::exception& e) {
         std::cerr << "error: " << e.what() << std::endl;
     }
+    cubeNode->setName("cube");
     cubeNode->addRenderable(cubeMesh);
     cubeNode->transform().setPosition(glm::vec3(4, 1, 0));
     scene.rootNode().addChildNode(cubeNode);
@@ -155,9 +161,10 @@ int launch(std::vector<std::string>& modelNames) {
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
         camera->setAspect(1200.0 / 800.0);
+        camera->setFarZ(15.0);
         cameraNode->setCamera(camera);
     }
-    cameraNode->transform().moveBy(0, 0, 1);
+    cameraNode->transform().moveBy(0, 7, 5);
     scene.setCameraNode(*cameraNode);
 
     //
@@ -173,7 +180,7 @@ int launch(std::vector<std::string>& modelNames) {
 
         planeNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
         cubeMesh->getMaterial()->diffuse_transform.rotateBy(0.02);
-        spotlightNode->transform().setRotation(glm::angleAxis(currentTime / 10, glm::vec3(0, 1, 0)));
+        pointLightNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
 
         scene.renderInContext();
         /* do some drawing */

@@ -11,7 +11,15 @@
 
 #include "GLScene/GLSTransform.hpp"
 
+std::ostream& operator<<(std::ostream& stream, glm::mat4 m);
+std::ostream& operator<<(std::ostream& stream, glm::mat3 m);
+std::ostream& operator<<(std::ostream& stream, glm::vec3 v);
+std::ostream& operator<<(std::ostream& stream, glm::quat q);
+
 namespace GLS {
+    
+    float& mat4ValueAt(glm::mat4& m, int l, int c);
+    float& mat3ValueAt(glm::mat3& m, int l, int c);
     
     class Transform;
     class Scene;
@@ -24,6 +32,7 @@ namespace GLS {
     class Shader;
     class ShaderProgram;
     
+
     struct Vertex {
         glm::vec3 position;
         glm::vec3 normal;
