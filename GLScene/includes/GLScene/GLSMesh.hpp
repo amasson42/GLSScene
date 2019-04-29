@@ -71,9 +71,12 @@ namespace GLS {
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
 
+        bool _outlined;
+        glm::vec3 _outlineColor;
+        float _outlineSize;
+
     public:
 
-        bool outline;
         class BufferCreationException : public std::exception {
             public:
             const char* what() const throw();
@@ -105,6 +108,10 @@ namespace GLS {
         void setMaterial(std::shared_ptr<Material> mat);
         std::shared_ptr<Material> getMaterial() const;
         
+        void setOutline(float size, const glm::vec3& color);
+        void removeOutline();
+
+
         // OpenGL Buffers
          
         void generateBuffers() throw(BufferCreationException);
@@ -121,7 +128,7 @@ namespace GLS {
         void setProgram(std::shared_ptr<ShaderProgram> shaderProgram);
         
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
-        
+        virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
         
         // Prefabs
         
@@ -132,7 +139,6 @@ namespace GLS {
         
     };
     
-
 }
 
 #endif /* GLSMesh_h */

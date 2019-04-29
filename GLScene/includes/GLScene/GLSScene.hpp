@@ -23,6 +23,9 @@ namespace GLS {
         std::vector<Light> _frameLights;
         void _calculLights();
         
+        // post rendering
+        std::multimap<float, std::pair<IRenderable*, RenderUniforms> > _postRenderables;
+
     public:
         
         Scene();
@@ -37,10 +40,11 @@ namespace GLS {
 		Node *cameraNode() const;
 		void setCameraNode(Node& node);
 		
-        void sendLightsValueToShader(std::shared_ptr<ShaderProgram> program);
-
+        // Rendering
 		void renderInContext();
-        
+        void sendLightsValueToShader(std::shared_ptr<ShaderProgram> program);
+        void subscribeToPostRenderable(IRenderable *renderable, const RenderUniforms& uniforms, float priority);
+
     };
     
 }

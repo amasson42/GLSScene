@@ -70,6 +70,7 @@ int launch(std::vector<std::string>& modelNames) {
     // try compilation of shaders
     try {
         GLS::ShaderProgram::standardShaderProgramMesh();
+        GLS::ShaderProgram::standardShaderProgramMeshOutline();
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;
         std::cout << e.infoLog() << std::endl;
@@ -148,7 +149,7 @@ int launch(std::vector<std::string>& modelNames) {
         cubeMesh->getMaterial()->texture_normal = normal;
         cubeMesh->getMaterial()->texture_occlusion = occlusion;
         cubeMesh->getMaterial()->texture_roughness = roughness;
-        cubeMesh->outline = true;
+        cubeMesh->setOutline(0.1, glm::vec3(1));
     } catch (std::exception& e) {
         std::cerr << "error: " << e.what() << std::endl;
     }
@@ -189,8 +190,8 @@ int launch(std::vector<std::string>& modelNames) {
         lastTimeUpdate = currentTime;
     }
     
+    std::cout << "Ending..." << std::endl;
     glfwTerminate(); // free all used memory of glfw
-    
     return (EXIT_SUCCESS);
 }
 

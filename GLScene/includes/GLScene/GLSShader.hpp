@@ -54,6 +54,7 @@ namespace GLS {
         
         static std::shared_ptr<Shader> standardVertexMesh();
         static std::shared_ptr<Shader> standardFragmentMesh();
+        static std::shared_ptr<Shader> standardFragmentMeshOutline();
         
     };
     
@@ -65,7 +66,8 @@ namespace GLS {
         ShaderProgram(const ShaderProgram& copy);
         ShaderProgram& operator=(const ShaderProgram& copy);
         
-        static std::shared_ptr<ShaderProgram> _standardShaderProgram;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramMesh;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramMeshOutline;
 
     public:
         
@@ -91,6 +93,7 @@ namespace GLS {
         void use() const;
         
         static std::shared_ptr<ShaderProgram> standardShaderProgramMesh();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramMeshOutline();
 
     };
     

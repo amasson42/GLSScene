@@ -55,7 +55,6 @@ namespace GLS {
     }
 
     void Scene::_calculLights() {
-        _frameLights.clear();
         _rootNode->_getAllLights(_frameLights, glm::mat4(1));
     }
 
@@ -66,12 +65,16 @@ namespace GLS {
         }
         glUniform1i(program->getLocation("lights_count"), static_cast<int>(_frameLights.size()));
     }
-    
+
+    typedef std::pair<IRenderable*, RenderUniforms> RenderAndUniforms;
+
     void Scene::renderInContext() {
         
         glClearColor(_background.x, _background.y, _background.z, _background.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        
+        _frameLights.clear();
+        _postRenderables.clear();
+
         RenderUniforms uniforms;
         if (_cameraNode) {
             uniforms.view = glm::inverse(_cameraNode->getWorldTransformMatrix());
@@ -83,8 +86,21 @@ namespace GLS {
         std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMesh();
         _calculLights();
         sendLightsValueToShader(program);
-
+        
         _rootNode->renderInContext(*this, uniforms);
+        
+        std::multimap<float, RenderAndUniforms>::iterator itr;
+        for (itr = _postRenderables.begin(); itr != _postRenderables.end(); ++itr) {
+            IRenderable *renderable = itr->second.first;
+            RenderUniforms uniforms = itr->second.second;
+            float priority = itr->first;
+            renderable->postRenderInContext(*this, uniforms, priority);
+        }
     }
     
+    void Scene::subscribeToPostRenderable(IRenderable* renderable, const RenderUniforms& uniforms, float priority) {
+        RenderAndUniforms paired(renderable, uniforms);
+        _postRenderables.insert(std::pair<float, RenderAndUniforms>(priority, paired));
+    }
+
 }

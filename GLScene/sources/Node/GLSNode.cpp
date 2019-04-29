@@ -230,10 +230,6 @@ namespace GLS {
         }
     }
 
-    // static std::vector<std::shared_ptr<Texture> > _loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName) {
-
-    // }
-
     void Node::loadMeshFromFile(std::string path) {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);

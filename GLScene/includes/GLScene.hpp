@@ -13,6 +13,8 @@
 #include <exception>
 #include <string>
 #include <vector>
+#include <map>
+
 #include <OpenGL/gl3.h>
 
 #include "GLScene/GLSStructs.hpp"

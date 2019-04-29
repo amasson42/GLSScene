@@ -192,15 +192,41 @@ namespace GLS {
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);
     }
 
-    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgram = nullptr;
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramMesh = nullptr;
 
     std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramMesh() {
-        if (_standardShaderProgram == nullptr) {
+        if (_standardShaderProgramMesh == nullptr) {
             std::shared_ptr<Shader> vertex = Shader::standardVertexMesh();
             std::shared_ptr<Shader> fragment = Shader::standardFragmentMesh();
-            _standardShaderProgram = std::make_shared<ShaderProgram>(*vertex, *fragment);
+            _standardShaderProgramMesh = std::make_shared<ShaderProgram>(*vertex, *fragment);
         }
-        return _standardShaderProgram;
+        return _standardShaderProgramMesh;
+    }
+
+    std::shared_ptr<Shader> Shader::standardFragmentMeshOutline() {
+        std::string src =
+        "#version 400 core\n\n"
+        
+        "out vec4 FragColor;\n"
+
+        "uniform vec3 border_color;\n"
+
+        "void main() {\n"
+        "   FragColor = vec4(border_color, 1.0);\n"
+        "}\n"
+        "\n";
+        return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);
+    }
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramMeshOutline = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramMeshOutline() {
+        if (_standardShaderProgramMeshOutline == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertexMesh();
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentMeshOutline();
+            _standardShaderProgramMeshOutline = std::make_shared<ShaderProgram>(*vertex, *fragment);
+        }
+        return _standardShaderProgramMeshOutline;
     }
 
 }
