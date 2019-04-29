@@ -277,15 +277,15 @@ namespace GLS {
         }
     }
     
-    void Node::renderInContext(Scene& scene, const glm::mat4& projection,
-                                const glm::mat4& view, const glm::mat4& model) {
+    void Node::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
         _transform.updateMatrix();
-        glm::mat4 wModel = model * getTransformMatrix();
+        RenderUniforms nodeUniforms(uniforms);
+        nodeUniforms.model = uniforms.model * getTransformMatrix();
         for (size_t i = 0; i < _childs.size(); i++) {
-            _childs[i]->renderInContext(scene, projection, view, wModel);
+            _childs[i]->renderInContext(scene, nodeUniforms);
         }
         for (size_t i = 0; i < _renderables.size(); i++) {
-            _renderables[i]->renderInContext(scene, projection, view, wModel);
+            _renderables[i]->renderInContext(scene, nodeUniforms);
         }
     }
     

@@ -213,7 +213,7 @@ namespace GLS {
         _shaderProgram = shaderProgram;
     }
 
-    void Mesh::renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) {
+    void Mesh::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
         if (!_bufferGenerated)
             return ;
         
@@ -222,7 +222,6 @@ namespace GLS {
             program = _shaderProgram;
             program->use();
             scene.sendLightsValueToShader(program);
-            glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(projection));
         } else {
             program = ShaderProgram::standardShaderProgramMesh();
             program->use();
@@ -231,11 +230,15 @@ namespace GLS {
         glEnable(GL_CULL_FACE);
         glDepthFunc(GL_LESS);
 
-        glm::mat3 normalMatrix = glm::inverseTranspose(model);
+        glm::mat3 normalMatrix = glm::inverseTranspose(uniforms.model);
+        glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(uniforms.projection));
         glUniformMatrix3fv(program->getLocation("u_mat_normal"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
-        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(program->getLocation("u_mat_model"), 1, GL_FALSE, glm::value_ptr(model));
-        
+        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(uniforms.view));
+        glUniformMatrix4fv(program->getLocation("u_mat_model"), 1, GL_FALSE, glm::value_ptr(uniforms.model));
+        glUniform3f(program->getLocation("u_camera_position"), uniforms.camera_position.x,
+                                                               uniforms.camera_position.y,
+                                                               uniforms.camera_position.z);
+
         _material->sendUniformToShaderProgram(program);
         glBindVertexArray(_elementsBuffer);
         glDrawElements(GL_TRIANGLES,

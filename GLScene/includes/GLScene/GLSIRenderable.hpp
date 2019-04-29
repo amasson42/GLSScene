@@ -17,7 +17,7 @@ namespace GLS {
         
     public:
 
-        virtual void renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model) = 0;
+        virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms) = 0;
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const = 0;
         
     };

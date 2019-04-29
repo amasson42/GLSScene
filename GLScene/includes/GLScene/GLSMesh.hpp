@@ -120,7 +120,7 @@ namespace GLS {
         
         void setProgram(std::shared_ptr<ShaderProgram> shaderProgram);
         
-        virtual void renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model);
+        virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         
         
         // Prefabs

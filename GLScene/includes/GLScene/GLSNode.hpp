@@ -81,7 +81,7 @@ namespace GLS {
         std::shared_ptr<Light> light();
         void setLight(std::shared_ptr<Light> light);
         
-        void renderInContext(Scene& scene, const glm::mat4& projection, const glm::mat4& view, const glm::mat4& model);
+        void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         
     };
     

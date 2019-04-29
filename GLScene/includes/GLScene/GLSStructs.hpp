@@ -32,6 +32,19 @@ namespace GLS {
     class Shader;
     class ShaderProgram;
     
+    struct RenderUniforms {
+        glm::mat4 projection;
+        glm::mat4 view;
+        glm::mat4 model;
+        glm::vec3 camera_position;
+
+        RenderUniforms();
+
+        RenderUniforms(const glm::mat4& p,
+                       const glm::mat4& v,
+                       const glm::mat4& m,
+                       const glm::vec3& c);
+    };
 
     struct Vertex {
         glm::vec3 position;

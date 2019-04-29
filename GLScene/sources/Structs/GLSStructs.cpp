@@ -44,6 +44,22 @@ namespace GLS {
         return (values[3 * l + c]);
     }
 
+    RenderUniforms::RenderUniforms() {
+        projection = glm::mat4(1);
+        view = glm::mat4(1);
+        model = glm::mat4(1);
+        camera_position = glm::vec3(0);
+    }
+
+    RenderUniforms::RenderUniforms(const glm::mat4& p,
+                                   const glm::mat4& v,
+                                   const glm::mat4& m,
+                                   const glm::vec3& c) {
+        projection = p;
+        view = v;
+        model = m;
+        camera_position = c;
+    }
 
     Vertex::Vertex() {
         position = glm::vec3(0);

@@ -72,32 +72,19 @@ namespace GLS {
         glClearColor(_background.x, _background.y, _background.z, _background.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         
-        glm::mat4 proj(1);
-        glm::mat4 view(1);
-        glm::vec3 p;
+        RenderUniforms uniforms;
         if (_cameraNode) {
-            view = _cameraNode->getWorldTransformMatrix();
-            view = glm::inverse(view);
-            p = glm::vec3(view * glm::vec4(_cameraNode->transform().position(), 1));
+            uniforms.view = glm::inverse(_cameraNode->getWorldTransformMatrix());
+            uniforms.camera_position = glm::vec3(uniforms.view * glm::vec4(_cameraNode->transform().position(), 1));
             if (_cameraNode->camera() != nullptr)
-                proj = _cameraNode->camera()->projectionMatrix();
-            else
-                proj = glm::mat4(1);
-        } else {
-            view = glm::mat4(1);
-            p = glm::vec3(0);
-            proj = glm::mat4(1);
+                uniforms.projection = _cameraNode->camera()->projectionMatrix();
         }
         
         std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMesh();
         _calculLights();
         sendLightsValueToShader(program);
 
-        glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(proj));
-        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniform3f(program->getLocation("u_camera_position"), p.x, p.y, p.z);
-        
-        _rootNode->renderInContext(*this, proj, view, glm::mat4(1));
+        _rootNode->renderInContext(*this, uniforms);
     }
     
 }
