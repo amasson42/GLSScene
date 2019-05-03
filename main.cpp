@@ -52,7 +52,7 @@ int launch(std::vector<std::string>& modelNames) {
     
     GLFWwindow *window = nullptr; // create a window pointer
     
-    const int win_width = 1200, win_height = 800, win_margin = 10;
+    const int win_width = 1200, win_height = 800, win_margin = 0;
     window = glfwCreateWindow(win_width, win_height, "openGL", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -71,6 +71,7 @@ int launch(std::vector<std::string>& modelNames) {
     try {
         GLS::ShaderProgram::standardShaderProgramMesh();
         GLS::ShaderProgram::standardShaderProgramMeshOutline();
+        GLS::ShaderProgram::standardShaderProgramScreenTexture();
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;
         std::cout << e.infoLog() << std::endl;
@@ -79,7 +80,7 @@ int launch(std::vector<std::string>& modelNames) {
         return EXIT_FAILURE;
     }
 
-    std::cout << "mesh shaders compiled" << std::endl;
+    std::cout << "shaders compiled" << std::endl;
     // create simple mesh
 
     GLS::Scene scene;
@@ -161,7 +162,7 @@ int launch(std::vector<std::string>& modelNames) {
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-        camera->setAspect(1200.0 / 800.0);
+        camera->setAspect(win_width / (float)win_height);
         camera->setFarZ(15.0);
         cameraNode->setCamera(camera);
     }
@@ -169,7 +170,12 @@ int launch(std::vector<std::string>& modelNames) {
     scene.setCameraNode(*cameraNode);
 
     //
-    
+
+    GLS::Framebuffer facebook(win_width, win_height);
+    {
+        GLS::Framebuffer fb(500, 250);
+    }
+
     float lastTimeUpdate = glfwGetTime();
     while (!glfwWindowShouldClose(window)) { // loop while not closed
         glfwPollEvents(); // check a loop turn
@@ -183,9 +189,12 @@ int launch(std::vector<std::string>& modelNames) {
         cubeMesh->getMaterial()->diffuse_transform.rotateBy(0.02);
         pointLightNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
 
-        scene.renderInContext();
         /* do some drawing */
-        
+        facebook.bind();
+        scene.renderInContext();
+        facebook.unbind();
+        facebook.renderInContext();
+
         glfwSwapBuffers(window); // draw the new image to the buffer
         lastTimeUpdate = currentTime;
     }

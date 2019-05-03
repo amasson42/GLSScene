@@ -29,5 +29,6 @@
 #include "GLScene/GLSShader.hpp"
 #include "GLScene/GLSNode.hpp"
 #include "GLScene/GLSScene.hpp"
+#include "GLScene/GLSFramebuffer.hpp"
 
 #endif /* GLScene_h */

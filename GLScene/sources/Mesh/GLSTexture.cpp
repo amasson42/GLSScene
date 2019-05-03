@@ -20,15 +20,34 @@ namespace GLS {
         return "can't create additional texture";
     }
     
-    Texture::Texture(std::string path, GLenum format) {
-        _data = stbi_load(path.c_str(), &_width, &_height, &_bpp, 0);
-        if (_data == NULL) {
-            throw LoadingException();
-        }
-        _path = path;
+    Texture::Texture(GLsizei width, GLsizei height) throw(CreationException) {
+        _width = width;
+        _height = height;
         glGenTextures(1, &_buffer);
         if (_buffer == 0) {
-            free(_data);
+            throw CreationException();
+        }
+        glBindTexture(GL_TEXTURE_2D, _buffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    Texture::Texture(std::string path, GLenum format) throw(CreationException, LoadingException){
+        int bpp;
+        int width, height;
+        uint8_t *data = stbi_load(path.c_str(), &width, &height, &bpp, 0);
+        _width = width;
+        _height = height;
+        if (data == NULL) {
+            throw LoadingException();
+        }
+        glGenTextures(1, &_buffer);
+        if (_buffer == 0) {
+            free(data);
             throw CreationException();
         }
         glBindTexture(GL_TEXTURE_2D, _buffer);
@@ -36,19 +55,13 @@ namespace GLS {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, _width, _height, 0, format, GL_UNSIGNED_BYTE, _data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, _width, _height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
+        free(data);
     }
     
     Texture::~Texture() {
-        clearData();
         glDeleteTextures(1, &_buffer);
-    }
-    
-    void Texture::clearData() {
-        if (_data)
-            free(_data);
-        _data = NULL;
     }
     
     GLuint Texture::buffer() const {
@@ -68,4 +81,13 @@ namespace GLS {
             }
         }
     }
+
+    GLsizei Texture::width() const {
+        return _width;
+    }
+
+    GLsizei Texture::height() const {
+        return _height;
+    }
+
 }

@@ -77,4 +77,4 @@ namespace GLS {
 
 }
 
-#endif
+#endif /* GLSLight_h */

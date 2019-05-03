@@ -68,6 +68,7 @@ namespace GLS {
         
         static std::shared_ptr<ShaderProgram> _standardShaderProgramMesh;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramMeshOutline;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramScreenTexture;
 
     public:
         
@@ -94,6 +95,7 @@ namespace GLS {
         
         static std::shared_ptr<ShaderProgram> standardShaderProgramMesh();
         static std::shared_ptr<ShaderProgram> standardShaderProgramMeshOutline();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramScreenTexture();
 
     };
     

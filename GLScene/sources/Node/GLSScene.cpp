@@ -1,5 +1,5 @@
 //
-//  GLScene.cpp
+//  GLSScene.cpp
 //  GLScene
 //
 //  Created by Arthur Masson on 12/04/2018.

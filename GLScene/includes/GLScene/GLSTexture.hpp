@@ -15,12 +15,8 @@ namespace GLS {
     
     class Texture {
         
-        int _width;
-        int _height;
-        int _bpp;
-        uint8_t *_data;
-        std::string _path;
-        
+        GLsizei _width;
+        GLsizei _height;
         GLuint _buffer;
         
         Texture();
@@ -39,13 +35,16 @@ namespace GLS {
             const char* what() const throw();
         };
 
-        Texture(std::string path, GLenum format);
+        Texture(GLsizei width, GLsizei height) throw(CreationException);
+        Texture(std::string path, GLenum format) throw(CreationException, LoadingException);
         virtual ~Texture();
         
-        void clearData();
         GLuint buffer() const;
         void setParameter(GLenum pname, GLint param);
         void setParameters(std::vector<GLenum> pnames, std::vector<GLint> params);
+
+        GLsizei width() const;
+        GLsizei height() const;
 
     };
     
