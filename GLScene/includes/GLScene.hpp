@@ -20,10 +20,12 @@
 #include "GLScene/GLSStructs.hpp"
 
 #include "GLScene/GLSTransform.hpp"
+#include "GLScene/GLSIRenderable.hpp"
+
 #include "GLScene/GLSCamera.hpp"
 #include "GLScene/GLSLight.hpp"
 #include "GLScene/GLSTexture.hpp"
-#include "GLScene/GLSIRenderable.hpp"
+#include "GLScene/GLSSkybox.hpp"
 #include "GLScene/GLSMesh.hpp"
 #include "GLScene/GLSDotParticleSystem.hpp"
 #include "GLScene/GLSShader.hpp"

@@ -14,10 +14,14 @@
 namespace GLS {
     
     class Scene {
-        
-		Node *_rootNode; // shared
-		Node *_cameraNode; // weak
+
         glm::vec2 _size;
+        
+		Node *_rootNode;
+		Node *_cameraNode;
+        // std::unique_ptr<Node> _rootNode;
+        // std::weak_ptr<Node> _cameraNode;
+        std::shared_ptr<Skybox> _skybox;
         glm::vec4 _background;
 
         std::vector<Light> _frameLights;
@@ -39,6 +43,9 @@ namespace GLS {
 		
 		Node *cameraNode() const;
 		void setCameraNode(Node& node);
+
+        std::shared_ptr<Skybox> skybox() const;
+        void setSkybox(std::shared_ptr<Skybox> skybox);
 		
         // Rendering
 		void renderInContext();

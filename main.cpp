@@ -72,6 +72,7 @@ int launch(std::vector<std::string>& modelNames) {
         GLS::ShaderProgram::standardShaderProgramMesh();
         GLS::ShaderProgram::standardShaderProgramMeshOutline();
         GLS::ShaderProgram::standardShaderProgramScreenTexture();
+        GLS::ShaderProgram::standardShaderProgramSkybox();
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;
         std::cout << e.infoLog() << std::endl;
@@ -169,12 +170,25 @@ int launch(std::vector<std::string>& modelNames) {
     cameraNode->transform().moveBy(0, 7, 5);
     scene.setCameraNode(*cameraNode);
 
+    std::vector<std::string> skyboxFaces;
+    // skyboxFaces.push_back("../textures/lac_skybox/right.jpg");
+    // skyboxFaces.push_back("../textures/lac_skybox/left.jpg");
+    // skyboxFaces.push_back("../textures/lac_skybox/top.jpg");
+    // skyboxFaces.push_back("../textures/lac_skybox/bottom.jpg");
+    // skyboxFaces.push_back("../textures/lac_skybox/front.jpg");
+    // skyboxFaces.push_back("../textures/lac_skybox/back.jpg");
+    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
+    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
+    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
+    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
+    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
+    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
+    std::shared_ptr<GLS::Skybox> skybox = std::make_shared<GLS::Skybox>(skyboxFaces);
+    scene.setSkybox(skybox);
+
     //
 
     GLS::Framebuffer facebook(win_width, win_height);
-    {
-        GLS::Framebuffer fb(500, 250);
-    }
 
     float lastTimeUpdate = glfwGetTime();
     while (!glfwWindowShouldClose(window)) { // loop while not closed

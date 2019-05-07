@@ -47,7 +47,7 @@ namespace GLS {
         }
         glGenTextures(1, &_buffer);
         if (_buffer == 0) {
-            free(data);
+            stbi_image_free(data);
             throw CreationException();
         }
         glBindTexture(GL_TEXTURE_2D, _buffer);
@@ -57,7 +57,7 @@ namespace GLS {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexImage2D(GL_TEXTURE_2D, 0, format, _width, _height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
-        free(data);
+        stbi_image_free(data);
     }
     
     Texture::~Texture() {

@@ -13,6 +13,8 @@
 
 namespace GLS {
     
+    // TODO: allow us to change the fragment shader to create custom post-processing effects
+
     class Framebuffer {
         GLuint _framebuffer;
         std::shared_ptr<Texture> _colorTexture;

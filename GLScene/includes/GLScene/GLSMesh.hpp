@@ -82,13 +82,6 @@ namespace GLS {
             const char* what() const throw();
         };
 
-        // class LoadMeshException : public std::exception {
-        //     std::string _filename;
-        //     public:
-        //     LoadMeshException(std::string filename);
-        //     const char* what() const throw();
-        // };
-
         Mesh();
         Mesh(const Mesh& copy);
         virtual ~Mesh();

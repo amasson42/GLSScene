@@ -11,16 +11,18 @@
 namespace GLS {
     
     Scene::Scene() :
-    _rootNode(new Node), _cameraNode(nullptr),
     _size(100, 100),
+    _rootNode(new Node),
+    _cameraNode(nullptr), _skybox(nullptr),
     _background(0.2)
     {
 
     }
     
     Scene::Scene(const Scene& copy) :
-    _rootNode(new Node(copy.rootNode())), _cameraNode(nullptr),
     _size(copy._size),
+    _rootNode(new Node(copy.rootNode())),
+    _cameraNode(nullptr), _skybox(copy._skybox),
     _background(copy._background)
     {
 
@@ -31,10 +33,11 @@ namespace GLS {
     }
     
     Scene& Scene::operator=(const Scene& copy) {
+        _size = copy._size;
         _rootNode = copy._rootNode;
         _cameraNode = nullptr;
-        _size = copy._size;
         _background = copy._background;
+        _skybox = copy._skybox;
         return *this;
     }
     
@@ -52,6 +55,14 @@ namespace GLS {
     
     void Scene::setCameraNode(Node& node) {
         _cameraNode = &node;
+    }
+
+    std::shared_ptr<Skybox> Scene::skybox() const {
+        return _skybox;
+    }
+
+    void Scene::setSkybox(std::shared_ptr<Skybox> skybox) {
+        _skybox = skybox;
     }
 
     void Scene::_calculLights() {
@@ -95,6 +106,10 @@ namespace GLS {
             RenderUniforms uniforms = itr->second.second;
             float priority = itr->first;
             renderable->postRenderInContext(*this, uniforms, priority);
+        }
+
+        if (_skybox != nullptr) {
+            _skybox->renderInContext(*this, uniforms);
         }
     }
     
