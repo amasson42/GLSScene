@@ -59,7 +59,8 @@ namespace GLS {
     };
     
     class Mesh : public IRenderable {
-        
+    
+    protected:
         std::vector<Vertex> _vertices;
         std::vector<GLuint> _indices;
         
@@ -107,12 +108,9 @@ namespace GLS {
 
         // OpenGL Buffers
          
-        void generateBuffers() throw(BufferCreationException);
-        void deleteBuffers();
+        virtual void generateBuffers() throw(BufferCreationException);
+        virtual void deleteBuffers();
         
-        GLuint verticesBuffer() const;
-        GLuint indicesBuffer() const;
-        GLuint elementsBuffer() const;
         bool bufferGenerated() const;
         
         
@@ -130,6 +128,36 @@ namespace GLS {
         static std::shared_ptr<Mesh> sphere(GLfloat radius, unsigned int ringCount = 12, bool generateBuffers = true);
         static std::shared_ptr<Mesh> objModel(std::string path, int options, bool generateBuffers = true) /*throw(LoadMeshException)*/;
         
+    };
+
+    class InstancedMesh : public Mesh {
+
+        protected:
+
+        std::vector<Transform> _instancesTransforms;
+        GLuint _transformsBuffer;
+
+        public:
+        InstancedMesh();
+        InstancedMesh(const Mesh& copy, size_t instanceCount = 1);
+        InstancedMesh(const InstancedMesh& copy);
+        virtual ~InstancedMesh();
+
+        InstancedMesh& operator=(const Mesh& copy);
+        InstancedMesh& operator=(const InstancedMesh& copy);
+
+        size_t instancesCount() const;
+        void setInstancesCount(size_t count);
+
+        const Transform& instanceTransformAt(size_t i) const;
+        void setInstanceTransformAt(size_t i, Transform t);
+
+        virtual void generateBuffers() throw(BufferCreationException);
+        virtual void deleteBuffers();
+        
+        virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
+        virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
+
     };
     
 }

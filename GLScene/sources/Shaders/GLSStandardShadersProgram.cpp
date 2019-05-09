@@ -33,6 +33,28 @@ namespace GLS {
         return _standardShaderProgramMeshOutline;
     }
 
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramInstancedMesh = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramInstancedMesh() {
+        if (_standardShaderProgramInstancedMesh == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertexInstancedMesh();
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentMesh();
+            _standardShaderProgramInstancedMesh = std::make_shared<ShaderProgram>(*vertex, *fragment);
+        }
+        return _standardShaderProgramInstancedMesh;
+    }
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramInstancedMeshOutline = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramInstancedMeshOutline() {
+        if (_standardShaderProgramInstancedMeshOutline == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertexInstancedMesh();
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentMeshOutline();
+            _standardShaderProgramInstancedMeshOutline = std::make_shared<ShaderProgram>(*vertex, *fragment);
+        }
+        return _standardShaderProgramInstancedMeshOutline;
+    }
+
     std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramScreenTexture = nullptr;
 
     std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramScreenTexture() {

@@ -29,6 +29,10 @@ int main(int argc, const char * argv[]) {
     for (int i = 1; i < argc; i++)
         args.push_back(argv[i]);
     launch(args);
+    if (!args.empty() && args[0] == "-leaks") {
+        std::cout << "test leaks..." << std::endl;
+        while (1);
+    }
     return 0;
 }
 
@@ -81,7 +85,7 @@ int launch(std::vector<std::string>& modelNames) {
         glfwTerminate();
         return EXIT_FAILURE;
     }
-
+    
     std::cout << "shaders compiled" << std::endl;
     // create simple mesh
 
@@ -89,16 +93,26 @@ int launch(std::vector<std::string>& modelNames) {
     
     std::shared_ptr<GLS::Node> triangleNode = std::make_shared<GLS::Node>();
     {
-        std::shared_ptr<GLS::Mesh> triangleMesh = std::make_shared<GLS::Mesh>();
-        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec2(0, 0)));
-        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0)));
-        triangleMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1)));
-        triangleMesh->indicesRef().push_back(0);
-        triangleMesh->indicesRef().push_back(1);
-        triangleMesh->indicesRef().push_back(2);
-        triangleMesh->generateBuffers();
-        triangleNode->addRenderable(triangleMesh);
-        triangleMesh->getMaterial()->diffuse = glm::vec3(1.0, 0.0, 0.0);
+        std::shared_ptr<GLS::InstancedMesh> trianglesMesh = std::make_shared<GLS::InstancedMesh>();
+        trianglesMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec2(0, 0)));
+        trianglesMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0)));
+        trianglesMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1)));
+        trianglesMesh->indicesRef().push_back(0);
+        trianglesMesh->indicesRef().push_back(1);
+        trianglesMesh->indicesRef().push_back(2);
+        trianglesMesh->getMaterial()->diffuse = glm::vec3(1.0, 0.0, 0.0);
+
+        trianglesMesh->setInstancesCount(10000);
+        for (size_t i = 0; i < trianglesMesh->instancesCount(); i++) {
+            float x = ((i % 100) / 10) * 0.2f;
+            float y = ((i % 100) % 10) * 0.2f;
+            float z = ((float)i / 100) * 0.5f - 10;
+            GLS::Transform t;
+            t.setPosition(glm::vec3(x, y, z));
+            trianglesMesh->setInstanceTransformAt(i, t);
+        }
+        trianglesMesh->generateBuffers();
+        triangleNode->addRenderable(trianglesMesh);
     }
     scene.rootNode().addChildNode(triangleNode);
 
@@ -110,7 +124,9 @@ int launch(std::vector<std::string>& modelNames) {
     {
         std::shared_ptr<GLS::Mesh> sphereMesh = GLS::Mesh::sphere(1.0);
         sphereMesh->getMaterial()->diffuse = glm::vec3(0.5, 0.1, 0.2);
+        std::cout << "will generate" << std::endl;
         sphereMesh->generateBuffers();
+        std::cout << "buffer generated" << std::endl;
         sphereNode->addRenderable(sphereMesh);
     }
     planeNode->addChildNode(sphereNode);
@@ -165,7 +181,7 @@ int launch(std::vector<std::string>& modelNames) {
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
         camera->setAspect(win_width / (float)win_height);
-        camera->setFarZ(15.0);
+        camera->setFarZ(25.0);
         cameraNode->setCamera(camera);
     }
     cameraNode->transform().moveBy(0, 7, 5);

@@ -206,18 +206,6 @@ namespace GLS {
         _bufferGenerated = false;
     }
     
-    GLuint Mesh::verticesBuffer() const {
-        return _verticesBuffer;
-    }
-    
-    GLuint Mesh::indicesBuffer() const {
-        return _indicesBuffer;
-    }
-    
-    GLuint Mesh::elementsBuffer() const {
-        return _elementsBuffer;
-    }
-    
     bool Mesh::bufferGenerated() const {
         return _bufferGenerated;
     }
@@ -277,7 +265,6 @@ namespace GLS {
     
     void Mesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
         if (_outlined && priority == 1) {
-            // std::cout << "drawing outline of size " << _outlineSize << std::endl;
             glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
             glStencilMask(0x00);
             std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMeshOutline();

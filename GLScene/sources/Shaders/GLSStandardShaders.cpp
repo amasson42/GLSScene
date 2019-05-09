@@ -50,7 +50,7 @@ namespace GLS {
         "}\n";
         return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
     }
-    
+
     std::shared_ptr<Shader> Shader::standardFragmentMesh() {
         std::string src =
         "#version 400 core\n\n"
@@ -194,6 +194,46 @@ namespace GLS {
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);
     }
 
+    std::shared_ptr<Shader> Shader::standardVertexInstancedMesh() {
+        std::string src =
+        "#version 400 core\n"
+
+        "layout (location = 0) in vec3 vin_position;\n"
+        "layout (location = 1) in vec3 vin_normal;\n"
+        "layout (location = 2) in vec3 vin_tangent;\n"
+        "layout (location = 3) in vec3 vin_bitangent;\n"
+        "layout (location = 4) in vec2 vin_uv;\n"
+        "layout (location = 5) in mat4 vin_model_matrix;\n"
+        
+        "out vec3 fin_position;\n"
+        "out vec3 fin_wposition;\n"
+        "out vec2 fin_uv;\n"
+        "out vec3 fin_wnormal;\n"
+        "out vec3 fin_wtangent;\n"
+        "out vec3 fin_wbitangent;\n"
+        
+        // sent by scene:
+        "uniform mat3 u_mat_normal;\n"
+        "uniform mat4 u_mat_projection;\n"
+        "uniform mat4 u_mat_view;\n"
+
+        // sent by node:
+        "uniform mat4 u_mat_model;\n"
+        
+        "void main()\n"
+        "{\n"
+        "    mat4 model = u_mat_model * vin_model_matrix;\n"
+        "    gl_Position = u_mat_projection * u_mat_view * model * vec4(vin_position, 1.0);\n"
+        "    fin_position = gl_Position.xyz;\n"
+        "    fin_wposition = vec3(model * vec4(vin_position, 1.0));\n"
+        "    fin_wnormal = u_mat_normal * vin_normal;\n"
+        "    fin_wtangent = u_mat_normal * vin_tangent;\n"
+        "    fin_wbitangent = u_mat_normal * vin_bitangent;\n"
+        "    fin_uv = vin_uv;\n"
+        "}\n";
+        return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
+    }
+    
     std::shared_ptr<Shader> Shader::standardFragmentMeshOutline() {
         std::string src =
         "#version 400 core\n\n"

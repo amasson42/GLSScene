@@ -25,6 +25,7 @@ namespace GLS {
     class Light;
     class Material;
     class Mesh;
+    class InstancedMesh;
     class Skybox;
     class Texture;
     class Shader;

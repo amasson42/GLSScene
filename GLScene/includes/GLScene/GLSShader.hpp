@@ -53,6 +53,7 @@ namespace GLS {
         void clearSrcs();
         
         static std::shared_ptr<Shader> standardVertexMesh();
+        static std::shared_ptr<Shader> standardVertexInstancedMesh();
         static std::shared_ptr<Shader> standardVertexScreenTexture();
         static std::shared_ptr<Shader> standardVertexSkybox();
 
@@ -73,6 +74,8 @@ namespace GLS {
         
         static std::shared_ptr<ShaderProgram> _standardShaderProgramMesh;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramMeshOutline;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramInstancedMesh;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramInstancedMeshOutline;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramScreenTexture;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramSkybox;
 
@@ -101,6 +104,8 @@ namespace GLS {
         
         static std::shared_ptr<ShaderProgram> standardShaderProgramMesh();
         static std::shared_ptr<ShaderProgram> standardShaderProgramMeshOutline();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMesh();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMeshOutline();
         static std::shared_ptr<ShaderProgram> standardShaderProgramScreenTexture();
         static std::shared_ptr<ShaderProgram> standardShaderProgramSkybox();
 
