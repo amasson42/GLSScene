@@ -23,6 +23,9 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace GLS {
+    
+    float& mat4ValueAt(glm::mat4& m, int l, int c);
+    float& mat3ValueAt(glm::mat3& m, int l, int c);
 
     class Transform2D {
 

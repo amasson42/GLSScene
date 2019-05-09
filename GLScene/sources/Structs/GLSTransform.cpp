@@ -121,11 +121,19 @@ namespace GLS {
     // Matrix
     
     static const glm::mat3 calculTransformMatrix(const glm::vec2& offset, const GLfloat rotation, const glm::vec2& scale) {
-        // TODO !
-        (void)offset;
-        (void)rotation;
-        (void)scale;
-        return glm::mat3(1);
+        glm::mat3 mat;
+        float cosa = cos(rotation);
+        float sina = sin(rotation);
+        mat3ValueAt(mat, 0, 0) = scale.x * cosa;
+        mat3ValueAt(mat, 1, 0) = scale.x * sina;
+        mat3ValueAt(mat, 2, 0) = 0;
+        mat3ValueAt(mat, 0, 1) = scale.y * -sina;
+        mat3ValueAt(mat, 1, 1) = scale.y * cosa;
+        mat3ValueAt(mat, 2, 1) = 0;
+        mat3ValueAt(mat, 0, 2) = offset.x;
+        mat3ValueAt(mat, 1, 2) = offset.y;
+        mat3ValueAt(mat, 2, 2) = 1;
+        return mat;
     }
 
     const glm::mat3& Transform2D::matrix() {

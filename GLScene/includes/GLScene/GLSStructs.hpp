@@ -18,9 +18,6 @@ std::ostream& operator<<(std::ostream& stream, glm::quat q);
 
 namespace GLS {
     
-    float& mat4ValueAt(glm::mat4& m, int l, int c);
-    float& mat3ValueAt(glm::mat3& m, int l, int c);
-    
     class Transform;
     class Scene;
     class Node;

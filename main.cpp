@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include <stdio.h>
 
 #ifdef __APPLE__
 # define __gl_h_
@@ -200,7 +201,12 @@ int launch(std::vector<std::string>& modelNames) {
             processInput(window, deltaTime, scene);
 
         planeNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
-        cubeMesh->getMaterial()->diffuse_transform.rotateBy(0.02);
+        cubeMesh->getMaterial()->normal_transform.setRotation(0.25 * sin(currentTime));
+        cubeMesh->getMaterial()->normal_transform.setOffset(glm::vec2(0.0, 0.0 + 0.25 * sin(currentTime)));
+        cubeMesh->getMaterial()->normal_transform.setScale(glm::vec2(1.0, 1.0 + 0.25 * sin(currentTime)));
+        cubeMesh->getMaterial()->diffuse_transform.setRotation(0.25 * sin(currentTime));
+        cubeMesh->getMaterial()->diffuse_transform.setOffset(glm::vec2(0.0, 0.0 + 0.25 * sin(currentTime)));
+        cubeMesh->getMaterial()->diffuse_transform.setScale(glm::vec2(1.0, 1.0 + 0.25 * sin(currentTime)));
         pointLightNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
 
         /* do some drawing */

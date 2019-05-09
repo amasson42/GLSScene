@@ -319,7 +319,7 @@ namespace GLS {
         "uniform samplerCube u_skybox;\n"
 
         "void main() {\n"
-        "   FragColor = texture(u_skybox, normalize(fin_uv););\n"
+        "   FragColor = texture(u_skybox, normalize(fin_uv));\n"
         "}\n"
         "\n";
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);

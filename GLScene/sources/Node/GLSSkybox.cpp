@@ -94,6 +94,7 @@ namespace GLS {
     }
 
     void Skybox::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
+        return;
         (void)scene;
         glDepthFunc(GL_LEQUAL);
         std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramSkybox();
