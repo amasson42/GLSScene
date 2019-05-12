@@ -14,11 +14,9 @@ namespace GLS {
         return "can't create additional buffer";
     }
 
-    // Mesh::LoadMeshException::LoadMeshException(std::string filename) : _filename(filename) {}
-
-    // const char* Mesh::LoadMeshException::what() const throw() {
-    //     return ("can't load mesh from the file" + _filename).c_str();
-    // }
+    const char* Mesh::LoadMeshException::what() const throw() {
+        return "can't load mesh from file";
+    }
 
     Mesh::Mesh() : _vertices(), _indices(),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
@@ -26,9 +24,7 @@ namespace GLS {
     _material(nullptr),
     _outlined(false)
     {
-        if (_material == nullptr) {
-            _material = std::make_shared<Material>();
-        }
+
     }
     
     Mesh::Mesh(const Mesh& copy) :
@@ -218,8 +214,8 @@ namespace GLS {
     }
 
     void Mesh::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
-        if (!_bufferGenerated)
-            return ;
+        if (!bufferGenerated())
+            generateBuffers();
         
         std::shared_ptr<ShaderProgram> program;
         if (_shaderProgram) {
@@ -255,7 +251,11 @@ namespace GLS {
             glStencilMask(0x00);
         }
 
-        _material->sendUniformToShaderProgram(program);
+        if (_material == nullptr) {
+            Material().sendUniformToShaderProgram(program);
+        } else {
+            _material->sendUniformToShaderProgram(program);
+        }
         glBindVertexArray(_elementsBuffer);
         glDrawElements(GL_TRIANGLES,
                        static_cast<GLsizei>(_indices.size()),
@@ -281,7 +281,6 @@ namespace GLS {
             glStencilMask(0xFF);
         }
         (void)scene;
-        (void)priority;
     }
 
 }

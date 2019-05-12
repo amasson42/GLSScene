@@ -67,7 +67,7 @@ namespace GLS {
                 _instancesTransforms.push_back(Transform());
             }
         }
-        _bufferGenerated = false;
+        deleteBuffers();
     }
 
     const Transform& InstancedMesh::instanceTransformAt(size_t i) const {
@@ -166,7 +166,11 @@ namespace GLS {
             glStencilMask(0x00);
         }
 
-        _material->sendUniformToShaderProgram(program);
+        if (_material == nullptr) {
+            Material().sendUniformToShaderProgram(program);
+        } else {
+            _material->sendUniformToShaderProgram(program);
+        }
         glBindVertexArray(_elementsBuffer);
         glDrawElementsInstanced(GL_TRIANGLES,
                                 static_cast<GLsizei>(_indices.size()),
@@ -193,7 +197,6 @@ namespace GLS {
             glStencilMask(0xFF);
         }
         (void)scene;
-        (void)priority;
     }
 
 }

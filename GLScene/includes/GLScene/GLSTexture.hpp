@@ -36,7 +36,7 @@ namespace GLS {
         };
 
         Texture(GLsizei width, GLsizei height) throw(CreationException);
-        Texture(std::string path, GLenum format) throw(CreationException, LoadingException);
+        Texture(std::string path) throw(CreationException, LoadingException);
         virtual ~Texture();
         
         GLuint buffer() const;

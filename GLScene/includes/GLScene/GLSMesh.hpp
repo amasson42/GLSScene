@@ -9,7 +9,6 @@
 #ifndef GLSMesh_h
 #define GLSMesh_h
 
-#include <fstream>
 #include "GLScene.hpp"
 
 namespace GLS {
@@ -54,7 +53,7 @@ namespace GLS {
 
         void sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
 
-        // TODO: read info from file
+        static std::shared_ptr<Material> loadFromAiMaterial(aiMaterial *material, const std::string& directory);
 
     };
     
@@ -79,6 +78,11 @@ namespace GLS {
     public:
 
         class BufferCreationException : public std::exception {
+            public:
+            const char* what() const throw();
+        };
+
+        class LoadMeshException : public std::exception {
             public:
             const char* what() const throw();
         };
@@ -123,21 +127,23 @@ namespace GLS {
         
         // Prefabs
         
+
         static std::shared_ptr<Mesh> plane(GLfloat width, GLfloat height, bool generateBuffers = true);
         static std::shared_ptr<Mesh> cube(GLfloat width, GLfloat height, GLfloat length, bool generateBuffers = true);
         static std::shared_ptr<Mesh> sphere(GLfloat radius, unsigned int ringCount = 12, bool generateBuffers = true);
-        static std::shared_ptr<Mesh> objModel(std::string path, int options, bool generateBuffers = true) /*throw(LoadMeshException)*/;
-        
+        static std::shared_ptr<Mesh> objModel(std::string path, bool generateBuffers = true) /*throw(LoadMeshException)*/;
+        static std::shared_ptr<Mesh> loadFromAiMesh(aiMesh *mesh, bool generateBuffers = true);
+
     };
 
     class InstancedMesh : public Mesh {
-
         protected:
 
         std::vector<Transform> _instancesTransforms;
         GLuint _transformsBuffer;
 
         public:
+
         InstancedMesh();
         InstancedMesh(const Mesh& copy, size_t instanceCount = 1);
         InstancedMesh(const InstancedMesh& copy);
@@ -154,7 +160,7 @@ namespace GLS {
 
         virtual void generateBuffers() throw(BufferCreationException);
         virtual void deleteBuffers();
-        
+
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
 

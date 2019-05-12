@@ -7,7 +7,6 @@
 //
 
 #include "GLSShader.hpp"
-#include <iostream>
 
 namespace GLS {
     

@@ -15,7 +15,6 @@
 #endif
 
 #include "GLScene.hpp"
-#include <OpenGL/gl3.h>
 #include <vector>
 
 #include <GLFW/glfw3.h>
@@ -41,6 +40,9 @@ void printNodePosition(const GLS::Node& node) {
     std::cout << "node transform: " << std::endl << node.getTransformMatrix() << std::endl;
 }
 
+void loadScene1(GLS::Scene& scene);
+void loadScene2(GLS::Scene& scene);
+
 int launch(std::vector<std::string>& modelNames) {
 
 	static_cast<void>(modelNames);
@@ -48,13 +50,12 @@ int launch(std::vector<std::string>& modelNames) {
     if (!glfwInit()) // init the lib once
         return (EXIT_FAILURE);
     
-    glfwWindowHint(GLFW_SAMPLES, 4);
+    glfwWindowHint(GLFW_SAMPLES, 1);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
-    
     GLFWwindow *window = nullptr; // create a window pointer
     
     const int win_width = 1200, win_height = 800, win_margin = 0;
@@ -69,7 +70,8 @@ int launch(std::vector<std::string>& modelNames) {
             win_width - 2 * win_margin, win_height - 2 * win_margin);
     
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
-    
+    glEnable(GL_MULTISAMPLE);
+
     /* create mesh */
     
     // try compilation of shaders
@@ -89,123 +91,13 @@ int launch(std::vector<std::string>& modelNames) {
     std::cout << "shaders compiled" << std::endl;
     // create simple mesh
 
-    GLS::Scene scene;
+    GLS::Scene scene(glm::vec2(win_width, win_height));
+    loadScene2(scene);
     
-    std::shared_ptr<GLS::Node> triangleNode = std::make_shared<GLS::Node>();
-    {
-        std::shared_ptr<GLS::InstancedMesh> trianglesMesh = std::make_shared<GLS::InstancedMesh>();
-        trianglesMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 0, 0), glm::vec3(0, 0, -1), glm::vec2(0, 0)));
-        trianglesMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(1, 0, 0), glm::vec3(0, 0, -1), glm::vec2(1, 0)));
-        trianglesMesh->verticesRef().push_back(GLS::Vertex(glm::vec3(0, 1, 0), glm::vec3(0, 0, -1), glm::vec2(0, 1)));
-        trianglesMesh->indicesRef().push_back(0);
-        trianglesMesh->indicesRef().push_back(1);
-        trianglesMesh->indicesRef().push_back(2);
-        trianglesMesh->getMaterial()->diffuse = glm::vec3(1.0, 0.0, 0.0);
-
-        trianglesMesh->setInstancesCount(10000);
-        for (size_t i = 0; i < trianglesMesh->instancesCount(); i++) {
-            float x = ((i % 100) / 10) * 0.2f;
-            float y = ((i % 100) % 10) * 0.2f;
-            float z = ((float)i / 100) * 0.5f - 10;
-            GLS::Transform t;
-            t.setPosition(glm::vec3(x, y, z));
-            trianglesMesh->setInstanceTransformAt(i, t);
-        }
-        trianglesMesh->generateBuffers();
-        triangleNode->addRenderable(trianglesMesh);
-    }
-    scene.rootNode().addChildNode(triangleNode);
-
-    std::shared_ptr<GLS::Node> planeNode = std::make_shared<GLS::Node>();
-    planeNode->addRenderable(GLS::Mesh::plane(1.0, 1.0));
-    scene.rootNode().addChildNode(planeNode);
-
-    std::shared_ptr<GLS::Node> sphereNode = std::make_shared<GLS::Node>();
-    {
-        std::shared_ptr<GLS::Mesh> sphereMesh = GLS::Mesh::sphere(1.0);
-        sphereMesh->getMaterial()->diffuse = glm::vec3(0.5, 0.1, 0.2);
-        std::cout << "will generate" << std::endl;
-        sphereMesh->generateBuffers();
-        std::cout << "buffer generated" << std::endl;
-        sphereNode->addRenderable(sphereMesh);
-    }
-    planeNode->addChildNode(sphereNode);
-    sphereNode->transform().setPosition(glm::vec3(2, 1, 0));
-
-    std::shared_ptr<GLS::Node> nsNode = std::make_shared<GLS::Node>();
-    nsNode->loadMeshFromFile("../models/nanosuit/nanosuit.obj");
-    scene.rootNode().addChildNode(nsNode);
-    std::cout << "the nanosuit node has " << nsNode->renderables().size() << " meshes" << std::endl;
-
-    std::shared_ptr<GLS::Node> ftNode = std::make_shared<GLS::Node>();
-    ftNode->loadMeshFromFile("../models/42.obj");
-    scene.rootNode().addChildNode(ftNode);
-
-    std::shared_ptr<GLS::Node> spotlightNode = std::make_shared<GLS::Node>();
-    std::shared_ptr<GLS::Light> spotlight = std::make_shared<GLS::Light>();
-    spotlight->setType(GLS::light_spot);
-    spotlight->setPosition(glm::vec3(0, 4, 0));
-    spotlight->setDirection(glm::vec3(4, -1, 0));
-    spotlight->setAngle(1.5);
-    spotlightNode->setLight(spotlight);
-    scene.rootNode().addChildNode(spotlightNode);
-
-    std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
-    std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
-    pointlight->setType(GLS::light_point);
-    pointlight->setPosition(glm::vec3(0, 15, -7));
-    pointLightNode->setLight(pointlight);
-    scene.rootNode().addChildNode(pointLightNode);
-
-    std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
-    std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1.5);
-    try {
-        std::shared_ptr<GLS::Texture> diffuse(new GLS::Texture("../textures/pavement/albedo.png", GL_RGB));
-        std::shared_ptr<GLS::Texture> normal(new GLS::Texture("../textures/pavement/normal.png", GL_RGB));
-        std::shared_ptr<GLS::Texture> occlusion(new GLS::Texture("../textures/pavement/occlusion.png", GL_RGB));
-        std::shared_ptr<GLS::Texture> roughness(new GLS::Texture("../textures/pavement/roughness.png", GL_RGB));
-        cubeMesh->getMaterial()->texture_diffuse = diffuse;
-        cubeMesh->getMaterial()->texture_normal = normal;
-        cubeMesh->getMaterial()->texture_occlusion = occlusion;
-        cubeMesh->getMaterial()->texture_roughness = roughness;
-        cubeMesh->setOutline(0.1, glm::vec3(1));
-    } catch (std::exception& e) {
-        std::cerr << "error: " << e.what() << std::endl;
-    }
-    cubeNode->setName("cube");
-    cubeNode->addRenderable(cubeMesh);
-    cubeNode->transform().setPosition(glm::vec3(4, 1, 0));
-    scene.rootNode().addChildNode(cubeNode);
-
-    std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
-    {
-        std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-        camera->setAspect(win_width / (float)win_height);
-        camera->setFarZ(25.0);
-        cameraNode->setCamera(camera);
-    }
-    cameraNode->transform().moveBy(0, 7, 5);
-    scene.setCameraNode(*cameraNode);
-
-    std::vector<std::string> skyboxFaces;
-    // skyboxFaces.push_back("../textures/lac_skybox/right.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/left.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/top.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/bottom.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/front.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/back.jpg");
-    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
-    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
-    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
-    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
-    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
-    skyboxFaces.push_back("../textures/sor_borg_skybox/borg_dn.JPG");
-    std::shared_ptr<GLS::Skybox> skybox = std::make_shared<GLS::Skybox>(skyboxFaces);
-    scene.setSkybox(skybox);
-
     //
 
     GLS::Framebuffer facebook(win_width, win_height);
+    facebook.unbind();
 
     float lastTimeUpdate = glfwGetTime();
     while (!glfwWindowShouldClose(window)) { // loop while not closed
@@ -216,20 +108,12 @@ int launch(std::vector<std::string>& modelNames) {
         if (true)
             processInput(window, deltaTime, scene);
 
-        planeNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
-        cubeMesh->getMaterial()->normal_transform.setRotation(0.25 * sin(currentTime));
-        cubeMesh->getMaterial()->normal_transform.setOffset(glm::vec2(0.0, 0.0 + 0.25 * sin(currentTime)));
-        cubeMesh->getMaterial()->normal_transform.setScale(glm::vec2(1.0, 1.0 + 0.25 * sin(currentTime)));
-        cubeMesh->getMaterial()->diffuse_transform.setRotation(0.25 * sin(currentTime));
-        cubeMesh->getMaterial()->diffuse_transform.setOffset(glm::vec2(0.0, 0.0 + 0.25 * sin(currentTime)));
-        cubeMesh->getMaterial()->diffuse_transform.setScale(glm::vec2(1.0, 1.0 + 0.25 * sin(currentTime)));
-        pointLightNode->transform().setRotation(glm::angleAxis(currentTime, glm::vec3(0, 1, 0)));
-
         /* do some drawing */
-        facebook.bind();
         scene.renderInContext();
-        facebook.unbind();
-        facebook.renderInContext();
+        // facebook.bind();
+        // scene.renderInContext();
+        // facebook.unbind();
+        // facebook.renderInContext();
 
         glfwSwapBuffers(window); // draw the new image to the buffer
         lastTimeUpdate = currentTime;

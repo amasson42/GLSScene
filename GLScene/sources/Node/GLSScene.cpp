@@ -18,6 +18,12 @@ namespace GLS {
     {
 
     }
+
+    Scene::Scene(glm::vec2 size) :
+    Scene()
+    {
+        _size = size;
+    }
     
     Scene::Scene(const Scene& copy) :
     _size(copy._size),
@@ -40,7 +46,15 @@ namespace GLS {
         _skybox = copy._skybox;
         return *this;
     }
-    
+
+    glm::vec2 Scene::getSize() const {
+        return _size;
+    }
+
+    float Scene::getAspect() const {
+        return _size.x / _size.y;
+    }
+
     Node& Scene::rootNode() {
         return *_rootNode;
     }
@@ -94,9 +108,9 @@ namespace GLS {
                 uniforms.projection = _cameraNode->camera()->projectionMatrix();
         }
         
-        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMesh();
         _calculLights();
-        sendLightsValueToShader(program);
+        sendLightsValueToShader(ShaderProgram::standardShaderProgramMesh());
+        sendLightsValueToShader(ShaderProgram::standardShaderProgramInstancedMesh());
         
         _rootNode->renderInContext(*this, uniforms);
         

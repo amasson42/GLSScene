@@ -36,7 +36,7 @@ namespace GLS {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    Texture::Texture(std::string path, GLenum format) throw(CreationException, LoadingException){
+    Texture::Texture(std::string path) throw(CreationException, LoadingException){
         int bpp;
         int width, height;
         uint8_t *data = stbi_load(path.c_str(), &width, &height, &bpp, 0);
@@ -44,6 +44,15 @@ namespace GLS {
         _height = height;
         if (data == NULL) {
             throw LoadingException();
+        }
+        GLuint format;
+        switch (bpp) {
+            case 1: format = GL_RED;  break;
+            case 3: format = GL_RGB;  break;
+            case 4: format = GL_RGBA; break;
+            default:
+                stbi_image_free(data);
+                throw CreationException();
         }
         glGenTextures(1, &_buffer);
         if (_buffer == 0) {

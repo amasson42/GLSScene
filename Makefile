@@ -1,6 +1,7 @@
 
 NAME = game
-FLAGS = -Wall -Werror -Wextra -O2
+FLAGS = -Wall -Werror -Wextra -O2 -std=c++11
+SRCS = main.cpp scene1.cpp scene2.cpp
 
 all:
 	make -C GLScene
@@ -24,7 +25,7 @@ $(NAME):
 		`pkg-config glm --cflags-only-I` \
 		`pkg-config assimp --cflags-only-I` \
 		-I GLScene/includes \
-		main.cpp -o game \
+		$(SRCS) -o game \
 		GLScene/GLScene.a
 
 clean:

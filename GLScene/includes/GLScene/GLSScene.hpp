@@ -33,11 +33,15 @@ namespace GLS {
     public:
         
         Scene();
+        Scene(glm::vec2 size);
         Scene(const Scene& copy);
         virtual ~Scene();
         
         Scene& operator=(const Scene& copy);
         
+        glm::vec2 getSize() const;
+        float getAspect() const;
+
 		Node& rootNode();
 		const Node& rootNode() const;
 		

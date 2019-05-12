@@ -10,11 +10,17 @@
 #define GLScene_h
 
 #include <iostream>
+#include <fstream>
 #include <exception>
 #include <string>
 #include <vector>
 #include <map>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+#define GL_SILENCE_DEPRECATION
 #include <OpenGL/gl3.h>
 
 #include "GLScene/GLSStructs.hpp"
