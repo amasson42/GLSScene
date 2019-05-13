@@ -14,9 +14,7 @@ namespace GLS {
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
             std::shared_ptr<Mesh> nMesh = Mesh::loadFromAiMesh(mesh);
-            if (mesh->mMaterialIndex >= 0) {
-                nMesh->setMaterial(materials[mesh->mMaterialIndex]);
-            }
+            nMesh->setMaterial(materials[mesh->mMaterialIndex]);
             n->addRenderable(nMesh);
         }
         for (unsigned int i = 0; i < node->mNumChildren; i++) {
@@ -37,6 +35,7 @@ namespace GLS {
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             materials.push_back(Material::loadFromAiMaterial(scene->mMaterials[i], directory));
         }
+        materials.push_back(std::make_shared<Material>());
         _processLoadNode(this, scene->mRootNode, scene, materials);
     }
 

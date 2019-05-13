@@ -162,7 +162,7 @@ namespace GLS {
     }
 
     static std::shared_ptr<Texture> _loadTextureTypeFromMaterial(aiMaterial *material, aiTextureType type, const std::string& directory) {
-        if (material->GetTextureCount(type) >= 0) {
+        if (material->GetTextureCount(type) > 0) {
             aiString textureName;
             material->GetTexture(type, 0, &textureName);
             std::cout << "load texture with name: " << textureName.C_Str() << std::endl;

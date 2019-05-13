@@ -90,7 +90,7 @@ void loadScene1(GLS::Scene& scene) {
     std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
     pointlight->setType(GLS::light_point);
-    pointlight->setPosition(glm::vec3(0, 15, -7));
+    pointlight->setPosition(glm::vec3(0, 15, 9));
     pointLightNode->setLight(pointlight);
     scene.rootNode().addChildNode(pointLightNode);
     pointLightNode->setName("pointight");

@@ -71,8 +71,6 @@ int launch(std::vector<std::string>& modelNames) {
     
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     glEnable(GL_MULTISAMPLE);
-
-    /* create mesh */
     
     // try compilation of shaders
     try {
@@ -92,7 +90,7 @@ int launch(std::vector<std::string>& modelNames) {
     // create simple mesh
 
     GLS::Scene scene(glm::vec2(win_width, win_height));
-    loadScene2(scene);
+    loadScene1(scene);
     
     //
 
