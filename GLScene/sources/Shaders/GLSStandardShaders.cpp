@@ -234,13 +234,13 @@ namespace GLS {
         return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
     }
     
-    std::shared_ptr<Shader> Shader::standardFragmentMeshOutline() {
+    std::shared_ptr<Shader> Shader::standardFragmentMeshSimpleColor() {
         std::string src =
         "#version 400 core\n\n"
         "out vec4 FragColor;\n"
-        "uniform vec3 border_color;\n"
+        "uniform vec3 color;\n"
         "void main() {\n"
-        "   FragColor = vec4(border_color, 1.0);\n"
+        "   FragColor = vec4(color, 1.0);\n"
         "}\n"
         "\n";
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);

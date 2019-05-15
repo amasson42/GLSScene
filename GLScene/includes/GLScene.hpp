@@ -39,4 +39,6 @@
 #include "GLScene/GLSScene.hpp"
 #include "GLScene/GLSFramebuffer.hpp"
 
+#include "GLScene/GLSAnimator.tpp"
+
 #endif /* GLScene_h */

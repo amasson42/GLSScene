@@ -1,5 +1,7 @@
 
 NAME = game
+
+CC = clang++
 FLAGS = -Wall -Werror -Wextra -O2 -std=c++11
 SRCS = main.cpp scene1.cpp scene2.cpp
 
@@ -15,8 +17,7 @@ install:
 	brew install assimp || brew upgrade assimp
 
 $(NAME):
-	clang++ \
-		$(FLAGS) \
+	$(CC) $(FLAGS) \
 		-lm -framework OpenGL \
 		`pkg-config --static --libs glfw3` \
 		`pkg-config --static --libs glm` \

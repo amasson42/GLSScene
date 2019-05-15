@@ -58,7 +58,7 @@ namespace GLS {
         static std::shared_ptr<Shader> standardVertexSkybox();
 
         static std::shared_ptr<Shader> standardFragmentMesh();
-        static std::shared_ptr<Shader> standardFragmentMeshOutline();
+        static std::shared_ptr<Shader> standardFragmentMeshSimpleColor();
         static std::shared_ptr<Shader> standardFragmentScreenTexture();
         static std::shared_ptr<Shader> standardFragmentSkybox();
         
@@ -73,9 +73,9 @@ namespace GLS {
         ShaderProgram& operator=(const ShaderProgram& copy);
         
         static std::shared_ptr<ShaderProgram> _standardShaderProgramMesh;
-        static std::shared_ptr<ShaderProgram> _standardShaderProgramMeshOutline;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramMeshSimpleColor;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramInstancedMesh;
-        static std::shared_ptr<ShaderProgram> _standardShaderProgramInstancedMeshOutline;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramInstancedMeshSimpleColor;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramScreenTexture;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramSkybox;
 
@@ -103,9 +103,9 @@ namespace GLS {
         void use() const;
         
         static std::shared_ptr<ShaderProgram> standardShaderProgramMesh();
-        static std::shared_ptr<ShaderProgram> standardShaderProgramMeshOutline();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramMeshSimpleColor();
         static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMesh();
-        static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMeshOutline();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMeshSimpleColor();
         static std::shared_ptr<ShaderProgram> standardShaderProgramScreenTexture();
         static std::shared_ptr<ShaderProgram> standardShaderProgramSkybox();
 

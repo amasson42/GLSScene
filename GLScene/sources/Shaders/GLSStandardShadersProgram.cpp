@@ -22,15 +22,15 @@ namespace GLS {
         return _standardShaderProgramMesh;
     }
 
-    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramMeshOutline = nullptr;
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramMeshSimpleColor = nullptr;
 
-    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramMeshOutline() {
-        if (_standardShaderProgramMeshOutline == nullptr) {
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramMeshSimpleColor() {
+        if (_standardShaderProgramMeshSimpleColor == nullptr) {
             std::shared_ptr<Shader> vertex = Shader::standardVertexMesh();
-            std::shared_ptr<Shader> fragment = Shader::standardFragmentMeshOutline();
-            _standardShaderProgramMeshOutline = std::make_shared<ShaderProgram>(*vertex, *fragment);
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentMeshSimpleColor();
+            _standardShaderProgramMeshSimpleColor = std::make_shared<ShaderProgram>(*vertex, *fragment);
         }
-        return _standardShaderProgramMeshOutline;
+        return _standardShaderProgramMeshSimpleColor;
     }
 
     std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramInstancedMesh = nullptr;
@@ -44,15 +44,15 @@ namespace GLS {
         return _standardShaderProgramInstancedMesh;
     }
 
-    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramInstancedMeshOutline = nullptr;
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramInstancedMeshSimpleColor = nullptr;
 
-    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramInstancedMeshOutline() {
-        if (_standardShaderProgramInstancedMeshOutline == nullptr) {
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramInstancedMeshSimpleColor() {
+        if (_standardShaderProgramInstancedMeshSimpleColor == nullptr) {
             std::shared_ptr<Shader> vertex = Shader::standardVertexInstancedMesh();
-            std::shared_ptr<Shader> fragment = Shader::standardFragmentMeshOutline();
-            _standardShaderProgramInstancedMeshOutline = std::make_shared<ShaderProgram>(*vertex, *fragment);
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentMeshSimpleColor();
+            _standardShaderProgramInstancedMeshSimpleColor = std::make_shared<ShaderProgram>(*vertex, *fragment);
         }
-        return _standardShaderProgramInstancedMeshOutline;
+        return _standardShaderProgramInstancedMeshSimpleColor;
     }
 
     std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramScreenTexture = nullptr;

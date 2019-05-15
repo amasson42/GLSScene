@@ -267,14 +267,14 @@ namespace GLS {
         if (_outlined && priority == 1) {
             glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
             glStencilMask(0x00);
-            std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMeshOutline();
+            std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMeshSimpleColor();
             program->use();
             glm::mat4 scaleUpModel = glm::scale(uniforms.model, glm::vec3(_outlineSize));
 
             glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(uniforms.projection));
             glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(uniforms.view));
             glUniformMatrix4fv(program->getLocation("u_mat_model"), 1, GL_FALSE, glm::value_ptr(scaleUpModel));
-            glUniform3f(program->getLocation("border_color"), _outlineColor.x, _outlineColor.y, _outlineColor.z);
+            glUniform3f(program->getLocation("color"), _outlineColor.x, _outlineColor.y, _outlineColor.z);
 
             glBindVertexArray(_elementsBuffer);
             glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);

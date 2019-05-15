@@ -74,6 +74,8 @@ namespace GLS {
 
         if (Framebuffer::_rectbuffer == 0)
             _createRectBuffer(&Framebuffer::_rectbuffer);
+        
+        unbind();
     }
 
     Framebuffer::~Framebuffer() {

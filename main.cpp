@@ -19,11 +19,80 @@
 
 #include <GLFW/glfw3.h>
 #include <cmath>
+#include <stdlib.h>
 
 void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene);
 int launch(std::vector<std::string>& modelNames);
 
+float floatLinearValue(const float a, const float b, const double timePercent) {
+    return ((b - a) * timePercent + a);
+}
+
+struct SimpleAnimationFrame {
+    float r;
+    float g;
+    float b;
+
+    SimpleAnimationFrame() : r(0), g(0), b(0) {
+
+    }
+
+    static SimpleAnimationFrame linearValue(const SimpleAnimationFrame& a,
+                                            const SimpleAnimationFrame& b,
+                                            double timePercent) {
+        SimpleAnimationFrame r;
+        r.r = floatLinearValue(a.r, b.r, timePercent);
+        r.g = floatLinearValue(a.g, b.g, timePercent);
+        r.b = floatLinearValue(a.b, b.b, timePercent);
+        return r;
+    }
+
+    bool LoadValuesFromLine(const std::vector<std::string>& words) {
+        if (words.size() < 2)
+            return false;
+        if (words[0] == "r") {
+            r = atof(words[1].c_str());
+            return true;
+        }
+        if (words[0] == "g") {
+            g = atof(words[1].c_str());
+            return true;
+        }
+        if (words[0] == "b") {
+            g = atof(words[1].c_str());
+            return true;
+        }
+        return false;
+    }
+};
+
+std::ostream& operator<<(std::ostream& out, const SimpleAnimationFrame& aframe) {
+    out << '{' << aframe.r << ';' << aframe.g << ';' << aframe.b << '}';
+    return out;
+}
+
 int main(int argc, const char * argv[]) {
+    SimpleAnimationFrame a;
+    std::cout << a << std::endl;
+
+    GLS::Animator<SimpleAnimationFrame> anim;
+    anim.addKeyframeAt(0, a);
+    a.r = 5;
+    anim.addKeyframeAt(3, a);
+    a.g = 2.5;
+    anim.addKeyframeAt(1.5, a);
+    a.b = 7;
+    anim.addKeyframeAt(4, a);
+    anim.removeKeyframeAt(3);
+    anim.removeKeyframeAt(0.01);
+
+    std::cout << anim << std::endl;
+
+    for (double t = -0.5; t < 5.0; t += 0.25) {
+        std::cout << "t:" << t << " -> " << anim.frameAt(t) << std::endl;
+    }
+
+    return (0);
     std::vector<std::string> args;
     for (int i = 1; i < argc; i++)
         args.push_back(argv[i]);
@@ -46,10 +115,10 @@ void loadScene2(GLS::Scene& scene);
 int launch(std::vector<std::string>& modelNames) {
 
 	static_cast<void>(modelNames);
-	
+
     if (!glfwInit()) // init the lib once
         return (EXIT_FAILURE);
-    
+
     glfwWindowHint(GLFW_SAMPLES, 1);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
@@ -57,7 +126,7 @@ int launch(std::vector<std::string>& modelNames) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
     GLFWwindow *window = nullptr; // create a window pointer
-    
+
     const int win_width = 1200, win_height = 800, win_margin = 0;
     window = glfwCreateWindow(win_width, win_height, "openGL", nullptr, nullptr);
     if (window == nullptr) {
@@ -68,14 +137,14 @@ int launch(std::vector<std::string>& modelNames) {
     glfwMakeContextCurrent(window); // make context to draw to
     glViewport(win_margin, win_margin,
             win_width - 2 * win_margin, win_height - 2 * win_margin);
-    
+
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     glEnable(GL_MULTISAMPLE);
-    
+
     // try compilation of shaders
     try {
         GLS::ShaderProgram::standardShaderProgramMesh();
-        GLS::ShaderProgram::standardShaderProgramMeshOutline();
+        GLS::ShaderProgram::standardShaderProgramMeshSimpleColor();
         GLS::ShaderProgram::standardShaderProgramScreenTexture();
         GLS::ShaderProgram::standardShaderProgramSkybox();
     } catch (GLS::Shader::CompilationException& e) {
@@ -85,13 +154,13 @@ int launch(std::vector<std::string>& modelNames) {
         glfwTerminate();
         return EXIT_FAILURE;
     }
-    
+
     std::cout << "shaders compiled" << std::endl;
     // create simple mesh
 
     GLS::Scene scene(glm::vec2(win_width, win_height));
     loadScene1(scene);
-    
+
     //
 
     GLS::Framebuffer facebook(win_width, win_height);
@@ -116,7 +185,7 @@ int launch(std::vector<std::string>& modelNames) {
         glfwSwapBuffers(window); // draw the new image to the buffer
         lastTimeUpdate = currentTime;
     }
-    
+
     std::cout << "Ending..." << std::endl;
     glfwTerminate(); // free all used memory of glfw
     return (EXIT_SUCCESS);
@@ -133,7 +202,7 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
         glm::vec3 cameraFront = glm::vec3(cameraMat * glm::vec4(0, 0, -1, 0));
         glm::vec3 cameraRight = glm::vec3(cameraMat * glm::vec4(1, 0, 0, 0));
         glm::vec3 cameraUp = glm::vec3(cameraMat * glm::vec4(0, 1, 0, 0));
-        
+
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
             cam.transform().moveBy(cameraSpeed * cameraFront);
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -146,7 +215,7 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
             cam.transform().moveBy(cameraSpeed * cameraUp);
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
             cam.transform().moveBy(-cameraSpeed * cameraUp);
-        
+
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
             cam.transform().rotateEulerAnglesBy(0, cameraSpeed, 0);
         if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
@@ -155,6 +224,6 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
             cam.transform().rotateEulerAnglesBy(-cameraSpeed, 0, 0);
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
             cam.transform().rotateEulerAnglesBy(cameraSpeed, 0, 0);
-        
+
     }
 }
