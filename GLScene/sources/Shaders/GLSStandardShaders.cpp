@@ -151,8 +151,8 @@ namespace GLS {
         "        Light light = lights[i];\n"
         "        switch (light.type) {\n" // unused = 0; sunlight = 1; spotlight = 2; pointlight = 3; ambiantlight = 4;
         "           case 1:\n" // sunlight
-        "               light_direction = normalize(light.direction);\n"
-        "               diffuse_intensity = clamp(dot(light_direction, normal_direction), 0.0, 1.0);\n"
+        "               light_direction = normalize(light.position - fin_wposition);\n"
+        "               diffuse_intensity = clamp(dot(-light_direction, normal_direction), 0.0, 1.0);\n"
         "               diffuse_color += light.color * diffuse * diffuse_intensity;\n"
         "               if (diffuse_intensity > 0) {\n"
         "                   vec3 reflection = reflect(light_direction, normal_direction);\n"
@@ -162,8 +162,8 @@ namespace GLS {
         "           case 2:\n" // spotlight
         "               d = distance(light.position, fin_wposition);\n"
         "               light_direction = normalize(light.position - fin_wposition);\n"
-        "               vec3 cone_direction = normalize(-light.direction);\n"
-        "               float spot_result = dot(light_direction, cone_direction);\n"
+        "               vec3 cone_direction = normalize(light.direction);\n"
+        "               float spot_result = dot(light_direction, -cone_direction);\n"
         "               if (spot_result > cos(light.angle)) {\n"
         "                   float attenuation = 1.0 / (light.attenuation.x + light.attenuation.y * d + light.attenuation.z * d * d);\n"
         "                   attenuation *= pow(spot_result, light.cone_attenuation);\n"

@@ -24,75 +24,7 @@
 void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene);
 int launch(std::vector<std::string>& modelNames);
 
-float floatLinearValue(const float a, const float b, const double timePercent) {
-    return ((b - a) * timePercent + a);
-}
-
-struct SimpleAnimationFrame {
-    float r;
-    float g;
-    float b;
-
-    SimpleAnimationFrame() : r(0), g(0), b(0) {
-
-    }
-
-    static SimpleAnimationFrame linearValue(const SimpleAnimationFrame& a,
-                                            const SimpleAnimationFrame& b,
-                                            double timePercent) {
-        SimpleAnimationFrame r;
-        r.r = floatLinearValue(a.r, b.r, timePercent);
-        r.g = floatLinearValue(a.g, b.g, timePercent);
-        r.b = floatLinearValue(a.b, b.b, timePercent);
-        return r;
-    }
-
-    bool LoadValuesFromLine(const std::vector<std::string>& words) {
-        if (words.size() < 2)
-            return false;
-        if (words[0] == "r") {
-            r = atof(words[1].c_str());
-            return true;
-        }
-        if (words[0] == "g") {
-            g = atof(words[1].c_str());
-            return true;
-        }
-        if (words[0] == "b") {
-            g = atof(words[1].c_str());
-            return true;
-        }
-        return false;
-    }
-};
-
-std::ostream& operator<<(std::ostream& out, const SimpleAnimationFrame& aframe) {
-    out << '{' << aframe.r << ';' << aframe.g << ';' << aframe.b << '}';
-    return out;
-}
-
 int main(int argc, const char * argv[]) {
-    SimpleAnimationFrame a;
-    std::cout << a << std::endl;
-
-    GLS::Animator<SimpleAnimationFrame> anim;
-    anim.addKeyframeAt(0, a);
-    a.r = 5;
-    anim.addKeyframeAt(3, a);
-    a.g = 2.5;
-    anim.addKeyframeAt(1.5, a);
-    a.b = 7;
-    anim.addKeyframeAt(4, a);
-    anim.removeKeyframeAt(3);
-    anim.removeKeyframeAt(0.01);
-
-    std::cout << anim << std::endl;
-
-    for (double t = -0.5; t < 5.0; t += 0.25) {
-        std::cout << "t:" << t << " -> " << anim.frameAt(t) << std::endl;
-    }
-
-    return (0);
     std::vector<std::string> args;
     for (int i = 1; i < argc; i++)
         args.push_back(argv[i]);
@@ -111,6 +43,7 @@ void printNodePosition(const GLS::Node& node) {
 
 void loadScene1(GLS::Scene& scene);
 void loadScene2(GLS::Scene& scene);
+void updateScene2(double timeElapsed, double deltaTime);
 
 int launch(std::vector<std::string>& modelNames) {
 
@@ -159,7 +92,7 @@ int launch(std::vector<std::string>& modelNames) {
     // create simple mesh
 
     GLS::Scene scene(glm::vec2(win_width, win_height));
-    loadScene1(scene);
+    loadScene2(scene);
 
     //
 
@@ -174,6 +107,8 @@ int launch(std::vector<std::string>& modelNames) {
         float deltaTime = currentTime - lastTimeUpdate;
         if (true)
             processInput(window, deltaTime, scene);
+
+        updateScene2(currentTime, deltaTime);
 
         /* do some drawing */
         scene.renderInContext();

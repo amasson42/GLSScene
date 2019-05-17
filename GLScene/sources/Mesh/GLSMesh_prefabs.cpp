@@ -40,20 +40,82 @@ namespace GLS {
         w /= 2.0;
         h /= 2.0;
         l /= 2.0;
-        vertices.push_back(Vertex(glm::vec3(-w, -h, -l), glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec2(0, 0)));
-        vertices.push_back(Vertex(glm::vec3(-w, -h, l), glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec2(1, 1)));
-        vertices.push_back(Vertex(glm::vec3(-w, h, -l), glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec2(0, 1)));
-        vertices.push_back(Vertex(glm::vec3(-w, h, l), glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec2(1, 0)));
-        vertices.push_back(Vertex(glm::vec3(w, -h, -l), glm::vec3(1.0f, -1.0f, -1.0f), glm::vec2(1, 0)));
-        vertices.push_back(Vertex(glm::vec3(w, -h, l), glm::vec3(1.0f, -1.0f, 1.0f), glm::vec2(0, 1)));
-        vertices.push_back(Vertex(glm::vec3(w, h, -l), glm::vec3(1.0f, 1.0f, -1.0f), glm::vec2(1, 1)));
-        vertices.push_back(Vertex(glm::vec3(w, h, l), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0, 0)));
-        indices = {1, 5, 3, 5, 7, 3,
-                    2, 4, 0, 2, 6, 4,
-                    0, 1, 2, 1, 3, 2,
-                    6, 5, 4, 6, 7, 5,
-                    2, 3, 6, 6, 3, 7,
-                    4, 1, 0, 5, 1, 4};
+
+        glm::vec3 pos_000 = glm::vec3(-w, -h, -l);
+        glm::vec3 pos_001 = glm::vec3(-w, -h, l);
+        glm::vec3 pos_010 = glm::vec3(-w, h, -l);
+        glm::vec3 pos_011 = glm::vec3(-w, h, l);
+
+        glm::vec3 pos_100 = glm::vec3(w, -h, -l);
+        glm::vec3 pos_101 = glm::vec3(w, -h, l);
+        glm::vec3 pos_110 = glm::vec3(w, h, -l);
+        glm::vec3 pos_111 = glm::vec3(w, h, l);
+
+        glm::vec3 dir_x = glm::vec3(1, 0, 0);
+        glm::vec3 dir_y = glm::vec3(0, 1, 0);
+        glm::vec3 dir_z = glm::vec3(0, 0, 1);
+
+        glm::vec2 uv_00 = glm::vec2(0, 0);
+        glm::vec2 uv_01 = glm::vec2(0, 1);
+        glm::vec2 uv_10 = glm::vec2(1, 0);
+        glm::vec2 uv_11 = glm::vec2(1, 1);
+
+        int io = 0;
+
+        // face x
+        vertices.push_back(Vertex(pos_100, dir_x, uv_00));
+        vertices.push_back(Vertex(pos_101, dir_x, uv_10));
+        vertices.push_back(Vertex(pos_111, dir_x, uv_11));
+        vertices.push_back(Vertex(pos_110, dir_x, uv_01));
+        indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
+        indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
+        io += 4;
+
+        // face -x
+        vertices.push_back(Vertex(pos_001, -dir_x, uv_00));
+        vertices.push_back(Vertex(pos_000, -dir_x, uv_10));
+        vertices.push_back(Vertex(pos_010, -dir_x, uv_11));
+        vertices.push_back(Vertex(pos_011, -dir_x, uv_01));
+        indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
+        indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
+        io += 4;
+
+        // face y
+        vertices.push_back(Vertex(pos_010, dir_y, uv_00));
+        vertices.push_back(Vertex(pos_110, dir_y, uv_10));
+        vertices.push_back(Vertex(pos_111, dir_y, uv_11));
+        vertices.push_back(Vertex(pos_011, dir_y, uv_01));
+        indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
+        indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
+        io += 4;
+
+        // face -y
+        vertices.push_back(Vertex(pos_100, -dir_y, uv_00));
+        vertices.push_back(Vertex(pos_000, -dir_y, uv_10));
+        vertices.push_back(Vertex(pos_001, -dir_y, uv_11));
+        vertices.push_back(Vertex(pos_101, -dir_y, uv_01));
+        indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
+        indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
+        io += 4;
+
+        // face z
+        vertices.push_back(Vertex(pos_101, dir_z, uv_00));
+        vertices.push_back(Vertex(pos_001, dir_z, uv_10));
+        vertices.push_back(Vertex(pos_011, dir_z, uv_11));
+        vertices.push_back(Vertex(pos_111, dir_z, uv_01));
+        indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
+        indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
+        io += 4;
+
+        // face -z
+        vertices.push_back(Vertex(pos_000, -dir_z, uv_00));
+        vertices.push_back(Vertex(pos_100, -dir_z, uv_10));
+        vertices.push_back(Vertex(pos_110, -dir_z, uv_11));
+        vertices.push_back(Vertex(pos_010, -dir_z, uv_01));
+        indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
+        indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
+        io += 4;
+
         if (generateBuffers)
             mesh->generateBuffers();
         return mesh;

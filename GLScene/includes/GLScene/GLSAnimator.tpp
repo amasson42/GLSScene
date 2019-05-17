@@ -11,6 +11,16 @@
 
 #include "GLScene.hpp"
 
+static inline std::vector<std::string> _splitWithSpaces(const std::string& str) {
+    std::vector<std::string> words;
+    std::stringstream ss(str);
+    std::string tok;
+    while (std::getline(ss, tok, ' ')) {
+        words.push_back(tok);
+    }
+    return words;
+}
+
 namespace GLS {
 
     template <typename Aframe>
@@ -28,9 +38,25 @@ namespace GLS {
 
         }
 
+        bool readValueFromWords(const std::vector<std::string>& words, Aframe& frame) {
+            if (words.size() < 2)
+                return false;
+            if (words[0] == "time") {
+                addKeyframeAt(std::atof(words[1].c_str()), frame);
+                frame = Aframe();
+                return true;
+            }
+            return false;
+        }
+
         Animator(std::ifstream& input) : _keyframes() {
-            // TODO:
-            (void)input;
+            Aframe frame = Aframe();
+            std::string line;
+            while (std::getline(input, line)) {
+                std::vector<std::string> words = _splitWithSpaces(line);
+                if (readValueFromWords(words, frame) == 0)
+                    frame.readValuesFromWords(words);
+            }
         }
 
         virtual ~Animator() {
@@ -98,7 +124,7 @@ namespace GLS {
         animator.send_to_flux(out);
         return out;
     }
-
+    
 }
 
 #endif /* GLSAnimator_t */
