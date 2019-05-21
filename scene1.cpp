@@ -79,18 +79,18 @@ void loadScene1(GLS::Scene& scene) {
 
     std::shared_ptr<GLS::Node> spotlightNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Light> spotlight = std::make_shared<GLS::Light>();
-    spotlight->setType(GLS::light_spot);
-    spotlight->setPosition(glm::vec3(0, 4, 0));
-    spotlight->setDirection(glm::vec3(4, -1, 0));
-    spotlight->setAngle(1.5);
+    spotlight->type = GLS::light_spot;
+    spotlight->position = glm::vec3(0, 4, 0);
+    spotlight->direction = glm::vec3(4, -1, 0);
+    spotlight->angle = 1.5;
     spotlightNode->setLight(spotlight);
     scene.rootNode().addChildNode(spotlightNode);
     spotlightNode->setName("spotlight");
 
     std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
-    pointlight->setType(GLS::light_point);
-    pointlight->setPosition(glm::vec3(0, 15, 9));
+    pointlight->type = (GLS::light_point);
+    pointlight->position = (glm::vec3(0, 15, 9));
     pointLightNode->setLight(pointlight);
     scene.rootNode().addChildNode(pointLightNode);
     pointLightNode->setName("pointight");
@@ -121,8 +121,8 @@ void loadScene1(GLS::Scene& scene) {
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-        camera->setAspect(scene.getAspect());
-        camera->setFarZ(25.0);
+        camera->aspect = (scene.getAspect());
+        camera->farZ = (25.0);
         cameraNode->setCamera(camera);
     }
     cameraNode->transform().moveBy(0, 7, 5);

@@ -21,52 +21,21 @@ namespace GLS {
         light_ambiant = 4
     };
 
-    class Light {
+    struct Light {
 
-        LightType _type;
-        glm::vec3 _position;
-        glm::vec3 _color;
-        glm::vec3 _specular;
-        GLfloat _intensity;
-        glm::vec3 _attenuation;
-        glm::vec3 _direction;
-        GLfloat _angle;
-        GLfloat _cone_attenuation;
+        LightType type;
 
-    public:
+        glm::vec3 position;
+        glm::vec3 color;
+        glm::vec3 specular;
+        GLfloat intensity;
+        glm::vec3 attenuation;
+
+        glm::vec3 direction; // for directional and spot
+        GLfloat angle; // for spot
+        GLfloat cone_attenuation; // for spot
+
         Light();
-        Light(const Light& copy);
-        virtual ~Light();
-
-        Light& operator=(const Light& copy);
-
-        LightType type() const;
-        void setType(LightType type);
-
-        glm::vec3 position() const;
-        void setPosition(glm::vec3 position);
-
-        glm::vec3 color() const;
-        void setColor(glm::vec3 color);
-
-        glm::vec3 specular() const;
-        void setSpecular(glm::vec3 specular);
-
-        GLfloat intensity() const;
-        void setIntensity(GLfloat intensity);
-
-        glm::vec3 attenuation() const;
-        void setAttenuation(glm::vec3 attenuation);
-
-        glm::vec3 direction() const;
-        void setDirection(glm::vec3 direction);
-
-        GLfloat angle() const;
-        void setAngle(GLfloat angle);
-
-        GLfloat coneAttenuation() const;
-        void setConeAttenuation(GLfloat cone_attenuation);
-
 
         // Utilities
 

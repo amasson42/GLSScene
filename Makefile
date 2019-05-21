@@ -3,7 +3,7 @@ NAME = game
 
 CC = clang++
 FLAGS = -Wall -Werror -Wextra -O2 -std=c++11
-SRCS = main.cpp scene1.cpp scene2.cpp
+SRCS = main.cpp scene1.cpp scene2.cpp scene3.cpp
 
 all:
 	make -C GLScene

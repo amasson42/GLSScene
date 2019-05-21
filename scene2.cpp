@@ -213,8 +213,8 @@ void loadScene2(GLS::Scene& scene) {
     T_Node cameraNode = newNode();
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-        camera->setAspect(scene.getAspect());
-        camera->setFarZ(25.0);
+        camera->aspect = (scene.getAspect());
+        camera->farZ = (25.0);
         cameraNode->setCamera(camera);
     }
     cameraNode->transform().moveBy(0, 3, 5);
@@ -222,8 +222,8 @@ void loadScene2(GLS::Scene& scene) {
     scene.rootNode().addChildNode(cameraNode);
 
     std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
-    light->setPosition(glm::vec3(3, 5, 3));
-    light->setType(GLS::light_point);
+    light->position = (glm::vec3(3, 5, 3));
+    light->type = (GLS::light_point);
     scene.rootNode().setLight(light);
 
     // just a nanosuit

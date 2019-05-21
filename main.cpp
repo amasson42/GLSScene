@@ -44,6 +44,7 @@ void printNodePosition(const GLS::Node& node) {
 void loadScene1(GLS::Scene& scene);
 void loadScene2(GLS::Scene& scene);
 void updateScene2(double timeElapsed, double deltaTime);
+void loadScene3(GLS::Scene& scene);
 
 int launch(std::vector<std::string>& modelNames) {
 
@@ -92,7 +93,7 @@ int launch(std::vector<std::string>& modelNames) {
     // create simple mesh
 
     GLS::Scene scene(glm::vec2(win_width, win_height));
-    loadScene2(scene);
+    loadScene3(scene);
 
     //
 
@@ -108,7 +109,7 @@ int launch(std::vector<std::string>& modelNames) {
         if (true)
             processInput(window, deltaTime, scene);
 
-        updateScene2(currentTime, deltaTime);
+        // updateScene2(currentTime, deltaTime);
 
         /* do some drawing */
         scene.renderInContext();

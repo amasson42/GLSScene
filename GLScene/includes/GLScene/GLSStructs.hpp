@@ -21,8 +21,10 @@ namespace GLS {
     class Transform;
     class Scene;
     class Node;
-    class Camera;
-    class Light;
+
+    struct Camera;
+    struct Light;
+    
     class Material;
     class Mesh;
     class InstancedMesh;

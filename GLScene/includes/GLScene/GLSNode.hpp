@@ -22,8 +22,8 @@ namespace GLS {
         std::vector<std::shared_ptr<Node> > _childs;
         
         std::shared_ptr<Camera> _camera;
-        std::vector<std::shared_ptr<IRenderable> > _renderables;
         std::shared_ptr<Light> _light;
+        std::vector<std::shared_ptr<IRenderable> > _renderables;
         
         friend class Scene;
         void _getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix);

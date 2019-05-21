@@ -13,40 +13,17 @@
 
 namespace GLS {
     
-    class Camera {
+    struct Camera {
         
-        GLfloat _fov;
-        GLfloat _aspect;
-        GLfloat _nearZ;
-        GLfloat _farZ;
-        
-        glm::mat4 _projection;
-        bool _projectionUpdated;
-        
-    public:
+        GLfloat fov;
+        GLfloat aspect;
+        GLfloat nearZ;
+        GLfloat farZ;
         
         Camera(GLfloat fov = 1.5708, GLfloat aspect = 1.0f,
                GLfloat nearZ = 0.1f, GLfloat farZ = 100.0f);
-        Camera(const Camera& copy);
-        virtual ~Camera();
-        
-        Camera& operator=(const Camera& copy);
-        
-        GLfloat fov() const;
-        void setFov(GLfloat fov);
-        
-        GLfloat aspect() const;
-        void setAspect(GLfloat aspect);
-        
-        GLfloat nearZ() const;
-        void setNearZ(GLfloat nearZ);
-        
-        GLfloat farZ() const;
-        void setFarZ(GLfloat farZ);
         
         glm::mat4 projectionMatrix() const;
-        glm::mat4 projectionMatrix();
-        void updateProjectionMatrix();
         
     };
     
