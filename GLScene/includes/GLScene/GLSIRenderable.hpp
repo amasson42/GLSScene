@@ -21,6 +21,10 @@ namespace GLS {
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {(void)scene;(void)uniforms;(void)priority;}
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const = 0;
         
+        virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+            return renderInContext(scene, uniforms);
+        }
+
     };
     
 }

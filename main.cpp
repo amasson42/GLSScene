@@ -165,5 +165,12 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
         if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
             cam.transform().rotateEulerAnglesBy(cameraSpeed, 0, 0);
 
+        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+            if (glIsEnabled(GL_FRAMEBUFFER_SRGB))
+                glDisable(GL_FRAMEBUFFER_SRGB);
+            else
+                glEnable(GL_FRAMEBUFFER_SRGB);
+        }
+
     }
 }

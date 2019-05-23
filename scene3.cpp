@@ -6,11 +6,16 @@ float degreeToRadians(float deg) {
 }
 
 std::shared_ptr<GLS::Node> rotateNode = nullptr;
+std::shared_ptr<GLS::Node> pivotNode = nullptr;
 
 void updateScene3(double et, double dt) {
     (void)dt;
     if (rotateNode != nullptr) {
         rotateNode->transform().setEulerAngles(glm::vec3(0, et * 0.2, 0));
+    }
+    if (pivotNode != nullptr) {
+        float angle = ((sin(et) + 1.0) / 2.0) * degreeToRadians(-50);
+        pivotNode->transform().setEulerAngles(glm::vec3(angle, degreeToRadians(50), 0));
     }
 }
 
@@ -29,6 +34,10 @@ void loadScene3(GLS::Scene& scene) {
     
     auto cubeNode1 = std::make_shared<GLS::Node>();
     auto cubeMesh1 = GLS::Mesh::cube(1, 1, 1);
+    auto cubeMaterial1 = std::make_shared<GLS::Material>();
+    cubeMaterial1->shininess = 32;
+    cubeMaterial1->specular = glm::vec3(0, 0, 1);
+    cubeMesh1->setMaterial(cubeMaterial1);
     cubeNode1->addRenderable(cubeMesh1);
     cubeNode1->setName("cube1");
     cubeNode1->transform().setPosition(glm::vec3(-1, 0.75, 1));
@@ -37,7 +46,12 @@ void loadScene3(GLS::Scene& scene) {
 
     auto cubesNode = std::make_shared<GLS::Node>();
     auto smallCubeMesh = GLS::Mesh::cube(0.05, 0.05, 0.05);
+    auto smallCubeMaterial = std::make_shared<GLS::Material>();
+    smallCubeMaterial->diffuse = glm::vec3(0.8, 0.2, 0.3);
+    planeMesh->setMaterial(smallCubeMaterial);
+    smallCubeMesh->setMaterial(smallCubeMaterial);
     auto cubesMesh = std::make_shared<GLS::InstancedMesh>(*smallCubeMesh, 1000);
+    cubesMesh->setMaterial(smallCubeMaterial);
     for (size_t i = 0; i < cubesMesh->instancesCount(); i++) {
         float angle = randFloat() * M_PI * 2;
         float distance = randFloat() * 0.4 + 1.6;
@@ -60,21 +74,26 @@ void loadScene3(GLS::Scene& scene) {
     auto sphereMesh = GLS::Mesh::sphere(0.5);
     auto sphereMaterial = std::make_shared<GLS::Material>();
     sphereMaterial->shininess = 64;
+    sphereMaterial->specular = glm::vec3(1);
     sphereMesh->setMaterial(sphereMaterial);
     sphereNode->addRenderable(sphereMesh);
     sphereNode->setName("sphere");
     sphereNode->transform().setPosition(glm::vec3(1, 0.75, 1));
     scene.rootNode().addChildNode(sphereNode);
 
+    auto lightPivotNode = std::make_shared<GLS::Node>();
+    lightPivotNode->transform().setEulerAngles(glm::vec3(degreeToRadians(-50), degreeToRadians(50), 0));
+    lightPivotNode->setName("light_pivot");
+    scene.rootNode().addChildNode(lightPivotNode);
+    pivotNode = lightPivotNode;
+
     auto spotlightNode = std::make_shared<GLS::Node>();
     auto spotlight = std::make_shared<GLS::Light>();
-    spotlight->type = (GLS::light_point);
-    spotlight->attenuation = glm::vec3(1, 0.05, 0.01);
+    spotlight->type = (GLS::light_spot);
     spotlightNode->setLight(spotlight);
-    spotlightNode->transform().setPosition(glm::vec3(3, 4, 3));
-    spotlightNode->transform().setEulerAngles(glm::vec3(degreeToRadians(-50), degreeToRadians(50), 0));
+    spotlightNode->transform().setPosition(glm::vec3(0, 0, 4));
     spotlightNode->setName("spotlight");
-    scene.rootNode().addChildNode(spotlightNode);
+    lightPivotNode->addChildNode(spotlightNode);
     spotlightNode->addRenderable(GLS::Mesh::cube(0.2, 0.2, 0.6));
 
     auto ambiantLightNode = std::make_shared<GLS::Node>();

@@ -12,7 +12,7 @@ namespace GLS {
 
     Material::Material() :
     diffuse(1),
-    specular(1),
+    specular(0),
     roughness(1),
     metalness(1),
     occlusion(1),

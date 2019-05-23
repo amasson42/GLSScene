@@ -91,17 +91,12 @@ namespace GLS {
         }
 
         const size_t instancesCount = _instancesTransforms.size();
-        glm::mat4 *modelMatrices = new glm::mat4[instancesCount];
-        if (modelMatrices == nullptr) {
-            deleteBuffers();
-            throw BufferCreationException(); // yes... no... fuck you...
-        }
+        glm::mat4 modelMatrices[instancesCount];
         for (size_t i = 0; i < instancesCount; i++)
             modelMatrices[i] = _instancesTransforms[i].matrix();
         
         glBindBuffer(GL_ARRAY_BUFFER, _transformsBuffer);
         glBufferData(GL_ARRAY_BUFFER, _instancesTransforms.size() * sizeof(glm::mat4), modelMatrices, GL_STATIC_DRAW);
-        delete[] modelMatrices;
 
         glBindVertexArray(_elementsBuffer);
         glEnableVertexAttribArray(5);
@@ -199,4 +194,27 @@ namespace GLS {
         (void)scene;
     }
 
+    void InstancedMesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+        if (!bufferGenerated())
+            generateBuffers();
+        if (!bufferGenerated())
+            return;
+
+        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramInstancedMeshSimpleColor();
+        program->use();
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_CULL_FACE);
+
+        glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(uniforms.projection));
+        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(uniforms.view));
+        glUniformMatrix4fv(program->getLocation("u_mat_model"), 1, GL_FALSE, glm::value_ptr(uniforms.model));
+
+        glBindVertexArray(_elementsBuffer);
+        glDrawElementsInstanced(GL_TRIANGLES,
+                                static_cast<GLsizei>(_indices.size()),
+                                GL_UNSIGNED_INT, 0, _instancesTransforms.size());
+        (void)scene;
+    }
 }

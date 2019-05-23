@@ -13,7 +13,7 @@ namespace GLS {
     Light::Light() :
     type(light_unused), color(1), specular(1), intensity(1),
     attenuation(1, 0, 0),
-    angle(1.5), cone_attenuation(1),
+    angle(M_PI / 4), cone_attenuation(M_PI / 6),
     _position(0), _direction(0, 0, -1)
     {
 

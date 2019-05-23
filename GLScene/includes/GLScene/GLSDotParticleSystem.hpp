@@ -37,6 +37,7 @@ namespace GLS {
         
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
+        virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
 
     };
     

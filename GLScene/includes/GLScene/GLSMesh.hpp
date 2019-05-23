@@ -124,7 +124,8 @@ namespace GLS {
         
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
-        
+        virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
+
         // Prefabs
         
 
@@ -163,7 +164,8 @@ namespace GLS {
 
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
-
+        virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
+        
     };
     
 }
