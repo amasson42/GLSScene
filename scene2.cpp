@@ -222,9 +222,11 @@ void loadScene2(GLS::Scene& scene) {
     scene.rootNode().addChildNode(cameraNode);
 
     std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
-    light->position = (glm::vec3(3, 5, 3));
+    T_Node lightNode = newNode();
+    lightNode->transform().setPosition(glm::vec3(3, 5, 3));
     light->type = (GLS::light_point);
-    scene.rootNode().setLight(light);
+    lightNode->setLight(light);
+    scene.rootNode().addChildNode(lightNode);
 
     // just a nanosuit
     hooman = std::make_shared<Human>();

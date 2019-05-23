@@ -25,15 +25,18 @@ namespace GLS {
 
         LightType type;
 
-        glm::vec3 position;
         glm::vec3 color;
         glm::vec3 specular;
         GLfloat intensity;
         glm::vec3 attenuation;
 
-        glm::vec3 direction; // for directional and spot
         GLfloat angle; // for spot
         GLfloat cone_attenuation; // for spot
+
+        private:
+        glm::vec3 _position;
+        glm::vec3 _direction;
+        public:
 
         Light();
 

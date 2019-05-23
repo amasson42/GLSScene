@@ -216,6 +216,8 @@ namespace GLS {
     void Mesh::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
         if (!bufferGenerated())
             generateBuffers();
+        if (!bufferGenerated())
+            return;
         
         std::shared_ptr<ShaderProgram> program;
         if (_shaderProgram) {
@@ -234,8 +236,7 @@ namespace GLS {
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
-        glm::mat3 normalMatrix = glm::inverseTranspose(uniforms.model); // TODO: check if this is correct
-
+        glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(uniforms.model));
         glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(uniforms.projection));
         glUniformMatrix3fv(program->getLocation("u_mat_normal"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
         glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(uniforms.view));

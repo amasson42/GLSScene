@@ -80,8 +80,8 @@ void loadScene1(GLS::Scene& scene) {
     std::shared_ptr<GLS::Node> spotlightNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Light> spotlight = std::make_shared<GLS::Light>();
     spotlight->type = GLS::light_spot;
-    spotlight->position = glm::vec3(0, 4, 0);
-    spotlight->direction = glm::vec3(4, -1, 0);
+    spotlightNode->transform().setPosition(glm::vec3(0, 4, 0));
+    spotlightNode->transform().setEulerAngles(0.5, -0.4, 0);
     spotlight->angle = 1.5;
     spotlightNode->setLight(spotlight);
     scene.rootNode().addChildNode(spotlightNode);
@@ -90,7 +90,7 @@ void loadScene1(GLS::Scene& scene) {
     std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
     pointlight->type = (GLS::light_point);
-    pointlight->position = (glm::vec3(0, 15, 9));
+    pointLightNode->transform().setPosition(glm::vec3(0, 15, 9));
     pointLightNode->setLight(pointlight);
     scene.rootNode().addChildNode(pointLightNode);
     pointLightNode->setName("pointight");

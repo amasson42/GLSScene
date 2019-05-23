@@ -103,7 +103,8 @@ namespace GLS {
         RenderUniforms uniforms;
         if (_cameraNode) {
             uniforms.view = glm::inverse(_cameraNode->getWorldTransformMatrix());
-            uniforms.camera_position = glm::vec3(uniforms.view * glm::vec4(_cameraNode->transform().position(), 1));
+            // uniforms.camera_position = glm::vec3(uniforms.view * glm::vec4(_cameraNode->transform().position(), 1));
+            uniforms.camera_position = _cameraNode->transform().position();
             if (_cameraNode->camera() != nullptr)
                 uniforms.projection = _cameraNode->camera()->projectionMatrix();
         }
