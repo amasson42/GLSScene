@@ -25,6 +25,8 @@ namespace GLS {
         glm::vec4 _background;
 
         std::vector<Light> _frameLights;
+        std::vector<LightCaster> _frameLightCasters;
+        void _renderInLightCasterContext(LightCaster& caster);
         void _calculLights();
         
         // post rendering

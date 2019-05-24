@@ -39,8 +39,8 @@ namespace GLS {
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
     }
 
-    Framebuffer::Framebuffer(GLsizei width, GLsizei height) throw(CreationException) :
-        _framebuffer(0), _colorTexture(nullptr), _renderbuffer(0)
+    Framebuffer::Framebuffer(GLsizei width, GLsizei height, GLint format, GLenum type, GLenum attachment) throw(CreationException) :
+        _framebuffer(0), _colorTexture(nullptr)
     {
         glGenFramebuffers(1, &_framebuffer);
         if (_framebuffer == 0) {
@@ -49,38 +49,39 @@ namespace GLS {
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
         
         try {
-            _colorTexture = std::make_shared<Texture>(width, height);
+            _colorTexture = std::make_shared<Texture>(width, height, format, type);
         } catch (std::exception& e) {
             glDeleteFramebuffers(1, &_framebuffer);
             throw CreationException();
         }
         _colorTexture->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         _colorTexture->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        glFramebufferTexture2D(GL_FRAMEBUFFER, attachment,
             GL_TEXTURE_2D, _colorTexture->buffer(), 0);
 
-        glGenRenderbuffers(1, &_renderbuffer);
-        if (_renderbuffer == 0) {
-            glDeleteFramebuffers(1, &_framebuffer);
-            throw CreationException();
-        }
-        glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _renderbuffer);
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            throw CreationException();
-        }
+        // if (createRenderbuffer) {
+        //     glGenRenderbuffers(1, &_renderbuffer);
+        //     if (_renderbuffer == 0) {
+        //         glDeleteFramebuffers(1, &_framebuffer);
+        //         throw CreationException();
+        //     }
+        //     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+        //     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+        //     glBindRenderbuffer(GL_RENDERBUFFER, 0);
+        //     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _renderbuffer);
+        //     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        //         throw CreationException();
+        //     }
+        // }
 
         if (Framebuffer::_rectbuffer == 0)
             _createRectBuffer(&Framebuffer::_rectbuffer);
-        
+
         unbind();
     }
 
     Framebuffer::~Framebuffer() {
         glDeleteFramebuffers(1, &_framebuffer);
-        glDeleteRenderbuffers(1, &_renderbuffer);
     }
 
     GLsizei Framebuffer::width() const {

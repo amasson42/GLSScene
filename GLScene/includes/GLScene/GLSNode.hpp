@@ -82,7 +82,8 @@ namespace GLS {
         void setLight(std::shared_ptr<Light> light);
         
         void renderInContext(Scene& scene, const RenderUniforms& uniforms);
-        
+        void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
+
     };
     
 }

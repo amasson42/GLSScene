@@ -79,8 +79,43 @@ namespace GLS {
         _skybox = skybox;
     }
 
+    void Scene::_renderInLightCasterContext(LightCaster& caster) {
+        caster.depth_map->bind();
+        glViewport(0, 0, caster.depth_map->width(), caster.depth_map->height());
+        glClear(GL_DEPTH_BUFFER_BIT);
+        RenderUniforms uniforms;
+        uniforms.view = glm::inverse(caster.light._view);
+        uniforms.camera_position = glm::vec3(caster.light._view * glm::vec4(0, 0, 0, 1));
+        // TODO: value are arbitrary here, we must create light properties
+        GLfloat light_near = 0.1, light_far = 100.0;
+        GLfloat light_width = 10, light_height = 10;
+        if (caster.light.type == light_spot) {
+            uniforms.projection = Camera(caster.light.angle * 2, 1.0, light_near, light_far).projectionMatrix();
+            // uniforms.projection = glm::perspective(caster.light.angle, 1.0,
+            //                                        light_near, light_far);
+        } else if (caster.light.type == light_directional) {
+            uniforms.projection = glm::ortho(-light_width, light_width,
+                                             -light_height, light_height,
+                                             light_near, light_far);
+        }
+        // TODO: remove this shit and use light properties when sending to uniforms
+        caster.light._view = uniforms.projection * uniforms.view;
+        _rootNode->renderInDepthContext(*this, uniforms);
+        caster.depth_map->unbind();
+    }
+
     void Scene::_calculLights() {
         _rootNode->_getAllLights(_frameLights, glm::mat4(1));
+        for (size_t i = 0; i < _frameLights.size(); i++) {
+            if (Light::lightTypeCanCastShadow(_frameLights[i].type))
+                if (_frameLights[i].cast_shadow && _frameLightCasters.size() < 4) {
+                    LightCaster caster(1024, 1024);
+                    caster.light = _frameLights[i];
+                    _renderInLightCasterContext(caster);
+                    _frameLightCasters.push_back(caster);
+                    _frameLights[i]._caster_index = _frameLightCasters.size() - 1;
+                }
+        }
     }
 
     void Scene::sendLightsValueToShader(std::shared_ptr<ShaderProgram> program) {
@@ -89,27 +124,32 @@ namespace GLS {
             _frameLights[i].sendUniformToShaderProgram(program, static_cast<int>(i));
         }
         glUniform1i(program->getLocation("lights_count"), static_cast<int>(_frameLights.size()));
+        for (size_t i = 0; i < _frameLightCasters.size() && i < 4; i++) {
+            _frameLightCasters[i].sendUniformToShaderProgram(program, static_cast<int>(i));
+        }
     }
 
     typedef std::pair<IRenderable*, RenderUniforms> RenderAndUniforms;
 
     void Scene::renderInContext() {
         
+        _frameLights.clear();
+        _frameLightCasters.clear();
+        _postRenderables.clear();
+        _calculLights();
+
+        glViewport(0, 0, _size.x, _size.y);
         glClearColor(_background.x, _background.y, _background.z, _background.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        _frameLights.clear();
-        _postRenderables.clear();
 
         RenderUniforms uniforms;
         if (_cameraNode) {
             uniforms.view = glm::inverse(_cameraNode->getWorldTransformMatrix());
-            // uniforms.camera_position = glm::vec3(uniforms.view * glm::vec4(_cameraNode->transform().position(), 1));
             uniforms.camera_position = _cameraNode->transform().position();
             if (_cameraNode->camera() != nullptr)
                 uniforms.projection = _cameraNode->camera()->projectionMatrix();
         }
         
-        _calculLights();
         sendLightsValueToShader(ShaderProgram::standardShaderProgramMesh());
         sendLightsValueToShader(ShaderProgram::standardShaderProgramInstancedMesh());
         
@@ -126,6 +166,7 @@ namespace GLS {
         if (_skybox != nullptr) {
             _skybox->renderInContext(*this, uniforms);
         }
+
     }
     
     void Scene::subscribeToPostRenderable(IRenderable* renderable, const RenderUniforms& uniforms, float priority) {

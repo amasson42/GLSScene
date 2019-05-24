@@ -96,13 +96,10 @@ int launch(std::vector<std::string>& modelNames) {
     std::cout << "shaders compiled" << std::endl;
     // create simple mesh
 
-    GLS::Scene scene(glm::vec2(win_width, win_height));
+    GLS::Scene scene(glm::vec2(2 * win_width, 2 * win_height));
     loadScene(scene);
 
     //
-
-    GLS::Framebuffer facebook(win_width, win_height);
-    facebook.unbind();
 
     float lastTimeUpdate = glfwGetTime();
     while (!glfwWindowShouldClose(window)) { // loop while not closed

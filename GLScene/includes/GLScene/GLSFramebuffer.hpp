@@ -18,7 +18,6 @@ namespace GLS {
     class Framebuffer {
         GLuint _framebuffer;
         std::shared_ptr<Texture> _colorTexture;
-        GLuint _renderbuffer;
 
         static GLuint _rectbuffer;
 
@@ -33,7 +32,9 @@ namespace GLS {
             const char *what() const throw();
         };
         
-        Framebuffer(GLsizei width, GLsizei height) throw(CreationException);
+        Framebuffer(GLsizei width, GLsizei height,
+            GLint format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE,
+            GLenum attachment = GL_COLOR_ATTACHMENT0) throw(CreationException);
 
         virtual ~Framebuffer();
 

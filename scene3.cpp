@@ -11,7 +11,7 @@ std::shared_ptr<GLS::Node> pivotNode = nullptr;
 void updateScene3(double et, double dt) {
     (void)dt;
     if (rotateNode != nullptr) {
-        rotateNode->transform().setEulerAngles(glm::vec3(0, et * 0.2, 0));
+        rotateNode->transform().setEulerAngles(glm::vec3(0, et * 0.02, 0));
     }
     if (pivotNode != nullptr) {
         float angle = ((sin(et) + 1.0) / 2.0) * degreeToRadians(-50);
@@ -89,12 +89,12 @@ void loadScene3(GLS::Scene& scene) {
 
     auto spotlightNode = std::make_shared<GLS::Node>();
     auto spotlight = std::make_shared<GLS::Light>();
+    spotlight->cast_shadow = true;
     spotlight->type = (GLS::light_spot);
     spotlightNode->setLight(spotlight);
     spotlightNode->transform().setPosition(glm::vec3(0, 0, 4));
     spotlightNode->setName("spotlight");
     lightPivotNode->addChildNode(spotlightNode);
-    spotlightNode->addRenderable(GLS::Mesh::cube(0.2, 0.2, 0.6));
 
     auto ambiantLightNode = std::make_shared<GLS::Node>();
     auto ambiantlight = std::make_shared<GLS::Light>();

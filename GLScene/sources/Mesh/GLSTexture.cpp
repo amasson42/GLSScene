@@ -20,7 +20,7 @@ namespace GLS {
         return "can't create additional texture";
     }
     
-    Texture::Texture(GLsizei width, GLsizei height) throw(CreationException) {
+    Texture::Texture(GLsizei width, GLsizei height, GLint format, GLenum type) throw(CreationException) {
         _width = width;
         _height = height;
         glGenTextures(1, &_buffer);
@@ -28,7 +28,7 @@ namespace GLS {
             throw CreationException();
         }
         glBindTexture(GL_TEXTURE_2D, _buffer);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, NULL);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

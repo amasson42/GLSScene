@@ -42,4 +42,6 @@
 
 #include "GLScene/GLSAnimator.tpp"
 
+// TODO: voxel with geometry shader
+
 #endif /* GLScene_h */

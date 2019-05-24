@@ -213,4 +213,16 @@ namespace GLS {
         }
     }
     
+    void Node::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+        _transform.updateMatrix();
+        RenderUniforms nodeUniforms(uniforms);
+        nodeUniforms.model = uniforms.model * getTransformMatrix();
+        for (size_t i = 0; i < _childs.size(); i++) {
+            _childs[i]->renderInDepthContext(scene, nodeUniforms);
+        }
+        for (size_t i = 0; i < _renderables.size(); i++) {
+            _renderables[i]->renderInDepthContext(scene, nodeUniforms);
+        }
+    }
+
 }

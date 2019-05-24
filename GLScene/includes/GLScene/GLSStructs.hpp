@@ -24,12 +24,14 @@ namespace GLS {
 
     struct Camera;
     struct Light;
+    struct LightCaster;
     
     class Material;
     class Mesh;
     class InstancedMesh;
     class Skybox;
     class Texture;
+    class Framebuffer;
     class Shader;
     class ShaderProgram;
     
