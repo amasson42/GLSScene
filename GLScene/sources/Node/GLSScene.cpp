@@ -105,7 +105,7 @@ namespace GLS {
     }
 
     void Scene::_calculLights() {
-        _rootNode->_getAllLights(_frameLights, glm::mat4(1));
+        _rootNode->getAllLights(_frameLights, glm::mat4(1));
         for (size_t i = 0; i < _frameLights.size(); i++) {
             if (Light::lightTypeCanCastShadow(_frameLights[i].type))
                 if (_frameLights[i].cast_shadow && _frameLightCasters.size() < 4) {

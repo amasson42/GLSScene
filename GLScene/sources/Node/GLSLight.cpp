@@ -52,6 +52,8 @@ namespace GLS {
         depth_map = std::make_shared<Framebuffer>(width, height,
             GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
         depth_map->bind();
+        depth_map->texture()->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        depth_map->texture()->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
         depth_map->unbind();

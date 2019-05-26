@@ -86,9 +86,11 @@ namespace GLS {
         normal = n;
         if (n == glm::vec3(0, 1, 0))
             tangent = glm::vec3(1, 0, 0);
+        else if (n == glm::vec3(0, -1, 0))
+            tangent = glm::vec3(-1, 0, 0);
         else
             tangent = glm::cross(glm::vec3(0, 1, 0), n);
-        bitangent = glm::cross(n, tangent);
+        bitangent = glm::cross(tangent, n);
         uv = u;
     }
 

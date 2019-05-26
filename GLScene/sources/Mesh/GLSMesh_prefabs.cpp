@@ -63,55 +63,55 @@ namespace GLS {
         int io = 0;
 
         // face x
-        vertices.push_back(Vertex(pos_100, dir_x, uv_00));
-        vertices.push_back(Vertex(pos_101, dir_x, uv_10));
-        vertices.push_back(Vertex(pos_111, dir_x, uv_11));
-        vertices.push_back(Vertex(pos_110, dir_x, uv_01));
+        vertices.push_back(Vertex(pos_100, dir_x, dir_z, dir_y, uv_00));
+        vertices.push_back(Vertex(pos_101, dir_x, dir_z, dir_y, uv_10));
+        vertices.push_back(Vertex(pos_111, dir_x, dir_z, dir_y, uv_11));
+        vertices.push_back(Vertex(pos_110, dir_x, dir_z, dir_y, uv_01));
         indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
         indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
         io += 4;
 
         // face -x
-        vertices.push_back(Vertex(pos_001, -dir_x, uv_00));
-        vertices.push_back(Vertex(pos_000, -dir_x, uv_10));
-        vertices.push_back(Vertex(pos_010, -dir_x, uv_11));
-        vertices.push_back(Vertex(pos_011, -dir_x, uv_01));
+        vertices.push_back(Vertex(pos_001, -dir_x, -dir_z, dir_y, uv_00));
+        vertices.push_back(Vertex(pos_000, -dir_x, -dir_z, dir_y, uv_10));
+        vertices.push_back(Vertex(pos_010, -dir_x, -dir_z, dir_y, uv_11));
+        vertices.push_back(Vertex(pos_011, -dir_x, -dir_z, dir_y, uv_01));
         indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
         indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
         io += 4;
 
         // face y
-        vertices.push_back(Vertex(pos_010, dir_y, uv_00));
-        vertices.push_back(Vertex(pos_110, dir_y, uv_10));
-        vertices.push_back(Vertex(pos_111, dir_y, uv_11));
-        vertices.push_back(Vertex(pos_011, dir_y, uv_01));
+        vertices.push_back(Vertex(pos_010, dir_y, dir_x, dir_z, uv_00));
+        vertices.push_back(Vertex(pos_110, dir_y, dir_x, dir_z, uv_10));
+        vertices.push_back(Vertex(pos_111, dir_y, dir_x, dir_z, uv_11));
+        vertices.push_back(Vertex(pos_011, dir_y, dir_x, dir_z, uv_01));
         indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
         indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
         io += 4;
 
         // face -y
-        vertices.push_back(Vertex(pos_100, -dir_y, uv_00));
-        vertices.push_back(Vertex(pos_000, -dir_y, uv_10));
-        vertices.push_back(Vertex(pos_001, -dir_y, uv_11));
-        vertices.push_back(Vertex(pos_101, -dir_y, uv_01));
+        vertices.push_back(Vertex(pos_100, -dir_y, -dir_x, -dir_z, uv_00));
+        vertices.push_back(Vertex(pos_000, -dir_y, -dir_x, -dir_z, uv_10));
+        vertices.push_back(Vertex(pos_001, -dir_y, -dir_x, -dir_z, uv_11));
+        vertices.push_back(Vertex(pos_101, -dir_y, -dir_x, -dir_z, uv_01));
         indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
         indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
         io += 4;
 
         // face z
-        vertices.push_back(Vertex(pos_101, dir_z, uv_00));
-        vertices.push_back(Vertex(pos_001, dir_z, uv_10));
-        vertices.push_back(Vertex(pos_011, dir_z, uv_11));
-        vertices.push_back(Vertex(pos_111, dir_z, uv_01));
+        vertices.push_back(Vertex(pos_101, dir_z, -dir_x, dir_y, uv_00));
+        vertices.push_back(Vertex(pos_001, dir_z, -dir_x, dir_y, uv_10));
+        vertices.push_back(Vertex(pos_011, dir_z, -dir_x, dir_y, uv_11));
+        vertices.push_back(Vertex(pos_111, dir_z, -dir_x, dir_y, uv_01));
         indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
         indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
         io += 4;
 
         // face -z
-        vertices.push_back(Vertex(pos_000, -dir_z, uv_00));
-        vertices.push_back(Vertex(pos_100, -dir_z, uv_10));
-        vertices.push_back(Vertex(pos_110, -dir_z, uv_11));
-        vertices.push_back(Vertex(pos_010, -dir_z, uv_01));
+        vertices.push_back(Vertex(pos_000, -dir_z, dir_x, dir_y, uv_00));
+        vertices.push_back(Vertex(pos_100, -dir_z, dir_x, dir_y, uv_10));
+        vertices.push_back(Vertex(pos_110, -dir_z, dir_x, dir_y, uv_11));
+        vertices.push_back(Vertex(pos_010, -dir_z, dir_x, dir_y, uv_01));
         indices.push_back(io + 0);indices.push_back(io + 2);indices.push_back(io + 1);
         indices.push_back(io + 0);indices.push_back(io + 3);indices.push_back(io + 2);
         io += 4;

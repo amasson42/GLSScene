@@ -39,6 +39,7 @@ namespace GLS {
         GLfloat angle; // for spot
         GLfloat cone_attenuation; // for spot
         bool cast_shadow; // for spot and directional
+        // TODO: cast shadow for point nodes with cubemap
 
         private:
         glm::mat4 _view;

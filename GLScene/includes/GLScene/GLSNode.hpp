@@ -25,8 +25,6 @@ namespace GLS {
         std::shared_ptr<Light> _light;
         std::vector<std::shared_ptr<IRenderable> > _renderables;
         
-        friend class Scene;
-        void _getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix);
 
     public:
         
@@ -80,6 +78,7 @@ namespace GLS {
         const std::shared_ptr<const Light> light() const;
         std::shared_ptr<Light> light();
         void setLight(std::shared_ptr<Light> light);
+        void getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix);
         
         void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);

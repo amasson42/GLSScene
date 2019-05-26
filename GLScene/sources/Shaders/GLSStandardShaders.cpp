@@ -179,7 +179,7 @@ namespace GLS {
         "           case 1:\n" // directional
         "               light_direction = normalize(-light.direction);\n"
         "               diffuse_intensity = clamp(dot(light_direction, normal_direction), 0.0, 1.0);\n"
-        "               diffuse_color += light.color * diffuse * diffuse_intensity * attenuation * shadow;\n"
+        "               diffuse_color += light.color * diffuse * diffuse_intensity * attenuation * shadow * occlusion;\n"
         "               if (diffuse_intensity > 0) {\n"
         "                   vec3 reflection = reflect(-light_direction, normal_direction);\n"
         "                   vec3 halfway_direction = normalize(fcamera_position + light_direction);\n"
@@ -195,7 +195,7 @@ namespace GLS {
         "                   float cosat = cos(light.angle - light.cone_attenuation);\n"
         "                   attenuation *= clamp((spot_result - cosangle) / (cosat - cosangle), 0.0, 1.0);\n"
         "                   diffuse_intensity = clamp(dot(light_direction, normal_direction), 0.0, 1.0);\n"
-        "                   diffuse_color += light.color * diffuse * diffuse_intensity * attenuation * shadow;\n"
+        "                   diffuse_color += light.color * diffuse * diffuse_intensity * attenuation * shadow * occlusion;\n"
         "                   if (diffuse_intensity > 0) {\n"
         "                       vec3 reflection = reflect(-light_direction, normal_direction);\n"
         "                       vec3 halfway_direction = normalize(fcamera_position + light_direction);\n"
@@ -207,7 +207,7 @@ namespace GLS {
         "           case 3:\n" // pointlight
         "               light_direction = normalize(light.position - fin_wposition);\n"
         "               diffuse_intensity = clamp(dot(light_direction, normal_direction), 0.0, 1.0);\n"
-        "               diffuse_color += light.color * diffuse * diffuse_intensity * attenuation * shadow;\n"
+        "               diffuse_color += light.color * diffuse * diffuse_intensity * attenuation * shadow * occlusion;\n"
         "               if (diffuse_intensity > 0) {\n"
         "                   vec3 reflection = reflect(-light_direction, normal_direction);\n"
         "                   vec3 halfway_direction = normalize(fcamera_position + light_direction);\n"
@@ -216,7 +216,7 @@ namespace GLS {
         "               }\n"
         "               break;\n"
         "           case 4:\n" // ambiant
-        "               ambient_color += light.color * light.intensity;\n"
+        "               ambient_color += light.color * light.intensity * occlusion;\n"
         "               break;\n"
         "        }\n"
         "    }\n"

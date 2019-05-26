@@ -11,7 +11,7 @@ std::shared_ptr<GLS::Node> pivotNode = nullptr;
 void updateScene3(double et, double dt) {
     (void)dt;
     if (rotateNode != nullptr) {
-        rotateNode->transform().setEulerAngles(glm::vec3(0, et * 0.02, 0));
+        rotateNode->transform().setEulerAngles(glm::vec3(sin(et * 0.3) * 0.5, et * 0.2, 0));
     }
     if (pivotNode != nullptr) {
         float angle = ((sin(et) + 1.0) / 2.0) * degreeToRadians(-50);
@@ -35,12 +35,14 @@ void loadScene3(GLS::Scene& scene) {
     auto cubeNode1 = std::make_shared<GLS::Node>();
     auto cubeMesh1 = GLS::Mesh::cube(1, 1, 1);
     auto cubeMaterial1 = std::make_shared<GLS::Material>();
-    cubeMaterial1->shininess = 32;
-    cubeMaterial1->specular = glm::vec3(0, 0, 1);
+    cubeMaterial1->texture_diffuse = std::make_shared<GLS::Texture>("../textures/brickwall.jpg");
+    cubeMaterial1->texture_normal = std::make_shared<GLS::Texture>("../textures/brickwall_normal.jpg");
+    cubeMaterial1->specular = glm::vec3(0.1);
+    cubeMaterial1->shininess = 64;
     cubeMesh1->setMaterial(cubeMaterial1);
     cubeNode1->addRenderable(cubeMesh1);
     cubeNode1->setName("cube1");
-    cubeNode1->transform().setPosition(glm::vec3(-1, 0.75, 1));
+    cubeNode1->transform().setPosition(glm::vec3(-1, 1.75, 1));
     scene.rootNode().addChildNode(cubeNode1);
     rotateNode = cubeNode1;
 
@@ -58,7 +60,7 @@ void loadScene3(GLS::Scene& scene) {
 
         glm::vec3 pos;
         pos.x = cos(angle) * distance;
-        pos.y = randFloat() * 0.3 - 0.8;
+        pos.y = randFloat() * 0.3 + 0.4;
         pos.z = sin(angle) * distance;
         GLS::Transform t;
         t.setPosition(pos);
@@ -73,8 +75,10 @@ void loadScene3(GLS::Scene& scene) {
     auto sphereNode = std::make_shared<GLS::Node>();
     auto sphereMesh = GLS::Mesh::sphere(0.5);
     auto sphereMaterial = std::make_shared<GLS::Material>();
+    sphereMaterial->texture_diffuse = std::make_shared<GLS::Texture>("../textures/brickwall.jpg");
+    sphereMaterial->texture_normal = std::make_shared<GLS::Texture>("../textures/brickwall_normal.jpg");
+    sphereMaterial->specular = glm::vec3(0.2);
     sphereMaterial->shininess = 64;
-    sphereMaterial->specular = glm::vec3(1);
     sphereMesh->setMaterial(sphereMaterial);
     sphereNode->addRenderable(sphereMesh);
     sphereNode->setName("sphere");
