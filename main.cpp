@@ -49,6 +49,7 @@ void updateScene3(double et, double dt);
 
 auto loadScene = loadScene3;
 auto updateScene = updateScene3;
+bool mustUpdate = true;
 
 int launch(std::vector<std::string>& modelNames) {
 
@@ -110,7 +111,8 @@ int launch(std::vector<std::string>& modelNames) {
         if (true)
             processInput(window, deltaTime, scene);
 
-        updateScene(currentTime, deltaTime);
+        if (mustUpdate)
+            updateScene(currentTime, deltaTime);
 
         /* do some drawing */
         scene.renderInContext();
@@ -167,6 +169,10 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
                 glDisable(GL_FRAMEBUFFER_SRGB);
             else
                 glEnable(GL_FRAMEBUFFER_SRGB);
+        }
+
+        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+            mustUpdate = !mustUpdate;
         }
 
     }

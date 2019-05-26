@@ -14,7 +14,11 @@ namespace GLS {
     type(light_unused), color(1), specular(1), intensity(1),
     attenuation(1, 0, 0),
     angle(M_PI / 4), cone_attenuation(M_PI / 6),
+    width(10.0), height(10.0),
     cast_shadow(false),
+    cast_shadow_clip_near(0.1), cast_shadow_clip_far(100.0),
+    cast_shadow_map_size_width(1024), cast_shadow_map_size_height(1024),
+    _projection(1), _view(1),
     _caster_index(-1)
     {
 
@@ -45,11 +49,23 @@ namespace GLS {
         Light l(*this);
         l._view = transform;
         l._caster_index = -1;
+        if (l.cast_shadow) {
+            if (l.type == light_spot) {
+                l._projection = Camera(l.angle * 2, 1.0, l.cast_shadow_clip_near, l.cast_shadow_clip_far).projectionMatrix();
+            } else if (l.type == light_directional) {
+                l._projection = glm::ortho(-l.width / 2, l.height / 2,
+                                            -l.height / 2, l.height / 2,
+                                            l.cast_shadow_clip_near, l.cast_shadow_clip_far);
+            }
+        }
+
         return l;
     }
 
-    LightCaster::LightCaster(size_t width, size_t height) {
-        depth_map = std::make_shared<Framebuffer>(width, height,
+    LightCaster::LightCaster(Light l) {
+        light = l;
+        depth_map = std::make_shared<Framebuffer>(
+            l.cast_shadow_map_size_width, l.cast_shadow_map_size_height,
             GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
         depth_map->bind();
         depth_map->texture()->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -63,9 +79,10 @@ namespace GLS {
     // Utilities
 
     void LightCaster::sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program, int index) const {
+        glm::mat4 vp = light._projection * glm::inverse(light._view);
         program->use();
         std::string scaster = "light_casters[" + std::to_string(index) + "]";
-        glUniformMatrix4fv(program->getLocation(scaster + ".vp"), 1, GL_FALSE, glm::value_ptr(light._view));
+        glUniformMatrix4fv(program->getLocation(scaster + ".vp"), 1, GL_FALSE, glm::value_ptr(vp));
         glActiveTexture(GL_TEXTURE12 + index);
         glBindTexture(GL_TEXTURE_2D, depth_map->texture()->buffer());
         glUniform1i(program->getLocation(scaster + ".depth_map"), 12 + index);

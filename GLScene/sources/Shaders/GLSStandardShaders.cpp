@@ -149,7 +149,7 @@ namespace GLS {
         "    vec3 specular_color = vec3(0);\n"
         "    vec3 fcamera_position = normalize(u_camera_position - fin_wposition);\n"
 
-        // TODO: refactorisation of light calculations
+        // FIXME: refactorisation of light calculations
         "    int i;\n"
         "    for (i = 0; i < lights_count; i++) {\n"
         "        Light light = lights[i];\n"
@@ -216,7 +216,7 @@ namespace GLS {
         "               }\n"
         "               break;\n"
         "           case 4:\n" // ambiant
-        "               ambient_color += light.color * light.intensity * occlusion;\n"
+        "               ambient_color += diffuse * light.color * light.intensity * occlusion;\n"
         "               break;\n"
         "        }\n"
         "    }\n"

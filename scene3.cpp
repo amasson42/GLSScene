@@ -5,17 +5,22 @@ float degreeToRadians(float deg) {
     return deg * M_PI / 180.0;
 }
 
-std::shared_ptr<GLS::Node> rotateNode = nullptr;
-std::shared_ptr<GLS::Node> pivotNode = nullptr;
+std::shared_ptr<GLS::Node> bigCubeNode = nullptr;
+std::shared_ptr<GLS::Node> lightPivotNode = nullptr;
+std::shared_ptr<GLS::Node> cubesPivotNode = nullptr;
 
 void updateScene3(double et, double dt) {
     (void)dt;
-    if (rotateNode != nullptr) {
-        rotateNode->transform().setEulerAngles(glm::vec3(sin(et * 0.3) * 0.5, et * 0.2, 0));
+    if (bigCubeNode != nullptr) {
+        bigCubeNode->transform().setEulerAngles(glm::vec3(sin(et * 0.3) * 0.5, et * 0.2, 0));
     }
-    if (pivotNode != nullptr) {
+    if (lightPivotNode != nullptr) {
         float angle = ((sin(et) + 1.0) / 2.0) * degreeToRadians(-50);
-        pivotNode->transform().setEulerAngles(glm::vec3(angle, degreeToRadians(50), 0));
+        lightPivotNode->transform().setEulerAngles(glm::vec3(angle, degreeToRadians(50), 0));
+    }
+    if (cubesPivotNode != nullptr) {
+        cubesPivotNode->transform().setEulerAngles(glm::vec3(sin(et * 0.02) * 0.3, et * 0.6, cos(et * 0.07) * 0.3));
+        cubesPivotNode->transform().moveBy(glm::vec3(0, 0.2 * dt * sin(M_PI + et * 0.3), 0));
     }
 }
 
@@ -35,8 +40,6 @@ void loadScene3(GLS::Scene& scene) {
     auto cubeNode1 = std::make_shared<GLS::Node>();
     auto cubeMesh1 = GLS::Mesh::cube(1, 1, 1);
     auto cubeMaterial1 = std::make_shared<GLS::Material>();
-    cubeMaterial1->texture_diffuse = std::make_shared<GLS::Texture>("../textures/brickwall.jpg");
-    cubeMaterial1->texture_normal = std::make_shared<GLS::Texture>("../textures/brickwall_normal.jpg");
     cubeMaterial1->specular = glm::vec3(0.1);
     cubeMaterial1->shininess = 64;
     cubeMesh1->setMaterial(cubeMaterial1);
@@ -44,13 +47,15 @@ void loadScene3(GLS::Scene& scene) {
     cubeNode1->setName("cube1");
     cubeNode1->transform().setPosition(glm::vec3(-1, 1.75, 1));
     scene.rootNode().addChildNode(cubeNode1);
-    rotateNode = cubeNode1;
+    bigCubeNode = cubeNode1;
 
+    cubesPivotNode = std::make_shared<GLS::Node>();
+    cubesPivotNode->transform().setPosition(bigCubeNode->transform().position());
+    scene.rootNode().addChildNode(cubesPivotNode);
     auto cubesNode = std::make_shared<GLS::Node>();
     auto smallCubeMesh = GLS::Mesh::cube(0.05, 0.05, 0.05);
     auto smallCubeMaterial = std::make_shared<GLS::Material>();
     smallCubeMaterial->diffuse = glm::vec3(0.8, 0.2, 0.3);
-    planeMesh->setMaterial(smallCubeMaterial);
     smallCubeMesh->setMaterial(smallCubeMaterial);
     auto cubesMesh = std::make_shared<GLS::InstancedMesh>(*smallCubeMesh, 1000);
     cubesMesh->setMaterial(smallCubeMaterial);
@@ -68,15 +73,12 @@ void loadScene3(GLS::Scene& scene) {
         t.setScale(glm::vec3(randFloat() * 0.2 + 0.7));
         cubesMesh->setInstanceTransformAt(i, t);
     }
-    cubesMesh->setMaterial(std::make_shared<GLS::Material>());
     cubesNode->addRenderable(cubesMesh);
-    cubeNode1->addChildNode(cubesNode);
+    cubesPivotNode->addChildNode(cubesNode);
 
     auto sphereNode = std::make_shared<GLS::Node>();
     auto sphereMesh = GLS::Mesh::sphere(0.5);
     auto sphereMaterial = std::make_shared<GLS::Material>();
-    sphereMaterial->texture_diffuse = std::make_shared<GLS::Texture>("../textures/brickwall.jpg");
-    sphereMaterial->texture_normal = std::make_shared<GLS::Texture>("../textures/brickwall_normal.jpg");
     sphereMaterial->specular = glm::vec3(0.2);
     sphereMaterial->shininess = 64;
     sphereMesh->setMaterial(sphereMaterial);
@@ -85,11 +87,10 @@ void loadScene3(GLS::Scene& scene) {
     sphereNode->transform().setPosition(glm::vec3(1, 0.75, 1));
     scene.rootNode().addChildNode(sphereNode);
 
-    auto lightPivotNode = std::make_shared<GLS::Node>();
+    lightPivotNode = std::make_shared<GLS::Node>();
     lightPivotNode->transform().setEulerAngles(glm::vec3(degreeToRadians(-50), degreeToRadians(50), 0));
     lightPivotNode->setName("light_pivot");
     scene.rootNode().addChildNode(lightPivotNode);
-    pivotNode = lightPivotNode;
 
     auto spotlightNode = std::make_shared<GLS::Node>();
     auto spotlight = std::make_shared<GLS::Light>();
@@ -103,9 +104,10 @@ void loadScene3(GLS::Scene& scene) {
     auto ambiantLightNode = std::make_shared<GLS::Node>();
     auto ambiantlight = std::make_shared<GLS::Light>();
     ambiantlight->type = (GLS::light_ambiant);
+    ambiantlight->color = glm::vec3(0.06);
     ambiantLightNode->setLight(ambiantlight);
     ambiantLightNode->setName("ambiant");
-    // scene.rootNode().addChildNode(ambiantLightNode);
+    scene.rootNode().addChildNode(ambiantLightNode);
 
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
     {

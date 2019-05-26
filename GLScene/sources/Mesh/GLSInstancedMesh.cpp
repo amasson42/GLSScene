@@ -57,7 +57,7 @@ namespace GLS {
     }
 
     void InstancedMesh::setInstancesCount(size_t count) {
-        // TODO: there may be a better way...
+        // FIXME: there may be a better way...
         if (count < _instancesTransforms.size()) {
             while (count < _instancesTransforms.size()) {
                 _instancesTransforms.pop_back();

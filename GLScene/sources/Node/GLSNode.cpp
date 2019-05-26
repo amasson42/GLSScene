@@ -192,12 +192,12 @@ namespace GLS {
         _light = light;
     }
 
-    void Node::_getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix) {
+    void Node::getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix) {
         glm::mat4 mat = parentMatrix * getTransformMatrix();
         if (_light != nullptr)
             container.push_back(_light->transformedBy(mat));
         for (size_t i = 0; i < _childs.size(); i++) {
-            _childs[i]->_getAllLights(container, mat);
+            _childs[i]->getAllLights(container, mat);
         }
     }
     

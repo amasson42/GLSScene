@@ -38,10 +38,19 @@ namespace GLS {
 
         GLfloat angle; // for spot
         GLfloat cone_attenuation; // for spot
+        GLfloat width; // for directional
+        GLfloat height; // for directional
+
         bool cast_shadow; // for spot and directional
         // TODO: cast shadow for point nodes with cubemap
 
+        GLfloat cast_shadow_clip_near;
+        GLfloat cast_shadow_clip_far;
+        size_t cast_shadow_map_size_width;
+        size_t cast_shadow_map_size_height;
+
         private:
+        glm::mat4 _projection;
         glm::mat4 _view;
         int _caster_index;
         friend class Scene;
@@ -62,7 +71,7 @@ namespace GLS {
         std::shared_ptr<Framebuffer> depth_map;
         Light light;
 
-        LightCaster(size_t width, size_t height);
+        LightCaster(Light l);
 
         // Utilities
 
