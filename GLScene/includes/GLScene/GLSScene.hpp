@@ -54,6 +54,7 @@ namespace GLS {
         void setSkybox(std::shared_ptr<Skybox> skybox);
 		
         // Rendering
+        // TODO: render in framebuffer
 		void renderInContext();
         void sendLightsValueToShader(std::shared_ptr<ShaderProgram> program);
         void subscribeToPostRenderable(IRenderable *renderable, const RenderUniforms& uniforms, float priority);

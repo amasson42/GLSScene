@@ -101,13 +101,13 @@ void loadScene3(GLS::Scene& scene) {
     spotlightNode->setName("spotlight");
     lightPivotNode->addChildNode(spotlightNode);
 
-    auto ambiantLightNode = std::make_shared<GLS::Node>();
-    auto ambiantlight = std::make_shared<GLS::Light>();
-    ambiantlight->type = (GLS::light_ambiant);
-    ambiantlight->color = glm::vec3(0.06);
-    ambiantLightNode->setLight(ambiantlight);
-    ambiantLightNode->setName("ambiant");
-    scene.rootNode().addChildNode(ambiantLightNode);
+    // auto ambiantLightNode = std::make_shared<GLS::Node>();
+    // auto ambiantlight = std::make_shared<GLS::Light>();
+    // ambiantlight->type = (GLS::light_ambiant);
+    // ambiantlight->color = glm::vec3(0.06);
+    // ambiantLightNode->setLight(ambiantlight);
+    // ambiantLightNode->setName("ambiant");
+    // scene.rootNode().addChildNode(ambiantLightNode);
 
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
     {

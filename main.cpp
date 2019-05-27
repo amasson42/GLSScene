@@ -66,7 +66,7 @@ int launch(std::vector<std::string>& modelNames) {
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
     GLFWwindow *window = nullptr; // create a window pointer
 
-    const int win_width = 1200, win_height = 800, win_margin = 0;
+    const int win_width = 1200, win_height = 800;
     window = glfwCreateWindow(win_width, win_height, "openGL", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -74,8 +74,6 @@ int launch(std::vector<std::string>& modelNames) {
         return EXIT_FAILURE;
     }
     glfwMakeContextCurrent(window); // make context to draw to
-    glViewport(win_margin, win_margin,
-            win_width - 2 * win_margin, win_height - 2 * win_margin);
 
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     glEnable(GL_MULTISAMPLE);
@@ -97,7 +95,9 @@ int launch(std::vector<std::string>& modelNames) {
     std::cout << "shaders compiled" << std::endl;
     // create simple mesh
 
-    GLS::Scene scene(glm::vec2(2 * win_width, 2 * win_height));
+    int win_buffer_width, win_buffer_height;
+    glfwGetFramebufferSize(window, &win_buffer_width, &win_buffer_height);
+    GLS::Scene scene(glm::vec2(win_buffer_width, win_buffer_height));
     loadScene(scene);
 
     //
