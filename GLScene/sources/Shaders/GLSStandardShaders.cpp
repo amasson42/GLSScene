@@ -77,10 +77,10 @@ namespace GLS {
         "    int caster_index;\n" // if the index >= 0 then there is a light caster bounds
         "};\n"
 
-        "struct LightCaster {\n"
-        "    mat4 vp;\n"
-        "    sampler2D depth_map;\n"
-        "};\n"
+        // "struct LightCaster {\n"
+        // "    mat4 vp;\n"
+        // "    sampler2D depth_map;\n"
+        // "};\n"
 
         "struct Material {\n"
         "    vec3 diffuse;\n"
@@ -115,27 +115,33 @@ namespace GLS {
         "uniform Light lights[16];\n"
         "uniform int lights_count;\n"
         "uniform vec3 u_camera_position;\n"
-        "uniform LightCaster light_casters[4];\n"
+
+        "uniform mat4 light_casters_vp[4];\n"
+        "uniform sampler2D light_casters_depth_map[4];\n"
+        // "uniform LightCaster light_casters[4];\n"
 
         // "    float near = 0.1;"
         // "    float far = 15.0;"
         // "    float z = gl_FragCoord.z * 2.0 - 1.0;"
         // "    float linearDepth = (2.0 * near * far) / (far + near - z * (far - near)) / far;"
 
-        // FIXME: using a variable to access a light_caster creates lags on old computers
+        // fixed but the workaround is an ugly code
         "float calculShadow(Light light) {\n"
         "    int caster_index = light.caster_index;\n"
         "    if (caster_index >= 0) {\n"
-        "        vec4 fpos_light = light_casters[caster_index].vp * vec4(fin_wposition, 1.0);\n"
+        // "        vec4 fpos_light = light_casters[caster_index].vp * vec4(fin_wposition, 1.0);\n"
+        "        vec4 fpos_light = light_casters_vp[caster_index] * vec4(fin_wposition, 1.0);\n"
         "        vec3 proj_coords = fpos_light.xyz / fpos_light.w;\n"
         "        proj_coords = proj_coords * 0.5 + 0.5;\n"
         "        float current_depth = proj_coords.z;\n"
         "        float bias = 0.0005;\n"// max(0.05 * (1.0 - dot(normal_direction, -light.direction)), 0.005);\n"
-        "        vec2 texel_size = 1.0 / textureSize(light_casters[caster_index].depth_map, 0);\n"
+        // "        vec2 texel_size = 1.0 / textureSize(light_casters[caster_index].depth_map, 0);\n"
+        "        vec2 texel_size = 1.0 / textureSize(light_casters_depth_map[caster_index], 0);\n"
         "        float shadow = 0.0;\n"
         "        for (int x = -1; x <= 1; x++)\n"
         "            for (int y = -1; y <= 1; y++) {\n"
-        "                float pcf_depth = texture(light_casters[caster_index].depth_map, proj_coords.xy + vec2(x, y) * texel_size).r;\n"
+        // "                float pcf_depth = texture(light_casters[caster_index].depth_map, proj_coords.xy + vec2(x, y) * texel_size).r;\n"
+        "                float pcf_depth = texture(light_casters_depth_map[caster_index], proj_coords.xy + vec2(x, y) * texel_size).r;\n"
         "                shadow += current_depth - bias > pcf_depth ? 0.0 : 1.0;\n"
         "            }\n"
         "        return shadow / 9.0;\n"
@@ -253,8 +259,6 @@ namespace GLS {
         "    }\n"
         "    FragColor = vec4(color, 1.0);\n"
         "}\n"
-
-        ""
 
         "\n";
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);

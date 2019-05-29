@@ -19,6 +19,7 @@ glm::vec3 vec3LinearValue(glm::vec3 a, glm::vec3 b, double t) {
 }
 
 struct HumanAnimationState {
+    glm::vec3 position;
     glm::vec3 torse;
     glm::vec3 tete;
     glm::vec3 bras_gauche;
@@ -31,6 +32,7 @@ struct HumanAnimationState {
     glm::vec3 mollet_droit;
 
     HumanAnimationState() :
+        position(0),
         torse(0), tete(0),
         bras_gauche(0), avant_gauche(0),
         bras_droit(0), avant_droit(0),
@@ -43,6 +45,7 @@ struct HumanAnimationState {
     const HumanAnimationState& b,
     double timePercent) {
         HumanAnimationState r;
+        r.position = vec3LinearValue(a.position, b.position, timePercent);
         r.torse = vec3LinearValue(a.torse, b.torse, timePercent);
         r.tete = vec3LinearValue(a.tete, b.tete, timePercent);
         r.bras_gauche = vec3LinearValue(a.bras_gauche, b.bras_gauche, timePercent);
@@ -61,16 +64,17 @@ struct HumanAnimationState {
             return false;
         
         const std::map<std::string, glm::vec3*> vecs = {
+            {"position", &position},
             {"torse", &torse},
-            {"tete", &tete},
-            {"bras_gauche", &bras_gauche},
-            {"avant_gauche", &avant_gauche},
-            {"bras_droit", &bras_droit},
-            {"avant_droit", &avant_droit},
-            {"cuisse_gauche", &cuisse_gauche},
-            {"mollet_gauche", &mollet_gauche},
-            {"cuisse_droit", &cuisse_droit},
-            {"mollet_droit", &mollet_droit}
+            {"cou", &tete},
+            {"epaulegauche", &bras_gauche},
+            {"coudegauche", &avant_gauche},
+            {"epauledroite", &bras_droit},
+            {"coudedroit", &avant_droit},
+            {"jambegauche", &cuisse_gauche},
+            {"genougauche", &mollet_gauche},
+            {"jambedroite", &cuisse_droit},
+            {"genoudroit", &mollet_droit}
         };
         
         auto it = vecs.find(words[0]);
@@ -190,6 +194,7 @@ class Human {
     }
 
     void applyFrame(HumanAnimationState frame) {
+        _node->transform().setPosition(frame.position);
         _torse->transform().setEulerAngles(frame.torse);
         _tete->transform().setEulerAngles(frame.tete);
         _bras_gauche->transform().setEulerAngles(frame.bras_gauche);
@@ -207,7 +212,7 @@ class Human {
 std::shared_ptr<Human> hooman = nullptr;
 std::shared_ptr<GLS::Animator<HumanAnimationState> > hoomanAnimator = nullptr;
 
-void loadScene2(GLS::Scene& scene) {
+void loadScene2(GLS::Scene& scene, const std::vector<std::string>& args) {
 
     // camera and light
     T_Node cameraNode = newNode();
@@ -230,10 +235,14 @@ void loadScene2(GLS::Scene& scene) {
 
     // just a nanosuit
     hooman = std::make_shared<Human>();
-    scene.rootNode().addChildNode(hooman->node());
+    T_Node humanNode = newNode();
+    humanNode->addChildNode(hooman->node());
+    scene.rootNode().addChildNode(humanNode);
 
-    std::ifstream animationFile("../animator/humangl/walk.hgl");
-    hoomanAnimator = std::make_shared<GLS::Animator<HumanAnimationState> >(animationFile);
+    if (args.size() >= 1) {
+        std::ifstream animationFile(args[0]);
+        hoomanAnimator = std::make_shared<GLS::Animator<HumanAnimationState> >(animationFile);
+    }
 
     std::cout << *hoomanAnimator << std::endl;
 

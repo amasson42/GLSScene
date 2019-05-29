@@ -100,6 +100,16 @@ void loadScene3(GLS::Scene& scene) {
     spotlightNode->transform().setPosition(glm::vec3(0, 0, 4));
     spotlightNode->setName("spotlight");
     lightPivotNode->addChildNode(spotlightNode);
+    auto spotlightMesh = GLS::Mesh::cube(0.1, 0.1, 0.15);
+    spotlightMesh->setOutline(0.1, spotlight->color);
+    spotlightNode->addRenderable(spotlightMesh);
+
+    auto pointlightNode = std::make_shared<GLS::Node>();
+    auto pointlight = std::make_shared<GLS::Light>();
+    pointlight->type = GLS::light_point;
+    pointlight->color = glm::vec3(0.3);
+    pointlightNode->setLight(pointlight);
+    spotlightNode->addChildNode(pointlightNode);
 
     // auto ambiantLightNode = std::make_shared<GLS::Node>();
     // auto ambiantlight = std::make_shared<GLS::Light>();

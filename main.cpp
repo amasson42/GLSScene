@@ -42,18 +42,16 @@ void printNodePosition(const GLS::Node& node) {
 }
 
 void loadScene1(GLS::Scene& scene);
-void loadScene2(GLS::Scene& scene);
+void loadScene2(GLS::Scene& scene, const std::vector<std::string>& args);
 void updateScene2(double et, double dt);
 void loadScene3(GLS::Scene& scene);
 void updateScene3(double et, double dt);
 
-auto loadScene = loadScene3;
-auto updateScene = updateScene3;
+auto loadScene = loadScene2;
+auto updateScene = updateScene2;
 bool mustUpdate = true;
 
-int launch(std::vector<std::string>& modelNames) {
-
-	static_cast<void>(modelNames);
+int launch(std::vector<std::string>& args) {
 
     if (!glfwInit()) // init the lib once
         return (EXIT_FAILURE);
@@ -98,7 +96,7 @@ int launch(std::vector<std::string>& modelNames) {
     int win_buffer_width, win_buffer_height;
     glfwGetFramebufferSize(window, &win_buffer_width, &win_buffer_height);
     GLS::Scene scene(glm::vec2(win_buffer_width, win_buffer_height));
-    loadScene(scene);
+    loadScene(scene, args);
 
     //
 

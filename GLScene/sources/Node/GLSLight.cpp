@@ -81,11 +81,10 @@ namespace GLS {
     void LightCaster::sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program, int index) const {
         glm::mat4 vp = light._projection * glm::inverse(light._view);
         program->use();
-        std::string scaster = "light_casters[" + std::to_string(index) + "]";
-        glUniformMatrix4fv(program->getLocation(scaster + ".vp"), 1, GL_FALSE, glm::value_ptr(vp));
+        glUniformMatrix4fv(program->getLocation("light_casters_vp[" + std::to_string(index) + "]"), 1, GL_FALSE, glm::value_ptr(vp));
         glActiveTexture(GL_TEXTURE12 + index);
         glBindTexture(GL_TEXTURE_2D, depth_map->texture()->buffer());
-        glUniform1i(program->getLocation(scaster + ".depth_map"), 12 + index);
+        glUniform1i(program->getLocation("light_casters_depth_map[" + std::to_string(index) + "]"), 12 + index);
     }
 
 }
