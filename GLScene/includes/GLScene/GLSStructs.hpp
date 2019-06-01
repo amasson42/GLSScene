@@ -30,6 +30,8 @@ namespace GLS {
     class Mesh;
     class InstancedMesh;
     class Skybox;
+    class VoxelChunk;
+
     class Texture;
     class Framebuffer;
     class Shader;

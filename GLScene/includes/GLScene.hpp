@@ -27,18 +27,21 @@
 #include "GLScene/GLSStructs.hpp"
 
 #include "GLScene/GLSTransform.hpp"
+#include "GLScene/GLSTexture.hpp"
+#include "GLScene/GLSFramebuffer.hpp"
+
 #include "GLScene/GLSIRenderable.hpp"
+#include "GLScene/GLSMesh.hpp"
+#include "GLScene/GLSVoxelChunk.hpp"
+#include "GLScene/GLSSkybox.hpp"
+#include "GLScene/GLSDotParticleSystem.hpp"
 
 #include "GLScene/GLSCamera.hpp"
 #include "GLScene/GLSLight.hpp"
-#include "GLScene/GLSTexture.hpp"
-#include "GLScene/GLSSkybox.hpp"
-#include "GLScene/GLSMesh.hpp"
-#include "GLScene/GLSDotParticleSystem.hpp"
+
 #include "GLScene/GLSShader.hpp"
 #include "GLScene/GLSNode.hpp"
 #include "GLScene/GLSScene.hpp"
-#include "GLScene/GLSFramebuffer.hpp"
 
 #include "GLScene/GLSAnimator.tpp"
 

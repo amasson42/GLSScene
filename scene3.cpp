@@ -28,7 +28,8 @@ float randFloat() {
     return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 }
 
-void loadScene3(GLS::Scene& scene) {
+void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
+    (void)args;
 
     auto planeNode = std::make_shared<GLS::Node>();
     planeNode->transform().setEulerAngles(glm::vec3(-M_PI_2, 0, 0));
@@ -111,14 +112,6 @@ void loadScene3(GLS::Scene& scene) {
     pointlightNode->setLight(pointlight);
     spotlightNode->addChildNode(pointlightNode);
 
-    // auto ambiantLightNode = std::make_shared<GLS::Node>();
-    // auto ambiantlight = std::make_shared<GLS::Light>();
-    // ambiantlight->type = (GLS::light_ambiant);
-    // ambiantlight->color = glm::vec3(0.06);
-    // ambiantLightNode->setLight(ambiantlight);
-    // ambiantLightNode->setName("ambiant");
-    // scene.rootNode().addChildNode(ambiantLightNode);
-
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
@@ -130,4 +123,9 @@ void loadScene3(GLS::Scene& scene) {
     scene.setCameraNode(*cameraNode);
     scene.rootNode().addChildNode(cameraNode);
 
+    auto chunkNode = std::make_shared<GLS::Node>();
+    auto chunkMesh = std::make_shared<GLS::VoxelChunk>();
+    chunkMesh->generateBuffers();
+    chunkNode->addRenderable(chunkMesh);
+    scene.rootNode().addChildNode(chunkNode);
 }

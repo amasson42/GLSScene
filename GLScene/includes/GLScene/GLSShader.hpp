@@ -56,11 +56,15 @@ namespace GLS {
         static std::shared_ptr<Shader> standardVertexInstancedMesh();
         static std::shared_ptr<Shader> standardVertexScreenTexture();
         static std::shared_ptr<Shader> standardVertexSkybox();
+        static std::shared_ptr<Shader> standardVertexVoxelChunk();
+
+        static std::shared_ptr<Shader> standardGeometryVoxelChunk();
 
         static std::shared_ptr<Shader> standardFragmentMesh();
         static std::shared_ptr<Shader> standardFragmentMeshSimpleColor();
         static std::shared_ptr<Shader> standardFragmentScreenTexture();
         static std::shared_ptr<Shader> standardFragmentSkybox();
+        static std::shared_ptr<Shader> standardFragmentVoxelChunk();
         
     };
     
