@@ -439,19 +439,39 @@ namespace GLS {
 
     std::shared_ptr<Shader> Shader::standardVertexVoxelChunk() {
         std::string src =
-        "#version 400 core\n\n"
+        "#version 400 core\n"
 
-        "void main() {\n"
-        "}\n"
-        "\n";
+        "layout (location = 0) in vec3 vin_position;\n"
+
+        "out vec3 gin_position;\n"
+        
+        "void main()\n"
+        "{\n"
+        "    gin_position = vec3(0, 0, 0);\n"
+        "}\n";
         return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
     }
 
     std::shared_ptr<Shader> Shader::standardGeometryVoxelChunk() {
         std::string src =
         "#version 400 core\n\n"
+        "layout (points) in;\n"
+        "layout (triangles_strip, max_vertices = 4) out;\n"
+        
+        "in vec3 gin_position;\n"
+
+        // sent by scene:
+        "uniform mat3 u_mat_normal;\n"
+        "uniform mat4 u_mat_projection;\n"
+        "uniform mat4 u_mat_view;\n"
+
+        // sent by node:
+        "uniform mat4 u_mat_model;\n"
 
         "void main() {\n"
+        "    gl_Position = u_mat_projection * u_mat_view * u_mat_model * vec4(vin_position, 1.0);\n"
+        "    gin_position = gl_Position.xyz;\n"
+        "    gin_wposition = vec3(u_mat_model * vec4(vin_position, 1.0));\n"
         "}\n"
         "\n";
         return std::make_shared<Shader>(src, GL_GEOMETRY_SHADER);
@@ -462,6 +482,7 @@ namespace GLS {
         "#version 400 core\n\n"
 
         "void main() {\n"
+        "    gl_FragColor = vec4(1.0, 0, 0, 1.0);\n"
         "}\n"
         "\n";
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);

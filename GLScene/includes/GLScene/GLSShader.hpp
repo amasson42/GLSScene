@@ -82,6 +82,7 @@ namespace GLS {
         static std::shared_ptr<ShaderProgram> _standardShaderProgramInstancedMeshSimpleColor;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramScreenTexture;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramSkybox;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramVoxelChunk;
 
     public:
         
@@ -99,6 +100,7 @@ namespace GLS {
         };
         
         ShaderProgram(const Shader& vertex, const Shader& fragment);
+        ShaderProgram(const Shader& vertex, const Shader& geometry, const Shader& fragment);
         virtual ~ShaderProgram();
         
         GLuint program() const;
@@ -112,6 +114,7 @@ namespace GLS {
         static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMeshSimpleColor();
         static std::shared_ptr<ShaderProgram> standardShaderProgramScreenTexture();
         static std::shared_ptr<ShaderProgram> standardShaderProgramSkybox();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramVoxelChunk();
 
     };
     

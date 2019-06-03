@@ -136,8 +136,7 @@ namespace GLS {
     // OpenGL Buffers
     
     void Mesh::generateBuffers() throw(BufferCreationException) {
-        if (bufferGenerated())
-            deleteBuffers();
+        deleteBuffers();
         if (_vertices.empty() || _indices.empty())
             return ;
 
@@ -155,7 +154,7 @@ namespace GLS {
             glDeleteBuffers(1, &_verticesBuffer);
             throw BufferCreationException();
         }
-        
+
         glBindVertexArray(_elementsBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, _verticesBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vertices.size(),

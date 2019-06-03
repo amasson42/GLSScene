@@ -90,13 +90,7 @@ namespace GLS {
             throw BufferCreationException();
         }
 
-        const size_t instancesCount = _instancesTransforms.size();
-        glm::mat4 modelMatrices[instancesCount];
-        for (size_t i = 0; i < instancesCount; i++)
-            modelMatrices[i] = _instancesTransforms[i].matrix();
-        
         glBindBuffer(GL_ARRAY_BUFFER, _transformsBuffer);
-        glBufferData(GL_ARRAY_BUFFER, _instancesTransforms.size() * sizeof(glm::mat4), modelMatrices, GL_STATIC_DRAW);
 
         glBindVertexArray(_elementsBuffer);
         glEnableVertexAttribArray(5);
@@ -112,8 +106,8 @@ namespace GLS {
         glVertexAttribDivisor(6, 1);
         glVertexAttribDivisor(7, 1);
         glVertexAttribDivisor(8, 1);
-        glBindVertexArray(0);
 
+        resetTransformsBufferValues();
     }
 
     void InstancedMesh::deleteBuffers() {
@@ -121,6 +115,21 @@ namespace GLS {
         if (_transformsBuffer != 0)
             glDeleteBuffers(1, &_transformsBuffer);
         _transformsBuffer = 0;
+    }
+
+    bool InstancedMesh::bufferGenerated() const {
+        return (Mesh::bufferGenerated() && _transformsBuffer != 0);
+    }
+
+    void InstancedMesh::resetTransformsBufferValues() {
+        if (_transformsBuffer) {
+            glBindBuffer(GL_ARRAY_BUFFER, _transformsBuffer);
+            const size_t instancesCount = _instancesTransforms.size();
+            glm::mat4 modelMatrices[instancesCount];
+            for (size_t i = 0; i < instancesCount; i++)
+                modelMatrices[i] = _instancesTransforms[i].matrix();
+            glBufferData(GL_ARRAY_BUFFER, _instancesTransforms.size() * sizeof(glm::mat4), modelMatrices, GL_DYNAMIC_DRAW);
+        }
     }
 
     void InstancedMesh::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
@@ -170,7 +179,6 @@ namespace GLS {
         glDrawElementsInstanced(GL_TRIANGLES,
                                 static_cast<GLsizei>(_indices.size()),
                                 GL_UNSIGNED_INT, 0, _instancesTransforms.size());
-        
     }
     
     void InstancedMesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {

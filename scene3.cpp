@@ -8,6 +8,7 @@ float degreeToRadians(float deg) {
 std::shared_ptr<GLS::Node> bigCubeNode = nullptr;
 std::shared_ptr<GLS::Node> lightPivotNode = nullptr;
 std::shared_ptr<GLS::Node> cubesPivotNode = nullptr;
+std::shared_ptr<GLS::InstancedMesh> instancedMeshFloater = nullptr;
 
 void updateScene3(double et, double dt) {
     (void)dt;
@@ -19,8 +20,18 @@ void updateScene3(double et, double dt) {
         lightPivotNode->transform().setEulerAngles(glm::vec3(angle, degreeToRadians(50), 0));
     }
     if (cubesPivotNode != nullptr) {
-        cubesPivotNode->transform().setEulerAngles(glm::vec3(sin(et * 0.02) * 0.3, et * 0.6, cos(et * 0.07) * 0.3));
+        float rotateSpeed = 0.2;
+        cubesPivotNode->transform().setEulerAngles(glm::vec3(sin(et * 0.02) * 0.3, et * rotateSpeed, cos(et * 0.07) * 0.3));
         cubesPivotNode->transform().moveBy(glm::vec3(0, 0.2 * dt * sin(M_PI + et * 0.3), 0));
+    }
+    if (instancedMeshFloater != nullptr) {
+        for (size_t i = 0; i < instancedMeshFloater->instancesCount(); i++) {
+            float length = (float)i * 0.2 + et;
+            GLS::Transform t = instancedMeshFloater->instanceTransformAt(i);
+            t.position().y = cos(length) * 0.2;
+            instancedMeshFloater->setInstanceTransformAt(i, t);
+        }
+        instancedMeshFloater->resetTransformsBufferValues();
     }
 }
 
@@ -63,7 +74,6 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
     for (size_t i = 0; i < cubesMesh->instancesCount(); i++) {
         float angle = randFloat() * M_PI * 2;
         float distance = randFloat() * 0.4 + 1.6;
-
         glm::vec3 pos;
         pos.x = cos(angle) * distance;
         pos.y = randFloat() * 0.3 + 0.4;
@@ -74,6 +84,7 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
         t.setScale(glm::vec3(randFloat() * 0.2 + 0.7));
         cubesMesh->setInstanceTransformAt(i, t);
     }
+    instancedMeshFloater = cubesMesh;
     cubesNode->addRenderable(cubesMesh);
     cubesPivotNode->addChildNode(cubesNode);
 

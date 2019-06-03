@@ -16,13 +16,15 @@ namespace GLS {
     class VoxelChunk : public IRenderable {
     
     public:
-    static const int chunkSize = 16;
-    static const int chunkBlockCount = chunkSize * chunkSize * chunkSize;
+        static const int chunkSize = 16;
+        static const int chunkBlockCount = chunkSize * chunkSize * chunkSize;
+        static int indexOfBlock(int x, int y, int z);
+        static std::tuple<int, int, int> coordinatesOfBlock(int i);
 
     protected:
 
         int _blockIds[chunkBlockCount];
-        
+
     public:
 
         class BufferCreationException : public std::exception {
@@ -44,12 +46,13 @@ namespace GLS {
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
 
         // OpenGL Buffers
-         
+        
         void generateBuffers() throw(BufferCreationException);
         void deleteBuffers();
         
         bool bufferGenerated() const;
         
+        void resetIdsBufferValues();
         
         // Rendering
         

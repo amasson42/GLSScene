@@ -103,6 +103,26 @@ namespace GLS {
             throw e;
         }
     }
+
+    ShaderProgram::ShaderProgram(const Shader& vertex, const Shader& geometry, const Shader& fragment) {
+        _program = glCreateProgram();
+        if (_program == 0) {
+            throw CreationException();
+        }
+        glAttachShader(_program, vertex._shader);
+        glAttachShader(_program, geometry._shader);
+        glAttachShader(_program, fragment._shader);
+        glLinkProgram(_program);
+
+        GLint success;
+        glGetProgramiv(_program, GL_LINK_STATUS, &success);
+        if (!success) {
+            LinkException e;
+            glGetProgramInfoLog(_program, 1024, NULL, e._infoLogBuffer);
+            glDeleteProgram(_program);
+            throw e;
+        }
+    }
     
     ShaderProgram::~ShaderProgram() {
         glDeleteProgram(_program);

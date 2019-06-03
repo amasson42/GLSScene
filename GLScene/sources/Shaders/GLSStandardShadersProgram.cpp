@@ -77,4 +77,16 @@ namespace GLS {
         return _standardShaderProgramSkybox;
     }
 
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramVoxelChunk = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramVoxelChunk() {
+        if (_standardShaderProgramVoxelChunk == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertexVoxelChunk();
+            std::shared_ptr<Shader> geometry = Shader::standardGeometryVoxelChunk();
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentVoxelChunk();
+            _standardShaderProgramVoxelChunk = std::make_shared<ShaderProgram>(*vertex, *geometry, *fragment);
+        }
+        return _standardShaderProgramVoxelChunk;
+    }
+
 }

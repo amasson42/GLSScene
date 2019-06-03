@@ -115,7 +115,7 @@ namespace GLS {
         virtual void generateBuffers() throw(BufferCreationException);
         virtual void deleteBuffers();
         
-        bool bufferGenerated() const;
+        virtual bool bufferGenerated() const;
         
         
         // Rendering
@@ -161,6 +161,10 @@ namespace GLS {
 
         virtual void generateBuffers() throw(BufferCreationException);
         virtual void deleteBuffers();
+
+        virtual bool bufferGenerated() const;
+
+        void resetTransformsBufferValues();
 
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);

@@ -41,10 +41,11 @@ void printNodePosition(const GLS::Node& node) {
     std::cout << "node transform: " << std::endl << node.getTransformMatrix() << std::endl;
 }
 
-void loadScene1(GLS::Scene& scene);
+void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args);
 void loadScene2(GLS::Scene& scene, const std::vector<std::string>& args);
-void updateScene2(double et, double dt);
 void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args);
+
+void updateScene2(double et, double dt);
 void updateScene3(double et, double dt);
 
 auto loadScene = loadScene3;
@@ -52,7 +53,7 @@ auto updateScene = updateScene3;
 bool mustUpdate = true;
 
 int launch(std::vector<std::string>& args) {
-
+    (void)args;
     if (!glfwInit()) // init the lib once
         return (EXIT_FAILURE);
 
@@ -82,6 +83,7 @@ int launch(std::vector<std::string>& args) {
         GLS::ShaderProgram::standardShaderProgramMeshSimpleColor();
         GLS::ShaderProgram::standardShaderProgramScreenTexture();
         GLS::ShaderProgram::standardShaderProgramSkybox();
+        // GLS::ShaderProgram::standardShaderProgramVoxelChunk();
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;
         std::cout << e.infoLog() << std::endl;

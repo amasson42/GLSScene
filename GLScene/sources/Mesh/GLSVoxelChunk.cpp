@@ -15,15 +15,13 @@ namespace GLS {
     }
 
     VoxelChunk::VoxelChunk() {
-        for (int i = 0; i < chunkBlockCount; i++) {
+        for (int i = 0; i < chunkBlockCount; i++)
             _blockIds[i] = 0;
-        }
     }
 
     VoxelChunk::VoxelChunk(const VoxelChunk& copy) {
-        for (int i = 0; i < chunkBlockCount; i++) {
+        for (int i = 0; i < chunkBlockCount; i++)
             _blockIds[i] = copy._blockIds[i];
-        }
     }
 
     VoxelChunk::~VoxelChunk() {
@@ -31,9 +29,8 @@ namespace GLS {
     }
 
     VoxelChunk& VoxelChunk::operator=(const VoxelChunk& copy) {
-        for (int i = 0; i < chunkBlockCount; i++) {
+        for (int i = 0; i < chunkBlockCount; i++)
             _blockIds[i] = copy._blockIds[i];
-        }
         return (*this);
     }
 
@@ -43,7 +40,7 @@ namespace GLS {
     }
 
     void VoxelChunk::generateBuffers() throw(BufferCreationException) {
-
+        deleteBuffers();
     }
 
     void VoxelChunk::deleteBuffers() {
@@ -54,7 +51,12 @@ namespace GLS {
         return true;
     }
 
+    void VoxelChunk::resetIdsBufferValues() {
+        
+    }
+
     void VoxelChunk::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
+        
         (void)scene;
         (void)uniforms;
     }
