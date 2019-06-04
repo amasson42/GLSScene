@@ -189,6 +189,7 @@ namespace GLS {
             glStencilMask(0x00);
             std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramInstancedMeshSimpleColor();
             program->use();
+
             glm::mat4 scaleUpModel = glm::scale(uniforms.model, glm::vec3(_outlineSize));
 
             glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(uniforms.projection));
@@ -204,8 +205,6 @@ namespace GLS {
     }
 
     void InstancedMesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
-        if (!bufferGenerated())
-            generateBuffers();
         if (!bufferGenerated())
             return;
 

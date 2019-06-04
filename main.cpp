@@ -79,10 +79,19 @@ int launch(std::vector<std::string>& args) {
 
     // try compilation of shaders
     try {
+        std::cout << "Compiling Mesh..." << std::endl;
         GLS::ShaderProgram::standardShaderProgramMesh();
+        std::cout << "Compiling MeshSimpleColor..." << std::endl;
         GLS::ShaderProgram::standardShaderProgramMeshSimpleColor();
+        std::cout << "Compiling IMesh..." << std::endl;
+        GLS::ShaderProgram::standardShaderProgramInstancedMesh();
+        std::cout << "Compiling IMeshSimpleColor..." << std::endl;
+        GLS::ShaderProgram::standardShaderProgramInstancedMeshSimpleColor();
+        std::cout << "Compiling Screen Texture..." << std::endl;
         GLS::ShaderProgram::standardShaderProgramScreenTexture();
+        std::cout << "Compiling Skybox..." << std::endl;
         GLS::ShaderProgram::standardShaderProgramSkybox();
+        std::cout << "Compiling VoxelChunk..." << std::endl;
         GLS::ShaderProgram::standardShaderProgramVoxelChunk();
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;

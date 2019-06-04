@@ -286,8 +286,6 @@ namespace GLS {
 
     void Mesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
         if (!bufferGenerated())
-            generateBuffers();
-        if (!bufferGenerated())
             return;
 
         std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMeshSimpleColor();

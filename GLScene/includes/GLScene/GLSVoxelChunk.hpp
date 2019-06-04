@@ -29,6 +29,7 @@ namespace GLS {
         GLuint _blocksArray;
 
         std::shared_ptr<ShaderProgram> _shaderProgram;
+        std::shared_ptr<Material> _material;
 
     public:
 
@@ -50,6 +51,9 @@ namespace GLS {
 
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
 
+        void setMaterial(std::shared_ptr<Material> mat);
+        std::shared_ptr<Material> getMaterial() const;
+
         // OpenGL Buffers
         
         void generateBuffers() throw(BufferCreationException);
@@ -61,8 +65,9 @@ namespace GLS {
         
         // Rendering
         
+        void setProgram(std::shared_ptr<ShaderProgram> shaderProgram);
+
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
-        virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
 
     };

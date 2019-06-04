@@ -92,12 +92,24 @@ namespace GLS {
         return _blocksBuffer != 0 && _blocksArray != 0;
     }
 
+    void VoxelChunk::setMaterial(std::shared_ptr<Material> mat) {
+        _material = mat;
+    }
+
+    std::shared_ptr<Material> VoxelChunk::getMaterial() const {
+        return _material;
+    }
+
     void VoxelChunk::resetIdsBufferValues() {
         if (bufferGenerated()) {
             glBindVertexArray(_blocksArray);
             glBindBuffer(GL_ARRAY_BUFFER, _blocksBuffer);
             glBufferData(GL_ARRAY_BUFFER, sizeof(int) * chunkBlockCount, _blockIds, GL_DYNAMIC_DRAW);
         }
+    }
+
+    void VoxelChunk::setProgram(std::shared_ptr<ShaderProgram> shaderProgram) {
+        _shaderProgram = shaderProgram;
     }
 
     void VoxelChunk::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
@@ -131,27 +143,33 @@ namespace GLS {
                                                                uniforms.camera_position.y,
                                                                uniforms.camera_position.z);
 
-        glStencilMask(0x00);
-
         static std::shared_ptr<Material> mat = nullptr;
-        if (mat == nullptr) {
+        if (mat == nullptr)
             mat = std::make_shared<Material>();
-            mat->texture_diffuse = std::make_shared<Texture>("../textures/container.jpg");
-        }
         mat->sendUniformToShaderProgram(program);
 
         glBindVertexArray(_blocksArray);
         glDrawArrays(GL_POINTS, 0, chunkBlockCount);
     }
 
-    void VoxelChunk::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
-        (void)scene;
-        (void)uniforms;
-        (void)priority;
-    }
-
     void VoxelChunk::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+        if (!bufferGenerated())
+            return;
+        
+        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMeshSimpleColor();
+        program->use();
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
+
+        glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(uniforms.projection));
+        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(uniforms.view));
+        glUniformMatrix4fv(program->getLocation("u_mat_model"), 1, GL_FALSE, glm::value_ptr(uniforms.model));
+
+        glBindVertexArray(_blocksArray);
+        glDrawArrays(GL_POINTS, 0, chunkBlockCount);
         (void)scene;
-        (void)uniforms;
     }
 }

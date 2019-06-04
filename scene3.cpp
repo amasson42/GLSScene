@@ -143,6 +143,15 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
     chunkNode->addRenderable(chunkMesh);
     scene.rootNode().addChildNode(chunkNode);
     chunkNode->addRenderable(GLS::Mesh::cube(0.2, 0.2, 0.2));
+    auto endChunkNode = std::make_shared<GLS::Node>();
+    endChunkNode->transform().setPosition(glm::vec3(static_cast<float>(GLS::VoxelChunk::chunkSize)));
+    chunkNode->addChildNode(endChunkNode);
+    auto endChunkMesh = GLS::Mesh::cube(0.2, 0.2, 0.2);
+    auto endChunkMaterial = std::make_shared<GLS::Material>();
+    endChunkMaterial->diffuse = glm::vec3(1, 0, 0);
+    endChunkMesh->setMaterial(endChunkMaterial);
+    endChunkNode->addRenderable(endChunkMesh);
+
 
     {
         std::cout << "testing..." << std::endl;
@@ -156,6 +165,12 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
                         std::cout << "error block y" << std::endl;
                     if (std::get<2>(blockCoordinates) != iz)
                         std::cout << "error block z" << std::endl;
+                    if ((ix + iy) % 2 == 0) {
+                        chunkMesh->blockIds()[GLS::VoxelChunk::indexOfBlock(ix, iy, 2)] = 1;
+                    }
                 }
     }
+
+    chunkMesh->generateBuffers();
+    // chunkMesh->resetIdsBufferValues();
 }
