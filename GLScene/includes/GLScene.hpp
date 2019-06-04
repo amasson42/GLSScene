@@ -9,6 +9,9 @@
 #ifndef GLScene_h
 #define GLScene_h
 
+// TODO: why do we have to do this shit
+#define SCHOOL_DUMPS
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -44,7 +47,5 @@
 #include "GLScene/GLSScene.hpp"
 
 #include "GLScene/GLSAnimator.tpp"
-
-// TODO: voxel with geometry shader
 
 #endif /* GLScene_h */

@@ -40,13 +40,20 @@ namespace GLS {
         
         "void main()\n"
         "{\n"
-        "    gl_Position = u_mat_projection * u_mat_view * u_mat_model * vec4(vin_position, 1.0);\n"
-        "    fin_position = gl_Position.xyz;\n"
         "    fin_wposition = vec3(u_mat_model * vec4(vin_position, 1.0));\n"
+        "    gl_Position = u_mat_projection * u_mat_view * vec4(fin_wposition, 1.0);\n"
+        "    fin_position = gl_Position.xyz;\n"
         "    fin_wnormal = u_mat_normal * vin_normal;\n"
         "    fin_wtangent = u_mat_normal * vin_tangent;\n"
         "    fin_wbitangent = u_mat_normal * vin_bitangent;\n"
         "    fin_uv = vin_uv;\n"
+        // "    gl_Position = u_mat_projection * u_mat_view * u_mat_model * vec4(vin_position, 1.0);\n"
+        // "    fin_position = gl_Position.xyz;\n"
+        // "    fin_wposition = vec3(u_mat_model * vec4(vin_position, 1.0));\n"
+        // "    fin_wnormal = u_mat_normal * vin_normal;\n"
+        // "    fin_wtangent = u_mat_normal * vin_tangent;\n"
+        // "    fin_wbitangent = u_mat_normal * vin_bitangent;\n"
+        // "    fin_uv = vin_uv;\n"
         "}\n";
         return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
     }
@@ -116,9 +123,12 @@ namespace GLS {
         "uniform int lights_count;\n"
         "uniform vec3 u_camera_position;\n"
 
-        // "uniform mat4 light_casters_vp[4];\n"
-        // "uniform sampler2D light_casters_depth_map[4];\n"
+        #ifdef SCHOOL_DUMPS
+        "uniform mat4 light_casters_vp[4];\n"
+        "uniform sampler2D light_casters_depth_map[4];\n"
+        #else
         "uniform LightCaster light_casters[4];\n"
+        #endif
 
         // "    float near = 0.1;"
         // "    float far = 15.0;"
@@ -126,28 +136,47 @@ namespace GLS {
         // "    float linearDepth = (2.0 * near * far) / (far + near - z * (far - near)) / far;"
 
         // fixed but the workaround is an ugly code
+        #ifdef SCHOOL_DUMPS
         "float calculShadow(Light light) {\n"
         "    int caster_index = light.caster_index;\n"
         "    if (caster_index >= 0) {\n"
-        "        vec4 fpos_light = light_casters[caster_index].vp * vec4(fin_wposition, 1.0);\n"
-        // "        vec4 fpos_light = light_casters_vp[caster_index] * vec4(fin_wposition, 1.0);\n"
+        "        vec4 fpos_light = light_casters_vp[caster_index] * vec4(fin_wposition, 1.0);\n"
         "        vec3 proj_coords = fpos_light.xyz / fpos_light.w;\n"
         "        proj_coords = proj_coords * 0.5 + 0.5;\n"
         "        float current_depth = proj_coords.z;\n"
         "        float bias = 0.0005;\n"// max(0.05 * (1.0 - dot(normal_direction, -light.direction)), 0.005);\n"
-        "        vec2 texel_size = 1.0 / textureSize(light_casters[caster_index].depth_map, 0);\n"
-        // "        vec2 texel_size = 1.0 / textureSize(light_casters_depth_map[caster_index], 0);\n"
+        "        vec2 texel_size = 1.0 / textureSize(light_casters_depth_map[caster_index], 0);\n"
         "        float shadow = 0.0;\n"
         "        for (int x = -1; x <= 1; x++)\n"
         "            for (int y = -1; y <= 1; y++) {\n"
-        "                float pcf_depth = texture(light_casters[caster_index].depth_map, proj_coords.xy + vec2(x, y) * texel_size).r;\n"
-        // "                float pcf_depth = texture(light_casters_depth_map[caster_index], proj_coords.xy + vec2(x, y) * texel_size).r;\n"
+        "                float pcf_depth = texture(light_casters_depth_map[caster_index], proj_coords.xy + vec2(x, y) * texel_size).r;\n"
         "                shadow += current_depth - bias > pcf_depth ? 0.0 : 1.0;\n"
         "            }\n"
         "        return shadow / 9.0;\n"
         "    }\n"
         "    return 1.0;\n"
         "}\n"
+        #else
+        "float calculShadow(Light light) {\n"
+        "    int caster_index = light.caster_index;\n"
+        "    if (caster_index >= 0) {\n"
+        "        vec4 fpos_light = light_casters[caster_index].vp * vec4(fin_wposition, 1.0);\n"
+        "        vec3 proj_coords = fpos_light.xyz / fpos_light.w;\n"
+        "        proj_coords = proj_coords * 0.5 + 0.5;\n"
+        "        float current_depth = proj_coords.z;\n"
+        "        float bias = 0.0005;\n"// max(0.05 * (1.0 - dot(normal_direction, -light.direction)), 0.005);\n"
+        "        vec2 texel_size = 1.0 / textureSize(light_casters[caster_index].depth_map, 0);\n"
+        "        float shadow = 0.0;\n"
+        "        for (int x = -1; x <= 1; x++)\n"
+        "            for (int y = -1; y <= 1; y++) {\n"
+        "                float pcf_depth = texture(light_casters[caster_index].depth_map, proj_coords.xy + vec2(x, y) * texel_size).r;\n"
+        "                shadow += current_depth - bias > pcf_depth ? 0.0 : 1.0;\n"
+        "            }\n"
+        "        return shadow / 9.0;\n"
+        "    }\n"
+        "    return 1.0;\n"
+        "}\n"
+        #endif
 
         "vec3 calculDirectionalLight(Light light, Material fragMat, vec3 normal_direction, vec3 fcamera_position) {\n"
         "    vec3 color = vec3(0);\n"
@@ -441,13 +470,23 @@ namespace GLS {
         std::string src =
         "#version 400 core\n"
 
-        "layout (location = 0) in vec3 vin_position;\n"
+        "layout (location = 0) in int vin_blockId;\n"
 
-        "out vec3 gin_position;\n"
-        
+        // "in int gl_VertexID;\n"
+
+        "flat out int gin_position_x;\n"
+        "flat out int gin_position_y;\n"
+        "flat out int gin_position_z;\n"
+        "flat out int gin_blockId;\n"
+
+        "const int chunkSize = 16;\n"
+
         "void main()\n"
         "{\n"
-        "    gin_position = vec3(0, 0, 0);\n"
+        "    gin_position_x = gl_VertexID % chunkSize;\n"
+        "    gin_position_y = (gl_VertexID % (chunkSize * chunkSize)) / chunkSize;\n"
+        "    gin_position_z = gl_VertexID / (chunkSize * chunkSize);\n"
+        "    gin_blockId = vin_blockId;\n"
         "}\n";
         return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
     }
@@ -456,9 +495,19 @@ namespace GLS {
         std::string src =
         "#version 400 core\n\n"
         "layout (points) in;\n"
-        "layout (triangles_strip, max_vertices = 4) out;\n"
+        "layout (triangle_strip, max_vertices = 4) out;\n"
         
-        "in vec3 gin_position;\n"
+        "flat in int gin_position_x[];\n"
+        "flat in int gin_position_y[];\n"
+        "flat in int gin_position_z[];\n"
+        "flat in int gin_blockId[];\n"
+
+        "out vec3 fin_position;\n"
+        "out vec3 fin_wposition;\n"
+        "out vec2 fin_uv;\n"
+        "out vec3 fin_wnormal;\n"
+        "out vec3 fin_wtangent;\n"
+        "out vec3 fin_wbitangent;\n"
 
         // sent by scene:
         "uniform mat3 u_mat_normal;\n"
@@ -469,23 +518,129 @@ namespace GLS {
         "uniform mat4 u_mat_model;\n"
 
         "void main() {\n"
-        "    gl_Position = u_mat_projection * u_mat_view * u_mat_model * vec4(vin_position, 1.0);\n"
-        "    gin_position = gl_Position.xyz;\n"
-        "    gin_wposition = vec3(u_mat_model * vec4(vin_position, 1.0));\n"
+        "    vec3 axe_x = vec3(u_mat_model * vec4(1, 0, 0, 0));\n"
+        "    vec3 axe_y = vec3(u_mat_model * vec4(0, 1, 0, 0));\n"
+        "    vec3 axe_z = vec3(u_mat_model * vec4(0, 0, 1, 0));\n"
+        "    vec3 origin = vec3(u_mat_model * vec4(0, 0, 0, 1))"
+        "        + axe_x * gin_position_x[0]"
+        "        + axe_y * gin_position_y[0]"
+        "        + axe_z * gin_position_z[0];\n"
+
+        // "    if (gin_blockId[0] == 0) return;\n"
+
+        "    fin_uv = vec2(0, 0);\n"
+        "    fin_wposition = origin + axe_x * fin_uv.x + axe_z * fin_uv.y;\n"
+        "    fin_position = vec3(u_mat_projection * u_mat_view * vec4(fin_wposition, 1.0));\n"
+        "    fin_wnormal = -axe_y;\n"
+        "    fin_wtangent = axe_x;\n"
+        "    fin_wbitangent = axe_z;\n"
+        "    gl_Position = vec4(fin_position, 1.0);\n"
+        "    EmitVertex();\n"
+
+        "    fin_uv = vec2(1, 0);\n"
+        "    fin_wposition = origin + axe_x * fin_uv.x + axe_z * fin_uv.y;\n"
+        "    fin_position = vec3(u_mat_projection * u_mat_view * vec4(fin_wposition, 1.0));\n"
+        "    fin_wnormal = -axe_y;\n"
+        "    fin_wtangent = axe_x;\n"
+        "    fin_wbitangent = axe_z;\n"
+        "    gl_Position = vec4(fin_position, 1.0);\n"
+        "    EmitVertex();\n"
+
+        "    fin_uv = vec2(0, 1);\n"
+        "    fin_wposition = origin + axe_x * fin_uv.x + axe_z * fin_uv.y;\n"
+        "    fin_position = vec3(u_mat_projection * u_mat_view * vec4(fin_wposition, 1.0));\n"
+        "    fin_wnormal = -axe_y;\n"
+        "    fin_wtangent = axe_x;\n"
+        "    fin_wbitangent = axe_z;\n"
+        "    gl_Position = vec4(fin_position, 1.0);\n"
+        "    EmitVertex();\n"
+
+        "    fin_uv = vec2(1, 1);\n"
+        "    fin_wposition = origin + axe_x * fin_uv.x + axe_z * fin_uv.y;\n"
+        "    fin_position = vec3(u_mat_projection * u_mat_view * vec4(fin_wposition, 1.0));\n"
+        "    fin_wnormal = -axe_y;\n"
+        "    fin_wtangent = axe_x;\n"
+        "    fin_wbitangent = axe_z;\n"
+        "    gl_Position = vec4(fin_position, 1.0);\n"
+        "    EmitVertex();\n"
+
+        "    EndPrimitive();\n"
+
         "}\n"
         "\n";
         return std::make_shared<Shader>(src, GL_GEOMETRY_SHADER);
     }
 
-    std::shared_ptr<Shader> Shader::standardFragmentVoxelChunk() {
-        std::string src =
+}
+
+/*
         "#version 400 core\n\n"
 
-        "void main() {\n"
-        "    gl_FragColor = vec4(1.0, 0, 0, 1.0);\n"
-        "}\n"
-        "\n";
-        return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);
-    }
+        "out vec4 FragColor;\n"
 
-}
+        "in vec3 fin_position;\n"
+        "in vec3 fin_wposition;\n"
+        "in vec2 fin_uv;\n"
+        "in vec3 fin_wnormal;\n"
+        "in vec3 fin_wtangent;\n"
+        "in vec3 fin_wbitangent;\n"
+        
+        "struct Light {\n"
+        "    int type;\n" // unused = 0; sunlight = 1; spotlight = 2; pointlight = 3; ambiantlight = 4;
+        "    vec3 position;\n"
+        "    vec3 color;\n"
+        "    vec3 specular;\n"
+        "    float intensity;\n"
+        "    vec3 attenuation;\n"
+        "    vec3 direction;\n"
+        "    float angle;\n"
+        "    float cone_attenuation;\n"
+        "    int caster_index;\n" // if the index >= 0 then there is a light caster bounds
+        "};\n"
+
+        "struct LightCaster {\n"
+        "    mat4 vp;\n"
+        "    sampler2D depth_map;\n"
+        "};\n"
+
+        "struct Material {\n"
+        "    vec3 diffuse;\n"
+        "    vec3 specular;\n"
+        "    float roughness;\n"
+        "    float metalness;\n"
+        "    vec3 occlusion;\n"
+        "    float shininess;\n"
+        "};\n"
+
+        // sent by mesh material :
+        "uniform sampler2D texture_diffuse;\n"    // 1
+        "uniform sampler2D texture_specular;\n"   // 2
+        "uniform sampler2D texture_roughness;\n"  // 4
+        "uniform sampler2D texture_metalness;\n"  // 8
+        "uniform sampler2D texture_occlusion;\n"  // 16
+        "uniform sampler2D texture_shininess;\n"  // 32
+        "uniform sampler2D texture_normal;\n"     // 64
+        "uniform sampler2D texture_mask;\n"       // 128
+        "uniform int texturebitmask;\n"
+        "uniform mat3 diffuse_transform;\n"
+        "uniform mat3 specular_transform;\n"
+        "uniform mat3 roughness_transform;\n"
+        "uniform mat3 metalness_transform;\n"
+        "uniform mat3 occlusion_transform;\n"
+        "uniform mat3 shininess_transform;\n"
+        "uniform mat3 normal_transform;\n"
+        "uniform mat3 mask_transform;\n"
+        "uniform Material material;\n"
+
+        // sent by scene :
+        "uniform Light lights[16];\n"
+        "uniform int lights_count;\n"
+        "uniform vec3 u_camera_position;\n"
+
+        #ifdef SCHOOL_DUMPS
+        "uniform mat4 light_casters_vp[4];\n"
+        "uniform sampler2D light_casters_depth_map[4];\n"
+        #else
+        "uniform LightCaster light_casters[4];\n"
+        #endif
+*/

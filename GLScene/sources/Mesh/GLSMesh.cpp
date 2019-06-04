@@ -30,7 +30,7 @@ namespace GLS {
     Mesh::Mesh(const Mesh& copy) :
     _vertices(copy._vertices), _indices(copy._indices),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
-    _shaderProgram(nullptr),
+    _shaderProgram(copy._shaderProgram),
     _material(copy._material),
     _outlined(copy._outlined), _outlineColor(copy._outlineColor), _outlineSize(copy._outlineSize)
     {
@@ -45,6 +45,7 @@ namespace GLS {
     Mesh& Mesh::operator=(const Mesh& copy) {
         _vertices = copy._vertices;
         _indices = copy._indices;
+        _shaderProgram = copy._shaderProgram;
         deleteBuffers();
         if (copy.bufferGenerated())
             generateBuffers();
@@ -187,17 +188,15 @@ namespace GLS {
     }
     
     void Mesh::deleteBuffers() {
-        if (bufferGenerated()) {
-            if (_elementsBuffer)
-                glDeleteVertexArrays(1, &_elementsBuffer);
-            if (_verticesBuffer)
-                glDeleteBuffers(1, &_verticesBuffer);
-            if (_indicesBuffer)
-                glDeleteBuffers(1, &_indicesBuffer);
-        }
-        _verticesBuffer = 0;
-        _indicesBuffer = 0;
+        if (_elementsBuffer)
+            glDeleteVertexArrays(1, &_elementsBuffer);
         _elementsBuffer = 0;
+        if (_verticesBuffer)
+            glDeleteBuffers(1, &_verticesBuffer);
+        _verticesBuffer = 0;
+        if (_indicesBuffer)
+            glDeleteBuffers(1, &_indicesBuffer);
+        _indicesBuffer = 0;
         _bufferGenerated = false;
     }
     

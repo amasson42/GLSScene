@@ -26,7 +26,7 @@ void updateScene3(double et, double dt) {
     }
     if (instancedMeshFloater != nullptr) {
         for (size_t i = 0; i < instancedMeshFloater->instancesCount(); i++) {
-            float length = (float)i * 0.2 + et;
+            float length = (float)i * 0.2 * (float)i + et * 0.5;
             GLS::Transform t = instancedMeshFloater->instanceTransformAt(i);
             t.position().y = cos(length) * 0.2;
             instancedMeshFloater->setInstanceTransformAt(i, t);
@@ -136,7 +136,26 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
 
     auto chunkNode = std::make_shared<GLS::Node>();
     auto chunkMesh = std::make_shared<GLS::VoxelChunk>();
+    chunkMesh->blockIds()[0] = 1;
+    chunkMesh->blockIds()[GLS::VoxelChunk::indexOfBlock(1, 1, 1)] = 1;
+    chunkMesh->blockIds()[GLS::VoxelChunk::indexOfBlock(0, 1, 0)] = 1;
     chunkMesh->generateBuffers();
     chunkNode->addRenderable(chunkMesh);
     scene.rootNode().addChildNode(chunkNode);
+    chunkNode->addRenderable(GLS::Mesh::cube(0.2, 0.2, 0.2));
+
+    {
+        std::cout << "testing..." << std::endl;
+        for (int ix = 0; ix < GLS::VoxelChunk::chunkSize; ix++)
+            for (int iy = 0; iy < GLS::VoxelChunk::chunkSize; iy++)
+                for (int iz = 0; iz < GLS::VoxelChunk::chunkSize; iz++) {
+                    std::tuple<int, int, int> blockCoordinates = GLS::VoxelChunk::coordinatesOfBlock(GLS::VoxelChunk::indexOfBlock(ix, iy, iz));
+                    if (std::get<0>(blockCoordinates) != ix)
+                        std::cout << "error block x" << std::endl;
+                    if (std::get<1>(blockCoordinates) != iy)
+                        std::cout << "error block y" << std::endl;
+                    if (std::get<2>(blockCoordinates) != iz)
+                        std::cout << "error block z" << std::endl;
+                }
+    }
 }

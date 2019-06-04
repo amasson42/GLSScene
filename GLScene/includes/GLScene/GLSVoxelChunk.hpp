@@ -25,6 +25,11 @@ namespace GLS {
 
         int _blockIds[chunkBlockCount];
 
+        GLuint _blocksBuffer;
+        GLuint _blocksArray;
+
+        std::shared_ptr<ShaderProgram> _shaderProgram;
+
     public:
 
         class BufferCreationException : public std::exception {

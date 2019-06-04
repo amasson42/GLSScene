@@ -122,7 +122,8 @@ namespace GLS {
     }
 
     void InstancedMesh::resetTransformsBufferValues() {
-        if (_transformsBuffer) {
+        if (bufferGenerated()) {
+            glBindVertexArray(_elementsBuffer);
             glBindBuffer(GL_ARRAY_BUFFER, _transformsBuffer);
             const size_t instancesCount = _instancesTransforms.size();
             glm::mat4 modelMatrices[instancesCount];

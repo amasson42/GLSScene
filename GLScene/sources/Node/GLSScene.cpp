@@ -138,6 +138,7 @@ namespace GLS {
         
         sendLightsValueToShader(ShaderProgram::standardShaderProgramMesh());
         sendLightsValueToShader(ShaderProgram::standardShaderProgramInstancedMesh());
+        sendLightsValueToShader(ShaderProgram::standardShaderProgramVoxelChunk());
         
         _rootNode->renderInContext(*this, uniforms);
         

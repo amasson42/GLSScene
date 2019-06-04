@@ -83,7 +83,7 @@ int launch(std::vector<std::string>& args) {
         GLS::ShaderProgram::standardShaderProgramMeshSimpleColor();
         GLS::ShaderProgram::standardShaderProgramScreenTexture();
         GLS::ShaderProgram::standardShaderProgramSkybox();
-        // GLS::ShaderProgram::standardShaderProgramVoxelChunk();
+        GLS::ShaderProgram::standardShaderProgramVoxelChunk();
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;
         std::cout << e.infoLog() << std::endl;
