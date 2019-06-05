@@ -18,6 +18,7 @@
 #include <exception>
 #include <string>
 #include <vector>
+#include <array>
 #include <map>
 
 #include <assimp/Importer.hpp>

@@ -252,11 +252,11 @@ namespace GLS {
             glStencilMask(0x00);
         }
 
-        if (_material == nullptr) {
+        if (_material == nullptr)
             Material().sendUniformToShaderProgram(program);
-        } else {
+        else
             _material->sendUniformToShaderProgram(program);
-        }
+
         glBindVertexArray(_elementsBuffer);
         glDrawElements(GL_TRIANGLES,
                        static_cast<GLsizei>(_indices.size()),

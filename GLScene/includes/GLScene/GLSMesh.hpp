@@ -66,7 +66,7 @@ namespace GLS {
         GLuint _verticesBuffer;
         GLuint _indicesBuffer;
         GLuint _elementsBuffer;
-        bool _bufferGenerated;
+        bool _bufferGenerated; // TODO: remove this
         
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;

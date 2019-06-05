@@ -42,6 +42,7 @@ namespace GLS {
         GLfloat height; // for directional
 
         bool cast_shadow; // for spot and directional
+        // TODO: handle multiple casters
         // TODO: cast shadow for point nodes with cubemap
 
         GLfloat cast_shadow_clip_near;

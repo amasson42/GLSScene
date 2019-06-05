@@ -484,23 +484,23 @@ namespace GLS {
 
         "layout (location = 0) in int blockId;\n"
 
-        // "in int gl_VertexID;\n"
-
         "out GS_IN {"
         "    int position_x;\n"
         "    int position_y;\n"
         "    int position_z;\n"
+        "    flat int blockAdj;\n"
         "    flat int blockId;\n"
         "} gs_in;\n"
 
-        "const int chunkSize = 16;\n"
+        "const int chunkSize = " + std::to_string(VoxelChunk::chunkSize) + ";\n"
 
         "void main()\n"
         "{\n"
         "    gs_in.position_x = gl_VertexID % chunkSize;\n"
         "    gs_in.position_y = (gl_VertexID % (chunkSize * chunkSize)) / chunkSize;\n"
         "    gs_in.position_z = gl_VertexID / (chunkSize * chunkSize);\n"
-        "    gs_in.blockId = blockId;\n"
+        "    gs_in.blockAdj = (blockId & 0xFF0000) >> 16;\n"
+        "    gs_in.blockId = blockId & 0xFFFF;\n"
         "}\n";
         return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
     }
@@ -508,13 +508,15 @@ namespace GLS {
     std::shared_ptr<Shader> Shader::standardGeometryVoxelChunk() {
         std::string src =
         "#version 400 core\n\n"
+
         "layout (points) in;\n"
-        "layout (triangle_strip, max_vertices = 4) out;\n"
+        "layout (triangle_strip, max_vertices = 24) out;\n"
         
         "in GS_IN {\n"
         "    int position_x;\n"
         "    int position_y;\n"
         "    int position_z;\n"
+        "    flat int blockAdj;\n"
         "    flat int blockId;\n"
         "} gs_in[];\n"
 
@@ -535,6 +537,128 @@ namespace GLS {
         // sent by node:
         "uniform mat4 u_mat_model;\n"
 
+        "const vec2 uvs = vec2(0.0, 1);\n"
+
+        // +X
+        "void drawFace_positiveX_emitVertex(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z, vec2 uv) {\n"
+        "    gs_out.uv = uv;\n"
+        "    gs_out.wposition = origin + axe_x + axe_y * gs_out.uv.y + axe_z * (1.0 - gs_out.uv.x);\n"
+        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
+        "    gs_out.wnormal = axe_x;\n"
+        "    gs_out.wtangent = -axe_z;\n"
+        "    gs_out.wbitangent = axe_y;\n"
+        "    gl_Position = gs_out.position;\n"
+        "    EmitVertex();\n"
+        "}\n"
+
+        "void drawFace_positiveX(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z) {\n"
+        "    drawFace_positiveX_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.x));\n"
+        "    drawFace_positiveX_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.x));\n"
+        "    drawFace_positiveX_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.y));\n"
+        "    drawFace_positiveX_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.y));\n"
+        "    EndPrimitive();\n"
+        "}\n"
+
+        // -X
+        "void drawFace_negativeX_emitVertex(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z, vec2 uv) {\n"
+        "    gs_out.uv = uv;\n"
+        "    gs_out.wposition = origin + axe_y * gs_out.uv.y + axe_z * gs_out.uv.x;\n"
+        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
+        "    gs_out.wnormal = -axe_x;\n"
+        "    gs_out.wtangent = axe_z;\n"
+        "    gs_out.wbitangent = axe_y;\n"
+        "    gl_Position = gs_out.position;\n"
+        "    EmitVertex();\n"
+        "}\n"
+    
+        "void drawFace_negativeX(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z) {\n"
+        "    drawFace_negativeX_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.x));\n"
+        "    drawFace_negativeX_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.x));\n"
+        "    drawFace_negativeX_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.y));\n"
+        "    drawFace_negativeX_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.y));\n"
+        "    EndPrimitive();\n"
+        "}\n"
+
+        // +Y
+        "void drawFace_positiveY_emitVertex(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z, vec2 uv) {\n"
+        "    gs_out.uv = uv;\n"
+        "    gs_out.wposition = origin + axe_x * gs_out.uv.x + axe_y + axe_z * (1 - gs_out.uv.y);\n"
+        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
+        "    gs_out.wnormal = axe_y;\n"
+        "    gs_out.wtangent = axe_x;\n"
+        "    gs_out.wbitangent = -axe_z;\n"
+        "    gl_Position = gs_out.position;\n"
+        "    EmitVertex();\n"
+        "}\n"
+
+        "void drawFace_positiveY(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z) {\n"
+        "    drawFace_positiveY_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.x));\n"
+        "    drawFace_positiveY_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.x));\n"
+        "    drawFace_positiveY_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.y));\n"
+        "    drawFace_positiveY_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.y));\n"
+        "    EndPrimitive();\n"
+        "}\n"
+
+        // -Y
+        "void drawFace_negativeY_emitVertex(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z, vec2 uv) {\n"
+        "    gs_out.uv = uv;\n"
+        "    gs_out.wposition = origin + axe_x * (1 - gs_out.uv.x) + axe_z * (1 - gs_out.uv.y);\n"
+        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
+        "    gs_out.wnormal = -axe_y;\n"
+        "    gs_out.wtangent = -axe_x;\n"
+        "    gs_out.wbitangent = -axe_z;\n"
+        "    gl_Position = gs_out.position;\n"
+        "    EmitVertex();\n"
+        "}\n"
+
+        "void drawFace_negativeY(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z) {\n"
+        "    drawFace_negativeY_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.x));\n"
+        "    drawFace_negativeY_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.x));\n"
+        "    drawFace_negativeY_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.y));\n"
+        "    drawFace_negativeY_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.y));\n"
+        "    EndPrimitive();\n"
+        "}\n"
+
+        // +Z
+        "void drawFace_positiveZ_emitVertex(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z, vec2 uv) {\n"
+        "    gs_out.uv = uv;\n"
+        "    gs_out.wposition = origin + axe_x * gs_out.uv.x + axe_y * gs_out.uv.y + axe_z;\n"
+        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
+        "    gs_out.wnormal = axe_z;\n"
+        "    gs_out.wtangent = axe_x;\n"
+        "    gs_out.wbitangent = axe_y;\n"
+        "    gl_Position = gs_out.position;\n"
+        "    EmitVertex();\n"
+        "}\n"
+
+        "void drawFace_positiveZ(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z) {\n"
+        "    drawFace_positiveZ_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.x));\n"
+        "    drawFace_positiveZ_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.x));\n"
+        "    drawFace_positiveZ_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.y));\n"
+        "    drawFace_positiveZ_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.y));\n"
+        "    EndPrimitive();\n"
+        "}\n"
+
+        // -Z
+        "void drawFace_negativeZ_emitVertex(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z, vec2 uv) {\n"
+        "    gs_out.uv = uv;\n"
+        "    gs_out.wposition = origin + axe_x * (1 - gs_out.uv.x) + axe_y * gs_out.uv.y;\n"
+        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
+        "    gs_out.wnormal = -axe_z;\n"
+        "    gs_out.wtangent = -axe_x;\n"
+        "    gs_out.wbitangent = axe_y;\n"
+        "    gl_Position = gs_out.position;\n"
+        "    EmitVertex();\n"
+        "}\n"
+
+        "void drawFace_negativeZ(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z) {\n"
+        "    drawFace_negativeZ_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.x));\n"
+        "    drawFace_negativeZ_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.x));\n"
+        "    drawFace_negativeZ_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.x, uvs.y));\n"
+        "    drawFace_negativeZ_emitVertex(origin, axe_x, axe_y, axe_z, vec2(uvs.y, uvs.y));\n"
+        "    EndPrimitive();\n"
+        "}\n"
+
         "void main() {\n"
         "    vec3 axe_x = vec3(u_mat_model * vec4(1, 0, 0, 0));\n"
         "    vec3 axe_y = vec3(u_mat_model * vec4(0, 1, 0, 0));\n"
@@ -544,48 +668,21 @@ namespace GLS {
         "        + axe_y * gs_in[0].position_y"
         "        + axe_z * gs_in[0].position_z;\n"
 
-        "    float mult = 0.95;"
-        "    if (gs_in[0].blockId == 0) {\n"
-        "        mult = 0.5;"
-        "    }\n"
+        "    if (gs_in[0].blockId == 0)\n"
+        "        return;"
 
-        "    gs_out.uv = vec2(0, 0);\n"
-        "    gs_out.wposition = origin + mult * axe_x * gs_out.uv.x + mult * axe_z * gs_out.uv.y;\n"
-        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
-        "    gs_out.wnormal = -axe_y;\n"
-        "    gs_out.wtangent = axe_x;\n"
-        "    gs_out.wbitangent = axe_z;\n"
-        "    gl_Position = gs_out.position;\n"
-        "    EmitVertex();\n"
-
-        "    gs_out.uv = vec2(1, 0);\n"
-        "    gs_out.wposition = origin + mult * axe_x * gs_out.uv.x + mult * axe_z * gs_out.uv.y;\n"
-        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
-        "    gs_out.wnormal = -axe_y;\n"
-        "    gs_out.wtangent = axe_x;\n"
-        "    gs_out.wbitangent = axe_z;\n"
-        "    gl_Position = gs_out.position;\n"
-        "    EmitVertex();\n"
-
-        "    gs_out.uv = vec2(0, 1);\n"
-        "    gs_out.wposition = origin + mult * axe_x * gs_out.uv.x + mult * axe_z * gs_out.uv.y;\n"
-        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
-        "    gs_out.wnormal = -axe_y;\n"
-        "    gs_out.wtangent = axe_x;\n"
-        "    gs_out.wbitangent = axe_z;\n"
-        "    gl_Position = gs_out.position;\n"
-        "    EmitVertex();\n"
-
-        "    gs_out.uv = vec2(1, 1);\n"
-        "    gs_out.wposition = origin + mult * axe_x * gs_out.uv.x + mult * axe_z * gs_out.uv.y;\n"
-        "    gs_out.position = u_mat_projection * u_mat_view * vec4(gs_out.wposition, 1.0);\n"
-        "    gs_out.wnormal = -axe_y;\n"
-        "    gs_out.wtangent = axe_x;\n"
-        "    gs_out.wbitangent = axe_z;\n"
-        "    gl_Position = gs_out.position;\n"
-        "    EmitVertex();\n"
-
-        "    EndPrimitive();\n"
+        "    if ((gs_in[0].blockAdj & (1 << 0)) != 0)\n"
+        "        drawFace_positiveX(origin, axe_x, axe_y, axe_z);\n"
+        "    if ((gs_in[0].blockAdj & (1 << 1)) != 0)\n"
+        "        drawFace_negativeX(origin, axe_x, axe_y, axe_z);\n"
+        "    if ((gs_in[0].blockAdj & (1 << 2)) != 0)\n"
+        "        drawFace_positiveY(origin, axe_x, axe_y, axe_z);\n"
+        "    if ((gs_in[0].blockAdj & (1 << 3)) != 0)\n"
+        "        drawFace_negativeY(origin, axe_x, axe_y, axe_z);\n"
+        "    if ((gs_in[0].blockAdj & (1 << 4)) != 0)\n"
+        "        drawFace_positiveZ(origin, axe_x, axe_y, axe_z);\n"
+        "    if ((gs_in[0].blockAdj & (1 << 5)) != 0)\n"
+        "        drawFace_negativeZ(origin, axe_x, axe_y, axe_z);\n"
 
         "}\n"
         "\n";
@@ -593,75 +690,3 @@ namespace GLS {
     }
 
 }
-
-/*
-        "#version 400 core\n\n"
-
-        "out vec4 FragColor;\n"
-
-        "in vec3 fin_position;\n"
-        "in vec3 fin_wposition;\n"
-        "in vec2 fin_uv;\n"
-        "in vec3 fin_wnormal;\n"
-        "in vec3 fin_wtangent;\n"
-        "in vec3 fin_wbitangent;\n"
-        
-        "struct Light {\n"
-        "    int type;\n" // unused = 0; sunlight = 1; spotlight = 2; pointlight = 3; ambiantlight = 4;
-        "    vec3 position;\n"
-        "    vec3 color;\n"
-        "    vec3 specular;\n"
-        "    float intensity;\n"
-        "    vec3 attenuation;\n"
-        "    vec3 direction;\n"
-        "    float angle;\n"
-        "    float cone_attenuation;\n"
-        "    int caster_index;\n" // if the index >= 0 then there is a light caster bounds
-        "};\n"
-
-        "struct LightCaster {\n"
-        "    mat4 vp;\n"
-        "    sampler2D depth_map;\n"
-        "};\n"
-
-        "struct Material {\n"
-        "    vec3 diffuse;\n"
-        "    vec3 specular;\n"
-        "    float roughness;\n"
-        "    float metalness;\n"
-        "    vec3 occlusion;\n"
-        "    float shininess;\n"
-        "};\n"
-
-        // sent by mesh material :
-        "uniform sampler2D texture_diffuse;\n"    // 1
-        "uniform sampler2D texture_specular;\n"   // 2
-        "uniform sampler2D texture_roughness;\n"  // 4
-        "uniform sampler2D texture_metalness;\n"  // 8
-        "uniform sampler2D texture_occlusion;\n"  // 16
-        "uniform sampler2D texture_shininess;\n"  // 32
-        "uniform sampler2D texture_normal;\n"     // 64
-        "uniform sampler2D texture_mask;\n"       // 128
-        "uniform int texturebitmask;\n"
-        "uniform mat3 diffuse_transform;\n"
-        "uniform mat3 specular_transform;\n"
-        "uniform mat3 roughness_transform;\n"
-        "uniform mat3 metalness_transform;\n"
-        "uniform mat3 occlusion_transform;\n"
-        "uniform mat3 shininess_transform;\n"
-        "uniform mat3 normal_transform;\n"
-        "uniform mat3 mask_transform;\n"
-        "uniform Material material;\n"
-
-        // sent by scene :
-        "uniform Light lights[16];\n"
-        "uniform int lights_count;\n"
-        "uniform vec3 u_camera_position;\n"
-
-        #ifdef SCHOOL_DUMPS
-        "uniform mat4 light_casters_vp[4];\n"
-        "uniform sampler2D light_casters_depth_map[4];\n"
-        #else
-        "uniform LightCaster light_casters[4];\n"
-        #endif
-*/

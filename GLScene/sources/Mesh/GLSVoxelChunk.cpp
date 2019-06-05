@@ -56,6 +56,67 @@ namespace GLS {
         return _blockIds;
     }
 
+    const int& VoxelChunk::blockAt(int x, int y, int z) const {
+        return _blockIds[indexOfBlock(x, y, z)];
+    }
+
+    int& VoxelChunk::blockAt(int x, int y, int z) {
+        return _blockIds[indexOfBlock(x, y, z)];
+    }
+
+    int VoxelChunk::blockIdAt(int x, int y, int z) const {
+        return blockAt(x, y, z) & 0xFFFF;
+    }
+
+    void VoxelChunk::calculBlockAdjacence(const std::array<std::shared_ptr<VoxelChunk>, 6>& adjChunks) {
+        (void)adjChunks;
+        for (int x = 0; x < chunkSize; x++)
+            for (int y = 0; y < chunkSize; y++)
+                for (int z = 0; z < chunkSize; z++) {
+
+                    int blockId = blockIdAt(x, y, z);
+                    if (blockId != 0) {
+
+                        int adj = 0;
+
+                        // +x | -x | +y | -y | +z | -z
+                        //  0 |  1 |  2 |  3 |  4 |  5
+
+                        // TODO: fix the adjacence bug
+
+                        if ((x >= chunkSize - 1
+                                && (adjChunks[0] == nullptr || adjChunks[0]->blockIdAt(0, y, z) == 0))
+                            || (blockIdAt(x + 1, y, z) == 0))
+                            adj |= (1 << 0);
+                        if ((x <= 0
+                                && (adjChunks[1] == nullptr || adjChunks[1]->blockIdAt(chunkSize - 1, y, z) == 0))
+                            || (blockIdAt(x - 1, y, z) == 0))
+                            adj |= (1 << 1);
+                        if ((y >= chunkSize - 1
+                                && (adjChunks[2] == nullptr || adjChunks[2]->blockIdAt(x, 0, z) == 0))
+                            || (blockIdAt(x, y + 1, z) == 0))
+                            adj |= (1 << 2);
+                        if ((y <= 0
+                                && (adjChunks[3] == nullptr || adjChunks[3]->blockIdAt(x, chunkSize - 1, z) == 0))
+                            || (blockIdAt(x, y - 1, z) == 0))
+                            adj |= (1 << 3);
+                        if ((z >= chunkSize - 1
+                                && (adjChunks[4] == nullptr || adjChunks[4]->blockIdAt(x, y, 0) == 0))
+                            || (blockIdAt(x, y, z + 1) == 0))
+                            adj |= (1 << 4);
+                        if ((z <= 0
+                                && (adjChunks[5] == nullptr || adjChunks[5]->blockIdAt(x, y, chunkSize - 1) == 0))
+                            || (blockIdAt(x, y, z - 1) == 0))
+                            adj |= (1 << 5);
+                        
+                        blockAt(x, y, z) = blockId | (adj << 16);
+
+                    } else {
+                        blockAt(x, y, z) = 0;
+                    }
+                }
+    }
+
     std::pair<glm::vec3, glm::vec3> VoxelChunk::getBounds(glm::mat4 transform) const {
         (void)transform;
         return std::pair<glm::vec3, glm::vec3>(0, 0);
@@ -75,6 +136,9 @@ namespace GLS {
             throw BufferCreationException();
         }
         glBindBuffer(GL_ARRAY_BUFFER, _blocksBuffer);
+
+        glVertexAttribPointer(0, 1, GL_INT, GL_FALSE, sizeof(int), NULL);
+        glEnableVertexAttribArray(0);
 
         resetIdsBufferValues();
     }
@@ -143,10 +207,12 @@ namespace GLS {
                                                                uniforms.camera_position.y,
                                                                uniforms.camera_position.z);
 
-        static std::shared_ptr<Material> mat = nullptr;
-        if (mat == nullptr)
-            mat = std::make_shared<Material>();
-        mat->sendUniformToShaderProgram(program);
+        glStencilMask(0x00);
+
+        if (_material == nullptr)
+            Material().sendUniformToShaderProgram(program);
+        else
+            _material->sendUniformToShaderProgram(program);
 
         glBindVertexArray(_blocksArray);
         glDrawArrays(GL_POINTS, 0, chunkBlockCount);
@@ -156,7 +222,7 @@ namespace GLS {
         if (!bufferGenerated())
             return;
         
-        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMeshSimpleColor();
+        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramVoxelChunkSimpleColor();
         program->use();
 
         glEnable(GL_DEPTH_TEST);
