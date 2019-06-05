@@ -537,13 +537,9 @@ namespace GLS {
         // sent by node:
         "uniform mat4 u_mat_model;\n"
 
-        "const vec2 uvs = vec2(0.0, 1.0);\n"
+        // "const vec2 uvs = vec2(0.01, 0.99);\n"
+        "const vec2 uvs = vec2(0, 1);\n"
 
-        // a texture contains 100 blockIds texture
-        // [ 0b  0s  0t]  [ 1b  1s  1t]  [ 2b  2s  2t] ... [ 9b  9s  9t]
-        // [10b 10s 10t]  [11b 11s 11t]  [12b 12s 12t] ... [19b 19s 19t]
-        // ...
-        // [90b 90s 90t]  [91b 91s 91t]  [92b 92s 92t] ... [99b 99s 99t]
         "vec2 getBlockIdUvs(vec2 uv, int blockId, int face) {\n" // face: 0 = bot; 1 = side; 2 = top
         "    blockId--;\n"
         "    int gridX = (blockId % 10);\n"

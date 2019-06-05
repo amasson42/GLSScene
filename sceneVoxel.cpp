@@ -1,15 +1,17 @@
 
 #include "GLScene.hpp"
 
+std::shared_ptr<GLS::Node> mainChunkNode = nullptr;
 std::shared_ptr<GLS::VoxelChunk> mainChunk = nullptr;
 std::array<std::shared_ptr<GLS::VoxelChunk>, 6> neighbourgsChunks = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 void updateSceneVoxel(double et, double dt) {
-    (void)et;
-    (void)dt;
     static double removeBlockCD = 1.0;
     static int i = 0;
 
+    if (mainChunkNode != nullptr) {
+        mainChunkNode->transform().setEulerAngles(glm::vec3(0, sin(et * 0.05), 0));
+    }
     if (mainChunk != nullptr) {
         removeBlockCD -= dt;
         if (removeBlockCD <= 0) {
@@ -115,7 +117,7 @@ void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
         adjChunks[a] = adjChunkMesh;
         adjChunkNode->addRenderable(adjChunkMesh);
         adjChunkMesh->setMaterial(endChunkMaterial);
-        scene.rootNode().addChildNode(adjChunkNode);
+        chunkNode->addChildNode(adjChunkNode);
         float offset = GLS::VoxelChunk::chunkSize * 1.0;
         glm::vec3 offsetPos(0);
         switch (a) {
@@ -160,4 +162,7 @@ void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
 
     chunkMesh->updateIdsBuffer();
     chunkMesh->generateBuffers();
+
+    mainChunkNode = chunkNode;
+    chunkNode->transform().scaleBy(glm::vec3(0.5));
 }

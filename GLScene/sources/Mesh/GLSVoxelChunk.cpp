@@ -82,31 +82,40 @@ namespace GLS {
                         // +x | -x | +y | -y | +z | -z
                         //  0 |  1 |  2 |  3 |  4 |  5
 
-                        // TODO: fix the neighbourg adjacence bug
-
-                        if ((x >= chunkSize - 1
-                                && (adjChunks[0] == nullptr || adjChunks[0]->blockIdAt(0, y, z) == 0))
-                            || (blockIdAt(x + 1, y, z) == 0))
+                        if (x >= chunkSize - 1) {
+                            if (adjChunks[0] == nullptr || adjChunks[0]->blockIdAt(0, y, z) == 0)
+                                adj |= (1 << 0);
+                        } else if (blockIdAt(x + 1, y, z) == 0)
                             adj |= (1 << 0);
-                        if ((x <= 0
-                                && (adjChunks[1] == nullptr || adjChunks[1]->blockIdAt(chunkSize - 1, y, z) == 0))
-                            || (blockIdAt(x - 1, y, z) == 0))
+                        
+                        if (x <= 0) {
+                            if (adjChunks[1] == nullptr || adjChunks[1]->blockIdAt(chunkSize - 1, y, z) == 0)
+                                adj |= (1 << 1);
+                        } else if (blockIdAt(x - 1, y, z) == 0)
                             adj |= (1 << 1);
-                        if ((y >= chunkSize - 1
-                                && (adjChunks[2] == nullptr || adjChunks[2]->blockIdAt(x, 0, z) == 0))
-                            || (blockIdAt(x, y + 1, z) == 0))
+
+                        if (y >= chunkSize - 1) {
+                            if (adjChunks[2] == nullptr || adjChunks[2]->blockIdAt(x, 0, z) == 0)
+                                adj |= (1 << 2);
+                        } else if (blockIdAt(x, y + 1, z) == 0)
                             adj |= (1 << 2);
-                        if ((y <= 0
-                                && (adjChunks[3] == nullptr || adjChunks[3]->blockIdAt(x, chunkSize - 1, z) == 0))
-                            || (blockIdAt(x, y - 1, z) == 0))
+                        
+                        if (y <= 0) {
+                            if (adjChunks[3] == nullptr || adjChunks[3]->blockIdAt(x, chunkSize - 1, z) == 0)
+                                adj |= (1 << 3);
+                        } else if (blockIdAt(x, y - 1, z) == 0)
                             adj |= (1 << 3);
-                        if ((z >= chunkSize - 1
-                                && (adjChunks[4] == nullptr || adjChunks[4]->blockIdAt(x, y, 0) == 0))
-                            || (blockIdAt(x, y, z + 1) == 0))
+
+                        if (z >= chunkSize - 1) {
+                            if (adjChunks[4] == nullptr || adjChunks[4]->blockIdAt(x, y, 0) == 0)
+                                adj |= (1 << 4);
+                        } else if (blockIdAt(x, y, z + 1) == 0)
                             adj |= (1 << 4);
-                        if ((z <= 0
-                                && (adjChunks[5] == nullptr || adjChunks[5]->blockIdAt(x, y, chunkSize - 1) == 0))
-                            || (blockIdAt(x, y, z - 1) == 0))
+                        
+                        if (z <= 0) {
+                            if (adjChunks[5] == nullptr || adjChunks[5]->blockIdAt(x, y, chunkSize - 1) == 0)
+                                adj |= (1 << 5);
+                        } else if (blockIdAt(x, y, z - 1) == 0)
                             adj |= (1 << 5);
                         
                         blockAt(x, y, z) = blockId | (adj << 16);
