@@ -19,7 +19,7 @@ namespace GLS {
     }
 
     Mesh::Mesh() : _vertices(), _indices(),
-    _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
+    _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _shaderProgram(nullptr),
     _material(nullptr),
     _outlined(false)
@@ -29,7 +29,7 @@ namespace GLS {
     
     Mesh::Mesh(const Mesh& copy) :
     _vertices(copy._vertices), _indices(copy._indices),
-    _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0), _bufferGenerated(false),
+    _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _shaderProgram(copy._shaderProgram),
     _material(copy._material),
     _outlined(copy._outlined), _outlineColor(copy._outlineColor), _outlineSize(copy._outlineSize)
@@ -183,8 +183,6 @@ namespace GLS {
         glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE,
                               sizeof(Vertex), (void*)(12 * sizeof(GLfloat)));
         glEnableVertexAttribArray(4);
-
-        _bufferGenerated = true;
     }
     
     void Mesh::deleteBuffers() {
@@ -197,11 +195,10 @@ namespace GLS {
         if (_indicesBuffer)
             glDeleteBuffers(1, &_indicesBuffer);
         _indicesBuffer = 0;
-        _bufferGenerated = false;
     }
     
     bool Mesh::bufferGenerated() const {
-        return _bufferGenerated;
+        return _elementsBuffer != 0 && _verticesBuffer != 0 && _indicesBuffer != 0;
     }
     
     
@@ -285,6 +282,8 @@ namespace GLS {
     }
 
     void Mesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+        if (!bufferGenerated())
+            generateBuffers();
         if (!bufferGenerated())
             return;
 

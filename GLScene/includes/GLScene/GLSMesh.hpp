@@ -66,7 +66,6 @@ namespace GLS {
         GLuint _verticesBuffer;
         GLuint _indicesBuffer;
         GLuint _elementsBuffer;
-        bool _bufferGenerated; // TODO: remove this
         
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
@@ -164,7 +163,7 @@ namespace GLS {
 
         virtual bool bufferGenerated() const;
 
-        void resetTransformsBufferValues();
+        void updateTransformsBufferValues();
 
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);

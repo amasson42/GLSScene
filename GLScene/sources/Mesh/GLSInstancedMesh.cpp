@@ -57,16 +57,7 @@ namespace GLS {
     }
 
     void InstancedMesh::setInstancesCount(size_t count) {
-        // FIXME: there may be a better way...
-        if (count < _instancesTransforms.size()) {
-            while (count < _instancesTransforms.size()) {
-                _instancesTransforms.pop_back();
-            }
-        } else if (count > _instancesTransforms.size()) {
-            while (count > _instancesTransforms.size()) {
-                _instancesTransforms.push_back(Transform());
-            }
-        }
+        _instancesTransforms.resize(count, Transform());
         deleteBuffers();
     }
 
@@ -76,12 +67,11 @@ namespace GLS {
 
     void InstancedMesh::setInstanceTransformAt(size_t i, Transform t) {
         _instancesTransforms[i] = t;
-        _bufferGenerated = false;
     }
 
     void InstancedMesh::generateBuffers() throw(BufferCreationException) {
         Mesh::generateBuffers();
-        if (!_bufferGenerated)
+        if (!Mesh::bufferGenerated())
             return;
 
         glGenBuffers(1, &_transformsBuffer);
@@ -107,7 +97,7 @@ namespace GLS {
         glVertexAttribDivisor(7, 1);
         glVertexAttribDivisor(8, 1);
 
-        resetTransformsBufferValues();
+        updateTransformsBufferValues();
     }
 
     void InstancedMesh::deleteBuffers() {
@@ -121,15 +111,16 @@ namespace GLS {
         return (Mesh::bufferGenerated() && _transformsBuffer != 0);
     }
 
-    void InstancedMesh::resetTransformsBufferValues() {
+    void InstancedMesh::updateTransformsBufferValues() {
         if (bufferGenerated()) {
             glBindVertexArray(_elementsBuffer);
             glBindBuffer(GL_ARRAY_BUFFER, _transformsBuffer);
             const size_t instancesCount = _instancesTransforms.size();
-            glm::mat4 modelMatrices[instancesCount];
+            glm::mat4 *modelMatrices = new glm::mat4[instancesCount];
             for (size_t i = 0; i < instancesCount; i++)
                 modelMatrices[i] = _instancesTransforms[i].matrix();
             glBufferData(GL_ARRAY_BUFFER, _instancesTransforms.size() * sizeof(glm::mat4), modelMatrices, GL_DYNAMIC_DRAW);
+            delete [] modelMatrices;
         }
     }
 
@@ -205,6 +196,8 @@ namespace GLS {
     }
 
     void InstancedMesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+        if (!bufferGenerated())
+            generateBuffers();
         if (!bufferGenerated())
             return;
 

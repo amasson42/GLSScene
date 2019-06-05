@@ -44,12 +44,14 @@ void printNodePosition(const GLS::Node& node) {
 void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args);
 void loadScene2(GLS::Scene& scene, const std::vector<std::string>& args);
 void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args);
+void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args);
 
 void updateScene2(double et, double dt);
 void updateScene3(double et, double dt);
+void updateSceneVoxel(double et, double dt);
 
-auto loadScene = loadScene3;
-auto updateScene = updateScene3;
+void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxel;
+auto (*updateScene)(double, double)                                 = updateSceneVoxel;
 bool mustUpdate = true;
 
 int launch(std::vector<std::string>& args) {

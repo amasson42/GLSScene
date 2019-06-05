@@ -82,7 +82,7 @@ namespace GLS {
                         // +x | -x | +y | -y | +z | -z
                         //  0 |  1 |  2 |  3 |  4 |  5
 
-                        // TODO: fix the adjacence bug
+                        // TODO: fix the neighbourg adjacence bug
 
                         if ((x >= chunkSize - 1
                                 && (adjChunks[0] == nullptr || adjChunks[0]->blockIdAt(0, y, z) == 0))
@@ -140,7 +140,7 @@ namespace GLS {
         glVertexAttribPointer(0, 1, GL_INT, GL_FALSE, sizeof(int), NULL);
         glEnableVertexAttribArray(0);
 
-        resetIdsBufferValues();
+        updateIdsBuffer();
     }
 
     void VoxelChunk::deleteBuffers() {
@@ -156,20 +156,20 @@ namespace GLS {
         return _blocksBuffer != 0 && _blocksArray != 0;
     }
 
+    void VoxelChunk::updateIdsBuffer() {
+        if (bufferGenerated()) {
+            glBindVertexArray(_blocksArray);
+            glBindBuffer(GL_ARRAY_BUFFER, _blocksBuffer);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(int) * chunkBlockCount, _blockIds, GL_DYNAMIC_DRAW);
+        }
+    }
+
     void VoxelChunk::setMaterial(std::shared_ptr<Material> mat) {
         _material = mat;
     }
 
     std::shared_ptr<Material> VoxelChunk::getMaterial() const {
         return _material;
-    }
-
-    void VoxelChunk::resetIdsBufferValues() {
-        if (bufferGenerated()) {
-            glBindVertexArray(_blocksArray);
-            glBindBuffer(GL_ARRAY_BUFFER, _blocksBuffer);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(int) * chunkBlockCount, _blockIds, GL_DYNAMIC_DRAW);
-        }
     }
 
     void VoxelChunk::setProgram(std::shared_ptr<ShaderProgram> shaderProgram) {
@@ -219,6 +219,8 @@ namespace GLS {
     }
 
     void VoxelChunk::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+        if (!bufferGenerated())
+            generateBuffers();
         if (!bufferGenerated())
             return;
         

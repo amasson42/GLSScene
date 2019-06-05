@@ -16,7 +16,7 @@ namespace GLS {
     class VoxelChunk : public IRenderable {
     
     public:
-        static const int chunkSize = 4;
+        static const int chunkSize = 16;
         static const int chunkBlockCount = chunkSize * chunkSize * chunkSize;
         static int indexOfBlock(int x, int y, int z);
         static std::tuple<int, int, int> coordinatesOfBlock(int i);
@@ -69,7 +69,7 @@ namespace GLS {
         
         bool bufferGenerated() const;
         
-        void resetIdsBufferValues();
+        void updateIdsBuffer();
         
         // Rendering
         

@@ -537,7 +537,21 @@ namespace GLS {
         // sent by node:
         "uniform mat4 u_mat_model;\n"
 
-        "const vec2 uvs = vec2(0.0, 1);\n"
+        "const vec2 uvs = vec2(0.0, 1.0);\n"
+
+        // a texture contains 100 blockIds texture
+        // [ 0b  0s  0t]  [ 1b  1s  1t]  [ 2b  2s  2t] ... [ 9b  9s  9t]
+        // [10b 10s 10t]  [11b 11s 11t]  [12b 12s 12t] ... [19b 19s 19t]
+        // ...
+        // [90b 90s 90t]  [91b 91s 91t]  [92b 92s 92t] ... [99b 99s 99t]
+        "vec2 getBlockIdUvs(vec2 uv, int blockId, int face) {\n" // face: 0 = bot; 1 = side; 2 = top
+        "    blockId--;\n"
+        "    int gridX = (blockId % 10);\n"
+        "    int gridY = (blockId / 10);\n"
+        "    uv.x = ((gridX * 3) + face + uv.x) * (1.0 / 30.0);\n"
+        "    uv.y = (gridY + (1 - uv.y)) * (1.0 / 10.0);\n"
+        "    return uv;\n"
+        "}\n"
 
         // +X
         "void drawFace_positiveX_emitVertex(vec3 origin, vec3 axe_x, vec3 axe_y, vec3 axe_z, vec2 uv) {\n"
@@ -548,6 +562,7 @@ namespace GLS {
         "    gs_out.wtangent = -axe_z;\n"
         "    gs_out.wbitangent = axe_y;\n"
         "    gl_Position = gs_out.position;\n"
+        "    gs_out.uv = getBlockIdUvs(uv, gs_in[0].blockId, 1);\n"
         "    EmitVertex();\n"
         "}\n"
 
@@ -568,6 +583,7 @@ namespace GLS {
         "    gs_out.wtangent = axe_z;\n"
         "    gs_out.wbitangent = axe_y;\n"
         "    gl_Position = gs_out.position;\n"
+        "    gs_out.uv = getBlockIdUvs(uv, gs_in[0].blockId, 1);\n"
         "    EmitVertex();\n"
         "}\n"
     
@@ -588,6 +604,7 @@ namespace GLS {
         "    gs_out.wtangent = axe_x;\n"
         "    gs_out.wbitangent = -axe_z;\n"
         "    gl_Position = gs_out.position;\n"
+        "    gs_out.uv = getBlockIdUvs(uv, gs_in[0].blockId, 2);\n"
         "    EmitVertex();\n"
         "}\n"
 
@@ -608,6 +625,7 @@ namespace GLS {
         "    gs_out.wtangent = -axe_x;\n"
         "    gs_out.wbitangent = -axe_z;\n"
         "    gl_Position = gs_out.position;\n"
+        "    gs_out.uv = getBlockIdUvs(uv, gs_in[0].blockId, 0);\n"
         "    EmitVertex();\n"
         "}\n"
 
@@ -628,6 +646,7 @@ namespace GLS {
         "    gs_out.wtangent = axe_x;\n"
         "    gs_out.wbitangent = axe_y;\n"
         "    gl_Position = gs_out.position;\n"
+        "    gs_out.uv = getBlockIdUvs(uv, gs_in[0].blockId, 1);\n"
         "    EmitVertex();\n"
         "}\n"
 
@@ -648,6 +667,7 @@ namespace GLS {
         "    gs_out.wtangent = -axe_x;\n"
         "    gs_out.wbitangent = axe_y;\n"
         "    gl_Position = gs_out.position;\n"
+        "    gs_out.uv = getBlockIdUvs(uv, gs_in[0].blockId, 1);\n"
         "    EmitVertex();\n"
         "}\n"
 
