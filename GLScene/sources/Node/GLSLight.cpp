@@ -66,6 +66,7 @@ namespace GLS {
         light = l;
         depth_map = std::make_shared<Framebuffer>(
             l.cast_shadow_map_size_width, l.cast_shadow_map_size_height,
+            false,
             GL_DEPTH_COMPONENT, GL_FLOAT, GL_DEPTH_ATTACHMENT);
         depth_map->bind();
         depth_map->texture()->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);

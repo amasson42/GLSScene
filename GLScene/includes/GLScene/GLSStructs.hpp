@@ -52,6 +52,8 @@ namespace GLS {
                        const glm::mat4& v,
                        const glm::mat4& m,
                        const glm::vec3& c);
+        
+        void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
     };
 
     struct Vertex {

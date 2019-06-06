@@ -46,8 +46,9 @@ namespace GLS {
         glDeleteBuffers(1, &_rectVbo);
     }
 
-    Framebuffer::Framebuffer(GLsizei width, GLsizei height, GLint format, GLenum type, GLenum attachment) throw(CreationException) :
-        _framebuffer(0), _colorTexture(nullptr),
+    Framebuffer::Framebuffer(GLsizei width, GLsizei height, bool createRenderbuffer, GLint format, GLenum type, GLenum attachment) throw(CreationException) :
+        _framebuffer(0), _renderbuffer(0),
+        _colorTexture(nullptr),
         _program(nullptr)
     {
         glGenFramebuffers(1, &_framebuffer);
@@ -67,26 +68,30 @@ namespace GLS {
         glFramebufferTexture2D(GL_FRAMEBUFFER, attachment,
             GL_TEXTURE_2D, _colorTexture->buffer(), 0);
 
-        // if (createRenderbuffer) {
-        //     glGenRenderbuffers(1, &_renderbuffer);
-        //     if (_renderbuffer == 0) {
-        //         glDeleteFramebuffers(1, &_framebuffer);
-        //         throw CreationException();
-        //     }
-        //     glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
-        //     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
-        //     glBindRenderbuffer(GL_RENDERBUFFER, 0);
-        //     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _renderbuffer);
-        //     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        //         throw CreationException();
-        //     }
-        // }
+        if (createRenderbuffer) {
+            glGenRenderbuffers(1, &_renderbuffer);
+            if (_renderbuffer == 0) {
+                glDeleteFramebuffers(1, &_framebuffer);
+                throw CreationException();
+            }
+            glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, _renderbuffer);
+            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+                glDeleteFramebuffers(1, &_framebuffer);
+                glDeleteRenderbuffers(1, &_renderbuffer);
+                throw CreationException();
+            }
+        }
 
         unbind();
     }
 
     Framebuffer::~Framebuffer() {
         glDeleteFramebuffers(1, &_framebuffer);
+        if (_renderbuffer != 0)
+            glDeleteRenderbuffers(1, &_renderbuffer);
     }
 
     GLsizei Framebuffer::width() const {
@@ -101,6 +106,11 @@ namespace GLS {
         return _colorTexture;
     }
 
+    std::pair<glm::vec3, glm::vec3> Framebuffer::getBounds(glm::mat4 transform) const {
+        (void)transform;
+        return std::make_pair<glm::vec3, glm::vec3>(glm::vec3(0), glm::vec3(0));
+    }
+
     void Framebuffer::bind() const {
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
     }
@@ -113,7 +123,9 @@ namespace GLS {
         _program = program;
     }
 
-    void Framebuffer::renderInContext() {
+    void Framebuffer::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
+
+        (void)scene;
 
         std::shared_ptr<ShaderProgram> program;
         if (_program == nullptr)
@@ -121,12 +133,15 @@ namespace GLS {
         else
             program = _program;
         program->use();
-        glDisable(GL_DEPTH_TEST | GL_STENCIL_TEST);
-        glClearColor(1, 1, 1, 1);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+        glEnable(GL_DEPTH_TEST | GL_STENCIL_TEST);
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, _colorTexture->buffer());
         glUniform1i(program->getLocation("screen_texture"), 0);
+
+        uniforms.sendUniformsToShaderProgram(program);
+
         glBindVertexArray(Framebuffer::_rectbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
     }
@@ -138,6 +153,11 @@ namespace GLS {
         return
         "layout (location = 0) in vec2 position;\n"
         "\n"
+        "uniform mat4 u_mat_projection;\n"
+        "uniform mat4 u_mat_view;\n"
+        "uniform mat4 u_mat_model;\n"
+        "uniform vec3 u_camera_position;\n"
+        "\n"
         "out VS_OUT {\n"
         "    vec2 uv;\n"
         "} vs_out;\n"
@@ -146,6 +166,11 @@ namespace GLS {
 
     std::string Framebuffer::shaderUniformsGeometry() {
         return
+        "uniform mat4 u_mat_projection;\n"
+        "uniform mat4 u_mat_view;\n"
+        "uniform mat4 u_mat_model;\n"
+        "uniform vec3 u_camera_position;\n"
+        "\n"
         "in VS_OUT {\n"
         "    vec2 uv;\n"
         "} gs_in;\n"
@@ -158,6 +183,11 @@ namespace GLS {
 
     std::string Framebuffer::shaderUniformsFragment() {
         return
+        "uniform mat4 u_mat_projection;\n"
+        "uniform mat4 u_mat_view;\n"
+        "uniform mat4 u_mat_model;\n"
+        "uniform vec3 u_camera_position;\n"
+        "\n"
         "in VS_OUT {\n"
         "    vec2 uv;\n"
         "} fs_in;\n"

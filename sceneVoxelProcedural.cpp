@@ -33,7 +33,7 @@ double noise(glm::vec3 v) {
 
 class VoxelWorld {
 
-    static const int worldSize = 2;
+    static const int worldSize = 10;
     typedef std::array<std::array<std::shared_ptr<GLS::VoxelChunk>, worldSize>, worldSize> VoxelMap;
     VoxelMap _voxels;
 
@@ -122,6 +122,7 @@ void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>&
     camera->aspect = (scene.getAspect());
     cameraNode->setCamera(camera);
     cameraNode->transform().moveBy(0, 2, 5);
+    cameraNode->transform().rotateEulerAnglesBy(0.1, 0.1, 0);
     scene.setCameraNode(*cameraNode);
     scene.rootNode().addChildNode(cameraNode);
     cameraNode->addChildNode(pointlightNode);

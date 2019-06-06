@@ -13,8 +13,10 @@
 
 namespace GLS {
     
-    class Framebuffer {
+    class Framebuffer : public IRenderable {
+
         GLuint _framebuffer;
+        GLuint _renderbuffer;
         std::shared_ptr<Texture> _colorTexture;
         std::shared_ptr<ShaderProgram> _program;
 
@@ -36,22 +38,30 @@ namespace GLS {
         };
         
         Framebuffer(GLsizei width, GLsizei height,
+            bool createRenderbuffer = true,
             GLint format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE,
             GLenum attachment = GL_COLOR_ATTACHMENT0) throw(CreationException);
 
         virtual ~Framebuffer();
+
+
+        // Texture utilities
 
         GLsizei width() const;
         GLsizei height() const;
 
         std::shared_ptr<Texture> texture();
 
+        std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
+
+        // Rendering
+
         void bind() const;
         void unbind() const;
 
         void setProgram(std::shared_ptr<ShaderProgram> program);
 
-        void renderInContext();
+        void renderInContext(Scene& scene, const RenderUniforms& uniforms);
 
 
         // Shader Uniforms

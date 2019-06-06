@@ -174,6 +174,7 @@ namespace GLS {
     }
     
     void InstancedMesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
+        (void)scene;
 
         if (_outlined && priority == 1) {
             glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
@@ -192,10 +193,10 @@ namespace GLS {
             glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0, _instancesTransforms.size());
             glStencilMask(0xFF);
         }
-        (void)scene;
     }
 
     void InstancedMesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+        (void)scene;
         if (!bufferGenerated())
             generateBuffers();
         if (!bufferGenerated())
@@ -216,7 +217,6 @@ namespace GLS {
         glDrawElementsInstanced(GL_TRIANGLES,
                                 static_cast<GLsizei>(_indices.size()),
                                 GL_UNSIGNED_INT, 0, _instancesTransforms.size());
-        (void)scene;
     }
 
     std::string InstancedMesh::shaderUniformsVertex() {

@@ -128,6 +128,7 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
     auto pointlight = std::make_shared<GLS::Light>();
     pointlight->type = GLS::light_spot;
     pointlight->color = glm::vec3(1);
+    pointlight->cast_shadow = false;
     pointlightNode->setLight(pointlight);
 
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();

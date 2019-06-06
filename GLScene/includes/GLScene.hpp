@@ -32,9 +32,9 @@
 
 #include "GLScene/GLSTransform.hpp"
 #include "GLScene/GLSTexture.hpp"
-#include "GLScene/GLSFramebuffer.hpp"
 
 #include "GLScene/GLSIRenderable.hpp"
+#include "GLScene/GLSFramebuffer.hpp"
 #include "GLScene/GLSMesh.hpp"
 #include "GLScene/GLSVoxelChunk.hpp"
 #include "GLScene/GLSSkybox.hpp"

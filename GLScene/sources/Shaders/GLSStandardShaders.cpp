@@ -374,10 +374,10 @@ namespace GLS {
 
         "layout (points) in;\n"
         "layout (triangle_strip, max_vertices = 24) out;\n"
-        
+
         + VoxelChunk::shaderUniformsGeometry() +
 
-        // "const vec2 uvs = vec2(0.01, 0.99);\n"
+        // "const vec2 uvs = vec2(0.05, 0.95);\n"
         "const vec2 uvs = vec2(0, 1);\n"
 
         "vec2 getBlockIdUvs(vec2 uv, int blockId, int face) {\n" // face: 0 = bot; 1 = side; 2 = top

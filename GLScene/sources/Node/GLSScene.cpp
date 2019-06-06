@@ -93,14 +93,13 @@ namespace GLS {
 
     void Scene::_calculLights() {
         _rootNode->getAllLights(_frameLights, glm::mat4(1));
-        for (size_t i = 0; i < _frameLights.size(); i++) {
-            if (Light::lightTypeCanCastShadow(_frameLights[i].type))
-                if (_frameLights[i].cast_shadow && _frameLightCasters.size() < 4) {
-                    LightCaster caster(_frameLights[i]);
-                    _renderInLightCasterContext(caster);
-                    _frameLightCasters.push_back(caster);
-                    _frameLights[i]._caster_index = _frameLightCasters.size() - 1;
-                }
+        for (size_t i = 0; i < _frameLights.size() && _frameLightCasters.size() < 4; i++) {
+            if (_frameLights[i].cast_shadow && Light::lightTypeCanCastShadow(_frameLights[i].type)) {
+                LightCaster caster(_frameLights[i]);
+                _renderInLightCasterContext(caster);
+                _frameLightCasters.push_back(caster);
+                _frameLights[i]._caster_index = _frameLightCasters.size() - 1;
+            }
         }
     }
 
@@ -117,12 +116,18 @@ namespace GLS {
 
     typedef std::pair<IRenderable*, RenderUniforms> RenderAndUniforms;
 
-    void Scene::renderInContext() {
+    void Scene::renderInContext(std::shared_ptr<Framebuffer> framebuffer) {
         
         _frameLights.clear();
         _frameLightCasters.clear();
         _postRenderables.clear();
         _calculLights();
+
+        if (framebuffer == 0) {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        } else {
+            framebuffer->bind();
+        }
 
         glViewport(0, 0, _size.x, _size.y);
         glClearColor(_background.x, _background.y, _background.z, _background.w);

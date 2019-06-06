@@ -17,11 +17,17 @@ namespace GLS {
         
     public:
 
-        virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms) = 0;
-        virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {(void)scene;(void)uniforms;(void)priority;}
+        // Must implement
+
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const = 0;
-        
+
+        virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms) = 0;
+
+
+        // Optional features
+
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {(void)scene;(void)uniforms;}
+        virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {(void)scene;(void)uniforms;(void)priority;}
 
         static std::string shaderUniformsVertex() {return "";}
         static std::string shaderUniformsGeometry() {return "";}

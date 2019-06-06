@@ -262,6 +262,7 @@ namespace GLS {
     }
     
     void Mesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
+        (void)scene;
         if (_outlined && priority == 1) {
             glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
             glStencilMask(0x00);
@@ -278,7 +279,6 @@ namespace GLS {
             glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
             glStencilMask(0xFF);
         }
-        (void)scene;
     }
 
     void Mesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
@@ -321,6 +321,7 @@ namespace GLS {
         "uniform mat4 u_mat_projection;\n"
         "uniform mat4 u_mat_view;\n"
         "uniform mat4 u_mat_model;\n"
+        "uniform vec3 u_camera_position;\n"
         "\n"
         "out VS_OUT {\n"
         "    vec4 position;\n"
@@ -339,6 +340,7 @@ namespace GLS {
         "uniform mat4 u_mat_projection;\n"
         "uniform mat4 u_mat_view;\n"
         "uniform mat4 u_mat_model;\n"
+        "uniform vec3 u_camera_position;\n"
         "\n"
         "in VS_OUT {\n"
         "    vec4 position;\n"

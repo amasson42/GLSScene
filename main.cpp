@@ -52,7 +52,7 @@ void updateScene3(double et, double dt);
 void updateSceneVoxel(double et, double dt);
 
 void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
-void (*updateScene)(double, double)                                 = nullptr;
+void (*updateScene)(double, double)                                 = updateSceneVoxel;
 bool mustUpdate = true;
 
 int launch(std::vector<std::string>& args) {
@@ -101,6 +101,8 @@ int launch(std::vector<std::string>& args) {
 
     //
 
+    std::shared_ptr<GLS::Framebuffer> facebook = std::make_shared<GLS::Framebuffer>(win_buffer_width, win_buffer_height);
+
     float lastTimeUpdate = glfwGetTime();
     float fpsDisplayCD = 0.5;
 
@@ -109,26 +111,31 @@ int launch(std::vector<std::string>& args) {
 
         float currentTime = glfwGetTime();
         float deltaTime = currentTime - lastTimeUpdate;
+        fpsDisplayCD -= deltaTime;
         if (true)
             processInput(window, deltaTime, scene);
         
-        fpsDisplayCD -= deltaTime;
+        if (updateScene != nullptr)
+            updateScene(currentTime, deltaTime);
+
+        /* do some drawing */
+
+        if (1) {
+            scene.renderInContext(facebook);
+            facebook->unbind();
+            glClearColor(1, 1, 1, 1);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            facebook->renderInContext(scene, GLS::RenderUniforms());
+        } else {
+            scene.renderInContext();
+        }
+
         if (fpsDisplayCD <= 0) {
             std::stringstream fpsss;
             fpsss << "FPS: " << 1.0 / deltaTime;
             glfwSetWindowTitle(window, fpsss.str().c_str());
             fpsDisplayCD = 0.5;
         }
-
-        if (updateScene != nullptr)
-            updateScene(currentTime, deltaTime);
-
-        /* do some drawing */
-        scene.renderInContext();
-        // facebook.bind();
-        // scene.renderInContext();
-        // facebook.unbind();
-        // facebook.renderInContext();
 
         glfwSwapBuffers(window); // draw the new image to the buffer
         lastTimeUpdate = currentTime;

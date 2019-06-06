@@ -54,7 +54,7 @@ namespace GLS {
 		
         // Rendering
         // TODO: render in framebuffer
-		void renderInContext();
+		void renderInContext(std::shared_ptr<Framebuffer> framebuffer = nullptr);
         void sendLightsValueToShader(std::shared_ptr<ShaderProgram> program);
         void subscribeToPostRenderable(IRenderable *renderable, const RenderUniforms& uniforms, float priority);
 

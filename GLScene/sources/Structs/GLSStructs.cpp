@@ -59,6 +59,16 @@ namespace GLS {
         camera_position = c;
     }
 
+    void RenderUniforms::sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program) const {
+        program->use();
+        glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(program->getLocation("u_mat_model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniform3f(program->getLocation("u_camera_position"), camera_position.x,
+                                                               camera_position.y,
+                                                               camera_position.z);
+    }
+
     Vertex::Vertex() {
         position = glm::vec3(0);
         normal = glm::vec3(0, 0, -1);
