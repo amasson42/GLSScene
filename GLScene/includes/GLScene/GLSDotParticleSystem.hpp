@@ -20,6 +20,8 @@ namespace GLS {
     
     class DotParticleSystem : public IRenderable { // TODO
         
+        // static CLS::GPUDevice _device; //TODO: manage creation and destruction
+
     public:
         
         class BufferCreationException : public std::exception {

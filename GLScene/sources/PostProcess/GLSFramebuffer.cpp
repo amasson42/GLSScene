@@ -40,7 +40,8 @@ namespace GLS {
     }
 
     Framebuffer::Framebuffer(GLsizei width, GLsizei height, GLint format, GLenum type, GLenum attachment) throw(CreationException) :
-        _framebuffer(0), _colorTexture(nullptr)
+        _framebuffer(0), _colorTexture(nullptr),
+        _program(nullptr)
     {
         glGenFramebuffers(1, &_framebuffer);
         if (_framebuffer == 0) {
@@ -104,8 +105,17 @@ namespace GLS {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
+    void Framebuffer::setProgram(std::shared_ptr<ShaderProgram> program) {
+        _program = program;
+    }
+
     void Framebuffer::renderInContext() {
-        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramScreenTexture();
+
+        std::shared_ptr<ShaderProgram> program;
+        if (_program == nullptr)
+            program = ShaderProgram::standardShaderProgramScreenTexture();
+        else
+            program = _program;
         program->use();
         glDisable(GL_DEPTH_TEST | GL_STENCIL_TEST);
         glClearColor(1, 1, 1, 1);
@@ -115,6 +125,43 @@ namespace GLS {
         glUniform1i(program->getLocation("screen_texture"), 0);
         glBindVertexArray(Framebuffer::_rectbuffer);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+
+
+    // Shader Uniforms
+
+    std::string Framebuffer::shaderUniformsVertex() {
+        return
+        "layout (location = 0) in vec2 position;\n"
+        "\n"
+        "out VS_OUT {\n"
+        "    vec2 uv;\n"
+        "} vs_out;\n"
+        "\n";
+    }
+
+    std::string Framebuffer::shaderUniformsGeometry() {
+        return
+        "in VS_OUT {\n"
+        "    vec2 uv;\n"
+        "} gs_in;\n"
+        "\n"
+        "out VS_OUT {\n"
+        "    vec2 uv;\n"
+        "} gs_out;\n"
+        "\n";
+    }
+
+    std::string Framebuffer::shaderUniformsFragment() {
+        return
+        "in VS_OUT {\n"
+        "    vec2 uv;\n"
+        "} fs_in;\n"
+        "\n"
+        "uniform sampler2D screen_texture;\n"
+        "\n"
+        "out vec4 FragColor;\n"
+        "\n";
     }
 
 }

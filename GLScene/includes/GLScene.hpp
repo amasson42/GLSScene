@@ -49,4 +49,11 @@
 
 #include "GLScene/GLSAnimator.tpp"
 
+namespace GLS { // TODO: initialise and destroy every global buffers and var with those functions
+
+    void glsInit();
+    void glsDeinit();
+
+}
+
 #endif /* GLScene_h */

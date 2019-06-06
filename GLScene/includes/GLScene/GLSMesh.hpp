@@ -125,14 +125,21 @@ namespace GLS {
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
 
+
         // Prefabs
-        
 
         static std::shared_ptr<Mesh> plane(GLfloat width, GLfloat height, bool generateBuffers = true);
         static std::shared_ptr<Mesh> cube(GLfloat width, GLfloat height, GLfloat length, bool generateBuffers = true);
         static std::shared_ptr<Mesh> sphere(GLfloat radius, unsigned int ringCount = 12, bool generateBuffers = true);
         static std::shared_ptr<Mesh> objModel(std::string path, bool generateBuffers = true) /*throw(LoadMeshException)*/;
         static std::shared_ptr<Mesh> loadFromAiMesh(aiMesh *mesh, bool generateBuffers = true);
+
+
+        // Shader uniforms
+
+        static std::string shaderUniformsVertex();
+        static std::string shaderUniformsGeometry();
+        static std::string shaderUniformsFragment();
 
     };
 
@@ -152,11 +159,17 @@ namespace GLS {
         InstancedMesh& operator=(const Mesh& copy);
         InstancedMesh& operator=(const InstancedMesh& copy);
 
+
+        // Instances utilities
+
         size_t instancesCount() const;
         void setInstancesCount(size_t count);
 
         const Transform& instanceTransformAt(size_t i) const;
         void setInstanceTransformAt(size_t i, Transform t);
+
+
+        // OpenGL Buffers
 
         virtual void generateBuffers() throw(BufferCreationException);
         virtual void deleteBuffers();
@@ -165,9 +178,19 @@ namespace GLS {
 
         void updateTransformsBufferValues();
 
+
+        // Rendering
+
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
+
+
+        // Shader uniforms
+
+        static std::string shaderUniformsVertex();
+        static std::string shaderUniformsGeometry();
+        static std::string shaderUniformsFragment();
         
     };
     

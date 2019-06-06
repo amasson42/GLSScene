@@ -13,13 +13,12 @@
 
 namespace GLS {
     
-    // TODO: allow us to change the fragment shader to create custom post-processing effects
-
     class Framebuffer {
         GLuint _framebuffer;
         std::shared_ptr<Texture> _colorTexture;
+        std::shared_ptr<ShaderProgram> _program;
 
-        static GLuint _rectbuffer;
+        static GLuint _rectbuffer; // Manage creation and destruction at GLS::initGLS() and GLS::destroyGLS()
 
         Framebuffer();
         Framebuffer(const Framebuffer& copy);
@@ -46,7 +45,16 @@ namespace GLS {
         void bind() const;
         void unbind() const;
 
+        void setProgram(std::shared_ptr<ShaderProgram> program);
+
         void renderInContext();
+
+
+        // Shader Uniforms
+
+        static std::string shaderUniformsVertex();
+        static std::string shaderUniformsGeometry();
+        static std::string shaderUniformsFragment();
 
     };
 

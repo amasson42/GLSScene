@@ -133,7 +133,7 @@ void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
             for (int iy = 0; iy < GLS::VoxelChunk::chunkSize; iy++)
                 for (int iz = 0; iz < GLS::VoxelChunk::chunkSize; iz++) {
                     if (((ix - 8) * (ix - 8) + (iy - 8) * (iy - 8) + (iz - 8) * (iz - 8) < 70)
-                        || (ix + iy + iz) % 10 <= 3
+                        // || (ix + iy + iz) % 10 <= 3
                         )
                     {
                         adjChunkMesh->blockIds()[GLS::VoxelChunk::indexOfBlock(ix, iy, iz)] = 1;

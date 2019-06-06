@@ -55,12 +55,15 @@ namespace GLS {
 
         int blockIdAt(int x, int y, int z) const;
         
+        // TODO: keep adjChunks as weak_ptr attributes
+        // TODO: allow the update of a small part of the chunk and add the possibility to update the target part of the buffer with glBufferSubData
         void calculBlockAdjacence(const std::array<std::shared_ptr<VoxelChunk>, 6>& adjChunks);
 
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
 
         void setMaterial(std::shared_ptr<Material> mat);
         std::shared_ptr<Material> getMaterial() const;
+
 
         // OpenGL Buffers
         
@@ -70,13 +73,21 @@ namespace GLS {
         bool bufferGenerated() const;
         
         void updateIdsBuffer();
-        
+
+
         // Rendering
         
         void setProgram(std::shared_ptr<ShaderProgram> shaderProgram);
 
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
+
+
+        // Shader Uniforms
+
+        static std::string shaderUniformsVertex();
+        static std::string shaderUniformsGeometry();
+        static std::string shaderUniformsFragment();
 
     };
 

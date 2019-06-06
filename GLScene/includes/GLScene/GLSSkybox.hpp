@@ -18,7 +18,7 @@ namespace GLS {
     class Skybox : public IRenderable {
         GLuint _textureid;
     
-        static GLuint _cubebuffer;
+        static GLuint _cubebuffer; // TODO: manage creation and destruction
 
     public:
 
@@ -36,8 +36,18 @@ namespace GLS {
 
         virtual ~Skybox();
 
+
+        // Rendering
+
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
+
+
+        // Shader uniforms
+
+        static std::string shaderUniformsVertex();
+        static std::string shaderUniformsGeometry();
+        static std::string shaderUniformsFragment();
 
     };
 
