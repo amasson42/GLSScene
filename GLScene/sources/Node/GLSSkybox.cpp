@@ -20,8 +20,9 @@ namespace GLS {
     }
 
    GLuint Skybox::_cubebuffer = 0;
+   static GLuint _cubeVbo = 0;
 
-    static void _createCubeBuffer(GLuint *buffer) {
+    void Skybox::_createCubeBuffer() {
         float skyboxVertices[] = {
             -1.0f,  1.0f, -1.0f,    -1.0f, -1.0f, -1.0f,    1.0f, -1.0f, -1.0f,
             1.0f, -1.0f, -1.0f,     1.0f,  1.0f, -1.0f,     -1.0f,  1.0f, -1.0f,
@@ -41,12 +42,18 @@ namespace GLS {
             -1.0f, -1.0f, -1.0f,    -1.0f, -1.0f,  1.0f,    1.0f, -1.0f, -1.0f,
             1.0f, -1.0f, -1.0f,     -1.0f, -1.0f,  1.0f,    1.0f, -1.0f,  1.0f
         };
-        GLuint vbo, vao;
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-        glBindVertexArray(vao);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glGenVertexArrays(1, &_cubebuffer);
+        if (_cubebuffer == 0)
+            return;
+        glGenBuffers(1, &_cubeVbo);
+        if (_cubeVbo == 0) {
+            glDeleteVertexArrays(1, &_cubebuffer);
+            return;
+        }
+        glBindVertexArray(_cubebuffer);
+
+        glBindBuffer(GL_ARRAY_BUFFER, _cubeVbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
@@ -54,8 +61,11 @@ namespace GLS {
         
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+    }
 
-        *buffer = vao;
+    void Skybox::_destroyCubeBuffer() {
+        glDeleteBuffers(1, &_cubeVbo);
+        glDeleteVertexArrays(1, &_cubebuffer);
     }
 
     Skybox::Skybox(std::vector<std::string> faces) {
@@ -84,9 +94,6 @@ namespace GLS {
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        
-        if (Skybox::_cubebuffer == 0)
-            _createCubeBuffer(&Skybox::_cubebuffer);
     }
 
     Skybox::~Skybox() {

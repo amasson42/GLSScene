@@ -18,7 +18,11 @@ namespace GLS {
         std::shared_ptr<Texture> _colorTexture;
         std::shared_ptr<ShaderProgram> _program;
 
-        static GLuint _rectbuffer; // Manage creation and destruction at GLS::initGLS() and GLS::destroyGLS()
+        static GLuint _rectbuffer;
+        static void _createRectBuffer();
+        static void _destroyRectBuffer();
+        friend void glsInit();
+        friend void glsDeinit();
 
         Framebuffer();
         Framebuffer(const Framebuffer& copy);

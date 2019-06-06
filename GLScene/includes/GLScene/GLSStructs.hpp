@@ -17,7 +17,10 @@ std::ostream& operator<<(std::ostream& stream, glm::vec3 v);
 std::ostream& operator<<(std::ostream& stream, glm::quat q);
 
 namespace GLS {
-    
+
+    void glsInit();
+    void glsDeinit();
+
     class Transform;
     class Scene;
     class Node;

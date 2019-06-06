@@ -2,7 +2,7 @@
 NAME = game
 
 CC = clang++
-FLAGS = -Wall -Werror -Wextra -O2 -std=c++11
+FLAGS = -std=c++11 -Wall -Werror -Wextra -g
 SRCS = *.cpp
 
 all:
@@ -30,6 +30,7 @@ $(NAME):
 		GLScene/GLScene.a
 
 clean:
+	rm -fr $(NAME).dSYM
 
 fclean: clean
 	make -C GLScene fclean

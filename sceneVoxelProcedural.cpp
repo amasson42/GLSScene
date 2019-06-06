@@ -33,7 +33,7 @@ double noise(glm::vec3 v) {
 
 class VoxelWorld {
 
-    static const int worldSize = 12;
+    static const int worldSize = 2;
     typedef std::array<std::array<std::shared_ptr<GLS::VoxelChunk>, worldSize>, worldSize> VoxelMap;
     VoxelMap _voxels;
 

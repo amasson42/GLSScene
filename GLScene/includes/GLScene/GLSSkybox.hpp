@@ -17,8 +17,12 @@ namespace GLS {
 
     class Skybox : public IRenderable {
         GLuint _textureid;
-    
-        static GLuint _cubebuffer; // TODO: manage creation and destruction
+
+        static GLuint _cubebuffer;
+        static void _createCubeBuffer();
+        static void _destroyCubeBuffer();
+        friend void glsInit();
+        friend void glsDeinit();
 
     public:
 

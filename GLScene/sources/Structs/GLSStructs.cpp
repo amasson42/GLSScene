@@ -94,4 +94,32 @@ namespace GLS {
         uv = u;
     }
 
+    void glsInit() {
+        Framebuffer::_createRectBuffer();
+        Skybox::_createCubeBuffer();
+        
+        ShaderProgram::standardShaderProgramMesh();
+        ShaderProgram::standardShaderProgramMeshSimpleColor();
+        ShaderProgram::standardShaderProgramInstancedMesh();
+        ShaderProgram::standardShaderProgramInstancedMeshSimpleColor();
+        ShaderProgram::standardShaderProgramScreenTexture();
+        ShaderProgram::standardShaderProgramSkybox();
+        ShaderProgram::standardShaderProgramVoxelChunk();
+        ShaderProgram::standardShaderProgramVoxelChunkSimpleColor();
+    }
+
+    void glsDeinit() {
+        Framebuffer::_destroyRectBuffer();
+        Skybox::_destroyCubeBuffer();
+
+        ShaderProgram::_standardShaderProgramMesh = nullptr;
+        ShaderProgram::_standardShaderProgramMeshSimpleColor = nullptr;
+        ShaderProgram::_standardShaderProgramInstancedMesh = nullptr;
+        ShaderProgram::_standardShaderProgramInstancedMeshSimpleColor = nullptr;
+        ShaderProgram::_standardShaderProgramScreenTexture = nullptr;
+        ShaderProgram::_standardShaderProgramSkybox = nullptr;
+        ShaderProgram::_standardShaderProgramVoxelChunk = nullptr;
+        ShaderProgram::_standardShaderProgramVoxelChunkSimpleColor = nullptr;
+    }
+
 }

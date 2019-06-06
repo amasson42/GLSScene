@@ -29,7 +29,6 @@ namespace GLS {
         void _renderInLightCasterContext(LightCaster& caster);
         void _calculLights();
         
-        // post rendering
         std::multimap<float, std::pair<IRenderable*, RenderUniforms> > _postRenderables;
 
     public:

@@ -15,8 +15,9 @@ namespace GLS {
     }
 
     GLuint Framebuffer::_rectbuffer = 0;
+    static GLuint _rectVbo = 0;
 
-    static void _createRectBuffer(GLuint *buffer) {
+    void Framebuffer::_createRectBuffer() {
         float rectVertices[] = {
             -1.0f,  1.0f,
             -1.0f, -1.0f,
@@ -25,18 +26,24 @@ namespace GLS {
             1.0f, -1.0f,
             1.0f,  1.0f
         };
-        GLuint vbo;
-        glGenBuffers(1, &vbo);
-        if (vbo == 0)
+        glGenBuffers(1, &_rectVbo);
+        if (_rectVbo == 0)
             return;
-        glGenVertexArrays(1, buffer);
-        if (*buffer == 0)
+        glGenVertexArrays(1, &_rectbuffer);
+        if (_rectbuffer == 0) {
+            glDeleteBuffers(1, &_rectVbo);
             return;
-        glBindVertexArray(*buffer);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        }
+        glBindVertexArray(_rectbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, _rectVbo);
         glBufferData(GL_ARRAY_BUFFER, sizeof(rectVertices), &rectVertices, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
+    }
+
+    void Framebuffer::_destroyRectBuffer() {
+        glDeleteVertexArrays(1, &_rectbuffer);
+        glDeleteBuffers(1, &_rectVbo);
     }
 
     Framebuffer::Framebuffer(GLsizei width, GLsizei height, GLint format, GLenum type, GLenum attachment) throw(CreationException) :
@@ -74,9 +81,6 @@ namespace GLS {
         //         throw CreationException();
         //     }
         // }
-
-        if (Framebuffer::_rectbuffer == 0)
-            _createRectBuffer(&Framebuffer::_rectbuffer);
 
         unbind();
     }

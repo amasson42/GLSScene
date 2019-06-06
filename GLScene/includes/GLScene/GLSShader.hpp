@@ -83,6 +83,8 @@ namespace GLS {
         static std::shared_ptr<ShaderProgram> _standardShaderProgramSkybox;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramVoxelChunk;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramVoxelChunkSimpleColor;
+        friend void glsInit();
+        friend void glsDeinit();
 
     public:
         

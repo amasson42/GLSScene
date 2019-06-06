@@ -21,7 +21,7 @@ LIBS := -L/usr/lib \
 
 CPP_FILES := $(shell find $(SRCS) -type f -name "*.cpp")
 CPP_DIRS := $(shell find $(SRCS) -depth -type d)
-CPP_FLAGS += -std=c++11 -Wall -Wextra -Werror -O2
+CPP_FLAGS += -std=c++11 -Wall -Wextra -Werror -g
 
 O_DIRS := $(addprefix $(OBJS)/,$(CPP_DIRS))
 O_FILES_TMP := $(CPP_FILES:%.cpp=$(OBJS)/%.o)

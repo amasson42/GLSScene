@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-#include <stdio.h>
+#include <sstream>
 
 #ifdef __APPLE__
 # define __gl_h_
@@ -51,8 +51,8 @@ void updateScene2(double et, double dt);
 void updateScene3(double et, double dt);
 void updateSceneVoxel(double et, double dt);
 
-void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxel;
-auto (*updateScene)(double, double)                                 = updateSceneVoxel;
+void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
+void (*updateScene)(double, double)                                 = nullptr;
 bool mustUpdate = true;
 
 int launch(std::vector<std::string>& args) {
@@ -82,20 +82,7 @@ int launch(std::vector<std::string>& args) {
 
     // try compilation of shaders
     try {
-        std::cout << "Compiling Mesh..." << std::endl;
-        GLS::ShaderProgram::standardShaderProgramMesh();
-        std::cout << "Compiling MeshSimpleColor..." << std::endl;
-        GLS::ShaderProgram::standardShaderProgramMeshSimpleColor();
-        std::cout << "Compiling IMesh..." << std::endl;
-        GLS::ShaderProgram::standardShaderProgramInstancedMesh();
-        std::cout << "Compiling IMeshSimpleColor..." << std::endl;
-        GLS::ShaderProgram::standardShaderProgramInstancedMeshSimpleColor();
-        std::cout << "Compiling Screen Texture..." << std::endl;
-        GLS::ShaderProgram::standardShaderProgramScreenTexture();
-        std::cout << "Compiling Skybox..." << std::endl;
-        GLS::ShaderProgram::standardShaderProgramSkybox();
-        std::cout << "Compiling VoxelChunk..." << std::endl;
-        GLS::ShaderProgram::standardShaderProgramVoxelChunk();
+        GLS::glsInit();
     } catch (GLS::Shader::CompilationException& e) {
         std::cout << e.what() << std::endl;
         std::cout << e.infoLog() << std::endl;
@@ -115,6 +102,8 @@ int launch(std::vector<std::string>& args) {
     //
 
     float lastTimeUpdate = glfwGetTime();
+    float fpsDisplayCD = 0.5;
+
     while (!glfwWindowShouldClose(window)) { // loop while not closed
         glfwPollEvents(); // check a loop turn
 
@@ -122,8 +111,16 @@ int launch(std::vector<std::string>& args) {
         float deltaTime = currentTime - lastTimeUpdate;
         if (true)
             processInput(window, deltaTime, scene);
+        
+        fpsDisplayCD -= deltaTime;
+        if (fpsDisplayCD <= 0) {
+            std::stringstream fpsss;
+            fpsss << "FPS: " << 1.0 / deltaTime;
+            glfwSetWindowTitle(window, fpsss.str().c_str());
+            fpsDisplayCD = 0.5;
+        }
 
-        if (mustUpdate)
+        if (updateScene != nullptr)
             updateScene(currentTime, deltaTime);
 
         /* do some drawing */
@@ -138,6 +135,7 @@ int launch(std::vector<std::string>& args) {
     }
 
     std::cout << "Ending..." << std::endl;
+    GLS::glsDeinit();
     glfwTerminate(); // free all used memory of glfw
     return (EXIT_SUCCESS);
 }
