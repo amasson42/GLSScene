@@ -101,4 +101,27 @@ namespace GLS {
         return _standardShaderProgramVoxelChunkSimpleColor;
     }
 
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramDotParticleSystem = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramDotParticleSystem() {
+        if (_standardShaderProgramDotParticleSystem == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertexParticleSystem();
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentDotParticleSystem();
+            _standardShaderProgramDotParticleSystem = std::make_shared<ShaderProgram>(*vertex, *fragment);
+        }
+        return _standardShaderProgramDotParticleSystem;
+    }
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramTexturedParticleSystem = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramTexturedParticleSystem() {
+        if (_standardShaderProgramTexturedParticleSystem == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertexParticleSystem();
+            std::shared_ptr<Shader> geometry = Shader::standardGeometryTexturedParticleSystem();
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentTexturedParticleSystem();
+            _standardShaderProgramTexturedParticleSystem = std::make_shared<ShaderProgram>(*vertex, *geometry, *fragment);
+        }
+        return _standardShaderProgramTexturedParticleSystem;
+    }
+
 }

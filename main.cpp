@@ -65,14 +65,14 @@ void updateSceneVoxelProcedural(double et, double dt);
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene2;
 // void (*updateScene)(double, double)                                 = updateScene2;
 
-// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene3;
-// void (*updateScene)(double, double)                                 = updateScene3;
+void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene3;
+void (*updateScene)(double, double)                                 = updateScene3;
 
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxel;
 // void (*updateScene)(double, double)                                 = updateSceneVoxel;
 
-void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
-void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
+// void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
 
 bool mustUpdate = true;
 

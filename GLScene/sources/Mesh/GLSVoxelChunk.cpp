@@ -254,7 +254,7 @@ namespace GLS {
         "\n"
         "const int chunkSize = " + std::to_string(chunkSize) + ";\n"
         "\n"
-        "out GS_IN {"
+        "out GS_IN {\n"
         "    int position_x;\n"
         "    int position_y;\n"
         "    int position_z;\n"

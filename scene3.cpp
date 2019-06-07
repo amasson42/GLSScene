@@ -144,4 +144,9 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
     pointlightNode->transform().moveBy(1, 0, 0);
     pointlightNode->transform().rotateEulerAnglesBy(0, 0.2, 0);
 
+    std::shared_ptr<GLS::Node> particleNode = std::make_shared<GLS::Node>();
+    std::shared_ptr<GLS::ParticleSystem> particleSystem = std::make_shared<GLS::ParticleSystem>();
+    particleNode->addRenderable(particleSystem);
+    scene.rootNode()->addChildNode(particleNode);
+
 }

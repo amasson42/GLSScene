@@ -38,7 +38,7 @@
 #include "GLScene/GLSMesh.hpp"
 #include "GLScene/GLSVoxelChunk.hpp"
 #include "GLScene/GLSSkybox.hpp"
-#include "GLScene/GLSDotParticleSystem.hpp"
+#include "GLScene/GLSParticleSystem.hpp"
 
 #include "GLScene/GLSCamera.hpp"
 #include "GLScene/GLSLight.hpp"

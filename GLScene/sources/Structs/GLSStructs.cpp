@@ -116,6 +116,8 @@ namespace GLS {
         ShaderProgram::standardShaderProgramSkybox();
         ShaderProgram::standardShaderProgramVoxelChunk();
         ShaderProgram::standardShaderProgramVoxelChunkSimpleColor();
+        ShaderProgram::standardShaderProgramDotParticleSystem();
+        ShaderProgram::standardShaderProgramTexturedParticleSystem();
     }
 
     void glsDeinit() {
@@ -130,6 +132,8 @@ namespace GLS {
         ShaderProgram::_standardShaderProgramSkybox = nullptr;
         ShaderProgram::_standardShaderProgramVoxelChunk = nullptr;
         ShaderProgram::_standardShaderProgramVoxelChunkSimpleColor = nullptr;
+        ShaderProgram::_standardShaderProgramDotParticleSystem = nullptr;
+        ShaderProgram::_standardShaderProgramTexturedParticleSystem = nullptr;
     }
 
 }
