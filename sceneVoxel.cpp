@@ -3,7 +3,7 @@
 
 std::shared_ptr<GLS::Node> mainChunkNode = nullptr;
 std::shared_ptr<GLS::VoxelChunk> mainChunk = nullptr;
-std::array<std::shared_ptr<GLS::VoxelChunk>, 6> neighbourgsChunks = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+std::array<std::weak_ptr<GLS::VoxelChunk>, 6> neighbourgsChunks;
 
 void updateSceneVoxel(double et, double dt) {
     static double removeBlockCD = 1.0;
@@ -15,24 +15,21 @@ void updateSceneVoxel(double et, double dt) {
     if (mainChunk != nullptr) {
         removeBlockCD -= dt;
         if (removeBlockCD <= 0) {
-            while (i < GLS::VoxelChunk::chunkBlockCount && mainChunk->blockIds()[i] == 0)
+            while (i < GLS::VoxelChunk::chunkBlockCount && mainChunk->blockIdAt(GLS::VoxelChunk::coordinatesOfBlock(i)) == 0)
                 i++;
             if (i < GLS::VoxelChunk::chunkBlockCount) {
-                mainChunk->blockIds()[i] = 0;
+                std::tuple<int, int, int> coord = GLS::VoxelChunk::coordinatesOfBlock(i);
+                mainChunk->setBlockIdAt(std::get<0>(coord), std::get<1>(coord), std::get<2>(coord), 0);
                 i++;
             }
-            mainChunk->calculBlockAdjacence(neighbourgsChunks);
+            mainChunk->calculBlockAdjacence();
             mainChunk->updateIdsBuffer();
             for (int c = 0; c < 6; c++) {
-                switch (c) {
-                    case 0: neighbourgsChunks[c]->calculBlockAdjacence({nullptr, mainChunk, nullptr, nullptr, nullptr, nullptr}); break;
-                    case 1: neighbourgsChunks[c]->calculBlockAdjacence({mainChunk, nullptr, nullptr, nullptr, nullptr, nullptr}); break;
-                    case 2: neighbourgsChunks[c]->calculBlockAdjacence({nullptr, nullptr, nullptr, mainChunk, nullptr, nullptr}); break;
-                    case 3: neighbourgsChunks[c]->calculBlockAdjacence({nullptr, nullptr, mainChunk, nullptr, nullptr, nullptr}); break;
-                    case 4: neighbourgsChunks[c]->calculBlockAdjacence({nullptr, nullptr, nullptr, nullptr, nullptr, mainChunk}); break;
-                    case 5: neighbourgsChunks[c]->calculBlockAdjacence({nullptr, nullptr, nullptr, nullptr, mainChunk, nullptr}); break;
-                }
-                neighbourgsChunks[c]->updateIdsBuffer();
+                if (neighbourgsChunks[c].expired())
+                    continue;
+                std::shared_ptr<GLS::VoxelChunk> neighbourg = neighbourgsChunks[c].lock();
+                neighbourg->calculBlockAdjacence();
+                neighbourg->updateIdsBuffer();
             }
             removeBlockCD += 0.05;
         }
@@ -105,12 +102,12 @@ void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
                     if (((ix - 8) * (ix - 8) + (iy - 8) * (iy - 8) + (iz - 8) * (iz - 8) < 70)
                         )
                     {
-                        chunkMesh->blockIds()[GLS::VoxelChunk::indexOfBlock(ix, iy, iz)] = 1;
+                        chunkMesh->setBlockIdAt(ix, iy, iz, 1);
                     }
                 }
     }
 
-    std::array<std::shared_ptr<GLS::VoxelChunk>, 6> adjChunks;
+    std::array<std::weak_ptr<GLS::VoxelChunk>, 6> adjChunks;
     for (int a = 0; a < 6; a++) {
         auto adjChunkNode = std::make_shared<GLS::Node>();
         auto adjChunkMesh = std::make_shared<GLS::VoxelChunk>();
@@ -136,29 +133,25 @@ void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
                         // || (ix + iy + iz) % 10 <= 3
                         )
                     {
-                        adjChunkMesh->blockIds()[GLS::VoxelChunk::indexOfBlock(ix, iy, iz)] = 1;
+                        adjChunkMesh->setBlockIdAt(ix, iy, iz, 1);
                     }
                 }
     }
     neighbourgsChunks = adjChunks;
 
-    adjChunks[0]->blockAt(0, 8, 8);// +x
-    adjChunks[1]->blockAt(GLS::VoxelChunk::chunkSize - 1, 8, 8);// -x
-    adjChunks[2]->blockAt(8, 0, 8);// +y
-    adjChunks[3]->blockAt(8, GLS::VoxelChunk::chunkSize - 1, 8);// -y
-    adjChunks[4]->blockAt(8, 8, 0);// +z
-    adjChunks[5]->blockAt(8, 8, GLS::VoxelChunk::chunkSize - 1);// -z
-
-    chunkMesh->calculBlockAdjacence(adjChunks);
-    adjChunks[0]->calculBlockAdjacence({nullptr, chunkMesh, nullptr, nullptr, nullptr, nullptr});
-    adjChunks[1]->calculBlockAdjacence({chunkMesh, nullptr, nullptr, nullptr, nullptr, nullptr});
-    adjChunks[2]->calculBlockAdjacence({nullptr, nullptr, nullptr, chunkMesh, nullptr, nullptr});
-    adjChunks[3]->calculBlockAdjacence({nullptr, nullptr, chunkMesh, nullptr, nullptr, nullptr});
-    adjChunks[4]->calculBlockAdjacence({nullptr, nullptr, nullptr, nullptr, nullptr, chunkMesh});
-    adjChunks[5]->calculBlockAdjacence({nullptr, nullptr, nullptr, nullptr, chunkMesh, nullptr});
-
-    for (int i = 0; i < 6; i++)
-        adjChunks[i]->generateBuffers();
+    chunkMesh->setAdjacentChunks(adjChunks);
+    chunkMesh->calculBlockAdjacence();
+    std::weak_ptr<GLS::VoxelChunk> nochunk;
+    adjChunks[0].lock()->setAdjacentChunks({nochunk, chunkMesh, nochunk, nochunk, nochunk, nochunk});
+    adjChunks[1].lock()->setAdjacentChunks({chunkMesh, nochunk, nochunk, nochunk, nochunk, nochunk});
+    adjChunks[2].lock()->setAdjacentChunks({nochunk, nochunk, nochunk, chunkMesh, nochunk, nochunk});
+    adjChunks[3].lock()->setAdjacentChunks({nochunk, nochunk, chunkMesh, nochunk, nochunk, nochunk});
+    adjChunks[4].lock()->setAdjacentChunks({nochunk, nochunk, nochunk, nochunk, nochunk, chunkMesh});
+    adjChunks[5].lock()->setAdjacentChunks({nochunk, nochunk, nochunk, nochunk, chunkMesh, nochunk});
+    for (int i = 0; i < 6; i++) {
+        adjChunks[i].lock()->calculBlockAdjacence();
+        adjChunks[i].lock()->generateBuffers();
+    }
 
     chunkMesh->updateIdsBuffer();
     chunkMesh->generateBuffers();

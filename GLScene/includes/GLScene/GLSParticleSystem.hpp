@@ -34,7 +34,7 @@ namespace GLS {
 
     class ParticleSystem : public IRenderable {
         // TODO: Manage update of particles with openCL
-        // TODO: allow the updating openCL compute shader to ge customized
+        // TODO: allow the updating openCL compute shader to be customized
         
         // static CLS::GPUDevice _device; //TODO: manage creation and destruction
         GLuint _glBuffer;

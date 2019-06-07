@@ -25,19 +25,31 @@ namespace GLS {
     }
 
     VoxelChunk::VoxelChunk() :
-    _blocksBuffer(0), _blocksArray(0)
+    _blocksBuffer(0), _blocksArray(0),
+    _shaderProgram(nullptr),
+    _material(nullptr),
+    _adjChunks(),
+    _isEmpty(true)
     {
         for (int i = 0; i < chunkBlockCount; i++)
             _blockIds[i] = 0;
+        for (int i = 0; i < 6; i++)
+            _fullEdges[i] = false;
     }
 
     VoxelChunk::VoxelChunk(const VoxelChunk& copy) :
-    _blocksBuffer(0), _blocksArray(0)
+    _blocksBuffer(0), _blocksArray(0),
+    _shaderProgram(nullptr),
+    _material(copy._material),
+    _adjChunks(),
+    _isEmpty(copy._isEmpty)
     {
         for (int i = 0; i < chunkBlockCount; i++)
             _blockIds[i] = copy._blockIds[i];
         if (copy.bufferGenerated())
             generateBuffers();
+        for (int i = 0; i < 6; i++)
+            _fullEdges[i] = copy._fullEdges[i];
     }
 
     VoxelChunk::~VoxelChunk() {
@@ -47,29 +59,167 @@ namespace GLS {
     VoxelChunk& VoxelChunk::operator=(const VoxelChunk& copy) {
         for (int i = 0; i < chunkBlockCount; i++)
             _blockIds[i] = copy._blockIds[i];
+        deleteBuffers();
+        _material = copy._material;
+        _isEmpty = copy._isEmpty;
+        for (int i = 0; i < 6; i++)
+            _fullEdges[i] = copy._fullEdges[i];
         if (copy.bufferGenerated())
             generateBuffers();
         return (*this);
     }
 
-    int *VoxelChunk::blockIds() {
-        return _blockIds;
-    }
 
-    const int& VoxelChunk::blockAt(int x, int y, int z) const {
-        return _blockIds[indexOfBlock(x, y, z)];
-    }
-
-    int& VoxelChunk::blockAt(int x, int y, int z) {
-        return _blockIds[indexOfBlock(x, y, z)];
-    }
+    // VoxelChunk utilities
 
     int VoxelChunk::blockIdAt(int x, int y, int z) const {
-        return blockAt(x, y, z) & 0xFFFF;
+        return _blockIds[indexOfBlock(x, y, z)] & 0xFFFF;
     }
 
-    void VoxelChunk::calculBlockAdjacence(const std::array<std::shared_ptr<VoxelChunk>, 6>& adjChunks) {
-        (void)adjChunks;
+    int VoxelChunk::blockIdAt(std::tuple<int, int, int> coord) const {
+        return blockIdAt(std::get<0>(coord), std::get<1>(coord), std::get<2>(coord));
+    }
+
+    bool _checkIsEmpty(int *blockIds) {
+        for (int i = 0; i < VoxelChunk::chunkBlockCount; i++) {
+            if ((blockIds[i] & 0xFFFF) != 0)
+                return false;
+        }
+        return true;
+    }
+
+    bool _checkFullEdge_px(int *blockIds) {
+        for (int i = 0; i < VoxelChunk::chunkSize; i++)
+            for (int j = 0; j < VoxelChunk::chunkSize; j++)
+                if ((blockIds[VoxelChunk::indexOfBlock(VoxelChunk::chunkSize - 1, i, j)]) == 0)
+                    return false;
+        return true;
+    }
+
+    bool _checkFullEdge_nx(int *blockIds) {
+        for (int i = 0; i < VoxelChunk::chunkSize; i++)
+            for (int j = 0; j < VoxelChunk::chunkSize; j++)
+                if ((blockIds[VoxelChunk::indexOfBlock(0, i, j)]) == 0)
+                    return false;
+        return true;
+    }
+
+    bool _checkFullEdge_py(int *blockIds) {
+        for (int i = 0; i < VoxelChunk::chunkSize; i++)
+            for (int j = 0; j < VoxelChunk::chunkSize; j++)
+                if ((blockIds[VoxelChunk::indexOfBlock(i, VoxelChunk::chunkSize - 1, j)]) == 0)
+                    return false;
+        return true;
+    }
+
+    bool _checkFullEdge_ny(int *blockIds) {
+        for (int i = 0; i < VoxelChunk::chunkSize; i++)
+            for (int j = 0; j < VoxelChunk::chunkSize; j++)
+                if ((blockIds[VoxelChunk::indexOfBlock(i, 0, j)]) == 0)
+                    return false;
+        return true;
+    }
+
+    bool _checkFullEdge_pz(int *blockIds) {
+        for (int i = 0; i < VoxelChunk::chunkSize; i++)
+            for (int j = 0; j < VoxelChunk::chunkSize; j++)
+                if ((blockIds[VoxelChunk::indexOfBlock(i, j, VoxelChunk::chunkSize - 1)]) == 0)
+                    return false;
+        return true;
+    }
+
+    bool _checkFullEdge_nz(int *blockIds) {
+        for (int i = 0; i < VoxelChunk::chunkSize; i++)
+            for (int j = 0; j < VoxelChunk::chunkSize; j++)
+                if ((blockIds[VoxelChunk::indexOfBlock(i, j, 0)]) == 0)
+                    return false;
+        return true;
+    }
+
+    void VoxelChunk::setBlockIdAt(int x, int y, int z, int id) {
+        _blockIds[indexOfBlock(x, y, z)] = id;
+
+        if (id == 0 && !_isEmpty)
+            _isEmpty = _checkIsEmpty(_blockIds);
+        else
+            _isEmpty = false;
+
+        if (x == chunkSize - 1) {
+            if (id == 0)
+                _fullEdges[0] = false;
+            else
+                _fullEdges[0] = _checkFullEdge_px(_blockIds);
+        } else if (x == 0) {
+            if (id == 0)
+                _fullEdges[1] = false;
+            else
+                _fullEdges[1] = _checkFullEdge_nx(_blockIds);
+        }
+        if (y == chunkSize - 1) {
+            if (id == 0)
+                _fullEdges[2] = false;
+            else
+                _fullEdges[2] = _checkFullEdge_py(_blockIds);
+        } else if (y == 0) {
+            if (id == 0)
+                _fullEdges[3] = false;
+            else
+                _fullEdges[3] = _checkFullEdge_ny(_blockIds);
+        }
+        if (z == chunkSize - 1) {
+            if (id == 0)
+                _fullEdges[4] = false;
+            else
+                _fullEdges[4] = _checkFullEdge_pz(_blockIds);
+        } else if (z == 0) {
+            if (id == 0)
+                _fullEdges[5] = false;
+            else
+                _fullEdges[5] = _checkFullEdge_nz(_blockIds);
+        }
+
+    }
+
+    int VoxelChunk::blockAdjAt(int x, int y, int z) const {
+        return (_blockIds[indexOfBlock(x, y, z)] & 0xFF0000) >> 16;
+    }
+
+    bool VoxelChunk::isEmpty() const {
+        return _isEmpty;
+    }
+
+    bool VoxelChunk::isFullOnEdge(int edgeIndex) const {
+        return _fullEdges[edgeIndex];
+    }
+
+    static int _opposedFace(int f) {
+        return ((f / 2) * 2) + (1 - (f % 2));
+    }
+
+    bool VoxelChunk::isSurrounded() const {
+        for (int i = 0; i < 6; i++) {
+            if (_adjChunks[i].expired())
+                return false;
+            std::shared_ptr<VoxelChunk> adj = _adjChunks[i].lock();
+            if (adj->isFullOnEdge(_opposedFace(i)) == false)
+                return false;
+        }
+        return true;
+    }
+
+    void VoxelChunk::setAdjacentChunks(std::array<std::weak_ptr<VoxelChunk>, 6> adjChunks) {
+        _adjChunks = adjChunks;
+    }
+
+    std::weak_ptr<VoxelChunk> VoxelChunk::adjacentChunk(int edgeIndex) {
+        return _adjChunks[edgeIndex];
+    }
+
+    void VoxelChunk::calculBlockAdjacence() {
+        std::array<std::shared_ptr<VoxelChunk>, 6> adjChunks;
+        for (int i = 0; i < 6; i++)
+            adjChunks[i] = _adjChunks[i].expired() ? nullptr : _adjChunks[i].lock();
+
         for (int x = 0; x < chunkSize; x++)
             for (int y = 0; y < chunkSize; y++)
                 for (int z = 0; z < chunkSize; z++) {
@@ -118,10 +268,12 @@ namespace GLS {
                         } else if (blockIdAt(x, y, z - 1) == 0)
                             adj |= (1 << 5);
                         
-                        blockAt(x, y, z) = blockId | (adj << 16);
+                        _blockIds[indexOfBlock(x, y, z)] = blockId | (adj << 16);
 
                     } else {
-                        blockAt(x, y, z) = 0;
+                        
+                        _blockIds[indexOfBlock(x, y, z)] = 0;
+
                     }
                 }
     }
@@ -293,4 +445,170 @@ namespace GLS {
     std::string VoxelChunk::shaderUniformsFragment() {
         return Mesh::shaderUniformsFragment();
     }
+
+
+    // Turn into mesh
+
+    static glm::vec2 _getBlockIdUvs(glm::vec2 uv, int blockId, int face) {
+        blockId--;
+        int gridX = (blockId % 10);
+        int gridY = (blockId / 10);
+        uv.x = ((gridX * 3) + face + uv.x) * (1.0 / 30.0);
+        uv.y = (gridY + (1 - uv.y)) * (1.0 / 10.0);
+        return uv;
+    }
+
+    static void _indices_appendFace(std::vector<GLuint>& indices, size_t verticesSize) {
+        indices.push_back(verticesSize - 4);
+        indices.push_back(verticesSize - 3);
+        indices.push_back(verticesSize - 2);
+        indices.push_back(verticesSize - 3);
+        indices.push_back(verticesSize - 1);
+        indices.push_back(verticesSize - 2);
+    }
+
+    static void _drawFace_positiveX_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+        Vertex v;
+        v.position = coords + glm::vec3(1, 0, 0) + glm::vec3(0, 1, 0) * uv.y + glm::vec3(0, 0, 1) * (1 - uv.x);
+        v.normal = glm::vec3(1, 0, 0);
+        v.tangent = glm::vec3(0, 0, -1);
+        v.bitangent = glm::vec3(0, 1, 0);
+        v.uv = _getBlockIdUvs(uv, blockId, 1);
+        vertices.push_back(v);
+    }
+
+    static void _drawFace_positiveX(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
+        _drawFace_positiveX_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
+        _drawFace_positiveX_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
+        _drawFace_positiveX_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
+        _drawFace_positiveX_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+        _indices_appendFace(indices, vertices.size());
+    }
+
+    static void _drawFace_negativeX_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+        Vertex v;
+        v.position = coords + glm::vec3(0, 1, 0) * uv.y + glm::vec3(0, 0, 1) * uv.x;
+        v.normal = glm::vec3(-1, 0, 0);
+        v.tangent = glm::vec3(0, 0, 1);
+        v.bitangent = glm::vec3(0, 1, 0);
+        v.uv = _getBlockIdUvs(uv, blockId, 1);
+        vertices.push_back(v);
+    }
+
+    static void _drawFace_negativeX(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
+        _drawFace_negativeX_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
+        _drawFace_negativeX_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
+        _drawFace_negativeX_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
+        _drawFace_negativeX_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+        _indices_appendFace(indices, vertices.size());
+    }
+
+    static void _drawFace_positiveY_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+        Vertex v;
+        v.position = coords + glm::vec3(1, 0, 0) * uv.x + glm::vec3(0, 1, 0) + glm::vec3(0, 0, 1) * (1 - uv.y);
+        v.normal = glm::vec3(0, 1, 0);
+        v.tangent = glm::vec3(1, 0, 0);
+        v.bitangent = glm::vec3(0, 0, -1);
+        v.uv = _getBlockIdUvs(uv, blockId, 2);
+        vertices.push_back(v);
+    }
+
+    static void _drawFace_positiveY(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
+        _drawFace_positiveY_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
+        _drawFace_positiveY_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
+        _drawFace_positiveY_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
+        _drawFace_positiveY_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+        _indices_appendFace(indices, vertices.size());
+    }
+
+    static void _drawFace_negativeY_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+        Vertex v;
+        v.position = coords + glm::vec3(1, 0, 0) * (1 - uv.x) + glm::vec3(0, 0, 1) * (1 - uv.y);
+        v.normal = glm::vec3(0, -1, 0);
+        v.tangent = glm::vec3(-1, 0, 0);
+        v.bitangent = glm::vec3(0, 0, -1);
+        v.uv = _getBlockIdUvs(uv, blockId, 0);
+        vertices.push_back(v);
+    }
+
+    static void _drawFace_negativeY(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
+        _drawFace_negativeY_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
+        _drawFace_negativeY_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
+        _drawFace_negativeY_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
+        _drawFace_negativeY_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+        _indices_appendFace(indices, vertices.size());
+    }
+
+    static void _drawFace_positiveZ_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+        Vertex v;
+        v.position = coords + glm::vec3(1, 0, 0) * uv.x + glm::vec3(0, 1, 0) * uv.y + glm::vec3(0, 0, 1);
+        v.normal = glm::vec3(0, 0, 1);
+        v.tangent = glm::vec3(1, 0, 0);
+        v.bitangent = glm::vec3(0, 1, 0);
+        v.uv = _getBlockIdUvs(uv, blockId, 1);
+        vertices.push_back(v);
+    }
+
+    static void _drawFace_positiveZ(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
+        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
+        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
+        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
+        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+        _indices_appendFace(indices, vertices.size());
+    }
+
+    static void _drawFace_negativeZ_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+        Vertex v;
+        v.position = coords + glm::vec3(1, 0, 0) * (1 - uv.x) + glm::vec3(0, 1, 0) * uv.y;
+        v.normal = glm::vec3(0, 0, -1);
+        v.tangent = glm::vec3(-1, 0, 0);
+        v.bitangent = glm::vec3(0, 1, 0);
+        v.uv = _getBlockIdUvs(uv, blockId, 1);
+        vertices.push_back(v);
+    }
+
+    static void _drawFace_negativeZ(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
+        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
+        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
+        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
+        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+        _indices_appendFace(indices, vertices.size());
+    }
+    
+
+    std::shared_ptr<Mesh> Mesh::voxelChunk(std::shared_ptr<VoxelChunk> chunk, bool generateBuffers) {
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+
+        std::vector<Vertex>& vertices(mesh->verticesRef());
+        std::vector<GLuint>& indices(mesh->indicesRef());
+
+        for (int x = 0; x < VoxelChunk::chunkSize; x++) {
+            for (int y = 0; y < VoxelChunk::chunkSize; y++) {
+                for (int z = 0; z < VoxelChunk::chunkSize; z++) {
+                    int blockId = chunk->blockIdAt(x, y, z);
+                    if (blockId == 0)
+                        continue;
+                    int blockAdj = chunk->blockAdjAt(x, y, z);
+                    glm::vec3 coords(x, y, z);
+                    if ((blockAdj & (1 << 0)) != 0)
+                        _drawFace_positiveX(vertices, indices, blockId, coords);
+                    if ((blockAdj & (1 << 1)) != 0)
+                        _drawFace_negativeX(vertices, indices, blockId, coords);
+                    if ((blockAdj & (1 << 2)) != 0)
+                        _drawFace_positiveY(vertices, indices, blockId, coords);
+                    if ((blockAdj & (1 << 3)) != 0)
+                        _drawFace_negativeY(vertices, indices, blockId, coords);
+                    if ((blockAdj & (1 << 4)) != 0)
+                        _drawFace_positiveZ(vertices, indices, blockId, coords);
+                    if ((blockAdj & (1 << 5)) != 0)
+                        _drawFace_negativeZ(vertices, indices, blockId, coords);
+                }
+            }
+        }
+        mesh->setMaterial(chunk->getMaterial());
+        if (generateBuffers)
+            mesh->generateBuffers();
+        return mesh;
+    }
+
 }

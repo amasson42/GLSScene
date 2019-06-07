@@ -133,7 +133,7 @@ namespace GLS {
         static std::shared_ptr<Mesh> sphere(GLfloat radius, unsigned int ringCount = 12, bool generateBuffers = true);
         static std::shared_ptr<Mesh> objModel(std::string path, bool generateBuffers = true) /*throw(LoadMeshException)*/;
         static std::shared_ptr<Mesh> loadFromAiMesh(aiMesh *mesh, bool generateBuffers = true);
-
+        static std::shared_ptr<Mesh> voxelChunk(std::shared_ptr<VoxelChunk> chunk, bool generateBuffers = true);
 
         // Shader uniforms
 

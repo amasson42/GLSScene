@@ -49,32 +49,32 @@ class VoxelWorld {
                         glm::vec3 wpos(wx * GLS::VoxelChunk::chunkSize + cx,
                                         0,
                                         wz * GLS::VoxelChunk::chunkSize + cz);
-                        chunk->blockAt(cx, 0, cz) = BLOCK_BEDROCK;
+                        chunk->setBlockIdAt(cx, 0, cz, BLOCK_BEDROCK);
                         int noiseHeight = noise(glm::vec3(0.03) * wpos) * 15 + 3;
                         noiseHeight = noiseHeight <= 0 ? 1 - noiseHeight : noiseHeight;
                         noiseHeight = noiseHeight > GLS::VoxelChunk::chunkSize ? 1 : noiseHeight;
 
                         float grassNoise = noise(glm::vec3(0.005) * wpos);
-                        chunk->blockAt(cx, noiseHeight, cz) = noise(glm::vec3(0.03) * wpos) * 15 + 3 < 1 ? (grassNoise < 0 ? BLOCK_GRASS_PURPLE : BLOCK_SAND) :
+                        chunk->setBlockIdAt(cx, noiseHeight, cz, noise(glm::vec3(0.03) * wpos) * 15 + 3 < 1 ? (grassNoise < 0 ? BLOCK_GRASS_PURPLE : BLOCK_SAND) :
                                                                 grassNoise < 0 ? BLOCK_GRASS_BROWN :
-                                                                BLOCK_GRASS; // grass
+                                                                BLOCK_GRASS); // grass
                         if (noiseHeight <= 2) {
                             for (int i = 1; i < 2; i++) {
-                                chunk->blockAt(cx, i, cz) = noiseHeight == 1 ? BLOCK_ICE_BROKEN : BLOCK_ICE;
+                                chunk->setBlockIdAt(cx, i, cz, noiseHeight == 1 ? BLOCK_ICE_BROKEN : BLOCK_ICE);
                             }
                         }
                         int h;
                         for (h = 1; h < noiseHeight - 2; h++) {
-                            chunk->blockAt(cx, h, cz) = BLOCK_STONE;
+                            chunk->setBlockIdAt(cx, h, cz, BLOCK_STONE);
                         }
                         for (; h < noiseHeight; h++) {
-                            chunk->blockAt(cx, h, cz) = BLOCK_DIRT;
+                            chunk->setBlockIdAt(cx, h, cz, BLOCK_DIRT);
                         }
                         float superNoise = noise(glm::vec3(12.57) * wpos) * noise(glm::vec3(4.5) * wpos) * noise(glm::vec3(0.042) * wpos);
                         if (superNoise >= 0.1 && noiseHeight > 2) {
                             int treeHeight = 5;
                             for (int ht = h + 1; ht < GLS::VoxelChunk::chunkSize && ht < h + treeHeight; ht++) {
-                                chunk->blockAt(cx, ht, cz) = BLOCK_WOOD;
+                                chunk->setBlockIdAt(cx, ht, cz, BLOCK_WOOD);
                             }
                             for (int ly = h + 3; ly <= h + treeHeight + 1; ly++) {
                                 int lr = ly <= h + 4 ? 2 : 1;
@@ -83,8 +83,8 @@ class VoxelWorld {
                                         if (lx >= 0 && lx < GLS::VoxelChunk::chunkSize
                                             && lz >= 0 && lz < GLS::VoxelChunk::chunkSize
                                             && ly < GLS::VoxelChunk::chunkSize
-                                            && chunk->blockAt(lx, ly, lz) == 0) {
-                                            chunk->blockAt(lx, ly, lz) = BLOCK_LEAFS;
+                                            && chunk->blockIdAt(lx, ly, lz) == 0) {
+                                            chunk->setBlockIdAt(lx, ly, lz, BLOCK_LEAFS);
                                         }
                                     }
                                 }
@@ -92,21 +92,26 @@ class VoxelWorld {
                         }
                         for (h++; h < GLS::VoxelChunk::chunkSize; h++) {
                             if (cx * cz + h % 15 == 0)
-                                chunk->blockAt(cx, h, cz) = BLOCK_WOOD_PLANKS;
+                                chunk->setBlockIdAt(cx, h, cz, BLOCK_WOOD_PLANKS);
                         }
                     }
                 chunk->setMaterial(mat);
                 _voxels[wx][wz] = chunk;
             }
         }
+        std::weak_ptr<GLS::VoxelChunk> nochunk;
         for (int x = 0; x < worldSize; x++)
             for (int z = 0; z < worldSize; z++) {
-                _voxels[x][z]->calculBlockAdjacence({
-                    x == worldSize - 1 ? nullptr : _voxels[x + 1][z],
-                    x == 0 ? nullptr : _voxels[x - 1][z],
-                    nullptr, nullptr,
-                    z == worldSize - 1 ? nullptr : _voxels[x][z + 1],
-                    z == 0 ? nullptr : _voxels[x][z - 1]});
+                std::array<std::weak_ptr<GLS::VoxelChunk>, 6> adjacents = {
+                    x == worldSize - 1 ? nochunk : _voxels[x + 1][z],
+                    x == 0 ? nochunk : _voxels[x - 1][z],
+                    nochunk,
+                    nochunk,
+                    z == worldSize - 1 ? nochunk : _voxels[x][z + 1],
+                    z == 0 ? nochunk : _voxels[x][z - 1]
+                };
+                _voxels[x][z]->setAdjacentChunks(adjacents);
+                _voxels[x][z]->calculBlockAdjacence();
                 _voxels[x][z]->generateBuffers();
             }
     }
@@ -119,7 +124,7 @@ class VoxelWorld {
                 float worldRay = (worldSize * GLS::VoxelChunk::chunkSize * 1.0) / 2.0;
                 glm::vec3 offset(-worldRay, -GLS::VoxelChunk::chunkSize / 2, -worldRay);
                 chunkNode->transform().setPosition(glm::vec3(x * magni, 0, z * magni) + offset);
-                chunkNode->addRenderable(_voxels[x][z]);
+                chunkNode->addRenderable(GLS::Mesh::voxelChunk(_voxels[x][z]));
                 worldNode->addChildNode(chunkNode);
             }
         }
@@ -134,7 +139,7 @@ void updateSceneVoxelProcedural(double et, double dt) {
     (void)dt;
     static double lt = et;
 
-    if (et - lt >= 0.3 || true) {
+    if (et - lt >= 0.3) {
         lt = et;
         if (worldNode != nullptr && cameraNode != nullptr) {
             auto camera = cameraNode->camera();
@@ -147,7 +152,7 @@ void updateSceneVoxelProcedural(double et, double dt) {
                 float length = glm::length(chunkDirection);
                 if (length < GLS::VoxelChunk::chunkSize * 1.5)
                     a = true;
-                else if (length > 160)
+                else if (length > 350)
                     a = false;
                 else {
                     chunkDirection /= length;
@@ -196,7 +201,7 @@ void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>&
     cameraNode = std::make_shared<GLS::Node>();
     cameraNode->transform().moveBy(5, 10, 20);
     std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-    camera->farZ = 300;
+    camera->farZ = 450;
     camera->fov = (80.0) * M_PI / 180;
     camera->aspect = (scene.getAspect());
     cameraNode->setCamera(camera);
@@ -210,4 +215,7 @@ void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>&
     VoxelWorld world(texturedMaterial);
     world.embedInNode(worldNode);
     scene.rootNode()->addChildNode(worldNode);
+
+    updateSceneVoxelProcedural(-0.5, 0.0);
+    updateSceneVoxelProcedural(0, 0.5);
 }

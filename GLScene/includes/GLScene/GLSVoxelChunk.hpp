@@ -33,6 +33,11 @@ namespace GLS {
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
 
+        std::array<std::weak_ptr<VoxelChunk>, 6> _adjChunks;
+
+        bool _isEmpty;
+        bool _fullEdges[6];
+
     public:
 
         class BufferCreationException : public std::exception {
@@ -48,16 +53,22 @@ namespace GLS {
         
         
         // VoxelChunk utilities
-        
-        int *blockIds();
-        const int& blockAt(int x, int y, int z) const;
-        int& blockAt(int x, int y, int z);
 
         int blockIdAt(int x, int y, int z) const;
-        
-        // TODO: keep adjChunks as weak_ptr attributes
+        int blockIdAt(std::tuple<int, int, int> coord) const;
+        void setBlockIdAt(int x, int y, int z, int id);
+
+        int blockAdjAt(int x, int y, int z) const;
+
+        bool isEmpty() const; // only contains air blocks
+        bool isFullOnEdge(int edgeIndex) const; // contains full blocks on the indexed edge
+        bool isSurrounded() const; // all adjacent are full on the edge
+
+        void setAdjacentChunks(std::array<std::weak_ptr<VoxelChunk>, 6> adjChunks);
+        std::weak_ptr<VoxelChunk> adjacentChunk(int edgeIndex);
+
         // TODO: allow the update of a small part of the chunk and add the possibility to update the target part of the buffer with glBufferSubData
-        void calculBlockAdjacence(const std::array<std::shared_ptr<VoxelChunk>, 6>& adjChunks);
+        void calculBlockAdjacence();
 
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
 
