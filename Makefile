@@ -2,6 +2,17 @@
 NAME = game
 
 CC = clang++
+
+FRAMEWORKS = -lm -framework OpenGL \
+		`pkg-config --static --libs glfw3` \
+		`pkg-config --static --libs glm` \
+		`pkg-config --static --libs assimp` \
+		`pkg-config glfw3 --cflags-only-I` \
+		`pkg-config glm --cflags-only-I` \
+		`pkg-config assimp --cflags-only-I` \
+
+INCLUDES = -I GLScene/includes
+
 FLAGS = -std=c++11 -Wall -Werror -Wextra -g
 SRCS = *.cpp
 
@@ -18,14 +29,8 @@ install:
 
 $(NAME):
 	$(CC) $(FLAGS) \
-		-lm -framework OpenGL \
-		`pkg-config --static --libs glfw3` \
-		`pkg-config --static --libs glm` \
-		`pkg-config --static --libs assimp` \
-		`pkg-config glfw3 --cflags-only-I` \
-		`pkg-config glm --cflags-only-I` \
-		`pkg-config assimp --cflags-only-I` \
-		-I GLScene/includes \
+		$(FRAMEWORKS) \
+		$(INCLUDES) \
 		$(SRCS) -o game \
 		GLScene/GLScene.a
 

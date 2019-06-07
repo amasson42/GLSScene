@@ -17,10 +17,9 @@ namespace GLS {
 
         glm::vec2 _size;
         
-		Node *_rootNode;
-		Node *_cameraNode;
-        // std::unique_ptr<Node> _rootNode;
-        // std::weak_ptr<Node> _cameraNode;
+        std::shared_ptr<Node> _rootNode;
+
+        std::weak_ptr<Node> _cameraNode;
         std::shared_ptr<Skybox> _skybox;
         glm::vec4 _background;
 
@@ -50,11 +49,11 @@ namespace GLS {
 
         // Node utilities
 
-		Node& rootNode();
-		const Node& rootNode() const;
-		
-		Node *cameraNode() const;
-		void setCameraNode(Node& node);
+		std::shared_ptr<Node> rootNode();
+		const std::shared_ptr<Node> rootNode() const;
+
+		std::weak_ptr<Node> cameraNode() const;
+		void setCameraNode(std::weak_ptr<Node> node);
 
         std::shared_ptr<Skybox> skybox() const;
         void setSkybox(std::shared_ptr<Skybox> skybox);

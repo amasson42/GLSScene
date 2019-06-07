@@ -12,8 +12,8 @@ namespace GLS {
     
     Scene::Scene() :
     _size(100, 100),
-    _rootNode(new Node),
-    _cameraNode(nullptr), _skybox(nullptr),
+    _rootNode(std::make_shared<Node>()),
+    _cameraNode(), _skybox(nullptr),
     _background(0.2)
     {
 
@@ -27,21 +27,21 @@ namespace GLS {
     
     Scene::Scene(const Scene& copy) :
     _size(copy._size),
-    _rootNode(new Node(copy.rootNode())),
-    _cameraNode(nullptr), _skybox(copy._skybox),
+    _rootNode(std::make_shared<Node>(*copy.rootNode())),
+    _cameraNode(), _skybox(copy._skybox),
     _background(copy._background)
     {
 
     }
     
     Scene::~Scene() {
-        delete _rootNode;
+
     }
     
     Scene& Scene::operator=(const Scene& copy) {
         _size = copy._size;
-        _rootNode = copy._rootNode;
-        _cameraNode = nullptr;
+        *_rootNode = *copy._rootNode;
+        _cameraNode = _rootNode;
         _background = copy._background;
         _skybox = copy._skybox;
         return *this;
@@ -59,20 +59,20 @@ namespace GLS {
         return _size.x / _size.y;
     }
 
-    Node& Scene::rootNode() {
-        return *_rootNode;
+    std::shared_ptr<Node> Scene::rootNode() {
+        return _rootNode;
     }
     
-    const Node& Scene::rootNode() const {
-        return *_rootNode;
+    const std::shared_ptr<Node> Scene::rootNode() const {
+        return _rootNode;
     }
     
-    Node *Scene::cameraNode() const {
+    std::weak_ptr<Node> Scene::cameraNode() const {
         return _cameraNode;
     }
     
-    void Scene::setCameraNode(Node& node) {
-        _cameraNode = &node;
+    void Scene::setCameraNode(std::weak_ptr<Node> node) {
+        _cameraNode = node;
     }
 
     std::shared_ptr<Skybox> Scene::skybox() const {
@@ -138,11 +138,12 @@ namespace GLS {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         RenderUniforms uniforms;
-        if (_cameraNode) {
-            uniforms.view = glm::inverse(_cameraNode->getWorldTransformMatrix());
-            uniforms.camera_position = _cameraNode->transform().position();
-            if (_cameraNode->camera() != nullptr)
-                uniforms.projection = _cameraNode->camera()->projectionMatrix();
+        if (!_cameraNode.expired()) {
+            std::shared_ptr<Node> camera = _cameraNode.lock();
+            uniforms.view = glm::inverse(camera->getWorldTransformMatrix());
+            uniforms.camera_position = camera->transform().position();
+            if (camera->camera() != nullptr)
+                uniforms.projection = camera->camera()->projectionMatrix();
         }
         
         sendLightsValueToShader(ShaderProgram::standardShaderProgramMesh());

@@ -223,28 +223,28 @@ void loadScene2(GLS::Scene& scene, const std::vector<std::string>& args) {
         cameraNode->setCamera(camera);
     }
     cameraNode->transform().moveBy(0, 3, 5);
-    scene.setCameraNode(*cameraNode);
-    scene.rootNode().addChildNode(cameraNode);
+    scene.setCameraNode(cameraNode);
+    scene.rootNode()->addChildNode(cameraNode);
 
     std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
     T_Node lightNode = newNode();
     lightNode->transform().setPosition(glm::vec3(3, 5, 3));
     light->type = (GLS::light_point);
     lightNode->setLight(light);
-    scene.rootNode().addChildNode(lightNode);
+    scene.rootNode()->addChildNode(lightNode);
 
     // just a nanosuit
     hooman = std::make_shared<Human>();
     T_Node humanNode = newNode();
     humanNode->addChildNode(hooman->node());
-    scene.rootNode().addChildNode(humanNode);
+    scene.rootNode()->addChildNode(humanNode);
 
     if (args.size() >= 1) {
         std::ifstream animationFile(args[0]);
         hoomanAnimator = std::make_shared<GLS::Animator<HumanAnimationState> >(animationFile);
+        std::cout << *hoomanAnimator << std::endl;
     }
 
-    std::cout << *hoomanAnimator << std::endl;
 
     // create ground plane
 

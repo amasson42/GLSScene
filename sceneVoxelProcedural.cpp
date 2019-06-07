@@ -191,7 +191,7 @@ void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>&
     ambiantlight->type = GLS::light_ambiant;
     ambiantlight->color = glm::vec3(0.2);
     ambiantlightNode->setLight(ambiantlight);
-    scene.rootNode().addChildNode(ambiantlightNode);
+    scene.rootNode()->addChildNode(ambiantlightNode);
 
     cameraNode = std::make_shared<GLS::Node>();
     cameraNode->transform().moveBy(5, 10, 20);
@@ -202,12 +202,12 @@ void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>&
     cameraNode->setCamera(camera);
     cameraNode->transform().moveBy(0, 2, 5);
     cameraNode->transform().rotateEulerAnglesBy(0.1, 0.1, 0);
-    scene.setCameraNode(*cameraNode);
-    scene.rootNode().addChildNode(cameraNode);
+    scene.setCameraNode(cameraNode);
+    scene.rootNode()->addChildNode(cameraNode);
     cameraNode->addChildNode(pointlightNode);
 
     worldNode = std::make_shared<GLS::Node>();
     VoxelWorld world(texturedMaterial);
     world.embedInNode(worldNode);
-    scene.rootNode().addChildNode(worldNode);
+    scene.rootNode()->addChildNode(worldNode);
 }

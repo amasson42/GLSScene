@@ -30,19 +30,19 @@ void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args) {
         trianglesMesh->generateBuffers();
         triangleNode->addRenderable(trianglesMesh);
     }
-    scene.rootNode().addChildNode(triangleNode);
+    scene.rootNode()->addChildNode(triangleNode);
     std::cout << "triangles added" << std::endl;
 
     std::shared_ptr<GLS::Node> planeNode = std::make_shared<GLS::Node>();
     planeNode->addRenderable(GLS::Mesh::plane(1.0, 1.0));
-    scene.rootNode().addChildNode(planeNode);
+    scene.rootNode()->addChildNode(planeNode);
     planeNode->setName("plane");
 
     std::shared_ptr<GLS::Node> planesNode = std::make_shared<GLS::Node>();
     auto planesMesh = std::make_shared<GLS::InstancedMesh>(*GLS::Mesh::plane(2.0, 0.3), 50);
     planesMesh->generateBuffers();
     planeNode->addRenderable(planesMesh);
-    scene.rootNode().addChildNode(planesNode);
+    scene.rootNode()->addChildNode(planesNode);
     planesNode->setName("planes");
 
     std::shared_ptr<GLS::Node> sphereNode = std::make_shared<GLS::Node>();
@@ -61,7 +61,7 @@ void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args) {
     try {
         std::shared_ptr<GLS::Node> nsNode = std::make_shared<GLS::Node>();
         nsNode->loadMeshFromFile("../models/nanosuit/nanosuit.obj");
-        scene.rootNode().addChildNode(nsNode);
+        scene.rootNode()->addChildNode(nsNode);
         nsNode->setName("nanosuit");
         std::cout << "the nanosuit node has " << nsNode->renderables().size() << " meshes" << std::endl;
     } catch (std::exception& e) {
@@ -71,7 +71,7 @@ void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args) {
     try {
         std::shared_ptr<GLS::Node> ftNode = std::make_shared<GLS::Node>();
         ftNode->loadMeshFromFile("../models/42.obj");
-        scene.rootNode().addChildNode(ftNode);
+        scene.rootNode()->addChildNode(ftNode);
         ftNode->setName("ft");
     } catch (std::exception& e) {
         std::cout << "can't create 42node with exception: " << e.what() << std::endl;
@@ -84,7 +84,7 @@ void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args) {
     spotlightNode->transform().setEulerAngles(0.5, -0.4, 0);
     spotlight->angle = 1.5;
     spotlightNode->setLight(spotlight);
-    scene.rootNode().addChildNode(spotlightNode);
+    scene.rootNode()->addChildNode(spotlightNode);
     spotlightNode->setName("spotlight");
 
     std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
@@ -92,7 +92,7 @@ void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args) {
     pointlight->type = (GLS::light_point);
     pointLightNode->transform().setPosition(glm::vec3(0, 15, 9));
     pointLightNode->setLight(pointlight);
-    scene.rootNode().addChildNode(pointLightNode);
+    scene.rootNode()->addChildNode(pointLightNode);
     pointLightNode->setName("pointight");
 
     std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
@@ -115,7 +115,7 @@ void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args) {
     cubeNode->setName("cube");
     cubeNode->addRenderable(cubeMesh);
     cubeNode->transform().setPosition(glm::vec3(4, 1, 0));
-    scene.rootNode().addChildNode(cubeNode);
+    scene.rootNode()->addChildNode(cubeNode);
     cubeNode->setName("cube");
 
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
@@ -126,8 +126,8 @@ void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args) {
         cameraNode->setCamera(camera);
     }
     cameraNode->transform().moveBy(0, 7, 5);
-    scene.setCameraNode(*cameraNode);
-    scene.rootNode().addChildNode(cameraNode);
+    scene.setCameraNode(cameraNode);
+    scene.rootNode()->addChildNode(cameraNode);
 
     std::vector<std::string> skyboxFaces;
     // skyboxFaces.push_back("../textures/lac_skybox/right.jpg");

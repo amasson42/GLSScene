@@ -68,8 +68,8 @@ void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
     camera->aspect = (scene.getAspect());
     cameraNode->setCamera(camera);
     cameraNode->transform().moveBy(0, 2, 5);
-    scene.setCameraNode(*cameraNode);
-    scene.rootNode().addChildNode(cameraNode);
+    scene.setCameraNode(cameraNode);
+    scene.rootNode()->addChildNode(cameraNode);
     cameraNode->addChildNode(pointlightNode);
     pointlightNode->transform().moveBy(1, 0, 0);
     pointlightNode->transform().rotateEulerAnglesBy(0, 0.2, 0);
@@ -79,7 +79,7 @@ void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
     mainChunk = chunkMesh;
     chunkNode->addRenderable(chunkMesh);
     chunkMesh->setMaterial(texturedMaterial);
-    scene.rootNode().addChildNode(chunkNode);
+    scene.rootNode()->addChildNode(chunkNode);
     chunkNode->addRenderable(GLS::Mesh::cube(0.2, 0.2, 0.2));
     auto endChunkNode = std::make_shared<GLS::Node>();
     endChunkNode->transform().setPosition(glm::vec3(static_cast<float>(GLS::VoxelChunk::chunkSize)));

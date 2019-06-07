@@ -24,14 +24,21 @@
 void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene);
 int launch(std::vector<std::string>& modelNames);
 
-int main(int argc, const char * argv[]) {
+void prelaunch(int argc, char const *argv[]) {
     std::vector<std::string> args;
-    for (int i = 1; i < argc; i++)
-        args.push_back(argv[i]);
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-leaks") != 0)
+            args.push_back(argv[i]);
+    }
     launch(args);
-    if (!args.empty() && args[0] == "-leaks") {
+}
+
+int main(int argc, const char * argv[]) {
+    prelaunch(argc, argv);
+    if (argc >= 2 && strcmp(argv[1], "-leaks") == 0) {
         std::cout << "test leaks..." << std::endl;
-        while (1);
+        while (1)
+            sleep(1);
     }
     return 0;
 }
@@ -52,8 +59,21 @@ void updateScene3(double et, double dt);
 void updateSceneVoxel(double et, double dt);
 void updateSceneVoxelProcedural(double et, double dt);
 
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene1;
+// void (*updateScene)(double, double)                                 = nullptr;
+
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene2;
+// void (*updateScene)(double, double)                                 = updateScene2;
+
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene3;
+// void (*updateScene)(double, double)                                 = updateScene3;
+
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxel;
+// void (*updateScene)(double, double)                                 = updateSceneVoxel;
+
 void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
 void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
+
 bool mustUpdate = true;
 
 int launch(std::vector<std::string>& args) {
@@ -156,8 +176,8 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
     static float cameraAngleY = 0;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-    if (scene.cameraNode()) {
-        GLS::Node& cam(*scene.cameraNode());
+    if (!scene.cameraNode().expired()) {
+        GLS::Node& cam(*scene.cameraNode().lock());
 
         float cameraSpeed = 15.0 * deltaTime;
         glm::mat4 cameraMat = cam.getWorldTransformMatrix();
