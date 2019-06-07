@@ -1,5 +1,6 @@
 
 #include <cmath>
+#include <iostream>
 
 static int p[512];
 static int permutation[] = { 151,160,137,91,90,15,
@@ -18,8 +19,10 @@ static int permutation[] = { 151,160,137,91,90,15,
 };
 
 void initNoise() {
+    (void)permutation;
+    srandom(time(NULL));
     for (int i = 0; i < 256 ; i++)
-        p[256+i] = p[i] = permutation[i];
+        p[256+i] = p[i] = random() % 256;//permutation[i];
 }
 
 double fade(double t) {

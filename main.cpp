@@ -50,9 +50,10 @@ void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>&
 void updateScene2(double et, double dt);
 void updateScene3(double et, double dt);
 void updateSceneVoxel(double et, double dt);
+void updateSceneVoxelProcedural(double et, double dt);
 
 void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
-void (*updateScene)(double, double)                                 = updateSceneVoxel;
+void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
 bool mustUpdate = true;
 
 int launch(std::vector<std::string>& args) {
@@ -115,7 +116,7 @@ int launch(std::vector<std::string>& args) {
         if (true)
             processInput(window, deltaTime, scene);
         
-        if (updateScene != nullptr)
+        if (mustUpdate && updateScene != nullptr)
             updateScene(currentTime, deltaTime);
 
         /* do some drawing */
@@ -135,6 +136,9 @@ int launch(std::vector<std::string>& args) {
             fpsss << "FPS: " << 1.0 / deltaTime;
             glfwSetWindowTitle(window, fpsss.str().c_str());
             fpsDisplayCD = 0.5;
+            glfwGetFramebufferSize(window, &win_buffer_width, &win_buffer_height);
+            scene.setSize(glm::vec2(win_buffer_width, win_buffer_height));
+            facebook = std::make_shared<GLS::Framebuffer>(win_buffer_width, win_buffer_height);
         }
 
         glfwSwapBuffers(window); // draw the new image to the buffer
@@ -148,12 +152,14 @@ int launch(std::vector<std::string>& args) {
 }
 
 void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
+    static float cameraAngleX = 0;
+    static float cameraAngleY = 0;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (scene.cameraNode()) {
         GLS::Node& cam(*scene.cameraNode());
 
-        float cameraSpeed = 5.0 * deltaTime;
+        float cameraSpeed = 15.0 * deltaTime;
         glm::mat4 cameraMat = cam.getWorldTransformMatrix();
         glm::vec3 cameraFront = glm::vec3(cameraMat * glm::vec4(0, 0, -1, 0));
         glm::vec3 cameraRight = glm::vec3(cameraMat * glm::vec4(1, 0, 0, 0));
@@ -172,14 +178,21 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
         if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
             cam.transform().moveBy(-cameraSpeed * cameraUp);
 
+        float cameraRotateSpeed = 3.0 * deltaTime;
+        bool changeCamera = true;
         if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-            cam.transform().rotateEulerAnglesBy(0, cameraSpeed, 0);
-        if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-            cam.transform().rotateEulerAnglesBy(0, -cameraSpeed, 0);
-        if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-            cam.transform().rotateEulerAnglesBy(-cameraSpeed, 0, 0);
-        if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-            cam.transform().rotateEulerAnglesBy(cameraSpeed, 0, 0);
+            cameraAngleY += cameraRotateSpeed;
+        else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+            cameraAngleY -= cameraRotateSpeed;
+        else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+            cameraAngleX -= cameraRotateSpeed;
+        else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+            cameraAngleX += cameraRotateSpeed;
+        else
+            changeCamera = false;
+
+        if (changeCamera)
+            cam.transform().setEulerAngles(cameraAngleX, cameraAngleY, 0);
 
         if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
             if (glIsEnabled(GL_FRAMEBUFFER_SRGB))

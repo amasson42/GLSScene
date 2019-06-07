@@ -14,7 +14,8 @@ namespace GLS {
     _name("empty_node"),
     _transform(),
     _parent(nullptr), _childs(),
-    _camera(nullptr), _renderables()
+    _camera(nullptr), _renderables(),
+    _active(true)
     {
 
     }
@@ -23,7 +24,8 @@ namespace GLS {
     _name(copy._name),
     _transform(copy._transform),
     _parent(nullptr), _childs(),
-    _camera(copy._camera), _renderables(copy._renderables)
+    _camera(copy._camera), _renderables(copy._renderables),
+    _active(copy._active)
     {
         for (size_t i = 0; i < copy._childs.size(); i++)
             addChildNode(std::make_shared<Node>(*copy._childs[i]));
@@ -39,6 +41,7 @@ namespace GLS {
         _parent = nullptr;
         _camera = copy._camera;
         _renderables = copy._renderables;
+        _active = copy._active;
         for (size_t i = 0; i < copy._childs.size(); i++)
             addChildNode(std::make_shared<Node>(*copy._childs[i]));
         return *this;
@@ -85,6 +88,7 @@ namespace GLS {
             return getTransformMatrix();
     }
 
+
     // Hierarchy
     
     const std::vector<std::shared_ptr<Node> >& Node::childNodes() {
@@ -129,6 +133,14 @@ namespace GLS {
     
     // Node functionalities
     
+    bool Node::isActive() const {
+        return _active;
+    }
+
+    void Node::setActive(bool active) {
+        _active = active;
+    }
+
     const std::vector<std::shared_ptr<IRenderable> >& Node::renderables() const {
         return _renderables;
     }
@@ -193,6 +205,8 @@ namespace GLS {
     }
 
     void Node::getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix) {
+        if (!_active)
+            return;
         glm::mat4 mat = parentMatrix * getTransformMatrix();
         if (_light != nullptr)
             container.push_back(_light->transformedBy(mat));
@@ -201,27 +215,29 @@ namespace GLS {
         }
     }
     
-    void Node::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
+    void Node::renderInContext(Scene& scene, RenderUniforms uniforms) {
+        if (!_active)
+            return;
         _transform.updateMatrix();
-        RenderUniforms nodeUniforms(uniforms);
-        nodeUniforms.model = uniforms.model * getTransformMatrix();
+        uniforms.model = uniforms.model * getTransformMatrix();
         for (size_t i = 0; i < _childs.size(); i++) {
-            _childs[i]->renderInContext(scene, nodeUniforms);
+            _childs[i]->renderInContext(scene, uniforms);
         }
         for (size_t i = 0; i < _renderables.size(); i++) {
-            _renderables[i]->renderInContext(scene, nodeUniforms);
+            _renderables[i]->renderInContext(scene, uniforms);
         }
     }
     
-    void Node::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+    void Node::renderInDepthContext(Scene& scene, RenderUniforms uniforms) {
+        if (!_active)
+            return;
         _transform.updateMatrix();
-        RenderUniforms nodeUniforms(uniforms);
-        nodeUniforms.model = uniforms.model * getTransformMatrix();
+        uniforms.model = uniforms.model * getTransformMatrix();
         for (size_t i = 0; i < _childs.size(); i++) {
-            _childs[i]->renderInDepthContext(scene, nodeUniforms);
+            _childs[i]->renderInDepthContext(scene, uniforms);
         }
         for (size_t i = 0; i < _renderables.size(); i++) {
-            _renderables[i]->renderInDepthContext(scene, nodeUniforms);
+            _renderables[i]->renderInDepthContext(scene, uniforms);
         }
     }
 

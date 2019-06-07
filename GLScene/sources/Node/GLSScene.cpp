@@ -47,6 +47,10 @@ namespace GLS {
         return *this;
     }
 
+    void Scene::setSize(glm::vec2 size) {
+        _size = size;
+    }
+
     glm::vec2 Scene::getSize() const {
         return _size;
     }

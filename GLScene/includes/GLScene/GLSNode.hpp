@@ -17,13 +17,14 @@ namespace GLS {
         
         std::string _name;
         Transform _transform;
-        
+
         Node *_parent;
         std::vector<std::shared_ptr<Node> > _childs;
-        
+
         std::shared_ptr<Camera> _camera;
         std::shared_ptr<Light> _light;
         std::vector<std::shared_ptr<IRenderable> > _renderables;
+        bool _active;
         
 
     public:
@@ -63,10 +64,13 @@ namespace GLS {
         
         // Node functionalities
         
+        bool isActive() const;
+        void setActive(bool active);
+
         const std::vector<std::shared_ptr<IRenderable> >& renderables() const;
         void addRenderable(std::shared_ptr<IRenderable> renderable);
         void removeRenderableIndex(size_t i);
-        
+    
         std::pair<glm::vec3, glm::vec3> getBounds() const;
         
         void loadMeshFromFile(std::string path);
@@ -79,9 +83,9 @@ namespace GLS {
         std::shared_ptr<Light> light();
         void setLight(std::shared_ptr<Light> light);
         void getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix);
-        
-        void renderInContext(Scene& scene, const RenderUniforms& uniforms);
-        void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
+
+        void renderInContext(Scene& scene, RenderUniforms uniforms);
+        void renderInDepthContext(Scene& scene, RenderUniforms uniforms);
 
     };
     
