@@ -16,7 +16,7 @@ namespace GLS {
     class VoxelChunk : public IRenderable {
     
     public:
-        static const int chunkSize = 16;
+        static const int chunkSize = 16; // min = 2
         static const int chunkBlockCount = chunkSize * chunkSize * chunkSize;
         static int indexOfBlock(int x, int y, int z);
         static std::tuple<int, int, int> coordinatesOfBlock(int i);
@@ -65,10 +65,12 @@ namespace GLS {
         bool isSurrounded() const; // all adjacent are full on the edge
 
         void setAdjacentChunks(std::array<std::weak_ptr<VoxelChunk>, 6> adjChunks);
-        std::weak_ptr<VoxelChunk> adjacentChunk(int edgeIndex);
+        std::shared_ptr<VoxelChunk> adjacentChunk(int edgeIndex);
+        std::array<std::shared_ptr<VoxelChunk>, 6> adjacentChunks();
 
-        // TODO: allow the update of a small part of the chunk and add the possibility to update the target part of the buffer with glBufferSubData
+        // TODO: add the possibility to update the target part of the buffer with glBufferSubData
         void calculBlockAdjacence();
+        void calculBlockAdjacence(int x, int y, int z);
 
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
 

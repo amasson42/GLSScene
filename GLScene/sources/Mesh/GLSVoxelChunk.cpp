@@ -211,71 +211,117 @@ namespace GLS {
         _adjChunks = adjChunks;
     }
 
-    std::weak_ptr<VoxelChunk> VoxelChunk::adjacentChunk(int edgeIndex) {
-        return _adjChunks[edgeIndex];
+    std::shared_ptr<VoxelChunk> VoxelChunk::adjacentChunk(int edgeIndex) {
+        return _adjChunks[edgeIndex].expired() ? nullptr : _adjChunks[edgeIndex].lock();
+    }
+
+    std::array<std::shared_ptr<VoxelChunk>, 6> VoxelChunk::adjacentChunks() {
+        std::array<std::shared_ptr<VoxelChunk>, 6> adj;
+        for (int i = 0; i < 6; i++)
+            adj[i] = _adjChunks[i].expired() ? nullptr : _adjChunks[i].lock();
+        return adj;
+    }
+
+    static int _calculBlockAdjacence(const VoxelChunk& chunk, int x, int y, int z, const std::array<std::shared_ptr<VoxelChunk>, 6>& adjChunks) {
+        if (chunk.blockIdAt(x, y, z) == 0)
+            return 0;
+        
+        int adj = 0;
+        if (x >= VoxelChunk::chunkSize - 1) {
+            if (adjChunks[0] == nullptr || adjChunks[0]->blockIdAt(0, y, z) == 0)
+                adj |= (1 << 0);
+        } else if (chunk.blockIdAt(x + 1, y, z) == 0)
+            adj |= (1 << 0);
+        
+        if (x <= 0) {
+            if (adjChunks[1] == nullptr || adjChunks[1]->blockIdAt(VoxelChunk::chunkSize - 1, y, z) == 0)
+                adj |= (1 << 1);
+        } else if (chunk.blockIdAt(x - 1, y, z) == 0)
+            adj |= (1 << 1);
+
+        if (y >= VoxelChunk::chunkSize - 1) {
+            if (adjChunks[2] == nullptr || adjChunks[2]->blockIdAt(x, 0, z) == 0)
+                adj |= (1 << 2);
+        } else if (chunk.blockIdAt(x, y + 1, z) == 0)
+            adj |= (1 << 2);
+        
+        if (y <= 0) {
+            if (adjChunks[3] == nullptr || adjChunks[3]->blockIdAt(x, VoxelChunk::chunkSize - 1, z) == 0)
+                adj |= (1 << 3);
+        } else if (chunk.blockIdAt(x, y - 1, z) == 0)
+            adj |= (1 << 3);
+
+        if (z >= VoxelChunk::chunkSize - 1) {
+            if (adjChunks[4] == nullptr || adjChunks[4]->blockIdAt(x, y, 0) == 0)
+                adj |= (1 << 4);
+        } else if (chunk.blockIdAt(x, y, z + 1) == 0)
+            adj |= (1 << 4);
+        
+        if (z <= 0) {
+            if (adjChunks[5] == nullptr || adjChunks[5]->blockIdAt(x, y, VoxelChunk::chunkSize - 1) == 0)
+                adj |= (1 << 5);
+        } else if (chunk.blockIdAt(x, y, z - 1) == 0)
+            adj |= (1 << 5);
+
+        return adj;
     }
 
     void VoxelChunk::calculBlockAdjacence() {
-        std::array<std::shared_ptr<VoxelChunk>, 6> adjChunks;
-        for (int i = 0; i < 6; i++)
-            adjChunks[i] = _adjChunks[i].expired() ? nullptr : _adjChunks[i].lock();
+        std::array<std::shared_ptr<VoxelChunk>, 6> adjChunks = adjacentChunks();
 
         for (int x = 0; x < chunkSize; x++)
             for (int y = 0; y < chunkSize; y++)
                 for (int z = 0; z < chunkSize; z++) {
-
-                    int blockId = blockIdAt(x, y, z);
-                    if (blockId != 0) {
-
-                        int adj = 0;
-
-                        // +x | -x | +y | -y | +z | -z
-                        //  0 |  1 |  2 |  3 |  4 |  5
-
-                        if (x >= chunkSize - 1) {
-                            if (adjChunks[0] == nullptr || adjChunks[0]->blockIdAt(0, y, z) == 0)
-                                adj |= (1 << 0);
-                        } else if (blockIdAt(x + 1, y, z) == 0)
-                            adj |= (1 << 0);
-                        
-                        if (x <= 0) {
-                            if (adjChunks[1] == nullptr || adjChunks[1]->blockIdAt(chunkSize - 1, y, z) == 0)
-                                adj |= (1 << 1);
-                        } else if (blockIdAt(x - 1, y, z) == 0)
-                            adj |= (1 << 1);
-
-                        if (y >= chunkSize - 1) {
-                            if (adjChunks[2] == nullptr || adjChunks[2]->blockIdAt(x, 0, z) == 0)
-                                adj |= (1 << 2);
-                        } else if (blockIdAt(x, y + 1, z) == 0)
-                            adj |= (1 << 2);
-                        
-                        if (y <= 0) {
-                            if (adjChunks[3] == nullptr || adjChunks[3]->blockIdAt(x, chunkSize - 1, z) == 0)
-                                adj |= (1 << 3);
-                        } else if (blockIdAt(x, y - 1, z) == 0)
-                            adj |= (1 << 3);
-
-                        if (z >= chunkSize - 1) {
-                            if (adjChunks[4] == nullptr || adjChunks[4]->blockIdAt(x, y, 0) == 0)
-                                adj |= (1 << 4);
-                        } else if (blockIdAt(x, y, z + 1) == 0)
-                            adj |= (1 << 4);
-                        
-                        if (z <= 0) {
-                            if (adjChunks[5] == nullptr || adjChunks[5]->blockIdAt(x, y, chunkSize - 1) == 0)
-                                adj |= (1 << 5);
-                        } else if (blockIdAt(x, y, z - 1) == 0)
-                            adj |= (1 << 5);
-                        
-                        _blockIds[indexOfBlock(x, y, z)] = blockId | (adj << 16);
-
-                    } else {
-                        
-                        _blockIds[indexOfBlock(x, y, z)] = 0;
-
-                    }
+                    _blockIds[indexOfBlock(x, y, z)] = blockIdAt(x, y, z) | (_calculBlockAdjacence(*this, x, y, z, adjChunks) << 16);
                 }
+    }
+
+    void VoxelChunk::calculBlockAdjacence(int x, int y, int z) {
+        std::array<std::shared_ptr<VoxelChunk>, 6> adjChunks = adjacentChunks();
+
+        _calculBlockAdjacence(*this, x, y, z, adjChunks);
+        if (x == 0) {
+            if (adjChunks[1] != nullptr)
+                _calculBlockAdjacence(*adjChunks[1].get(), chunkSize - 1, y, z, adjChunks[1]->adjacentChunks());
+        } else {
+            _calculBlockAdjacence(*this, x - 1, y, z, adjChunks);
+        }
+
+        if (x == chunkSize - 1) {
+            if (adjChunks[0] != nullptr)
+                _calculBlockAdjacence(*adjChunks[0].get(), 0, y, z, adjChunks[0]->adjacentChunks());
+        } else {
+            _calculBlockAdjacence(*this, x + 1, y, z, adjChunks);
+        }
+
+        if (y == 0) {
+            if (adjChunks[3] != nullptr)
+                _calculBlockAdjacence(*adjChunks[3].get(), x, chunkSize - 1, z, adjChunks[3]->adjacentChunks());
+        } else {
+            _calculBlockAdjacence(*this, x, y - 1, z, adjChunks);
+        }
+
+        if (y == chunkSize - 1) {
+            if (adjChunks[2] != nullptr)
+                _calculBlockAdjacence(*adjChunks[2].get(), x, 0, z, adjChunks[2]->adjacentChunks());
+        } else {
+            _calculBlockAdjacence(*this, x, y + 1, z, adjChunks);
+        }
+
+        if (z == 0) {
+            if (adjChunks[5] != nullptr)
+                _calculBlockAdjacence(*adjChunks[5].get(), x, y, chunkSize - 1, adjChunks[5]->adjacentChunks());
+        } else {
+            _calculBlockAdjacence(*this, x, y, z - 1, adjChunks);
+        }
+
+        if (z == chunkSize - 1) {
+            if (adjChunks[4] != nullptr)
+                _calculBlockAdjacence(*adjChunks[4].get(), x, y, 0, adjChunks[4]->adjacentChunks());
+        } else {
+            _calculBlockAdjacence(*this, x, y, z + 1, adjChunks);
+        }
+
     }
 
     std::pair<glm::vec3, glm::vec3> VoxelChunk::getBounds(glm::mat4 transform) const {

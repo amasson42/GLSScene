@@ -158,7 +158,7 @@ void updateSceneVoxelProcedural(double et, double dt) {
                     chunkDirection /= length;
                     glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
                     float cosangle = glm::dot(chunkDirection, cameraDirection);
-                    a = cosangle > cos(1.2 * camera->fov * camera->aspect / 2);
+                    a = cosangle > cos(1.3 * camera->fov * camera->aspect / 2);
                 }
                 chunkNode->setActive(a);
             }
