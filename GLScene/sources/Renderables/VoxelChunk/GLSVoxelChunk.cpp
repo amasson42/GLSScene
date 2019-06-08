@@ -80,7 +80,7 @@ namespace GLS {
         return blockIdAt(std::get<0>(coord), std::get<1>(coord), std::get<2>(coord));
     }
 
-    bool _checkIsEmpty(int *blockIds) {
+    static bool _checkIsEmpty(int *blockIds) {
         for (int i = 0; i < VoxelChunk::chunkBlockCount; i++) {
             if ((blockIds[i] & 0xFFFF) != 0)
                 return false;
@@ -88,7 +88,7 @@ namespace GLS {
         return true;
     }
 
-    bool _checkFullEdge_px(int *blockIds) {
+    static bool _checkFullEdge_px(int *blockIds) {
         for (int i = 0; i < VoxelChunk::chunkSize; i++)
             for (int j = 0; j < VoxelChunk::chunkSize; j++)
                 if ((blockIds[VoxelChunk::indexOfBlock(VoxelChunk::chunkSize - 1, i, j)]) == 0)
@@ -96,7 +96,7 @@ namespace GLS {
         return true;
     }
 
-    bool _checkFullEdge_nx(int *blockIds) {
+    static bool _checkFullEdge_nx(int *blockIds) {
         for (int i = 0; i < VoxelChunk::chunkSize; i++)
             for (int j = 0; j < VoxelChunk::chunkSize; j++)
                 if ((blockIds[VoxelChunk::indexOfBlock(0, i, j)]) == 0)
@@ -104,7 +104,7 @@ namespace GLS {
         return true;
     }
 
-    bool _checkFullEdge_py(int *blockIds) {
+    static bool _checkFullEdge_py(int *blockIds) {
         for (int i = 0; i < VoxelChunk::chunkSize; i++)
             for (int j = 0; j < VoxelChunk::chunkSize; j++)
                 if ((blockIds[VoxelChunk::indexOfBlock(i, VoxelChunk::chunkSize - 1, j)]) == 0)
@@ -112,7 +112,7 @@ namespace GLS {
         return true;
     }
 
-    bool _checkFullEdge_ny(int *blockIds) {
+    static bool _checkFullEdge_ny(int *blockIds) {
         for (int i = 0; i < VoxelChunk::chunkSize; i++)
             for (int j = 0; j < VoxelChunk::chunkSize; j++)
                 if ((blockIds[VoxelChunk::indexOfBlock(i, 0, j)]) == 0)
@@ -120,7 +120,7 @@ namespace GLS {
         return true;
     }
 
-    bool _checkFullEdge_pz(int *blockIds) {
+    static bool _checkFullEdge_pz(int *blockIds) {
         for (int i = 0; i < VoxelChunk::chunkSize; i++)
             for (int j = 0; j < VoxelChunk::chunkSize; j++)
                 if ((blockIds[VoxelChunk::indexOfBlock(i, j, VoxelChunk::chunkSize - 1)]) == 0)
@@ -128,7 +128,7 @@ namespace GLS {
         return true;
     }
 
-    bool _checkFullEdge_nz(int *blockIds) {
+    static bool _checkFullEdge_nz(int *blockIds) {
         for (int i = 0; i < VoxelChunk::chunkSize; i++)
             for (int j = 0; j < VoxelChunk::chunkSize; j++)
                 if ((blockIds[VoxelChunk::indexOfBlock(i, j, 0)]) == 0)
