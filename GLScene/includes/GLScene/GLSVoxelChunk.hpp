@@ -20,6 +20,7 @@ namespace GLS {
         static const int chunkBlockCount = chunkSize * chunkSize * chunkSize;
         static int indexOfBlock(int x, int y, int z);
         static std::tuple<int, int, int> coordinatesOfBlock(int i);
+        static int opposedFace(int f);
 
     protected:
 

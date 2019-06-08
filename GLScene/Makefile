@@ -45,7 +45,7 @@ $(OBJS)/%.o: %.cpp
 	clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $<
 
 clean:
-	rm -fr $(O_FILES) $(OBJS)
+	rm -fr $(OBJS)
 
 fclean: clean
 	rm -f $(NAME).dylib

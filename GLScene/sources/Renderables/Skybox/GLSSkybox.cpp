@@ -100,79 +100,9 @@ namespace GLS {
         glDeleteTextures(1, &_textureid);
     }
 
-    void Skybox::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
-        return;
-        (void)scene;
-        glDepthFunc(GL_LEQUAL);
-        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramSkybox();
-        program->use();
-        glm::mat4 view = glm::mat4(glm::mat3(uniforms.view));
-        glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(uniforms.projection));
-        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(view));
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, _textureid);
-        glUniform1i(program->getLocation("skybox"), 0);
-
-        glBindVertexArray(Skybox::_cubebuffer);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-
-        glDepthFunc(GL_LESS);
-    }
-
-        // if (texture_diffuse) {
-        //     glActiveTexture(GL_TEXTURE0);
-        //     glBindTexture(GL_TEXTURE_2D, texture_diffuse->buffer());
-        //     glUniform1i(program->getLocation("texture_diffuse"), 0);
-        //     texturebitmask |= (1 << 0);
-        //     glm::mat3 mat = diffuse_transform.matrix();
-        //     glUniformMatrix3fv(program->getLocation("diffuse_transform"), 1, GL_FALSE, glm::value_ptr(mat));
-        // }
-    
     std::pair<glm::vec3, glm::vec3> Skybox::getBounds(glm::mat4 transform) const {
         (void)transform;
         return std::pair<glm::vec3, glm::vec3>(glm::vec3(-1), glm::vec3(1));
-    }
-
-    std::string Skybox::shaderUniformsVertex() {
-        return
-        "layout (location = 0) in vec3 position;\n"
-        "\n"
-        "uniform mat4 u_mat_projection;\n"
-        "uniform mat4 u_mat_view;\n"
-        "\n"
-        "out VS_OUT {\n"
-        "    vec3 uv;\n"
-        "} vs_out;\n"
-        "\n";
-    }
-
-    std::string Skybox::shaderUniformsGeometry() {
-        return
-        "uniform mat4 u_mat_projection;\n"
-        "uniform mat4 u_mat_view;\n"
-        "\n"
-        "in VS_OUT {\n"
-        "    vec3 uv;\n"
-        "} gs_in;\n"
-        "\n"
-        "out VS_OUT {\n"
-        "    vec3 uv;\n"
-        "} gs_out;\n"
-        "\n";
-    }
-
-    std::string Skybox::shaderUniformsFragment() {
-        return
-        "in VS_OUT {\n"
-        "    vec3 uv;\n"
-        "} fs_in;\n"
-        "\n"
-        "uniform samplerCube u_skybox;\n"
-        "\n"
-        "out vec4 FragColor;\n"
-        "\n";
     }
 
 }
