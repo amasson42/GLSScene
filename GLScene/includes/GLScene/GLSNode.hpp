@@ -18,7 +18,7 @@ namespace GLS {
         std::string _name;
         Transform _transform;
 
-        Node *_parent;
+        std::weak_ptr<Node> _parent;
         std::vector<std::shared_ptr<Node> > _childs;
 
         std::shared_ptr<Camera> _camera;
@@ -56,9 +56,10 @@ namespace GLS {
         std::shared_ptr<Node> childNodeAt(size_t i) const;
 
         void addChildNode(std::shared_ptr<Node> node);
-        void removeChildNode(Node *node);
+        void removeChildNode(std::shared_ptr<Node> node);
+        void removeChildNode(Node* node);
         
-        bool hasParentNode(Node* node) const;
+        bool hasParentNode(std::shared_ptr<Node> node) const;
         void removeFromParent();
         
         

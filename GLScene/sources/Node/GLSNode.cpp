@@ -13,7 +13,7 @@ namespace GLS {
     Node::Node() :
     _name("empty_node"),
     _transform(),
-    _parent(nullptr), _childs(),
+    _parent(), _childs(),
     _camera(nullptr), _renderables(),
     _active(true)
     {
@@ -23,7 +23,7 @@ namespace GLS {
     Node::Node(const Node& copy) :
     _name(copy._name),
     _transform(copy._transform),
-    _parent(nullptr), _childs(),
+    _parent(), _childs(),
     _camera(copy._camera), _renderables(copy._renderables),
     _active(copy._active)
     {
@@ -38,7 +38,6 @@ namespace GLS {
     Node& Node::operator=(const Node& copy) {
         _name = copy._name;
         _transform = copy._transform;
-        _parent = nullptr;
         _camera = copy._camera;
         _renderables = copy._renderables;
         _active = copy._active;
@@ -75,17 +74,17 @@ namespace GLS {
     }
 
     const glm::mat4 Node::getWorldTransformMatrix() {
-        if (_parent)
-            return _parent->getWorldTransformMatrix() * getTransformMatrix();
-        else
+        if (_parent.expired())
             return getTransformMatrix();
+        else
+            return _parent.lock()->getWorldTransformMatrix() * getTransformMatrix();
     }
     
     const glm::mat4 Node::getWorldTransformMatrix() const {
-        if (_parent)
-            return _parent->getWorldTransformMatrix() * getTransformMatrix();
-        else
+        if (_parent.expired())
             return getTransformMatrix();
+        else
+            return _parent.lock()->getWorldTransformMatrix() * getTransformMatrix();
     }
 
 
@@ -102,31 +101,36 @@ namespace GLS {
     }
     
     void Node::addChildNode(std::shared_ptr<Node> node) {
-        if (node->hasParentNode(this) || this->hasParentNode(node.get()))
-            return;
+        node->removeFromParent();
         _childs.push_back(node);
     }
     
-    void Node::removeChildNode(Node *node) {
+    void Node::removeChildNode(std::shared_ptr<Node> node) {
+        removeChildNode(node.get());
+    }
+
+    void Node::removeChildNode(Node* node) {
         std::vector<std::shared_ptr<Node> >::iterator it;
         for (it = _childs.begin(); it != _childs.end(); ++it)
-            if (&(**it) == node)
-                return static_cast<void>(_childs.erase(it));
+            if (it->get() == node) {
+                (*it)->_parent = std::weak_ptr<Node>();
+                _childs.erase(it);
+                return;
+            }
     }
     
-    bool Node::hasParentNode(Node* node) const {
-        if (_parent == nullptr) {
+    bool Node::hasParentNode(std::shared_ptr<Node> node) const {
+        if (_parent.expired())
             return false;
-        } else if (_parent == node) {
+        std::shared_ptr<Node> parent = _parent.lock();
+        if (parent.get() == node.get())
             return true;
-        } else {
-            return _parent->hasParentNode(node);
-        }
+        return parent->hasParentNode(node);
     }
 
     void Node::removeFromParent() {
-        if (_parent) {
-            _parent->removeChildNode(this);
+        if (!_parent.expired()) {
+            _parent.lock()->removeChildNode(this);
         }
     }
     
