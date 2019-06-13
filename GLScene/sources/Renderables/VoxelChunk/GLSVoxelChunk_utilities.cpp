@@ -84,7 +84,41 @@ namespace GLS {
         return true;
     }
 
-    void VoxelChunk::setBlockIdAt(int x, int y, int z, int id) {
+    void VoxelChunk::setBlockIdAt(int x, int y, int z, int id, bool sureInside) {
+        
+        if (!sureInside) {
+            if (x < 0) {
+                if (!_adjChunks[1].expired())
+                    _adjChunks[1].lock()->setBlockIdAt(x + chunkSize, y, z, id, false);
+                return;
+            }
+            if (x >= chunkSize) {
+                if (!_adjChunks[0].expired())
+                    _adjChunks[0].lock()->setBlockIdAt(x - chunkSize, y, z, id, false);
+                return;
+            }
+            if (y < 0) {
+                if (!_adjChunks[3].expired())
+                    _adjChunks[3].lock()->setBlockIdAt(x, y + chunkSize, z, id, false);
+                return;
+            }
+            if (y >= chunkSize) {
+                if (!_adjChunks[2].expired())
+                    _adjChunks[2].lock()->setBlockIdAt(x, y - chunkSize, z, id, false);
+                return;
+            }
+            if (z < 0) {
+                if (!_adjChunks[5].expired())
+                    _adjChunks[5].lock()->setBlockIdAt(x, y, z + chunkSize, id, false);
+                return;
+            }
+            if (z >= chunkSize) {
+                if (!_adjChunks[4].expired())
+                    _adjChunks[4].lock()->setBlockIdAt(x, y, z - chunkSize, id, false);
+                return;
+            }
+        }
+
         _blockIds[indexOfBlock(x, y, z)] = id;
 
         if (id == 0 && !_isEmpty)

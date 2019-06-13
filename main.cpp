@@ -172,14 +172,14 @@ int launch(std::vector<std::string>& args) {
 }
 
 void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
-    static float cameraAngleX = 0;
-    static float cameraAngleY = 0;
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (!scene.cameraNode().expired()) {
         GLS::Node& cam(*scene.cameraNode().lock());
+        static float cameraAngleX = cam.transform().eulerAngles().x;
+        static float cameraAngleY = cam.transform().eulerAngles().y;
 
-        float cameraSpeed = 15.0 * deltaTime;
+        float cameraSpeed = 40.0 * deltaTime;
         glm::mat4 cameraMat = cam.getWorldTransformMatrix();
         glm::vec3 cameraFront = glm::vec3(cameraMat * glm::vec4(0, 0, -1, 0));
         glm::vec3 cameraRight = glm::vec3(cameraMat * glm::vec4(1, 0, 0, 0));

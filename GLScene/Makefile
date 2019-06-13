@@ -36,10 +36,10 @@ all:
 	make $(NAME).dylib
 
 $(NAME).dylib: $(O_FILES)
-	$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
+	@$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
 
 $(NAME).a: $(O_FILES)
-	ar rcs $@ $^
+	@ar rcs $@ $^
 
 $(OBJS)/%.o: %.cpp
 	clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $<

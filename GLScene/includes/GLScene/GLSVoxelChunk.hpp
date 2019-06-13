@@ -57,7 +57,7 @@ namespace GLS {
 
         int blockIdAt(int x, int y, int z) const;
         int blockIdAt(std::tuple<int, int, int> coord) const;
-        void setBlockIdAt(int x, int y, int z, int id);
+        void setBlockIdAt(int x, int y, int z, int id, bool sureInside = true);
 
         int blockAdjAt(int x, int y, int z) const;
 

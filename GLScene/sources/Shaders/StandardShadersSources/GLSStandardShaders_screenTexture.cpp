@@ -31,16 +31,16 @@ namespace GLS {
         + Framebuffer::shaderUniformsFragment() +
 
         // Normal
-        // "void main() {\n"
-        // "   FragColor = texture(screen_texture, fs_in.uv);\n"
-        // "}\n"
-
-        // Grayscale
         "void main() {\n"
         "   FragColor = texture(screen_texture, fs_in.uv);\n"
-        "   float average = (FragColor.r + FragColor.g + FragColor.b) / 3.0;\n"
-        "   FragColor = vec4(vec3(average), 1.0);\n"
         "}\n"
+
+        // Grayscale
+        // "void main() {\n"
+        // "   FragColor = texture(screen_texture, fs_in.uv);\n"
+        // "   float average = (FragColor.r + FragColor.g + FragColor.b) / 3.0;\n"
+        // "   FragColor = vec4(vec3(average), 1.0);\n"
+        // "}\n"
 
         // Kernel effect
         // "void main() {"
@@ -57,11 +57,17 @@ namespace GLS {
         // "       vec2( offset, -offset) " // bottom-right    
         // "   );"
 
-        // // "   float kernel[9] = float[](" // Simple
-        // // "       -1, -1, -1,"
-        // // "       -1,  9, -1,"
-        // // "       -1, -1, -1"
-        // // "   );"
+        // "   float kernel[9] = float[](" // Simple
+        // "       0, 0, 0,"
+        // "       0, 1, 0,"
+        // "       0, 0, 0"
+        // "   );"
+
+        // "   float kernel[9] = float[](" // Simple
+        // "       -1, -1, -1,"
+        // "       -1,  9, -1,"
+        // "       -1, -1, -1"
+        // "   );"
 
         // "   float kernel[9] = float[](" // Edge
         // "       1, 1, 1,"
@@ -69,11 +75,11 @@ namespace GLS {
         // "       1, 1, 1"
         // "   );"
 
-        // // "   float kernel[9] = float[](" // Blur
-        // // "       1.0 / 16, 2.0 / 16, 1.0 / 16,"
-        // // "       2.0 / 16, 4.0 / 16, 2.0 / 16,"
-        // // "       1.0 / 16, 2.0 / 16, 1.0 / 16"
-        // // "   );"
+        // "   float kernel[9] = float[](" // Blur
+        // "       1.0 / 16, 2.0 / 16, 1.0 / 16,"
+        // "       2.0 / 16, 4.0 / 16, 2.0 / 16,"
+        // "       1.0 / 16, 2.0 / 16, 1.0 / 16"
+        // "   );"
 
         // "   vec3 sampleTex[9];"
         // "   for(int i = 0; i < 9; i++)"
@@ -82,7 +88,7 @@ namespace GLS {
         // "   for(int i = 0; i < 9; i++)"
         // "   col += sampleTex[i] * kernel[i];"
         // "   FragColor = vec4(col, 1.0);"
-        // "}" 
+        // "}"
 
         "\n";
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);
