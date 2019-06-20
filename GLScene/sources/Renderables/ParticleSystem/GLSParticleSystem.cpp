@@ -31,7 +31,8 @@ namespace GLS {
     ParticleSystem::ParticleSystem() :
     _glBuffer(0), _glVertexArray(0)
     {
-
+        CLD::GPUDevice device;
+        std::cout << device << std::endl;
     }
 
     ParticleSystem::ParticleSystem(const ParticleSystem& copy) :

@@ -11,13 +11,15 @@ SHELL := /bin/bash
 
 INCLUDES := -I$(INCS) -I$(INCS)/GLScene \
 			`pkg-config glm --cflags-only-I` \
-			`pkg-config assimp --cflags-only-I`
+			`pkg-config assimp --cflags-only-I` \
+			-ICLDevice/includes \
 
 LIBS := -L/usr/lib \
 		-framework OpenCL \
 		-framework OpenGL \
 		`pkg-config --static --libs glm` \
-		`pkg-config --static --libs assimp`
+		`pkg-config --static --libs assimp` \
+		-L CLDevice -lCLDevice
 
 CPP_FILES := $(shell find $(SRCS) -type f -name "*.cpp")
 CPP_DIRS := $(shell find $(SRCS) -depth -type d)
@@ -32,24 +34,35 @@ DEPS := $(O_FILES:.o=.d)
 $(shell mkdir -p $(O_DIRS) $(OBJS))
 
 all:
-	make $(NAME).a
+	make -C CLDevice
+	make lib$(NAME).a
 	make $(NAME).dylib
 
 $(NAME).dylib: $(O_FILES)
 	@$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
 
-$(NAME).a: $(O_FILES)
-	@ar rcs $@ $^
+lib$(NAME).a: $(O_FILES)
+	ar rcs tmp_$@ $^
+	mkdir tmp_libmerge
+	cd tmp_libmerge \
+		&& ar -x ../tmp_$@ \
+		&& ar -x ../CLDevice/libCLDevice.a \
+		&& ar rcs ../$@ *.o
+	rm -fr tmp_libmerge
+	rm -fr tmp_$@
 
 $(OBJS)/%.o: %.cpp
 	clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $<
 
 clean:
 	rm -fr $(OBJS)
+	make -C CLDevice clean
+	rm -fr tmp_*
 
 fclean: clean
 	rm -f $(NAME).dylib
-	rm -f $(NAME).a
+	rm -f lib$(NAME).a
+	make -C CLDevice fclean
 
 re: fclean all
 

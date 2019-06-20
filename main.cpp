@@ -65,14 +65,14 @@ void updateSceneVoxelProcedural(double et, double dt);
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene2;
 // void (*updateScene)(double, double)                                 = updateScene2;
 
-// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene3;
-// void (*updateScene)(double, double)                                 = updateScene3;
+void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene3;
+void (*updateScene)(double, double)                                 = updateScene3;
 
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxel;
 // void (*updateScene)(double, double)                                 = updateSceneVoxel;
 
-void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
-void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
+// void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
 
 bool mustUpdate = true;
 
@@ -179,7 +179,7 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
         static float cameraAngleX = cam.transform().eulerAngles().x;
         static float cameraAngleY = cam.transform().eulerAngles().y;
 
-        float cameraSpeed = 40.0 * deltaTime;
+        float cameraSpeed = 5.0 * deltaTime;
         glm::mat4 cameraMat = cam.getWorldTransformMatrix();
         glm::vec3 cameraFront = glm::vec3(cameraMat * glm::vec4(0, 0, -1, 0));
         glm::vec3 cameraRight = glm::vec3(cameraMat * glm::vec4(1, 0, 0, 0));

@@ -3,15 +3,19 @@ NAME = game
 
 CC = clang++
 
-FRAMEWORKS = -lm -framework OpenGL \
+FRAMEWORKS = -lm \
+		-framework OpenGL \
+		-framework OpenCL \
 		`pkg-config --static --libs glfw3` \
 		`pkg-config --static --libs glm` \
 		`pkg-config --static --libs assimp` \
 		`pkg-config glfw3 --cflags-only-I` \
 		`pkg-config glm --cflags-only-I` \
 		`pkg-config assimp --cflags-only-I` \
+		-L GLScene -lGLScene
 
-INCLUDES = -I GLScene/includes
+INCLUDES = -I GLScene/includes \
+			-I GLScene/CLDevice/includes \
 
 FLAGS = -std=c++11 -Wall -Werror -Wextra -g
 SRCS = *.cpp
@@ -31,8 +35,7 @@ $(NAME):
 	$(CC) $(FLAGS) \
 		$(FRAMEWORKS) \
 		$(INCLUDES) \
-		$(SRCS) -o game \
-		GLScene/GLScene.a
+		$(SRCS) -o game
 
 clean:
 	rm -fr $(NAME).dSYM
