@@ -16,6 +16,7 @@ namespace GLS {
 
         "layout (location = 0) in vec3 position;\n"
         "layout (location = 1) in vec3 velocity;\n"
+        "layout (location = 2) in vec3 color;\n"
         "\n"
         "uniform mat4 u_mat_projection;\n"
         "uniform mat4 u_mat_view;\n"
@@ -24,11 +25,15 @@ namespace GLS {
         "out PARTICLE {\n"
         "    vec4 position;\n"
         "    vec2 uv;\n"
+        "    vec3 velocity;\n"
+        "    vec3 color;\n"
         "} vs_out;\n"
         "\n"
 
         "void main() {\n"
         "    vs_out.position = u_mat_projection * u_mat_view * u_mat_model * vec4(position, 1.0);\n"
+        "    vs_out.velocity = velocity;\n"
+        "    vs_out.color = color;\n"
         "    gl_Position = vs_out.position;\n"
         "}\n"
         "\n";
@@ -45,11 +50,15 @@ namespace GLS {
         "in PARTICLE {\n"
         "    vec4 position;\n"
         "    vec2 uv;\n"
+        "    vec3 velocity;\n"
+        "    vec3 color;\n"
         "} gs_in[];\n"
         "\n"
         "out PARTICLE {\n"
         "    vec4 position;\n"
         "    vec2 uv;\n"
+        "    vec3 velocity;\n"
+        "    vec3 color;\n"
         "} gs_out;\n"
         "\n"
         "void main() {\n"
@@ -83,6 +92,8 @@ namespace GLS {
         "in PARTICLE {\n"
         "    vec4 position;\n"
         "    vec2 uv;\n"
+        "    vec3 velocity;\n"
+        "    vec3 color;\n"
         "} fs_in;\n"
         "\n"
         "uniform vec3 particle_color;\n"
@@ -90,7 +101,7 @@ namespace GLS {
         "out vec4 FragColor;\n"
 
         "void main() {\n"
-        "    FragColor = vec4(particle_color, 1);\n"
+        "    FragColor = vec4(fs_in.color + fs_in.velocity, 1);\n"
         "}\n"
 
         "\n";

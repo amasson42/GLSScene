@@ -1,9 +1,9 @@
 
 #include "GLScene.hpp"
 
-std::shared_ptr<GLS::Node> mainChunkNode = nullptr;
-std::shared_ptr<GLS::VoxelChunk> mainChunk = nullptr;
-std::array<std::weak_ptr<GLS::VoxelChunk>, 6> neighbourgsChunks;
+static std::shared_ptr<GLS::Node> mainChunkNode = nullptr;
+static std::shared_ptr<GLS::VoxelChunk> mainChunk = nullptr;
+static std::array<std::weak_ptr<GLS::VoxelChunk>, 6> neighbourgsChunks;
 
 void updateSceneVoxel(double et, double dt) {
     static double removeBlockCD = 1.0;

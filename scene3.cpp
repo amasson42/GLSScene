@@ -5,13 +5,13 @@ float degreeToRadians(float deg) {
     return deg * M_PI / 180.0;
 }
 
-std::shared_ptr<GLS::Node> bigCubeNode = nullptr;
-std::shared_ptr<GLS::Node> lightPivotNode = nullptr;
-std::shared_ptr<GLS::Node> cubesPivotNode = nullptr;
-std::shared_ptr<GLS::InstancedMesh> instancedMeshFloater = nullptr;
+static std::shared_ptr<GLS::Node> bigCubeNode = nullptr;
+static std::shared_ptr<GLS::Node> lightPivotNode = nullptr;
+static std::shared_ptr<GLS::Node> cubesPivotNode = nullptr;
+static std::shared_ptr<GLS::InstancedMesh> instancedMeshFloater = nullptr;
+static std::weak_ptr<GLS::ParticleSystem> particleSystem;
 
 void updateScene3(double et, double dt) {
-    (void)dt;
     if (bigCubeNode != nullptr) {
         bigCubeNode->transform().setEulerAngles(glm::vec3(sin(et * 0.3) * 0.5, et * 0.2, 0));
     }
@@ -32,6 +32,9 @@ void updateScene3(double et, double dt) {
             instancedMeshFloater->setInstanceTransformAt(i, t);
         }
         instancedMeshFloater->updateTransformsBufferValues();
+    }
+    if (!particleSystem.expired()) {
+        particleSystem.lock()->animateWithDeltaTime(dt);
     }
 }
 
@@ -79,7 +82,7 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
     auto smallCubeMaterial = std::make_shared<GLS::Material>();
     smallCubeMaterial->diffuse = glm::vec3(0.8, 0.2, 0.3);
     smallCubeMesh->setMaterial(smallCubeMaterial);
-    auto cubesMesh = std::make_shared<GLS::InstancedMesh>(*smallCubeMesh, 10000);
+    auto cubesMesh = std::make_shared<GLS::InstancedMesh>(*smallCubeMesh, 100);
     cubesMesh->setMaterial(smallCubeMaterial);
     for (size_t i = 0; i < cubesMesh->instancesCount(); i++) {
         float angle = randFloat() * M_PI * 2;
@@ -145,8 +148,10 @@ void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
     pointlightNode->transform().rotateEulerAnglesBy(0, 0.2, 0);
 
     std::shared_ptr<GLS::Node> particleNode = std::make_shared<GLS::Node>();
-    std::shared_ptr<GLS::ParticleSystem> particleSystem = std::make_shared<GLS::ParticleSystem>();
-    particleNode->addRenderable(particleSystem);
+    std::shared_ptr<GLS::ParticleSystem> ps = std::make_shared<GLS::ParticleSystem>();
+    ps->generateBuffers();
+    ps->initAnimation();
+    particleNode->addRenderable(ps);
     scene.rootNode()->addChildNode(particleNode);
-
+    particleSystem = ps;
 }

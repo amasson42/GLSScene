@@ -13,6 +13,7 @@ namespace GLS {
     void glsInit() {
         Framebuffer::_createRectBuffer();
         Skybox::_createCubeBuffer();
+        ParticleSystem::_createDevice();
         
         ShaderProgram::standardShaderProgramMesh();
         ShaderProgram::standardShaderProgramMeshSimpleColor();
@@ -29,6 +30,7 @@ namespace GLS {
     void glsDeinit() {
         Framebuffer::_destroyRectBuffer();
         Skybox::_destroyCubeBuffer();
+        ParticleSystem::_destroyDevice();
 
         ShaderProgram::_standardShaderProgramMesh = nullptr;
         ShaderProgram::_standardShaderProgramMeshSimpleColor = nullptr;

@@ -25,28 +25,30 @@ namespace GLS {
         }
         glBindBuffer(GL_ARRAY_BUFFER, _glBuffer);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(0 * sizeof(GLfloat)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)(0 * sizeof(GLfloat)));
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(3 * sizeof(GLfloat)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)(3 * sizeof(GLfloat)));
         glEnableVertexAttribArray(1);
 
-        // update values
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)(6 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(2);
 
-        const int particleCount = 1000000;
-        Particle *particles = new Particle[particleCount];
-        for (int i = 0; i < particleCount; i++) {
-            glm::vec3 pos(0);
-            pos.x = static_cast<float>(random() % 1000) / 500 - 1;
-            pos.y = static_cast<float>(random() % 1000) / 500 - 1;
-            pos.z = static_cast<float>(random() % 1000) / 500 - 1;
-            particles[i] = Particle(pos, glm::vec3(0));
-        }
-
-        glBindVertexArray(_glVertexArray);
         glBindBuffer(GL_ARRAY_BUFFER, _glBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * particleCount, particles, GL_STREAM_DRAW);
-        delete [] particles;
+        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 9 * _properties.count, NULL, GL_STREAM_DRAW);
+
+        CLD::Buffer clBuffer = _device->createGLBuffer(_glBuffer, &_clBufferIndex);
+        if (_clBufferIndex < 0)
+            throw std::exception(); // TODO: throw can't create buffer exception
+
+        CLD::Kernel *initKernel = _device->kernel(_initKernelIndex);
+        initKernel->setArgument(0, clBuffer);
+        initKernel->setArgument(1, static_cast<int>(_properties.count));
+
+        CLD::Kernel *updateKernel = _device->kernel(_updateKernelIndex);
+        updateKernel->setArgument(0, clBuffer);
+        updateKernel->setArgument(1, static_cast<int>(_properties.count));
+
     }
 
     void ParticleSystem::deleteBuffers() {
@@ -56,10 +58,13 @@ namespace GLS {
         if (_glVertexArray != 0)
             glDeleteVertexArrays(1, &_glVertexArray);
         _glVertexArray = 0;
+        if (_clBufferIndex >= 0)
+            _device->destroyBuffer(_clBufferIndex);
+        _clBufferIndex = -1;
     }
 
     bool ParticleSystem::bufferGenerated() const {
-        return _glBuffer != 0 && _glVertexArray != 0;
+        return _glBuffer != 0 && _glVertexArray != 0 && _clBufferIndex >= 0;
     }
 
 }

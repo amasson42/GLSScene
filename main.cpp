@@ -53,11 +53,13 @@ void loadScene2(GLS::Scene& scene, const std::vector<std::string>& args);
 void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args);
 void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args);
 void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>& args);
+void loadSceneParticuleSystem(GLS::Scene& scene, const std::vector<std::string>& args);
 
 void updateScene2(double et, double dt);
 void updateScene3(double et, double dt);
 void updateSceneVoxel(double et, double dt);
 void updateSceneVoxelProcedural(double et, double dt);
+void updateSceneParticuleSystem(double et, double dt);
 
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene1;
 // void (*updateScene)(double, double)                                 = nullptr;
@@ -73,6 +75,9 @@ void (*updateScene)(double, double)                                 = updateScen
 
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
 // void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
+
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneParticuleSystem;
+// void (*updateScene)(double, double)                                 = updateSceneParticuleSystem;
 
 bool mustUpdate = true;
 
@@ -117,8 +122,8 @@ int launch(std::vector<std::string>& args) {
 
     int win_buffer_width, win_buffer_height;
     glfwGetFramebufferSize(window, &win_buffer_width, &win_buffer_height);
-    GLS::Scene scene(glm::vec2(win_buffer_width, win_buffer_height));
-    loadScene(scene, args);
+    std::shared_ptr<GLS::Scene> scene = std::make_shared<GLS::Scene>(glm::vec2(win_buffer_width, win_buffer_height));
+    loadScene(*scene, args);
 
     //
 
@@ -134,7 +139,7 @@ int launch(std::vector<std::string>& args) {
         float deltaTime = currentTime - lastTimeUpdate;
         fpsDisplayCD -= deltaTime;
         if (true)
-            processInput(window, deltaTime, scene);
+            processInput(window, deltaTime, *scene);
         
         if (mustUpdate && updateScene != nullptr)
             updateScene(currentTime, deltaTime);
@@ -142,13 +147,13 @@ int launch(std::vector<std::string>& args) {
         /* do some drawing */
 
         if (1) {
-            scene.renderInContext(facebook);
+            scene->renderInContext(facebook);
             facebook->unbind();
             glClearColor(1, 1, 1, 1);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            facebook->renderInContext(scene, GLS::RenderUniforms());
+            facebook->renderInContext(*scene, GLS::RenderUniforms());
         } else {
-            scene.renderInContext();
+            scene->renderInContext();
         }
 
         if (fpsDisplayCD <= 0) {
@@ -157,7 +162,7 @@ int launch(std::vector<std::string>& args) {
             glfwSetWindowTitle(window, fpsss.str().c_str());
             fpsDisplayCD = 0.5;
             glfwGetFramebufferSize(window, &win_buffer_width, &win_buffer_height);
-            scene.setSize(glm::vec2(win_buffer_width, win_buffer_height));
+            scene->setSize(glm::vec2(win_buffer_width, win_buffer_height));
             facebook = std::make_shared<GLS::Framebuffer>(win_buffer_width, win_buffer_height);
         }
 
@@ -166,6 +171,7 @@ int launch(std::vector<std::string>& args) {
     }
 
     std::cout << "Ending..." << std::endl;
+    scene = nullptr;
     GLS::glsDeinit();
     glfwTerminate(); // free all used memory of glfw
     return (EXIT_SUCCESS);

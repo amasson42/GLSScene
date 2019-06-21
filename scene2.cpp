@@ -209,8 +209,8 @@ class Human {
 
 };
 
-std::shared_ptr<Human> hooman = nullptr;
-std::shared_ptr<GLS::Animator<HumanAnimationState> > hoomanAnimator = nullptr;
+static std::shared_ptr<Human> hooman = nullptr;
+static std::shared_ptr<GLS::Animator<HumanAnimationState> > hoomanAnimator = nullptr;
 
 void loadScene2(GLS::Scene& scene, const std::vector<std::string>& args) {
 

@@ -30,10 +30,9 @@ namespace GLS {
         uniforms.sendUniformsToShaderProgram(program);
 
         glUniform3f(program->getLocation("particle_color"), 1, 0, 0);
-        
-        glPointSize(5);
+
         glBindVertexArray(_glVertexArray);
-        glDrawArrays(GL_POINTS, 0, 1000000);
+        glDrawArrays(GL_POINTS, 0, _properties.count);
     }
 
     void ParticleSystem::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
