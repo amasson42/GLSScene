@@ -38,6 +38,7 @@ namespace GLS {
     class ParticleSystem : public IRenderable {
 
         ParticleSystemProperties _properties;
+        std::shared_ptr<Texture> _texture;
 
         GLuint _glBuffer;
         GLuint _glVertexArray;
@@ -68,6 +69,9 @@ namespace GLS {
 
         ParticleSystem& operator=(const ParticleSystem& copy);
 
+
+        void setTexture(std::shared_ptr<Texture> texture);
+        std::shared_ptr<Texture> getTexture() const;
 
         // OpenGL Buffers
 

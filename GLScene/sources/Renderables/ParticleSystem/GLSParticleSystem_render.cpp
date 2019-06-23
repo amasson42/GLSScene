@@ -19,13 +19,17 @@ namespace GLS {
         }
 
         std::shared_ptr<ShaderProgram> program;
-        if (1) {
+        if (_texture == nullptr) {
             program = ShaderProgram::standardShaderProgramDotParticleSystem();
+            program->use();
             glEnable(GL_PROGRAM_POINT_SIZE);
         } else {
             program = ShaderProgram::standardShaderProgramTexturedParticleSystem();
+            program->use();
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, _texture->buffer());
+            glUniform1i(program->getLocation("particle_texture"), 0);
         }
-        program->use();
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);

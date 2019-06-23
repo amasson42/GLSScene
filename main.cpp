@@ -81,6 +81,7 @@ void (*updateScene)(double, double)                                 = updateScen
 
 bool mustUpdate = true;
 
+GLFWwindow *window = nullptr;
 glm::vec2 windowMousePos = glm::vec2(0);
 int win_buffer_width, win_buffer_height;
 
@@ -95,7 +96,7 @@ int launch(std::vector<std::string>& args) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
-    GLFWwindow *window = nullptr; // create a window pointer
+    window = nullptr; // create a window pointer
 
     const int window_width = 1200, window_height = 800;
     window = glfwCreateWindow(window_width, window_height, "openGL", nullptr, nullptr);

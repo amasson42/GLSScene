@@ -39,6 +39,7 @@ namespace GLS {
         Texture(std::string path) throw(CreationException, LoadingException);
         virtual ~Texture();
         
+        // TODO: add sendToShader function
         GLuint buffer() const;
         void setParameter(GLenum pname, GLint param);
         void setParameters(std::vector<GLenum> pnames, std::vector<GLint> params);

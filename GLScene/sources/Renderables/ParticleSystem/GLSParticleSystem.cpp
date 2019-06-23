@@ -40,6 +40,7 @@ namespace GLS {
 
     ParticleSystem::ParticleSystem(ParticleSystemProperties properties) throw(CLD::GPUDevice::BuildProgramException) :
     _properties(properties),
+    _texture(nullptr),
     _glBuffer(0), _glVertexArray(0),
     _clBufferIndex(-1)
     {
@@ -79,6 +80,7 @@ namespace GLS {
     ParticleSystem::ParticleSystem(const ParticleSystem& copy) :
     ParticleSystem(copy._properties)
     {
+        _texture = copy._texture;
         if (copy.bufferGenerated())
             generateBuffers();
     }
@@ -93,9 +95,18 @@ namespace GLS {
         _destroyKernels();
         _properties = copy._properties;
         _createKernels();
+        _texture = copy._texture;
         if (copy.bufferGenerated())
             generateBuffers();
         return *this;
+    }
+
+    void ParticleSystem::setTexture(std::shared_ptr<Texture> texture) {
+        _texture = texture;
+    }
+
+    std::shared_ptr<Texture> ParticleSystem::getTexture() const {
+        return _texture;
     }
 
     std::pair<glm::vec3, glm::vec3> ParticleSystem::getBounds(glm::mat4 transform) const {

@@ -52,7 +52,7 @@ kernel void particlesystem_update(global float *buffer, const unsigned int count
 
         //float3 gravityCenter = (float3)(0, 1, 3);
         float squaredDistance = length(gravityCenter - *position);
-        squaredDistance = squaredDistance;
+        squaredDistance *= squaredDistance;
         if (squaredDistance < 1)
             squaredDistance = 1;
         if (squaredDistance != 0) {

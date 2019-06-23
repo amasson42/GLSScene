@@ -1,10 +1,18 @@
 
+#ifdef __APPLE__
+# define __gl_h_
+# define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
+#endif
+
 #include "GLScene.hpp"
+#include <GLFW/glfw3.h>
 
 static std::weak_ptr<GLS::ParticleSystem> particleSystem;
 static std::shared_ptr<GLS::Node> cameraNode = nullptr;
 static std::shared_ptr<GLS::Node> gravityCenterNode = nullptr;
+static std::shared_ptr<GLS::Texture> particleTexture = nullptr;
 
+extern GLFWwindow *window;
 extern glm::vec2 windowMousePos;
 
 void updateSceneParticuleSystem(double et, double dt) {
@@ -23,6 +31,13 @@ void updateSceneParticuleSystem(double et, double dt) {
         ps->getAnimationKernel()->setArgument(3, gc.x, gc.y, gc.z);
         if (gravityCenterNode != nullptr)
             gravityCenterNode->transform().setPosition(gc);
+
+        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+            ps->setTexture(nullptr);
+        }
+        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+            ps->setTexture(particleTexture);
+        }
     }
 }
 
@@ -42,7 +57,6 @@ void loadSceneParticuleSystem(GLS::Scene& scene, const std::vector<std::string>&
     scene.rootNode()->addChildNode(cameraNode);
 
     GLS::ParticleSystemProperties psProperties;
-    std::cout << "standard particle kernel:" << std::endl << psProperties.kernelSource << std::endl;
     if (args.size() >= 1) {
         if (args[0] != "_") {
             std::ifstream file(args[0]);
@@ -62,13 +76,14 @@ void loadSceneParticuleSystem(GLS::Scene& scene, const std::vector<std::string>&
     }
     if (args.size() >= 3) {
         if (args[2] != "_") {
-            std::shared_ptr<GLS::Texture> particleTexture = std::make_shared<GLS::Texture>(args[2]);
+            particleTexture = std::make_shared<GLS::Texture>(args[2]);
         }
     }
 
     try {
         std::shared_ptr<GLS::Node> particleNode = std::make_shared<GLS::Node>();
         std::shared_ptr<GLS::ParticleSystem> ps = std::make_shared<GLS::ParticleSystem>(psProperties);
+        ps->setTexture(particleTexture);
         ps->generateBuffers();
         ps->initAnimation();
         particleNode->addRenderable(ps);
@@ -79,7 +94,7 @@ void loadSceneParticuleSystem(GLS::Scene& scene, const std::vector<std::string>&
     }
 
     gravityCenterNode = std::make_shared<GLS::Node>();
-    gravityCenterNode->addRenderable(GLS::Mesh::sphere(0.1));
+    gravityCenterNode->addRenderable(GLS::Mesh::sphere(0.5));
     scene.rootNode()->addChildNode(gravityCenterNode);
 
 }
