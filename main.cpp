@@ -67,8 +67,8 @@ void updateSceneParticuleSystem(double et, double dt);
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene2;
 // void (*updateScene)(double, double)                                 = updateScene2;
 
-void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene3;
-void (*updateScene)(double, double)                                 = updateScene3;
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadScene3;
+// void (*updateScene)(double, double)                                 = updateScene3;
 
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxel;
 // void (*updateScene)(double, double)                                 = updateSceneVoxel;
@@ -76,10 +76,13 @@ void (*updateScene)(double, double)                                 = updateScen
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
 // void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
 
-// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneParticuleSystem;
-// void (*updateScene)(double, double)                                 = updateSceneParticuleSystem;
+void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneParticuleSystem;
+void (*updateScene)(double, double)                                 = updateSceneParticuleSystem;
 
 bool mustUpdate = true;
+
+glm::vec2 windowMousePos = glm::vec2(0);
+int win_buffer_width, win_buffer_height;
 
 int launch(std::vector<std::string>& args) {
     (void)args;
@@ -94,8 +97,8 @@ int launch(std::vector<std::string>& args) {
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
     GLFWwindow *window = nullptr; // create a window pointer
 
-    const int win_width = 1200, win_height = 800;
-    window = glfwCreateWindow(win_width, win_height, "openGL", nullptr, nullptr);
+    const int window_width = 1200, window_height = 800;
+    window = glfwCreateWindow(window_width, window_height, "openGL", nullptr, nullptr);
     if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -120,7 +123,6 @@ int launch(std::vector<std::string>& args) {
     std::cout << "shaders compiled" << std::endl;
     // create simple mesh
 
-    int win_buffer_width, win_buffer_height;
     glfwGetFramebufferSize(window, &win_buffer_width, &win_buffer_height);
     std::shared_ptr<GLS::Scene> scene = std::make_shared<GLS::Scene>(glm::vec2(win_buffer_width, win_buffer_height));
     loadScene(*scene, args);
@@ -180,6 +182,7 @@ int launch(std::vector<std::string>& args) {
 void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+    
     if (!scene.cameraNode().expired()) {
         GLS::Node& cam(*scene.cameraNode().lock());
         static float cameraAngleX = cam.transform().eulerAngles().x;
@@ -219,17 +222,23 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
 
         if (changeCamera)
             cam.transform().setEulerAngles(cameraAngleX, cameraAngleY, 0);
-
-        if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-            if (glIsEnabled(GL_FRAMEBUFFER_SRGB))
-                glDisable(GL_FRAMEBUFFER_SRGB);
-            else
-                glEnable(GL_FRAMEBUFFER_SRGB);
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-            mustUpdate = !mustUpdate;
-        }
-
     }
+
+    if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+        if (glIsEnabled(GL_FRAMEBUFFER_SRGB))
+            glDisable(GL_FRAMEBUFFER_SRGB);
+        else
+            glEnable(GL_FRAMEBUFFER_SRGB);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+        mustUpdate = false;
+    }
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+        mustUpdate = true;
+    }
+
+    double mouseX, mouseY;
+    glfwGetCursorPos(window, &mouseX, &mouseY);
+    windowMousePos = glm::vec2(2, -2) * glm::vec2(mouseX, mouseY) / glm::vec2(win_buffer_width / 2, win_buffer_height / 2) + glm::vec2(-1, 1);
 }

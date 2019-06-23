@@ -28,6 +28,12 @@ namespace GLS {
         }
     }
 
+    CLD::Kernel *ParticleSystem::getInitKernel() {
+        if (_initKernelIndex < 0)
+            return NULL;
+        return _device->kernel(_initKernelIndex);
+    }
+
     CLD::Kernel *ParticleSystem::getAnimationKernel() {
         if (_updateKernelIndex < 0)
             return NULL;

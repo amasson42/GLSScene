@@ -25,17 +25,23 @@ namespace GLS {
         }
         glBindBuffer(GL_ARRAY_BUFFER, _glBuffer);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)(0 * sizeof(GLfloat)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(0 * sizeof(GLfloat)));
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)(3 * sizeof(GLfloat)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(3 * sizeof(GLfloat)));
         glEnableVertexAttribArray(1);
 
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)(6 * sizeof(GLfloat)));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(6 * sizeof(GLfloat)));
         glEnableVertexAttribArray(2);
 
+        glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(9 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(3);
+
+        glVertexAttribPointer(4, 1, GL_FLOAT, GL_FALSE, sizeof(Particle), (void*)(10 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(4);
+
         glBindBuffer(GL_ARRAY_BUFFER, _glBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 9 * _properties.count, NULL, GL_STREAM_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * _properties.count, NULL, GL_STREAM_DRAW);
 
         CLD::Buffer clBuffer = _device->createGLBuffer(_glBuffer, &_clBufferIndex);
         if (_clBufferIndex < 0)

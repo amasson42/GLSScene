@@ -22,6 +22,8 @@ namespace GLS {
         glm::vec3 position;
         glm::vec3 velocity;
         glm::vec3 color;
+        float size;
+        float age;
 
         Particle();
     };
@@ -84,6 +86,8 @@ namespace GLS {
 
         // Animating
 
+        // TODO: create a new IInterface for animated objects
+        CLD::Kernel *getInitKernel();
         CLD::Kernel *getAnimationKernel();
         virtual void initAnimation();
         virtual void animateWithDeltaTime(double deltaTime);

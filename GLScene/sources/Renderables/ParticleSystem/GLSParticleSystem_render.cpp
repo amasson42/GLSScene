@@ -19,7 +19,12 @@ namespace GLS {
         }
 
         std::shared_ptr<ShaderProgram> program;
-        program = ShaderProgram::standardShaderProgramDotParticleSystem();
+        if (1) {
+            program = ShaderProgram::standardShaderProgramDotParticleSystem();
+            glEnable(GL_PROGRAM_POINT_SIZE);
+        } else {
+            program = ShaderProgram::standardShaderProgramTexturedParticleSystem();
+        }
         program->use();
 
         glEnable(GL_DEPTH_TEST);
@@ -28,8 +33,6 @@ namespace GLS {
         glDisable(GL_STENCIL_TEST);
 
         uniforms.sendUniformsToShaderProgram(program);
-
-        glUniform3f(program->getLocation("particle_color"), 1, 0, 0);
 
         glBindVertexArray(_glVertexArray);
         glDrawArrays(GL_POINTS, 0, _properties.count);
