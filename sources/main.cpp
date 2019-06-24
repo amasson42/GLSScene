@@ -6,20 +6,7 @@
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#include <iostream>
-#include <sstream>
-
-#ifdef __APPLE__
-# define __gl_h_
-# define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
-#endif
-
-#include "GLScene.hpp"
-#include <vector>
-
-#include <GLFW/glfw3.h>
-#include <cmath>
-#include <stdlib.h>
+#include "sceneTest.hpp"
 
 void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene);
 int launch(std::vector<std::string>& modelNames);
@@ -73,11 +60,11 @@ void updateSceneParticuleSystem(double et, double dt);
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxel;
 // void (*updateScene)(double, double)                                 = updateSceneVoxel;
 
-void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
-void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
+// void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
 
-// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneParticuleSystem;
-// void (*updateScene)(double, double)                                 = updateSceneParticuleSystem;
+void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneParticuleSystem;
+void (*updateScene)(double, double)                                 = updateSceneParticuleSystem;
 
 bool mustUpdate = true;
 
