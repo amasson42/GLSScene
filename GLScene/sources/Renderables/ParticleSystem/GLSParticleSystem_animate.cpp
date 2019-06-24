@@ -14,6 +14,7 @@ namespace GLS {
         if (bufferGenerated()) {
             CLD::Kernel *ik = _device->kernel(_initKernelIndex);
             _device->commandQueue(_commandQueueIndex)->runNDRangeKernel(*ik, _properties.count);
+            _device->commandQueue(_commandQueueIndex)->finish();
         }
     }
 
@@ -22,8 +23,6 @@ namespace GLS {
             CLD::Kernel *uk = _device->kernel(_updateKernelIndex);
             uk->setArgument(2, deltaTime);
             _device->commandQueue(_commandQueueIndex)->runNDRangeKernel(*uk, _properties.count);
-
-            // TODO: do it at the end of all scene calls
             _device->commandQueue(_commandQueueIndex)->finish();
         }
     }

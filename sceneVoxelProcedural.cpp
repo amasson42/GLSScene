@@ -47,19 +47,18 @@ class VoxelWorld {
                     _voxels[wx][wy][wz] = chunk;
                 } // wz
 
-        std::cout << "c" << std::endl;
         std::weak_ptr<GLS::VoxelChunk> nochunk;
         for (int x = 0; x < worldSize; x++)
             for (int y = 0; y < worldHeight; y++)
                 for (int z = 0; z < worldSize; z++) {
-                    std::array<std::weak_ptr<GLS::VoxelChunk>, 6> adjacents = {
+                    std::array<std::weak_ptr<GLS::VoxelChunk>, 6> adjacents = {{
                         x == worldSize - 1 ? nochunk : _voxels[x + 1][y][z],
                         x == 0 ? nochunk : _voxels[x - 1][y][z],
                         y == worldHeight - 1 ? nochunk : _voxels[x][y + 1][z],
                         y == 0 ? nochunk : _voxels[x][y - 1][z],
                         z == worldSize - 1 ? nochunk : _voxels[x][y][z + 1],
                         z == 0 ? nochunk : _voxels[x][y][z - 1]
-                    };
+                    }};
                     _voxels[x][y][z]->setAdjacentChunks(adjacents);
                 }
     }

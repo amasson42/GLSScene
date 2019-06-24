@@ -73,11 +73,11 @@ void updateSceneParticuleSystem(double et, double dt);
 // void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxel;
 // void (*updateScene)(double, double)                                 = updateSceneVoxel;
 
-// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
-// void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
+void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneVoxelProcedural;
+void (*updateScene)(double, double)                                 = updateSceneVoxelProcedural;
 
-void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneParticuleSystem;
-void (*updateScene)(double, double)                                 = updateSceneParticuleSystem;
+// void (*loadScene)(GLS::Scene&, const std::vector<std::string>&)     = loadSceneParticuleSystem;
+// void (*updateScene)(double, double)                                 = updateSceneParticuleSystem;
 
 bool mustUpdate = true;
 
@@ -241,5 +241,5 @@ void processInput(GLFWwindow *window, float deltaTime, GLS::Scene& scene) {
 
     double mouseX, mouseY;
     glfwGetCursorPos(window, &mouseX, &mouseY);
-    windowMousePos = glm::vec2(2, -2) * glm::vec2(mouseX, mouseY) / glm::vec2(win_buffer_width / 2, win_buffer_height / 2) + glm::vec2(-1, 1);
+    windowMousePos = glm::vec2(1, -1) * glm::vec2(mouseX, mouseY) / glm::vec2(win_buffer_width / 2, win_buffer_height / 2) + glm::vec2(-1, 1);
 }

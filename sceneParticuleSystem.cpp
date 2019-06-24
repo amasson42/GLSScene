@@ -23,10 +23,7 @@ void updateSceneParticuleSystem(double et, double dt) {
         ps->animateWithDeltaTime(dt);
         glm::vec3 gc(0);
         if (cameraNode != nullptr) {
-            glm::mat4 mvp = glm::inverse(cameraNode->getWorldTransformMatrix());
-            if (cameraNode->camera() != nullptr)
-                mvp = cameraNode->camera()->projectionMatrix() * mvp;
-            gc = glm::vec3(glm::inverse(mvp) * glm::vec4(2, 2, 1, 1) * glm::vec4(windowMousePos.x, windowMousePos.y, 0.2, 1));
+            gc = glm::vec3(cameraNode->getWorldTransformMatrix() * glm::vec4(windowMousePos.x, windowMousePos.y, -10, 1));
         }
         ps->getAnimationKernel()->setArgument(3, gc.x, gc.y, gc.z);
         if (gravityCenterNode != nullptr)
@@ -94,7 +91,9 @@ void loadSceneParticuleSystem(GLS::Scene& scene, const std::vector<std::string>&
     }
 
     gravityCenterNode = std::make_shared<GLS::Node>();
-    gravityCenterNode->addRenderable(GLS::Mesh::sphere(0.5));
+    gravityCenterNode->addRenderable(GLS::Mesh::sphere(0.05));
     scene.rootNode()->addChildNode(gravityCenterNode);
+
+    GLS::Particle();
 
 }

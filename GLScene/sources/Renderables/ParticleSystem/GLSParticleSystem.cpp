@@ -25,9 +25,16 @@ namespace GLS {
 
     void ParticleSystem::_createDevice() {
         _device = std::make_shared<CLD::GPUDevice>();
-        std::cout << "ParticuleSystem: Context creation: " << _device->createContext(true) << std::endl;
+        if (_device->createContext(true) < 0) {
+            std::cout << "ParticuleSystem FAILED TO INITIALIZE" << std::endl;
+            return;
+        }
         _device->createCommandQueue(&_commandQueueIndex);
-        std::cout << "ParticuleSystem: queueIndex = " << _commandQueueIndex << std::endl;
+        if (_commandQueueIndex < 0) {
+            _device->destroyContext();
+            std::cout << "ParticuleSystem FAILED TO INITIALIZE" << std::endl;
+            return;
+        }
     }
 
     void ParticleSystem::_destroyDevice() {
@@ -118,6 +125,12 @@ namespace GLS {
     count(1000000)
     {
         kernelSource = "\n"
+        "#define position(k) buffer[p_i + 0 + k]\n"
+        "#define velocity(k) buffer[p_i + 3 + k]\n"
+        "#define color(k)    buffer[p_i + 6 + k]\n"
+        "#define size        buffer[p_i + 9]\n"
+        "#define age         buffer[p_i + 10]\n"
+        "\n"
         "static float random1f(float x) {\n"
         "    float v = (1.0 + (sin(x) * 2935867.354)) / 2.0;\n"
         "    return (v - floor(v));\n"
@@ -127,37 +140,25 @@ namespace GLS {
         "    unsigned int i = get_global_id(0);\n"
         "    if (i < count) {\n"
         "        int p_i = i * " + std::to_string(sizeof(Particle) / sizeof(float)) + ";\n"
-        "        global float3 *position = (global float3*)(buffer + p_i + 0);\n"
-        "        global float3 *velocity = (global float3*)(buffer + p_i + 3);\n"
-        "        global float3 *color = (global float3*)(buffer + p_i + 6);\n"
-        "        global float *size = (global float*)(buffer + p_i + 9);\n"
-        "        global float *age = (global float*)(buffer + p_i + 10);\n"
-
-        // position
-        "        position->x = 0;\n"
-        "        position->y = 0;\n"
-        "        position->z = 0;\n"
-
+        "\n"
+        "        position(0) = 0;\n"
+        "        position(1) = 0;\n"
+        "        position(2) = 0;\n"
+        "\n"
         "        float magnitude = random1f(i + 0.1);\n"
         "        float angleX = 2 * M_PI * random1f(i + random1f(magnitude + 4.2));\n"
         "        float angleY = 2 * M_PI * random1f(i + random1f(magnitude + 13.37));\n"
-
-        // velocity
-        "        velocity->x = magnitude * sin(angleY) * cos(angleX);\n"
-        "        velocity->y = magnitude * sin(angleX);\n"
-        "        velocity->z = magnitude * cos(angleY) * cos(angleX);\n"
-
-        // color
-        "        color->x = 0.5;\n"
-        "        color->y = 0.5;\n"
-        "        color->z = 0.5;\n"
-
-        // size
-        "       *size = 1;\n"
-
-        // age
-        "       *age = 3 * ((i / (float)count) - 1);\n"
-
+        "\n"
+        "        velocity(0) = magnitude * sin(angleY) * cos(angleX);\n"
+        "        velocity(1) = magnitude * sin(angleX);\n"
+        "        velocity(2) = magnitude * cos(angleY) * cos(angleX);\n"
+        "\n"
+        "        color(0) = 0.5;\n"
+        "        color(1) = 0.5;\n"
+        "        color(2) = 0.5;\n"
+        "\n"
+        "       size = 1;\n"
+        "       age = 3 * ((i / (float)count) - 1);\n"
         "    }\n"
         "    else printf(\"init out... bye !\\n\");\n"
         "}\n"
@@ -166,30 +167,25 @@ namespace GLS {
         "    unsigned int i = get_global_id(0);\n"
         "    if (i < count) {\n"
         "        int p_i = i * " + std::to_string(sizeof(Particle) / sizeof(float)) + ";\n"
-        "        global float3 *position = (global float3*)(buffer + p_i + 0);\n"
-        "        global float3 *velocity = (global float3*)(buffer + p_i + 3);\n"
-        "        global float3 *color = (global float3*)(buffer + p_i + 6);\n"
-        "        global float *size = (global float*)(buffer + p_i + 9);\n"
-        "        global float *age = (global float*)(buffer + p_i + 10);\n"
-
-        "        position->x += velocity->x * (float)dt;\n"
-        "        position->y += velocity->y * (float)dt;\n"
-        "        position->z += velocity->z * (float)dt;\n"
-        "        *age += (float)dt;\n"
-
-        "        color->x = cos(position->x) * 0.5 + 0.5;\n"
-        "        color->y = cos(position->y) * 0.5 + 0.5;\n"
-        "        color->z = sin(position->z) * 0.5 + 0.5;\n"
-
-        "        *size = (*age + 1);\n"
-
-        "        if (*age >= 3) {\n"
-        "            *age -= 3;\n"
-        "            position->x = 0;\n"
-        "            position->y = 0;\n"
-        "            position->z = 0;\n"
+        "        float fdt = (float)dt;\n"
+        "\n"
+        "        position(0) += velocity(0) * fdt;\n"
+        "        position(1) += velocity(1) * fdt;\n"
+        "        position(2) += velocity(2) * fdt;\n"
+        "        age += fdt;\n"
+        "\n"
+        "        color(0) = cos(position(0)) * 0.5 + 0.5;\n"
+        "        color(1) = cos(position(1)) * 0.5 + 0.5;\n"
+        "        color(2) = sin(position(2)) * 0.5 + 0.5;\n"
+        "\n"
+        "        size = (age + 1);\n"
+        "\n"
+        "        if (age >= 3) {\n"
+        "            age -= 3;\n"
+        "            position(0) = 0;\n"
+        "            position(1) = 0;\n"
+        "            position(2) = 0;\n"
         "        }\n"
-
         "    }\n"
         "}\n";
     }

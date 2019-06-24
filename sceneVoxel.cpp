@@ -142,12 +142,12 @@ void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
     chunkMesh->setAdjacentChunks(adjChunks);
     chunkMesh->calculBlockAdjacence();
     std::weak_ptr<GLS::VoxelChunk> nochunk;
-    adjChunks[0].lock()->setAdjacentChunks({nochunk, chunkMesh, nochunk, nochunk, nochunk, nochunk});
-    adjChunks[1].lock()->setAdjacentChunks({chunkMesh, nochunk, nochunk, nochunk, nochunk, nochunk});
-    adjChunks[2].lock()->setAdjacentChunks({nochunk, nochunk, nochunk, chunkMesh, nochunk, nochunk});
-    adjChunks[3].lock()->setAdjacentChunks({nochunk, nochunk, chunkMesh, nochunk, nochunk, nochunk});
-    adjChunks[4].lock()->setAdjacentChunks({nochunk, nochunk, nochunk, nochunk, nochunk, chunkMesh});
-    adjChunks[5].lock()->setAdjacentChunks({nochunk, nochunk, nochunk, nochunk, chunkMesh, nochunk});
+    adjChunks[0].lock()->setAdjacentChunks({{nochunk, chunkMesh, nochunk, nochunk, nochunk, nochunk}});
+    adjChunks[1].lock()->setAdjacentChunks({{chunkMesh, nochunk, nochunk, nochunk, nochunk, nochunk}});
+    adjChunks[2].lock()->setAdjacentChunks({{nochunk, nochunk, nochunk, chunkMesh, nochunk, nochunk}});
+    adjChunks[3].lock()->setAdjacentChunks({{nochunk, nochunk, chunkMesh, nochunk, nochunk, nochunk}});
+    adjChunks[4].lock()->setAdjacentChunks({{nochunk, nochunk, nochunk, nochunk, nochunk, chunkMesh}});
+    adjChunks[5].lock()->setAdjacentChunks({{nochunk, nochunk, nochunk, nochunk, chunkMesh, nochunk}});
     for (int i = 0; i < 6; i++) {
         adjChunks[i].lock()->calculBlockAdjacence();
         adjChunks[i].lock()->generateBuffers();
