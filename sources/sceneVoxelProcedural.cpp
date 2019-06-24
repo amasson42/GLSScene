@@ -1,5 +1,5 @@
 
-#include "GLScene.hpp"
+#include "sceneTest.hpp"
 
 #define BLOCK_AIR 0
 #define BLOCK_BEDROCK 1
@@ -21,8 +21,6 @@
 #define BLOCK_GOLD 35
 #define BLOCK_TNT 92
 
-void initNoise();
-double noise(double x, double y, double z);
 double noise(glm::vec3 v) {
     return noise(v.x, v.y, v.z);
 }
@@ -193,8 +191,8 @@ class VoxelWorld {
 static std::shared_ptr<GLS::Node> worldNode = nullptr;
 static std::shared_ptr<GLS::Node> cameraNode = nullptr;
 
-void updateSceneVoxelProcedural(double et, double dt) {
-    (void)dt;
+void updateSceneVoxelProcedural(const AppEnv& env) {
+    double et = env.currentTime;
     static double lt = et;
 
     if (et - lt >= 0.3) {
@@ -224,22 +222,23 @@ void updateSceneVoxelProcedural(double et, double dt) {
     }
 }
 
-void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>& args) {
+void loadSceneVoxelProcedural(const AppEnv& env) {
 
-    initNoise();
+    GLS::Scene& scene(*env.scene);
+
+    initNoise(time(NULL));
 
     auto texturedMaterial = std::make_shared<GLS::Material>();
     texturedMaterial->specular = glm::vec3(0.1);
     texturedMaterial->shininess = 64;
     try {
-        std::string filePath = args.size() >= 1 ? args[0] : "../textures/ft_vox_textures.png";
+        std::shared_ptr<std::string> textureName = env.getArgument("-texture");
+        std::string filePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures.png";
         texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(filePath);
         texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         texturedMaterial->texture_mask = texturedMaterial->texture_diffuse;
         texturedMaterial->shininess = 0;
-        if (args.size() >= 2)
-            texturedMaterial->texture_normal = std::make_shared<GLS::Texture>(args[1]);
     } catch (std::exception& e) {
         std::cout << "error " << e.what() << std::endl;
     }
@@ -277,6 +276,4 @@ void loadSceneVoxelProcedural(GLS::Scene& scene, const std::vector<std::string>&
     world.embedInNode(worldNode);
     scene.rootNode()->addChildNode(worldNode);
 
-    updateSceneVoxelProcedural(-0.5, 0.0);
-    updateSceneVoxelProcedural(0, 0.5);
 }

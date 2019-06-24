@@ -1,11 +1,13 @@
 
-#include "GLScene.hpp"
+#include "sceneTest.hpp"
 
 static std::shared_ptr<GLS::Node> mainChunkNode = nullptr;
 static std::shared_ptr<GLS::VoxelChunk> mainChunk = nullptr;
 static std::array<std::weak_ptr<GLS::VoxelChunk>, 6> neighbourgsChunks;
 
-void updateSceneVoxel(double et, double dt) {
+void updateSceneVoxel(const AppEnv& env) {
+    double et = env.currentTime;
+    double dt = env.deltaTime;
     static double removeBlockCD = 1.0;
     static int i = 0;
 
@@ -36,19 +38,23 @@ void updateSceneVoxel(double et, double dt) {
     }
 }
 
-void loadSceneVoxel(GLS::Scene& scene, const std::vector<std::string>& args) {
+void loadSceneVoxel(const AppEnv& env) {
+
+    GLS::Scene& scene(*env.scene);
 
     auto texturedMaterial = std::make_shared<GLS::Material>();
     texturedMaterial->specular = glm::vec3(0.1);
     texturedMaterial->shininess = 64;
     try {
-        if (args.size() >= 1) {
-            texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(args[0]);
+        std::shared_ptr<std::string> diffuseName = env.getArgument("-diffuse");
+        if (diffuseName != nullptr) {
+            texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(*diffuseName);
             texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
-        if (args.size() >= 2)
-            texturedMaterial->texture_normal = std::make_shared<GLS::Texture>(args[1]);
+        std::shared_ptr<std::string> normalName = env.getArgument("-normal");
+        if (normalName != nullptr)
+            texturedMaterial->texture_normal = std::make_shared<GLS::Texture>(*normalName);
     } catch (std::exception& e) {
         std::cout << "error " << e.what() << std::endl;
     }

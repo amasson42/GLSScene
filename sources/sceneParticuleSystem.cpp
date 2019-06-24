@@ -1,22 +1,15 @@
 
-#ifdef __APPLE__
-# define __gl_h_
-# define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
-#endif
-
-#include "GLScene.hpp"
-#include <GLFW/glfw3.h>
+#include "sceneTest.hpp"
 
 static std::weak_ptr<GLS::ParticleSystem> particleSystem;
 static std::shared_ptr<GLS::Node> cameraNode = nullptr;
 static std::shared_ptr<GLS::Node> gravityCenterNode = nullptr;
 static std::shared_ptr<GLS::Texture> particleTexture = nullptr;
 
-extern GLFWwindow *window;
-extern glm::vec2 windowMousePos;
+void updateSceneParticuleSystem(const AppEnv& env) {
+    double dt = env.deltaTime;
 
-void updateSceneParticuleSystem(double et, double dt) {
-    (void)et;
+    glm::vec2 windowMousePos = env.mouseContextPosition();
 
     if (!particleSystem.expired()) {
         std::shared_ptr<GLS::ParticleSystem> ps = particleSystem.lock();
@@ -29,18 +22,18 @@ void updateSceneParticuleSystem(double et, double dt) {
         if (gravityCenterNode != nullptr)
             gravityCenterNode->transform().setPosition(gc);
 
-        if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+        if (glfwGetKey(env.window, GLFW_KEY_T) == GLFW_PRESS) {
             ps->setTexture(nullptr);
         }
-        if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+        if (glfwGetKey(env.window, GLFW_KEY_Y) == GLFW_PRESS) {
             ps->setTexture(particleTexture);
         }
     }
 }
 
-void loadSceneParticuleSystem(GLS::Scene& scene, const std::vector<std::string>& args) {
+void loadSceneParticuleSystem(const AppEnv& env) {
 
-    (void)args;
+    GLS::Scene& scene(*env.scene);
 
     cameraNode = std::make_shared<GLS::Node>();
     {
@@ -54,27 +47,27 @@ void loadSceneParticuleSystem(GLS::Scene& scene, const std::vector<std::string>&
     scene.rootNode()->addChildNode(cameraNode);
 
     GLS::ParticleSystemProperties psProperties;
-    if (args.size() >= 1) {
-        if (args[0] != "_") {
-            std::ifstream file(args[0]);
-            file.seekg(0, file.end);
-            size_t length = file.tellg();
-            file.seekg(0, file.beg);
-            char *buffer = new char[length + 1];
-            file.read(buffer, length);
-            buffer[length] = '\0';
-            psProperties.kernelSource = buffer;
-            delete[] buffer;
-        }
+    std::shared_ptr<std::string> kernelFilename = env.getArgument("-kernel");
+    if (kernelFilename != nullptr) {
+        std::ifstream file(*kernelFilename);
+        file.seekg(0, file.end);
+        size_t length = file.tellg();
+        file.seekg(0, file.beg);
+        char *buffer = new char[length + 1];
+        file.read(buffer, length);
+        buffer[length] = '\0';
+        psProperties.kernelSource = buffer;
+        delete[] buffer;
     }
-    if (args.size() >= 2) {
-        if (args[1] != "_")
-            psProperties.count = atoi(args[1].c_str());
+
+    std::shared_ptr<std::string> particleCount = env.getArgument("-count");
+    if (particleCount != nullptr) {
+        psProperties.count = atoi(particleCount->c_str());
     }
-    if (args.size() >= 3) {
-        if (args[2] != "_") {
-            particleTexture = std::make_shared<GLS::Texture>(args[2]);
-        }
+
+    std::shared_ptr<std::string> textureFilename = env.getArgument("-texture");
+    if (textureFilename != nullptr) {
+        particleTexture = std::make_shared<GLS::Texture>(*textureFilename);
     }
 
     try {

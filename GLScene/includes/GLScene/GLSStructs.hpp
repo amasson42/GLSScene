@@ -14,6 +14,7 @@
 std::ostream& operator<<(std::ostream& stream, glm::mat4 m);
 std::ostream& operator<<(std::ostream& stream, glm::mat3 m);
 std::ostream& operator<<(std::ostream& stream, glm::vec3 v);
+std::ostream& operator<<(std::ostream& stream, glm::vec2 v);
 std::ostream& operator<<(std::ostream& stream, glm::quat q);
 
 namespace GLS {

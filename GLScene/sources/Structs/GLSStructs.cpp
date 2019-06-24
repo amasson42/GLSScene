@@ -27,6 +27,11 @@ std::ostream& operator<<(std::ostream& stream, glm::vec3 v) {
     return stream;
 }
 
+std::ostream& operator<<(std::ostream& stream, glm::vec2 v) {
+    stream << '(' << v.x << ',' << v.y << ')';
+    return stream;
+}
+
 std::ostream& operator<<(std::ostream& stream, glm::quat q) {
     stream << '(' << q.x << ',' << q.y << ',' << q.z << ',' << q.w << ')';
     return stream;

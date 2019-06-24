@@ -34,8 +34,6 @@ namespace GLS {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
 
-        glDisable(GL_STENCIL_TEST);
-
         uniforms.sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_glVertexArray);

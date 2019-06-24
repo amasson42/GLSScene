@@ -1,8 +1,9 @@
 
-#include "GLScene.hpp"
+#include "sceneTest.hpp"
 
-void loadScene1(GLS::Scene& scene, const std::vector<std::string>& args) {
-    (void)args;
+void loadSceneTrash(const AppEnv& env) {
+    GLS::Scene& scene(*env.scene);
+
     std::shared_ptr<GLS::Node> triangleNode = std::make_shared<GLS::Node>();
     triangleNode->setName("triangles");
     {

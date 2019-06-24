@@ -1,5 +1,5 @@
 
-#include "GLScene.hpp"
+#include "sceneTest.hpp"
 
 float degreeToRadians(float deg) {
     return deg * M_PI / 180.0;
@@ -11,7 +11,10 @@ static std::shared_ptr<GLS::Node> cubesPivotNode = nullptr;
 static std::shared_ptr<GLS::InstancedMesh> instancedMeshFloater = nullptr;
 static std::weak_ptr<GLS::ParticleSystem> particleSystem;
 
-void updateScene3(double et, double dt) {
+void updateSceneShadow(const AppEnv& env) {
+    double et = env.currentTime;
+    double dt = env.deltaTime;
+
     if (bigCubeNode != nullptr) {
         bigCubeNode->transform().setEulerAngles(glm::vec3(sin(et * 0.3) * 0.5, et * 0.2, 0));
     }
@@ -42,17 +45,20 @@ float randFloat() {
     return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 }
 
-void loadScene3(GLS::Scene& scene, const std::vector<std::string>& args) {
-    (void)args;
+void loadSceneShadow(const AppEnv& env) {
+
+    GLS::Scene& scene(*env.scene);
 
     auto texturedMaterial = std::make_shared<GLS::Material>();
     texturedMaterial->specular = glm::vec3(0.1);
     texturedMaterial->shininess = 64;
     try {
-        if (args.size() >= 1)
-            texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(args[0]);
-        if (args.size() >= 2)
-            texturedMaterial->texture_normal = std::make_shared<GLS::Texture>(args[1]);
+        std::shared_ptr<std::string> diffuseName = env.getArgument("-diffuse");
+        if (diffuseName != nullptr)
+            texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(*diffuseName);
+        std::shared_ptr<std::string> normalName = env.getArgument("-normal");
+        if (normalName)
+            texturedMaterial->texture_normal = std::make_shared<GLS::Texture>(*normalName);
     } catch (std::exception& e) {
         std::cout << "error " << e.what() << std::endl;
     }
