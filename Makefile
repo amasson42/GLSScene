@@ -22,7 +22,7 @@ INCLUDES =	-I $(INCS) \
 		-I GLScene/includes \
 		-I GLScene/CLDevice/includes \
 
-FLAGS = -std=c++11 -Wall -Werror -Wextra -g
+FLAGS = -std=c++11 -Wall -Werror -Wextra
 
 CPP_FILES = $(shell find $(SRCS) -type f -name *.cpp)
 CPP_DIRS = $(shell find $(SRCS) -depth -type d)
