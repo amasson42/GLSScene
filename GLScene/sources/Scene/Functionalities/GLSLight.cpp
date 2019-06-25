@@ -84,14 +84,10 @@ namespace GLS {
         program->use();
         #ifdef SCHOOL_DUMPS
         glUniformMatrix4fv(program->getLocation("light_casters_vp[" + std::to_string(index) + "]"), 1, GL_FALSE, glm::value_ptr(vp));
-        glBindTexture(GL_TEXTURE_2D, depth_map->texture()->buffer());
-        glActiveTexture(GL_TEXTURE12 + index);
-        glUniform1i(program->getLocation("light_casters_depth_map[" + std::to_string(index) + "]"), 12 + index);
+        depth_map->texture()->sendUniformsToShaderProgram(program, "light_casters_depth_map[" + std::to_string(index) + "]", 12 + index);
         #else
         glUniformMatrix4fv(program->getLocation("light_casters[" + std::to_string(index) + "].vp"), 1, GL_FALSE, glm::value_ptr(vp));
-        glBindTexture(GL_TEXTURE_2D, depth_map->texture()->buffer());
-        glActiveTexture(GL_TEXTURE12 + index);
-        glUniform1i(program->getLocation("light_casters[" + std::to_string(index) + "].depth_map"), 12 + index);
+        depth_map->texture()->sendUniformsToShaderProgram(program, "light_casters[" + std::to_string(index) + "].depth_map", 12 + index);
         #endif
     }
 

@@ -38,14 +38,15 @@ namespace GLS {
         Texture(GLsizei width, GLsizei height, GLint format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE) throw(CreationException);
         Texture(std::string path) throw(CreationException, LoadingException);
         virtual ~Texture();
-        
-        // TODO: add sendToShader function
+
         GLuint buffer() const;
+        void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, std::string uniformName, int textureIndex) const;
         void setParameter(GLenum pname, GLint param);
         void setParameters(std::vector<GLenum> pnames, std::vector<GLint> params);
 
         GLsizei width() const;
         GLsizei height() const;
+
 
     };
     

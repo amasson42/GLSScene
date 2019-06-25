@@ -35,10 +35,7 @@ namespace GLS {
 
         glEnable(GL_DEPTH_TEST | GL_STENCIL_TEST);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, _colorTexture->buffer());
-        glUniform1i(program->getLocation("screen_texture"), 0);
-
+        _colorTexture->sendUniformsToShaderProgram(program, "screen_texture", 0);
         uniforms.sendUniformsToShaderProgram(program);
 
         glBindVertexArray(Framebuffer::_rectbuffer);

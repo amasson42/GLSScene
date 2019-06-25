@@ -26,9 +26,7 @@ namespace GLS {
         } else {
             program = ShaderProgram::standardShaderProgramTexturedParticleSystem();
             program->use();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, _texture->buffer());
-            glUniform1i(program->getLocation("particle_texture"), 0);
+            _texture->sendUniformsToShaderProgram(program, "particle_texture", 0);
         }
 
         glEnable(GL_DEPTH_TEST);

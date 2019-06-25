@@ -13,8 +13,6 @@
 
 namespace GLS {
 
-    // TODO: Make it work lol
-
     class Skybox : public IRenderable {
         GLuint _textureid;
 

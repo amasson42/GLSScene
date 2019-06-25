@@ -77,6 +77,13 @@ namespace GLS {
         return _buffer;
     }
 
+    void Texture::sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, std::string uniformName, int textureIndex) const {
+        program->use();
+        glActiveTexture(GL_TEXTURE0 + textureIndex);
+        glBindTexture(GL_TEXTURE_2D, _buffer);
+        glUniform1i(program->getLocation(uniformName), textureIndex);
+    }
+
     void Texture::setParameter(GLenum pname, GLint param) {
         glBindTexture(GL_TEXTURE_2D, _buffer);
         glTexParameteri(GL_TEXTURE_2D, pname, param);
