@@ -8,14 +8,14 @@
 
 #include "sceneTest.hpp"
 
-// void (*loadScene)(const AppEnv& env)     = loadSceneTrash;
-// void (*updateScene)(const AppEnv& env)   = nullptr;
+void (*loadScene)(const AppEnv& env)     = loadSceneTrash;
+void (*updateScene)(const AppEnv& env)   = nullptr;
 
 // void (*loadScene)(const AppEnv& env)     = loadSceneHuman;
 // void (*updateScene)(const AppEnv& env)   = updateSceneHuman;
 
-void (*loadScene)(const AppEnv& env)     = loadSceneShadow;
-void (*updateScene)(const AppEnv& env)   = updateSceneShadow;
+// void (*loadScene)(const AppEnv& env)     = loadSceneShadow;
+// void (*updateScene)(const AppEnv& env)   = updateSceneShadow;
 
 // void (*loadScene)(const AppEnv& env)     = loadSceneVoxel;
 // void (*updateScene)(const AppEnv& env)   = updateSceneVoxel;

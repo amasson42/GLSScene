@@ -11,8 +11,8 @@
 namespace GLS {
 
     void Skybox::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
-        return;
         (void)scene;
+        glDepthMask(GL_FALSE);
         glDepthFunc(GL_LEQUAL);
         std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramSkybox();
         program->use();
@@ -29,6 +29,7 @@ namespace GLS {
         glBindVertexArray(0);
 
         glDepthFunc(GL_LESS);
+        glDepthMask(GL_TRUE);
     }
 
 }

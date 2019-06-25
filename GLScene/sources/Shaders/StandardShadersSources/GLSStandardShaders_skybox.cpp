@@ -19,7 +19,7 @@ namespace GLS {
         "void main() {\n"
         "    vs_out.uv = position;\n"
         "    vec4 pos = u_mat_projection * u_mat_view * vec4(position, 1.0);\n"
-        "    gl_Position = pos.xyzw;\n"
+        "    gl_Position = pos.xyww;\n"
         "}\n"
         "\n";
         return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
