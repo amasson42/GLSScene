@@ -88,7 +88,7 @@ void loadSceneShadow(const AppEnv& env) {
     auto smallCubeMaterial = std::make_shared<GLS::Material>();
     smallCubeMaterial->diffuse = glm::vec3(0.8, 0.2, 0.3);
     smallCubeMesh->setMaterial(smallCubeMaterial);
-    auto cubesMesh = std::make_shared<GLS::InstancedMesh>(*smallCubeMesh, 100);
+    auto cubesMesh = std::make_shared<GLS::InstancedMesh>(*smallCubeMesh, 10000);
     cubesMesh->setMaterial(smallCubeMaterial);
     for (size_t i = 0; i < cubesMesh->instancesCount(); i++) {
         float angle = randFloat() * M_PI * 2;

@@ -155,9 +155,14 @@ bool AppEnv::displayFps() {
 }
 
 void AppEnv::checkSize(std::shared_ptr<GLS::Framebuffer> effectFramebuffer) {
-    glfwGetFramebufferSize(window, &windowBufferWidth, &windowBufferHeight);
-    glm::vec2 newSize = glm::vec2(windowBufferWidth, windowBufferHeight);
-    if (newSize != scene->getSize()) {
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    if (width != windowWidth || height != windowHeight) {
+        std::cout << "new size" << std::endl;
+        windowWidth = width;
+        windowHeight = height;
+        glfwGetFramebufferSize(window, &windowBufferWidth, &windowBufferHeight);
+        glm::vec2 newSize = glm::vec2(windowBufferWidth, windowBufferHeight);
         scene->setSize(newSize);
         effectFramebuffer = std::make_shared<GLS::Framebuffer>(windowBufferWidth, windowBufferHeight);
     }
@@ -226,9 +231,8 @@ void AppEnv::processInput() {
     glfwGetCursorPos(window, &mouseX, &mouseY);
     mousePosition = glm::vec2(mouseX, mouseY);
     // std::cout << "mouse position: " << mousePosition << " -> " << mouseContextPosition() << std::endl;
-    // windowMousePos = glm::vec2(1, -1) * glm::vec2(mouseX, mouseY) / glm::vec2(win_buffer_width / 2, win_buffer_height / 2) + glm::vec2(-1, 1);
 }
 
 glm::vec2 AppEnv::mouseContextPosition() const {
-    return glm::vec2(2, -2) * mousePosition / glm::vec2(windowBufferWidth / 2, windowBufferHeight / 2) + glm::vec2(-1, 1);
+    return glm::vec2(1, -1) * mousePosition / glm::vec2(windowWidth / 2, windowHeight / 2) + glm::vec2(-1, 1);
 }
