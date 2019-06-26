@@ -43,9 +43,9 @@ namespace GLS {
         glStencilMask(0x00);
 
         if (_material == nullptr)
-            Material().sendUniformToShaderProgram(program);
+            Material().sendUniformsToShaderProgram(program);
         else
-            _material->sendUniformToShaderProgram(program);
+            _material->sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_blocksArray);
         glDrawArrays(GL_POINTS, 0, chunkBlockCount);

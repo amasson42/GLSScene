@@ -27,7 +27,7 @@ namespace GLS {
 
     // Utilities
 
-    void Light::sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program, int light_index) const {
+    void Light::sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, int light_index) const {
         program->use();
 
         std::string slight = "lights[" + std::to_string(light_index) + "]";
@@ -79,7 +79,7 @@ namespace GLS {
 
     // Utilities
 
-    void LightCaster::sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program, int index) const {
+    void LightCaster::sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, int index) const {
         glm::mat4 vp = light._projection * glm::inverse(light._view);
         program->use();
         #ifdef SCHOOL_DUMPS

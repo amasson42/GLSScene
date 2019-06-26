@@ -51,12 +51,33 @@ namespace GLS {
 
         // Utilities
 
-        void sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
+        void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
 
         static std::shared_ptr<Material> loadFromAiMaterial(aiMaterial *material, const std::string& directory);
 
     };
-    
+
+    struct Vertex {
+        glm::vec3 position;
+        glm::vec3 normal;
+        glm::vec3 tangent;
+        glm::vec3 bitangent;
+        glm::vec2 uv;
+        
+        Vertex();
+        
+        Vertex(const glm::vec3 p,
+            const glm::vec3 n,
+            const glm::vec3 t,
+            const glm::vec3 b,
+            const glm::vec2 u);
+        
+        Vertex(const glm::vec3& o,
+            const glm::vec3& n,
+            const glm::vec2& u);
+        
+    };
+
     class Mesh : public IRenderable {
     
     protected:

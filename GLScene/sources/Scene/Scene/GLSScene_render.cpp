@@ -37,11 +37,11 @@ namespace GLS {
     void Scene::sendLightsValueToShader(std::shared_ptr<ShaderProgram> program) {
         program->use();
         for (size_t i = 0; i < _frameLights.size() && i < 16; i++) {
-            _frameLights[i].sendUniformToShaderProgram(program, static_cast<int>(i));
+            _frameLights[i].sendUniformsToShaderProgram(program, static_cast<int>(i));
         }
         glUniform1i(program->getLocation("lights_count"), static_cast<int>(_frameLights.size()));
         for (size_t i = 0; i < _frameLightCasters.size() && i < 4; i++) {
-            _frameLightCasters[i].sendUniformToShaderProgram(program, static_cast<int>(i));
+            _frameLightCasters[i].sendUniformsToShaderProgram(program, static_cast<int>(i));
         }
     }
 

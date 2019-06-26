@@ -10,7 +10,7 @@
 
 namespace GLS {
 
-    void Material::sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program) const {
+    void Material::sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program) const {
 
         program->use();
 

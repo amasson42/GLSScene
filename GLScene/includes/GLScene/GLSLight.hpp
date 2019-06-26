@@ -62,7 +62,7 @@ namespace GLS {
 
         // Utilities
 
-        void sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program, int light_index) const;
+        void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, int light_index) const;
         Light transformedBy(glm::mat4 transform) const;
 
     };
@@ -76,7 +76,7 @@ namespace GLS {
 
         // Utilities
 
-        void sendUniformToShaderProgram(std::shared_ptr<ShaderProgram> program, int caster_index) const;
+        void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, int caster_index) const;
 
     };
 

@@ -1,13 +1,13 @@
 //
-//  GLSAnimator.tpp
+//  GLSAnimator.hpp
 //  GLScene
 //
 //  Created by Arthur Masson on 15/05/2019.
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#ifndef GLSAnimator_t
-#define GLSAnimator_t
+#ifndef GLSAnimator_h
+#define GLSAnimator_h
 
 #include "GLScene.hpp"
 
@@ -127,4 +127,4 @@ namespace GLS {
     
 }
 
-#endif /* GLSAnimator_t */
+#endif /* GLSAnimator_h */

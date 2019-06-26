@@ -49,9 +49,9 @@ namespace GLS {
         }
 
         if (_material == nullptr)
-            Material().sendUniformToShaderProgram(program);
+            Material().sendUniformsToShaderProgram(program);
         else
-            _material->sendUniformToShaderProgram(program);
+            _material->sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_elementsBuffer);
         glDrawElementsInstanced(GL_TRIANGLES,

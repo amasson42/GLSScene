@@ -31,13 +31,16 @@
 #include "CLDevice.hpp"
 
 #include "GLScene/GLSStructs.hpp"
-
 #include "GLScene/GLSTransform.hpp"
+
+#include "GLScene/GLSAnimator.hpp"
+
 #include "GLScene/GLSTexture.hpp"
 
 #include "GLScene/GLSIRenderable.hpp"
 #include "GLScene/GLSFramebuffer.hpp"
 #include "GLScene/GLSMesh.hpp"
+#include "GLScene/GLSAnimatedModel.hpp"
 #include "GLScene/GLSVoxelChunk.hpp"
 #include "GLScene/GLSSkybox.hpp"
 #include "GLScene/GLSParticleSystem.hpp"
@@ -48,7 +51,5 @@
 #include "GLScene/GLSShader.hpp"
 #include "GLScene/GLSNode.hpp"
 #include "GLScene/GLSScene.hpp"
-
-#include "GLScene/GLSAnimator.tpp"
 
 #endif /* GLScene_h */
