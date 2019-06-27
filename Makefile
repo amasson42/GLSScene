@@ -33,8 +33,6 @@ O_FILES = $(O_FILES_TMP:%.s=$(OBJS)/%.o)
 
 DEPS = $(O_FILES:.o=.d)
 
-$(shell mkdir -p $(O_DIRS) $(OBJS))
-
 # Print
 ACTUAL = $(words $(COUNT))
 TOTAL = $(words $(filter %.cpp,$(CPP_FILES)))
@@ -44,7 +42,9 @@ PRINTINC = $(INCREMENT) $(PRINT)
 PRINT = printf "\r \033[31;1m%3s%%\033[0m\t -->>\t\033[31;1m%-65s\033[0m\r" "$(shell echo $(ACTUAL)\*100\/$(TOTAL) | bc)" "$^"
 PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" "$(shell echo $(ACTUAL)\*100\/$(TOTAL) | bc)" "$@"
 
-all: $(NAME)
+all:
+	mkdir -p $(O_DIRS) $(OBJS)
+	make $(NAME)
 
 install:
 	brew update

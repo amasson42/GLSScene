@@ -129,6 +129,8 @@ namespace GLS {
         void setOutline(float size, const glm::vec3& color);
         void removeOutline();
 
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix) const;
+
 
         // OpenGL Buffers
          
@@ -155,6 +157,7 @@ namespace GLS {
         static std::shared_ptr<Mesh> objModel(std::string path, bool generateBuffers = true) /*throw(LoadMeshException)*/;
         static std::shared_ptr<Mesh> loadFromAiMesh(aiMesh *mesh, bool generateBuffers = true);
         static std::shared_ptr<Mesh> voxelChunk(std::shared_ptr<VoxelChunk> chunk, bool generateBuffers = true);
+
 
         // Shader uniforms
 

@@ -236,4 +236,28 @@ namespace GLS {
         return std::make_shared<Shader>(src, GL_FRAGMENT_SHADER);
     }
 
+    std::shared_ptr<Shader> Shader::standardVertexSkinnedMesh() {
+        std::string src =
+        "#version 400 core\n"
+
+        + SkinnedMesh::shaderUniformsVertex() +
+        
+        "void main()\n"
+        "{\n"
+        "    mat4 skin_matrix = joint_weights.x * u_mat_joints[joint_ids.x]\n"
+        "        + joint_weights.y * u_mat_joints[joint_ids.y]\n"
+        "        + joint_weights.z * u_mat_joints[joint_ids.z]\n"
+        "        + joint_weights.w * u_mat_joints[joint_ids.w];\n"
+        "    vs_out.wposition = vec3(u_mat_model * skin_matrix * vec4(position, 1.0));\n"
+        "    gl_Position = u_mat_projection * u_mat_view * vec4(vs_out.wposition, 1.0);\n"
+        "    vs_out.position = gl_Position;\n"
+        "    mat3 skin_normal = u_mat_normal * mat3(skin_matrix);\n"
+        "    vs_out.wnormal = skin_normal * normal;\n"
+        "    vs_out.wtangent = skin_normal * tangent;\n"
+        "    vs_out.wbitangent = skin_normal * bitangent;\n"
+        "    vs_out.uv = uv;\n"
+        "}\n";
+        return std::make_shared<Shader>(src, GL_VERTEX_SHADER);
+    }
+
 }

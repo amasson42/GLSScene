@@ -1,6 +1,8 @@
 
 #include "sceneTest.hpp"
 
+using namespace GLS;
+
 std::shared_ptr<GLS::Node> newNode() {
     return std::make_shared<GLS::Node>();
 }

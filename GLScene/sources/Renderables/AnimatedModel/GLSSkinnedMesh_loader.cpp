@@ -1,19 +1,19 @@
 //
-//  GLSMesh_loader.cpp
+//  GLSSkinnedMesh_loader.cpp
 //  GLScene
 //
-//  Created by Arthur Masson on 13/04/2018.
-//  Copyright © 2018 Arthur Masson. All rights reserved.
+//  Created by Arthur Masson on 26/06/2019.
+//  Copyright © 2019 Arthur Masson. All rights reserved.
 //
 
-#include "GLSMesh.hpp"
+#include "GLSSkinnedMesh.hpp"
 
 namespace GLS {
 
-    std::shared_ptr<Mesh> Mesh::loadFromAiMesh(aiMesh *mesh, bool generateBuffers) {
-        std::shared_ptr<Mesh> nMesh = std::make_shared<Mesh>();
+    std::shared_ptr<SkinnedMesh> SkinnedMesh::loadFromAiMesh(aiMesh *mesh, bool generateBuffers) {
+        std::shared_ptr<SkinnedMesh> nMesh = std::make_shared<SkinnedMesh>();
         for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
-            Vertex v;
+            SkinnedVertex v;
             v.position.x = mesh->mVertices[i].x;
             v.position.y = mesh->mVertices[i].y;
             v.position.z = mesh->mVertices[i].z;
@@ -34,7 +34,7 @@ namespace GLS {
                 v.bitangent.y = mesh->mBitangents[i].y;
                 v.bitangent.z = mesh->mBitangents[i].z;
             } else
-                v = Vertex(v.position, v.normal, v.uv);
+                v = SkinnedVertex(v.position, v.normal, v.uv);
             nMesh->verticesRef().push_back(v);
         }
         for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
@@ -43,30 +43,14 @@ namespace GLS {
                 nMesh->indicesRef().push_back(face.mIndices[j]);
             }
         }
-        if (!mesh->HasNormals()) {
-            nMesh->calculNormals();
+        // TODO: read mesh bones
+        for (unsigned int i = 0; i < mesh->mNumBones; i++) {
+            std::string boneName(mesh->mBones[i]->mName.data);
+            std::cout << "bone named: " << boneName << std::endl;
         }
         if (generateBuffers)
             nMesh->generateBuffers();
         return nMesh;
-    }
-
-    std::shared_ptr<Mesh> Mesh::objModel(std::string path, bool generateBuffers) /*throw(LoadMeshException)*/ {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
-
-        if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-            throw LoadMeshException();
-        }
-
-        if (!scene->HasMeshes())
-            throw LoadMeshException();
-
-        std::shared_ptr<Mesh> mesh = Mesh::loadFromAiMesh(scene->mMeshes[0]);
-
-        if (generateBuffers)
-            mesh->generateBuffers();
-        return mesh;
     }
 
 }

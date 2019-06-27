@@ -8,14 +8,14 @@
 
 #include "sceneTest.hpp"
 
-// void (*loadScene)(const AppEnv& env)     = loadSceneTrash;
-// void (*updateScene)(const AppEnv& env)   = nullptr;
+void (*loadScene)(const AppEnv& env)     = loadSceneTrash;
+void (*updateScene)(const AppEnv& env)   = nullptr;
 
 // void (*loadScene)(const AppEnv& env)     = loadSceneHuman;
 // void (*updateScene)(const AppEnv& env)   = updateSceneHuman;
 
-void (*loadScene)(const AppEnv& env)     = loadSceneShadow;
-void (*updateScene)(const AppEnv& env)   = updateSceneShadow;
+// void (*loadScene)(const AppEnv& env)     = loadSceneShadow;
+// void (*updateScene)(const AppEnv& env)   = updateSceneShadow;
 
 // void (*loadScene)(const AppEnv& env)     = loadSceneVoxel;
 // void (*updateScene)(const AppEnv& env)   = updateSceneVoxel;
@@ -69,6 +69,8 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
     scene = std::make_shared<GLS::Scene>(glm::vec2(windowBufferWidth, windowBufferHeight));
     loadScene(*this);
 
+    scene->rootNode()->sendToFlux(std::cout, ":");
+
     currentTime = glfwGetTime();
     deltaTime = 0;
     fpsDisplayCD = 0;
@@ -98,8 +100,12 @@ std::shared_ptr<GLS::Framebuffer> AppEnv::createEffectFramebuffer() {
         if (effectShaderFile.is_open()) {
             try {
                 std::shared_ptr<GLS::Shader> effectShader = std::make_shared<GLS::Shader>(effectShaderFile, GL_FRAGMENT_SHADER);
-                std::shared_ptr<GLS::ShaderProgram> effectProgram = std::make_shared<GLS::ShaderProgram>(*GLS::Shader::standardVertexScreenTexture(), *effectShader);
-                effectFrame->setProgram(effectProgram);
+                postProcessShaderProgram = std::make_shared<GLS::ShaderProgram>(*GLS::Shader::standardVertexScreenTexture(), *effectShader);
+                effectFrame->setProgram(postProcessShaderProgram);
+            } catch (GLS::Shader::CompilationException& e) {
+                std::cerr << "Post processing effect compilation error" << std::endl;
+                std::cerr << e.what() << std::endl;
+                std::cerr << e.infoLog() << std::endl;
             } catch (std::exception& e) {
                 std::cerr << "Can't create post processing effect" << std::endl << e.what() << std::endl;
             }
@@ -130,7 +136,16 @@ void AppEnv::loop() {
         effectFramebuffer->unbind();
         glClearColor(1, 1, 1, 1);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-        effectFramebuffer->renderInContext(*scene, GLS::RenderUniforms());
+
+        GLS::RenderUniforms uniforms;
+        if (!scene->cameraNode().expired()) {
+            std::shared_ptr<GLS::Node> cameraNode = scene->cameraNode().lock();
+            uniforms.view = glm::inverse(cameraNode->transform().matrix());
+            if (cameraNode->camera() != nullptr) {
+                uniforms.projection = cameraNode->camera()->projectionMatrix();
+            }
+        }
+        effectFramebuffer->renderInContext(*scene, uniforms);
 
         if (displayFps()) {
             checkSize(effectFramebuffer);
@@ -230,6 +245,12 @@ void AppEnv::processInput() {
     double mouseX, mouseY;
     glfwGetCursorPos(window, &mouseX, &mouseY);
     mousePosition = glm::vec2(mouseX, mouseY);
+    if (postProcessShaderProgram != nullptr) {
+        glm::vec2 devicePos = mouseContextPosition();
+        postProcessShaderProgram->use();
+        glUniform2f(postProcessShaderProgram->getLocation("u_mouse_position"), devicePos.x, devicePos.y);
+        glUniform1f(postProcessShaderProgram->getLocation("u_time"), currentTime);
+    }
     // std::cout << "mouse position: " << mousePosition << " -> " << mouseContextPosition() << std::endl;
 }
 

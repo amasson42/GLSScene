@@ -40,7 +40,7 @@
 #include "GLScene/GLSIRenderable.hpp"
 #include "GLScene/GLSFramebuffer.hpp"
 #include "GLScene/GLSMesh.hpp"
-#include "GLScene/GLSAnimatedModel.hpp"
+#include "GLScene/GLSSkinnedMesh.hpp"
 #include "GLScene/GLSVoxelChunk.hpp"
 #include "GLScene/GLSSkybox.hpp"
 #include "GLScene/GLSParticleSystem.hpp"

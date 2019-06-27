@@ -65,9 +65,7 @@ namespace GLS {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
 
-        glUniformMatrix4fv(program->getLocation("u_mat_projection"), 1, GL_FALSE, glm::value_ptr(uniforms.projection));
-        glUniformMatrix4fv(program->getLocation("u_mat_view"), 1, GL_FALSE, glm::value_ptr(uniforms.view));
-        glUniformMatrix4fv(program->getLocation("u_mat_model"), 1, GL_FALSE, glm::value_ptr(uniforms.model));
+        uniforms.sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_blocksArray);
         glDrawArrays(GL_POINTS, 0, chunkBlockCount);

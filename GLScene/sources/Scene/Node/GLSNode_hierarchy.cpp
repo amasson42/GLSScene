@@ -23,6 +23,8 @@ namespace GLS {
     void Node::addChildNode(std::shared_ptr<Node> node) {
         node->removeFromParent();
         _childs.push_back(node);
+        // TODO FIXME: node->_parent = this
+        // create a reference to myself when creating with make_shared
     }
 
     void Node::removeChildNode(std::shared_ptr<Node> node) {

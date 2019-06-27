@@ -83,4 +83,14 @@ namespace GLS {
         _outlined = false;
     }
 
+    void Mesh::sendToFlux(std::ostream& flux, std::string prefixLine) const {
+        flux << prefixLine << "[Mesh] {" << std::endl;
+        flux << prefixLine << "  vertices: " << _vertices.size() << std::endl;
+        flux << prefixLine << "  indices: " << _indices.size() << std::endl;
+        flux << prefixLine << "  customShader: " << _shaderProgram << std::endl;
+        flux << prefixLine << "  material: " << _material << std::endl;
+        flux << prefixLine << "  outlined: " << _outlined << std::endl;
+        flux << prefixLine << "}" << std::endl;
+    }
+
 }

@@ -1,16 +1,16 @@
 //
-//  GLSMesh_buffers.cpp
+//  GLSSkinnedMesh_buffers.cpp
 //  GLScene
 //
-//  Created by Arthur Masson on 13/04/2018.
-//  Copyright © 2018 Arthur Masson. All rights reserved.
+//  Created by Arthur Masson on 26/06/2019.
+//  Copyright © 2019 Arthur Masson. All rights reserved.
 //
 
-#include "GLSMesh.hpp"
+#include "GLSSkinnedMesh.hpp"
 
 namespace GLS {
 
-    void Mesh::generateBuffers() throw(BufferCreationException) {
+    void SkinnedMesh::generateBuffers() throw(BufferCreationException) {
         deleteBuffers();
 
         glGenVertexArrays(1, &_elementsBuffer);
@@ -30,34 +30,42 @@ namespace GLS {
 
         glBindVertexArray(_elementsBuffer);
         glBindBuffer(GL_ARRAY_BUFFER, _verticesBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * _vertices.size(),
+        glBufferData(GL_ARRAY_BUFFER, sizeof(SkinnedVertex) * _vertices.size(),
                      &_vertices.front(), GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * _indices.size(),
                      &_indices.front(), GL_STATIC_DRAW);
-        
+
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), (void*)(0 * sizeof(GLfloat)));
+                              sizeof(SkinnedVertex), (void*)(0 * sizeof(GLfloat)));
         glEnableVertexAttribArray(0);
         
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), (void*)(3 * sizeof(GLfloat)));
+                              sizeof(SkinnedVertex), (void*)(3 * sizeof(GLfloat)));
         glEnableVertexAttribArray(1);
         
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), (void*)(6 * sizeof(GLfloat)));
+                              sizeof(SkinnedVertex), (void*)(6 * sizeof(GLfloat)));
         glEnableVertexAttribArray(2);
         
         glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), (void*)(9 * sizeof(GLfloat)));
+                              sizeof(SkinnedVertex), (void*)(9 * sizeof(GLfloat)));
         glEnableVertexAttribArray(3);
 
         glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE,
-                              sizeof(Vertex), (void*)(12 * sizeof(GLfloat)));
+                              sizeof(SkinnedVertex), (void*)(12 * sizeof(GLfloat)));
         glEnableVertexAttribArray(4);
+
+        glVertexAttribIPointer(5, 4, GL_INT,
+                              sizeof(SkinnedVertex), (void*)(14 * sizeof(GLfloat)));
+        glEnableVertexAttribArray(5);
+
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE,
+                              sizeof(SkinnedVertex), (void*)(14 * sizeof(GLfloat) + 4 + sizeof(GLint)));
+        glEnableVertexAttribArray(6);
     }
-    
-    void Mesh::deleteBuffers() {
+
+    void SkinnedMesh::deleteBuffers() {
         if (_elementsBuffer)
             glDeleteVertexArrays(1, &_elementsBuffer);
         _elementsBuffer = 0;
@@ -69,7 +77,7 @@ namespace GLS {
         _indicesBuffer = 0;
     }
 
-    bool Mesh::bufferGenerated() const {
+    bool SkinnedMesh::bufferGenerated() const {
         return _elementsBuffer != 0 && _verticesBuffer != 0 && _indicesBuffer != 0;
     }
 

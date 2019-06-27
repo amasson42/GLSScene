@@ -40,6 +40,8 @@ struct AppEnv {
     double deltaTime;
     double fpsDisplayCD;
 
+    std::shared_ptr<GLS::ShaderProgram> postProcessShaderProgram;
+
     AppEnv(const std::vector<std::string>& as);
 
     ~AppEnv();

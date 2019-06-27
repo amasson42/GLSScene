@@ -54,6 +54,7 @@ namespace GLS {
         
         static std::shared_ptr<Shader> standardVertexMesh();
         static std::shared_ptr<Shader> standardVertexInstancedMesh();
+        static std::shared_ptr<Shader> standardVertexSkinnedMesh();
         static std::shared_ptr<Shader> standardVertexScreenTexture();
         static std::shared_ptr<Shader> standardVertexSkybox();
         static std::shared_ptr<Shader> standardVertexVoxelChunk();
@@ -83,6 +84,8 @@ namespace GLS {
         static std::shared_ptr<ShaderProgram> _standardShaderProgramMeshSimpleColor;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramInstancedMesh;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramInstancedMeshSimpleColor;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramSkinnedMesh;
+        static std::shared_ptr<ShaderProgram> _standardShaderProgramSkinnedMeshSimpleColor;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramScreenTexture;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramSkybox;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramVoxelChunk;
@@ -118,6 +121,8 @@ namespace GLS {
         
         static std::shared_ptr<ShaderProgram> standardShaderProgramMesh();
         static std::shared_ptr<ShaderProgram> standardShaderProgramMeshSimpleColor();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramSkinnedMesh();
+        static std::shared_ptr<ShaderProgram> standardShaderProgramSkinnedMeshSimpleColor();
         static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMesh();
         static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMeshSimpleColor();
         static std::shared_ptr<ShaderProgram> standardShaderProgramScreenTexture();

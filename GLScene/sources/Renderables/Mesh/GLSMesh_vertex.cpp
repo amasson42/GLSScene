@@ -1,12 +1,12 @@
 //
-//  GLSStructs.cpp
+//  GLSMesh_vertex.cpp
 //  GLScene
 //
 //  Created by Arthur Masson on 13/04/2018.
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#include "GLScene.hpp"
+#include "GLSMesh.hpp"
 
 namespace GLS {
 

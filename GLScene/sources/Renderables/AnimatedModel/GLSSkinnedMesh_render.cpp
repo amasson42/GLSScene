@@ -1,32 +1,32 @@
 //
-//  GLSMesh_render.cpp
+//  GLSSkinnedMesh_render.cpp
 //  GLScene
 //
-//  Created by Arthur Masson on 13/04/2018.
-//  Copyright © 2018 Arthur Masson. All rights reserved.
+//  Created by Arthur Masson on 26/06/2019.
+//  Copyright © 2019 Arthur Masson. All rights reserved.
 //
 
-#include "GLSMesh.hpp"
+#include "GLSSkinnedMesh.hpp"
 
 namespace GLS {
 
-    void Mesh::setProgram(std::shared_ptr<ShaderProgram> shaderProgram) {
+    void SkinnedMesh::setProgram(std::shared_ptr<ShaderProgram> shaderProgram) {
         _shaderProgram = shaderProgram;
     }
 
-    void Mesh::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
+    void SkinnedMesh::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
         if (!bufferGenerated())
             generateBuffers();
         if (!bufferGenerated())
             return;
-        
+
         std::shared_ptr<ShaderProgram> program;
         if (_shaderProgram) {
             program = _shaderProgram;
             program->use();
             scene.sendLightsValueToShader(program);
         } else {
-            program = ShaderProgram::standardShaderProgramMesh();
+            program = ShaderProgram::standardShaderProgramSkinnedMesh();
             program->use();
         }
         glEnable(GL_DEPTH_TEST);
@@ -41,6 +41,8 @@ namespace GLS {
         glm::mat3 normalMatrix = glm::inverseTranspose(glm::mat3(uniforms.model));
         glUniformMatrix3fv(program->getLocation("u_mat_normal"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
         uniforms.sendUniformsToShaderProgram(program);
+
+        _rootBone.sendUniformsToShaderProgram(program);
 
         if (_outlined) {
             glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -59,21 +61,22 @@ namespace GLS {
         glDrawElements(GL_TRIANGLES,
                        static_cast<GLsizei>(_indices.size()),
                        GL_UNSIGNED_INT, 0);
-        
     }
-    
-    void Mesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
+
+    void SkinnedMesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
         (void)scene;
         if (_outlined && priority == 1) {
             glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
             glStencilMask(0x00);
-            std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMeshSimpleColor();
+            std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramSkinnedMeshSimpleColor();
             program->use();
 
-            RenderUniforms scaledUniforms(uniforms);
-            scaledUniforms.model = glm::scale(uniforms.model, glm::vec3(_outlineSize));
-            scaledUniforms.sendUniformsToShaderProgram(program);
+            RenderUniforms scaleUniforms(uniforms);
+            scaleUniforms.model = glm::scale(uniforms.model, glm::vec3(_outlineSize));
+            scaleUniforms.sendUniformsToShaderProgram(program);
             glUniform3f(program->getLocation("material.diffuse"), _outlineColor.x, _outlineColor.y, _outlineColor.z);
+
+            _rootBone.sendUniformsToShaderProgram(program);
 
             glBindVertexArray(_elementsBuffer);
             glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
@@ -81,14 +84,14 @@ namespace GLS {
         }
     }
 
-    void Mesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
+    void SkinnedMesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
         (void)scene;
         if (!bufferGenerated())
             generateBuffers();
         if (!bufferGenerated())
             return;
 
-        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramMeshSimpleColor();
+        std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramSkinnedMeshSimpleColor();
         program->use();
 
         glEnable(GL_DEPTH_TEST);
@@ -97,6 +100,8 @@ namespace GLS {
         glCullFace(GL_FRONT);
 
         uniforms.sendUniformsToShaderProgram(program);
+
+        _rootBone.sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_elementsBuffer);
         glDrawElements(GL_TRIANGLES,

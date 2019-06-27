@@ -29,6 +29,8 @@ namespace GLS {
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {(void)scene;(void)uniforms;}
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {(void)scene;(void)uniforms;(void)priority;}
 
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix) const {flux << linePrefix << "[IRenderable]" << std::endl;}
+
         static std::string shaderUniformsVertex() {return "";}
         static std::string shaderUniformsGeometry() {return "";}
         static std::string shaderUniformsFragment() {return "";}

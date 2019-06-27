@@ -130,4 +130,38 @@ namespace GLS {
         }
     }
 
+    void Node::sendToFlux(std::ostream& flux, std::string linePrefix) const {
+        flux << linePrefix << "[Node] {" << std::endl;
+        flux << linePrefix << "  id: " << this << std::endl;
+        flux << linePrefix << "  name: " << _name << std::endl;
+        flux << linePrefix << "  transform: {" << std::endl;
+        flux << linePrefix << "    position: " << _transform.position() << std::endl;
+        flux << linePrefix << "    rotation: " << _transform.rotation() << std::endl;
+        flux << linePrefix << "    scale: " << _transform.scale() << std::endl;
+        flux << linePrefix << "  }" << std::endl;
+        flux << linePrefix << "  camera: " << _camera.get() << std::endl;
+        flux << linePrefix << "  light: " << _light.get() << std::endl;
+        if (_renderables.size() > 0) {
+            flux << linePrefix << "  renderables: [" << std::endl;
+            for (size_t i = 0; i < _renderables.size(); i++) {
+                _renderables[i]->sendToFlux(flux, linePrefix + "  > ");
+            }
+            flux << linePrefix << "  ]" << std::endl;
+        } else {
+            flux << linePrefix << "  renderables: []" << std::endl;
+        }
+        flux << linePrefix << "  active: " << (_active ? "true" : "false") << std::endl;
+        flux << linePrefix << "  parent: " << (_parent.expired() ? nullptr : _parent.lock().get()) << std::endl;
+        if (_childs.size() > 0) {
+            flux << linePrefix << "  childs: [" << std::endl;
+            for (size_t i = 0; i < _childs.size(); i++) {
+                _childs[i]->sendToFlux(flux, linePrefix + "  | ");
+            }
+            flux << linePrefix << "  ]" << std::endl;
+        } else {
+            flux << linePrefix << "  childs: []" << std::endl;
+        }
+        flux << linePrefix << "}" << std::endl;
+    }
+
 }

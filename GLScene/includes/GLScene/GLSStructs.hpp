@@ -11,13 +11,14 @@
 
 #include "GLScene/GLSTransform.hpp"
 
-std::ostream& operator<<(std::ostream& stream, glm::mat4 m);
-std::ostream& operator<<(std::ostream& stream, glm::mat3 m);
-std::ostream& operator<<(std::ostream& stream, glm::vec3 v);
-std::ostream& operator<<(std::ostream& stream, glm::vec2 v);
-std::ostream& operator<<(std::ostream& stream, glm::quat q);
 
 namespace GLS {
+
+    std::ostream& operator<<(std::ostream& stream, const glm::mat4& m);
+    std::ostream& operator<<(std::ostream& stream, const glm::mat3& m);
+    std::ostream& operator<<(std::ostream& stream, const glm::vec3& v);
+    std::ostream& operator<<(std::ostream& stream, const glm::vec2& v);
+    std::ostream& operator<<(std::ostream& stream, const glm::quat& q);
 
     void glsInit();
     void glsDeinit();
@@ -33,7 +34,7 @@ namespace GLS {
     class Material;
     class Mesh;
     class InstancedMesh;
-    class AnimatedModel;
+    class SkinnedMesh;
     class Skybox;
     class VoxelChunk;
     class ParticleSystem;

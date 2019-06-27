@@ -19,6 +19,8 @@ namespace GLS {
         ShaderProgram::standardShaderProgramMeshSimpleColor();
         ShaderProgram::standardShaderProgramInstancedMesh();
         ShaderProgram::standardShaderProgramInstancedMeshSimpleColor();
+        ShaderProgram::standardShaderProgramSkinnedMesh();
+        ShaderProgram::standardShaderProgramSkinnedMeshSimpleColor();
         ShaderProgram::standardShaderProgramScreenTexture();
         ShaderProgram::standardShaderProgramSkybox();
         ShaderProgram::standardShaderProgramVoxelChunk();
@@ -36,6 +38,8 @@ namespace GLS {
         ShaderProgram::_standardShaderProgramMeshSimpleColor = nullptr;
         ShaderProgram::_standardShaderProgramInstancedMesh = nullptr;
         ShaderProgram::_standardShaderProgramInstancedMeshSimpleColor = nullptr;
+        ShaderProgram::_standardShaderProgramSkinnedMesh = nullptr;
+        ShaderProgram::_standardShaderProgramSkinnedMeshSimpleColor = nullptr;
         ShaderProgram::_standardShaderProgramScreenTexture = nullptr;
         ShaderProgram::_standardShaderProgramSkybox = nullptr;
         ShaderProgram::_standardShaderProgramVoxelChunk = nullptr;

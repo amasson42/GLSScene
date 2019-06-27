@@ -18,33 +18,34 @@ void loadSceneTrash(const AppEnv& env) {
         triangleMat->diffuse = glm::vec3(1.0, 0, 0);
         trianglesMesh->setMaterial(triangleMat);
         trianglesMesh->calculNormals();
-        trianglesMesh->setInstancesCount(10000);
+        trianglesMesh->setInstancesCount(1000);
         
         for (size_t i = 0; i < trianglesMesh->instancesCount(); i++) {
-            float x = ((i % 10000) / 100) * 0.2f;
-            float y = ((i % 10000) % 100) * 0.2f;
-            float z = ((float)i / 10000) * 0.5f - 5.0f;
+            float x = ((i % 100) / 10) * 0.2f;
+            float y = ((i % 100) % 10) * 0.2f;
+            float z = ((float)i / 100) * 0.5f - 5.0f;
             GLS::Transform t;
             t.setPosition(glm::vec3(x, y, z));
             trianglesMesh->setInstanceTransformAt(i, t);
         }
         trianglesMesh->generateBuffers();
         triangleNode->addRenderable(trianglesMesh);
+        triangleNode->transform().moveBy(0, 0, -10);
     }
     scene.rootNode()->addChildNode(triangleNode);
-    std::cout << "triangles added" << std::endl;
 
     std::shared_ptr<GLS::Node> planeNode = std::make_shared<GLS::Node>();
+    planeNode->transform().rotateEulerAnglesBy(-M_PI / 2, 0, 0);
     planeNode->addRenderable(GLS::Mesh::plane(1.0, 1.0));
     scene.rootNode()->addChildNode(planeNode);
     planeNode->setName("plane");
 
-    std::shared_ptr<GLS::Node> planesNode = std::make_shared<GLS::Node>();
-    auto planesMesh = std::make_shared<GLS::InstancedMesh>(*GLS::Mesh::plane(2.0, 0.3), 50);
-    planesMesh->generateBuffers();
-    planeNode->addRenderable(planesMesh);
-    scene.rootNode()->addChildNode(planesNode);
-    planesNode->setName("planes");
+    // std::shared_ptr<GLS::Node> planesNode = std::make_shared<GLS::Node>();
+    // auto planesMesh = std::make_shared<GLS::InstancedMesh>(*GLS::Mesh::plane(2.0, 0.3), 50);
+    // planesMesh->generateBuffers();
+    // planesNode->addRenderable(planesMesh);
+    // planeNode->addChildNode(planesNode);
+    // planesNode->setName("planes");
 
     std::shared_ptr<GLS::Node> sphereNode = std::make_shared<GLS::Node>();
     {
@@ -61,21 +62,22 @@ void loadSceneTrash(const AppEnv& env) {
 
     try {
         std::shared_ptr<GLS::Node> nsNode = std::make_shared<GLS::Node>();
-        nsNode->loadMeshFromFile("../models/nanosuit/nanosuit.obj");
+        std::string nsPath = "../models/nanosuit/nanosuit.obj";
+        if (env.getArgument("-model") != nullptr)
+            nsPath = *env.getArgument("-model");
+        nsNode->loadFromFile(nsPath);
         scene.rootNode()->addChildNode(nsNode);
-        nsNode->setName("nanosuit");
-        std::cout << "the nanosuit node has " << nsNode->renderables().size() << " meshes" << std::endl;
     } catch (std::exception& e) {
-        std::cout << "can't create nanosuit with exception: " << e.what() << std::endl;
+        std::cout << "can't load object with exception: " << e.what() << std::endl;
     }
 
     try {
         std::shared_ptr<GLS::Node> ftNode = std::make_shared<GLS::Node>();
-        ftNode->loadMeshFromFile("../models/42.obj");
+        ftNode->loadFromFile("../models/42.obj");
         scene.rootNode()->addChildNode(ftNode);
         ftNode->setName("ft");
     } catch (std::exception& e) {
-        std::cout << "can't create 42node with exception: " << e.what() << std::endl;
+        std::cout << "can't create 42 node with exception: " << e.what() << std::endl;
     }
 
     std::shared_ptr<GLS::Node> spotlightNode = std::make_shared<GLS::Node>();
@@ -91,7 +93,7 @@ void loadSceneTrash(const AppEnv& env) {
     std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
     pointlight->type = (GLS::light_point);
-    pointLightNode->transform().setPosition(glm::vec3(0, 15, 9));
+    pointLightNode->transform().setPosition(glm::vec3(0, 15, -7));
     pointLightNode->setLight(pointlight);
     scene.rootNode()->addChildNode(pointLightNode);
     pointLightNode->setName("pointight");
@@ -99,19 +101,19 @@ void loadSceneTrash(const AppEnv& env) {
     std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1.5);
     try {
-        std::shared_ptr<GLS::Texture> diffuse(new GLS::Texture("../textures/pavement/albedo.png"));
-        std::shared_ptr<GLS::Texture> normal(new GLS::Texture("../textures/pavement/normal.png"));
-        std::shared_ptr<GLS::Texture> occlusion(new GLS::Texture("../textures/pavement/occlusion.png"));
-        std::shared_ptr<GLS::Texture> roughness(new GLS::Texture("../textures/pavement/roughness.png"));
         auto cubeMat = std::make_shared<GLS::Material>();
-        cubeMat->texture_diffuse = diffuse;
-        cubeMat->texture_normal = normal;
-        cubeMat->texture_occlusion = occlusion;
-        cubeMat->texture_roughness = roughness;
-        cubeMesh->setMaterial(cubeMat);
         cubeMesh->setOutline(0.1, glm::vec3(1));
+        cubeMesh->setMaterial(cubeMat);
+        std::shared_ptr<GLS::Texture> diffuse(new GLS::Texture("../textures/pavement/albedo.png"));
+        cubeMat->texture_diffuse = diffuse;
+        std::shared_ptr<GLS::Texture> normal(new GLS::Texture("../textures/pavement/normal.png"));
+        cubeMat->texture_normal = normal;
+        std::shared_ptr<GLS::Texture> occlusion(new GLS::Texture("../textures/pavement/occlusion.png"));
+        cubeMat->texture_occlusion = occlusion;
+        std::shared_ptr<GLS::Texture> roughness(new GLS::Texture("../textures/pavement/roughness.png"));
+        cubeMat->texture_roughness = roughness;
     } catch (std::exception& e) {
-        std::cerr << "error: " << e.what() << std::endl;
+        std::cerr << "error with cube: " << e.what() << std::endl;
     }
     cubeNode->setName("cube");
     cubeNode->addRenderable(cubeMesh);
@@ -123,10 +125,10 @@ void loadSceneTrash(const AppEnv& env) {
     {
         std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
         camera->aspect = (scene.getAspect());
-        camera->farZ = (25.0);
+        camera->farZ = (300.0);
         cameraNode->setCamera(camera);
     }
-    cameraNode->transform().moveBy(0, 7, 5);
+    cameraNode->transform().moveBy(0, 3, 6);
     scene.setCameraNode(cameraNode);
     scene.rootNode()->addChildNode(cameraNode);
 

@@ -55,6 +55,28 @@ namespace GLS {
         return _standardShaderProgramInstancedMeshSimpleColor;
     }
 
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramSkinnedMesh = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramSkinnedMesh() {
+        if (_standardShaderProgramSkinnedMesh == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertexSkinnedMesh();
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentMesh();
+            _standardShaderProgramSkinnedMesh = std::make_shared<ShaderProgram>(*vertex, *fragment);
+        }
+        return _standardShaderProgramSkinnedMesh;
+    }
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramSkinnedMeshSimpleColor = nullptr;
+
+    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramSkinnedMeshSimpleColor() {
+        if (_standardShaderProgramSkinnedMeshSimpleColor == nullptr) {
+            std::shared_ptr<Shader> vertex = Shader::standardVertexSkinnedMesh();
+            std::shared_ptr<Shader> fragment = Shader::standardFragmentMeshSimpleColor();
+            _standardShaderProgramSkinnedMeshSimpleColor = std::make_shared<ShaderProgram>(*vertex, *fragment);
+        }
+        return _standardShaderProgramSkinnedMeshSimpleColor;
+    }
+
     std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramScreenTexture = nullptr;
 
     std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramScreenTexture() {

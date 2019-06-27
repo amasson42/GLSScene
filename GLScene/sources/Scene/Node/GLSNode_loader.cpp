@@ -11,25 +11,44 @@
 namespace GLS {
 
     static void _processLoadNode(Node *n, aiNode *node, const aiScene *scene, std::vector<std::shared_ptr<Material> >& materials) {
+        {
+            n->setName(std::string(node->mName.C_Str()));
+            aiVector3D scale;
+            aiQuaternion rotation;
+            aiVector3D translate;
+            node->mTransformation.Decompose(scale, rotation, translate);
+            n->transform().setPosition(glm::vec3(translate.x, translate.y, translate.z));
+            n->transform().setRotation(glm::quat(rotation.x, rotation.y, rotation.z, rotation.z));
+            n->transform().setScale(glm::vec3(scale.x, scale.y, scale.z));
+        }
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-            std::shared_ptr<Mesh> nMesh = Mesh::loadFromAiMesh(mesh);
-            nMesh->setMaterial(materials[mesh->mMaterialIndex]);
-            n->addRenderable(nMesh);
+            if (mesh->HasBones()) {
+                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(mesh);
+                nSkinnedMesh->setMaterial(materials[mesh->mMaterialIndex]);
+                n->addRenderable(nSkinnedMesh);
+            } else {
+                std::shared_ptr<Mesh> nMesh = Mesh::loadFromAiMesh(mesh);
+                nMesh->setMaterial(materials[mesh->mMaterialIndex]);
+                n->addRenderable(nMesh);
+            }
         }
         for (unsigned int i = 0; i < node->mNumChildren; i++) {
-            _processLoadNode(n, node->mChildren[i], scene, materials);
+            std::shared_ptr<Node> newChild = std::make_shared<Node>();
+            _processLoadNode(newChild.get(), node->mChildren[i], scene, materials);
+            n->addChildNode(newChild);
         }
     }
 
-    void Node::loadMeshFromFile(std::string path) {
+    void Node::loadFromFile(std::string path) {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(path,
             aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
         
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+            std::cout << "invalid scene " << path << std::endl;
             return;
-            // throw LoadFileException();
+            // TODO: throw LoadFileException();
         }
         std::string directory = path.substr(0, path.find_last_of('/'));
         std::vector<std::shared_ptr<Material> > materials;
@@ -38,6 +57,8 @@ namespace GLS {
         }
         materials.push_back(std::make_shared<Material>());
         _processLoadNode(this, scene->mRootNode, scene, materials);
+
+        std::cout << "scene: " << scene->mNumAnimations << std::endl;
     }
 
 }

@@ -16,7 +16,7 @@ namespace GLS {
     _cameraNode(), _skybox(nullptr),
     _background(0.2)
     {
-
+        _rootNode->setName("root");
     }
 
     Scene::Scene(glm::vec2 size) :

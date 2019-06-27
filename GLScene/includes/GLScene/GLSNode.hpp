@@ -71,10 +71,10 @@ namespace GLS {
         const std::vector<std::shared_ptr<IRenderable> >& renderables() const;
         void addRenderable(std::shared_ptr<IRenderable> renderable);
         void removeRenderableIndex(size_t i);
-    
+
         std::pair<glm::vec3, glm::vec3> getBounds() const;
-        
-        void loadMeshFromFile(std::string path);
+
+        void loadFromFile(std::string path);
 
         const std::shared_ptr<const Camera> camera() const;
         std::shared_ptr<Camera> camera();
@@ -88,8 +88,10 @@ namespace GLS {
         void renderInContext(Scene& scene, RenderUniforms uniforms);
         void renderInDepthContext(Scene& scene, RenderUniforms uniforms);
 
+        void sendToFlux(std::ostream& flux, std::string linePrefix) const;
+
     };
-    
+
 }
 
 #endif /* GLSNode_h */

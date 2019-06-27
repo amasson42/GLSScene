@@ -1,13 +1,13 @@
 //
-//  GLSAnimatedModel.hpp
+//  GLSSkinnedMesh.hpp
 //  GLScene
 //
 //  Created by Arthur Masson on 26/06/2019.
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#ifndef GLSAnimatedModel_h
-#define GLSAnimatedModel_h
+#ifndef GLSSkinnedMesh_h
+#define GLSSkinnedMesh_h
 
 #include "GLScene.hpp"
 
@@ -15,16 +15,7 @@
 
 namespace GLS {
 
-    // std::cout << (size_t)&(vertex) << std::endl;
-    // std::cout << (size_t)&(vertex.position)       << ' ' << (size_t)(&(vertex)) + sizeof(float) * 0 + sizeof(int) * 0 << std::endl;
-    // std::cout << (size_t)&(vertex.normal)         << ' ' << (size_t)(&(vertex)) + sizeof(float) * 3 + sizeof(int) * 0 << std::endl;
-    // std::cout << (size_t)&(vertex.tangent)        << ' ' << (size_t)(&(vertex)) + sizeof(float) * 6 + sizeof(int) * 0 << std::endl;
-    // std::cout << (size_t)&(vertex.bitangent)      << ' ' << (size_t)(&(vertex)) + sizeof(float) * 9 + sizeof(int) * 0 << std::endl;
-    // std::cout << (size_t)&(vertex.uv)             << ' ' << (size_t)(&(vertex)) + sizeof(float) * 12 + sizeof(int) * 0 << std::endl;
-    // std::cout << (size_t)&(vertex.joint_ids)      << ' ' << (size_t)(&(vertex)) + sizeof(float) * 14 + sizeof(int) * 0 << std::endl;
-    // std::cout << (size_t)&(vertex.joint_weights)  << ' ' << (size_t)(&(vertex)) + sizeof(float) * 14 + sizeof(int) * 4 << std::endl;
-
-    struct AnimatedVertex {
+    struct SkinnedVertex {
         glm::vec3 position;
         glm::vec3 normal;
         glm::vec3 tangent;
@@ -33,15 +24,15 @@ namespace GLS {
         glm::ivec4 joint_ids;
         glm::vec4 joint_weights;
         
-        AnimatedVertex();
+        SkinnedVertex();
         
-        AnimatedVertex(const glm::vec3 p,
+        SkinnedVertex(const glm::vec3 p,
             const glm::vec3 n,
             const glm::vec3 t,
             const glm::vec3 b,
             const glm::vec2 u);
         
-        AnimatedVertex(const glm::vec3& o,
+        SkinnedVertex(const glm::vec3& o,
             const glm::vec3& n,
             const glm::vec2& u);
     };
@@ -49,21 +40,35 @@ namespace GLS {
     struct Joint {
         int id;
         std::string name;
-        std::vector<int> childs;
+        std::vector<Joint> childs;
         Transform transform;
+
+        Joint(int id = 0, std::string name = "root");
+
+        void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, glm::mat4 parentMatrix = glm::mat4(1)) const;
     };
 
-    struct JointTree {
-        static const int max_joints = 16;
-        Joint joints[max_joints];
+    class SkinnedMesh : public IRenderable {
 
-        void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
-    };
+    public:
+        static const int maxBones = 32;
 
-    class AnimatedModel : public IRenderable {
+    protected:
+        std::vector<SkinnedVertex> _vertices;
+        std::vector<GLuint> _indices;
+        
+        GLuint _verticesBuffer;
+        GLuint _indicesBuffer;
+        GLuint _elementsBuffer;
 
+        Joint _rootBone;
+        
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
+
+        bool _outlined;
+        glm::vec3 _outlineColor;
+        float _outlineSize;
 
     public:
 
@@ -71,23 +76,33 @@ namespace GLS {
             public: const char* what() const throw();
         };
 
-        AnimatedModel();
-        AnimatedModel(const AnimatedModel& copy);
-        virtual ~AnimatedModel();
+        SkinnedMesh();
+        SkinnedMesh(const SkinnedMesh& copy);
+        virtual ~SkinnedMesh();
         
-        AnimatedModel& operator=(const AnimatedModel& copy);
+        SkinnedMesh& operator=(const SkinnedMesh& copy);
 
+        static std::shared_ptr<SkinnedMesh> loadFromAiMesh(aiMesh* mesh, bool generateBuffers = true);
 
-        // AnimatedModel utilities
-        
+        // SkinnedMesh utilities
+
+        std::vector<SkinnedVertex>& verticesRef();
+        std::vector<GLuint>& indicesRef();
+
+        const Joint& rootBoneRef() const;
+        Joint& rootBoneRef();
+
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
         
         void setMaterial(std::shared_ptr<Material> mat);
         std::shared_ptr<Material> getMaterial() const;
 
+        void setOutline(float size, const glm::vec3& color);
+        void removeOutline();
+
 
         // OpenGL Buffers
-         
+        
         virtual void generateBuffers() throw(BufferCreationException);
         virtual void deleteBuffers();
         
@@ -95,7 +110,7 @@ namespace GLS {
         
         
         // Rendering
-        
+
         void setProgram(std::shared_ptr<ShaderProgram> shaderProgram);
         
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
@@ -113,4 +128,4 @@ namespace GLS {
 
 }
 
-#endif /* GLSAnimatedModel */
+#endif /* GLSSkinnedMesh */
