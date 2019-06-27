@@ -5,9 +5,9 @@
 static int p[512];
 
 void initNoise(unsigned int seed) {
-    srandom(seed);
+    srand(seed);
     for (int i = 0; i < 256 ; i++)
-        p[256+i] = p[i] = random() % 256;
+        p[256+i] = p[i] = rand() % 256;
 }
 
 double fade(double t) {

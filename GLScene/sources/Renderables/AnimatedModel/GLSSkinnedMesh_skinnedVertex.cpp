@@ -51,4 +51,20 @@ namespace GLS {
         joint_weights = glm::vec4(0, 0, 0, 0);
     }
 
+    bool SkinnedVertex::addWeight(int id, float weight) {
+        int mini = 0;
+        for (int i = 0; i < 4; i++) {
+            if (joint_weights[i] == 0) {
+                joint_ids[i] = id;
+                joint_weights[i] = weight;
+                return true;
+            }
+            if (joint_weights[i] < joint_weights[mini])
+                mini = i;
+        }
+        joint_ids[mini] = id;
+        joint_weights[mini] = weight;
+        return false;
+    }
+
 }

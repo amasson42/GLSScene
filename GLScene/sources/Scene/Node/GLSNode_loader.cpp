@@ -10,7 +10,10 @@
 
 namespace GLS {
 
-    static void _processLoadNode(Node *n, aiNode *node, const aiScene *scene, std::vector<std::shared_ptr<Material> >& materials) {
+    static void _processLoadNode(std::shared_ptr<Node> n, aiNode *node, const aiScene *scene, std::shared_ptr<Node> rootNode, std::vector<std::shared_ptr<Material> >& materials) {
+        if (n == nullptr) {
+            std::cout << "send nullptr" << std::endl;
+        }
         {
             n->setName(std::string(node->mName.C_Str()));
             aiVector3D scale;
@@ -21,10 +24,15 @@ namespace GLS {
             n->transform().setRotation(glm::quat(rotation.x, rotation.y, rotation.z, rotation.z));
             n->transform().setScale(glm::vec3(scale.x, scale.y, scale.z));
         }
+        for (unsigned int i = 0; i < node->mNumChildren; i++) {
+            std::shared_ptr<Node> newChild = std::make_shared<Node>();
+            n->addChildNode(newChild);
+            _processLoadNode(newChild, node->mChildren[i], scene, rootNode, materials);
+        }
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
             if (mesh->HasBones()) {
-                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(mesh);
+                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(mesh, rootNode, n);
                 nSkinnedMesh->setMaterial(materials[mesh->mMaterialIndex]);
                 n->addRenderable(nSkinnedMesh);
             } else {
@@ -32,11 +40,6 @@ namespace GLS {
                 nMesh->setMaterial(materials[mesh->mMaterialIndex]);
                 n->addRenderable(nMesh);
             }
-        }
-        for (unsigned int i = 0; i < node->mNumChildren; i++) {
-            std::shared_ptr<Node> newChild = std::make_shared<Node>();
-            _processLoadNode(newChild.get(), node->mChildren[i], scene, materials);
-            n->addChildNode(newChild);
         }
     }
 
@@ -56,7 +59,7 @@ namespace GLS {
             materials.push_back(Material::loadFromAiMaterial(scene->mMaterials[i], directory));
         }
         materials.push_back(std::make_shared<Material>());
-        _processLoadNode(this, scene->mRootNode, scene, materials);
+        _processLoadNode(shared_from_this(), scene->mRootNode, scene, shared_from_this(), materials);
 
         std::cout << "scene: " << scene->mNumAnimations << std::endl;
     }

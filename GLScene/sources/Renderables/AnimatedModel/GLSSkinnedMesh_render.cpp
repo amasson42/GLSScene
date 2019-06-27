@@ -14,6 +14,34 @@ namespace GLS {
         _shaderProgram = shaderProgram;
     }
 
+    void SkinnedMesh::_sendBonesToShaderProgram(std::shared_ptr<ShaderProgram> program) {
+        if (_rootBone.node.expired()) {
+            static bool expired_once = true;
+            if (expired_once) {
+                std::cout << "expired root bone" << std::endl;
+                expired_once = false;
+            }
+            return;
+        }
+        std::shared_ptr<Node> rootBone = _rootBone.node.lock();
+        program->use();
+        for (size_t i = 0; i < _bones.size() && i < maxBones; i++) {
+            if (_bones[i].node.expired()) {
+                static bool expired_bone_once = true;
+                if (expired_bone_once) {
+                    std::cout << "expired bone" << std::endl;
+                    expired_bone_once = false;
+                }
+                continue;
+            }
+            std::shared_ptr<Node> node = _bones[i].node.lock();
+            glm::mat4 modelMatrix = glm::inverse(rootBone->getTransformMatrix()) * node->getParentNodeRelativeTransformMatrix(rootBone) * _bones[i].offset;
+            modelMatrix = glm::mat4(1);
+            glUniformMatrix4fv(program->getLocation("u_mat_joints[" + std::to_string(i) + "]"),
+                1, GL_FALSE, glm::value_ptr(modelMatrix));
+        }
+    }
+
     void SkinnedMesh::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
         if (!bufferGenerated())
             generateBuffers();
@@ -42,7 +70,7 @@ namespace GLS {
         glUniformMatrix3fv(program->getLocation("u_mat_normal"), 1, GL_FALSE, glm::value_ptr(normalMatrix));
         uniforms.sendUniformsToShaderProgram(program);
 
-        _rootBone.sendUniformsToShaderProgram(program);
+        _sendBonesToShaderProgram(program);
 
         if (_outlined) {
             glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -76,7 +104,7 @@ namespace GLS {
             scaleUniforms.sendUniformsToShaderProgram(program);
             glUniform3f(program->getLocation("material.diffuse"), _outlineColor.x, _outlineColor.y, _outlineColor.z);
 
-            _rootBone.sendUniformsToShaderProgram(program);
+            _sendBonesToShaderProgram(program);
 
             glBindVertexArray(_elementsBuffer);
             glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
@@ -101,7 +129,7 @@ namespace GLS {
 
         uniforms.sendUniformsToShaderProgram(program);
 
-        _rootBone.sendUniformsToShaderProgram(program);
+        _sendBonesToShaderProgram(program);
 
         glBindVertexArray(_elementsBuffer);
         glDrawElements(GL_TRIANGLES,

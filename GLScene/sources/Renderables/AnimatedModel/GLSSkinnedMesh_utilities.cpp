@@ -18,12 +18,10 @@ namespace GLS {
         return _indices;
     }
 
-    const Joint& SkinnedMesh::rootBoneRef() const {
-        return _rootBone;
-    }
-
-    Joint& SkinnedMesh::rootBoneRef() {
-        return _rootBone;
+    std::shared_ptr<Node> SkinnedMesh::rootBone() const {
+        if (_rootBone.node.expired())
+            return nullptr;
+        return _rootBone.node.lock();
     }
 
     std::pair<glm::vec3, glm::vec3> SkinnedMesh::getBounds(glm::mat4 transform) const {

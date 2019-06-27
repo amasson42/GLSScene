@@ -23,7 +23,7 @@
 #include <glm/gtx/quaternion.hpp>
 
 namespace GLS {
-    
+
     const float& mat4ValueAt(const glm::mat4& m, int l, int c);
     const float& mat3ValueAt(const glm::mat3& m, int l, int c);
     float& mat4ValueAt(glm::mat4& m, int l, int c);

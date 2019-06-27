@@ -27,8 +27,7 @@ int main(int argc, const char * argv[]) {
     }
     if (loopLeaks) {
         std::cout << "test leaks..." << std::endl;
-        while (1)
-            sleep(1);
+        while (1);
     }
     return EXIT_SUCCESS;
 }

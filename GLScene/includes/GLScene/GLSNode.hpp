@@ -48,6 +48,8 @@ namespace GLS {
         const glm::mat4 getTransformMatrix() const;
         const glm::mat4 getWorldTransformMatrix();
         const glm::mat4 getWorldTransformMatrix() const;
+        const glm::mat4 getParentNodeRelativeTransformMatrix(std::shared_ptr<Node> parent);
+        const glm::mat4 getParentNodeRelativeTransformMatrix(const std::shared_ptr<Node> parent) const;
 
 
         // Hierarchy

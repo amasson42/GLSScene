@@ -35,23 +35,19 @@ namespace GLS {
         SkinnedVertex(const glm::vec3& o,
             const glm::vec3& n,
             const glm::vec2& u);
-    };
 
-    struct Joint {
-        int id;
-        std::string name;
-        std::vector<Joint> childs;
-        Transform transform;
-
-        Joint(int id = 0, std::string name = "root");
-
-        void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, glm::mat4 parentMatrix = glm::mat4(1)) const;
+        bool addWeight(int id, float weight);
     };
 
     class SkinnedMesh : public IRenderable {
 
     public:
-        static const int maxBones = 32;
+        static const int maxBones = 64;
+
+        struct Bone {
+            std::weak_ptr<Node> node;
+            glm::mat4 offset;
+        };
 
     protected:
         std::vector<SkinnedVertex> _vertices;
@@ -61,7 +57,8 @@ namespace GLS {
         GLuint _indicesBuffer;
         GLuint _elementsBuffer;
 
-        Joint _rootBone;
+        Bone _rootBone;
+        std::vector<Bone> _bones;
         
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
@@ -70,6 +67,7 @@ namespace GLS {
         glm::vec3 _outlineColor;
         float _outlineSize;
 
+        void _sendBonesToShaderProgram(std::shared_ptr<ShaderProgram> program);
     public:
 
         class BufferCreationException : public std::exception {
@@ -82,15 +80,14 @@ namespace GLS {
         
         SkinnedMesh& operator=(const SkinnedMesh& copy);
 
-        static std::shared_ptr<SkinnedMesh> loadFromAiMesh(aiMesh* mesh, bool generateBuffers = true);
+        static std::shared_ptr<SkinnedMesh> loadFromAiMesh(aiMesh* mesh, std::shared_ptr<Node> sceneRootNode, std::shared_ptr<Node> rootBone, bool generateBuffers = true);
 
         // SkinnedMesh utilities
 
         std::vector<SkinnedVertex>& verticesRef();
         std::vector<GLuint>& indicesRef();
 
-        const Joint& rootBoneRef() const;
-        Joint& rootBoneRef();
+        std::shared_ptr<Node> rootBone() const;
 
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
         

@@ -17,7 +17,7 @@ namespace GLS {
     SkinnedMesh::SkinnedMesh() :
     _vertices(), _indices(),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
-    _rootBone(),
+    _rootBone(), _bones(),
     _shaderProgram(nullptr),
     _material(nullptr),
     _outlined(false)
@@ -28,7 +28,7 @@ namespace GLS {
     SkinnedMesh::SkinnedMesh(const SkinnedMesh& copy) :
     _vertices(copy._vertices), _indices(copy._indices),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
-    _rootBone(copy._rootBone),
+    _rootBone(copy._rootBone), _bones(copy._bones),
     _shaderProgram(copy._shaderProgram),
     _material(copy._material),
     _outlined(copy._outlined), _outlineColor(copy._outlineColor), _outlineSize(copy._outlineSize)

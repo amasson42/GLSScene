@@ -48,6 +48,22 @@ namespace GLS {
             return _parent.lock()->getWorldTransformMatrix() * getTransformMatrix();
     }
 
+    const glm::mat4 Node::getParentNodeRelativeTransformMatrix(std::shared_ptr<Node> parent) {
+        if (this == parent.get())
+            return glm::mat4(1);
+        if (_parent.expired())
+            return glm::inverse(parent->getWorldTransformMatrix()) * getTransformMatrix();
+        return _parent.lock()->getParentNodeRelativeTransformMatrix(parent) * getTransformMatrix();
+    }
+
+    const glm::mat4 Node::getParentNodeRelativeTransformMatrix(const std::shared_ptr<Node> parent) const {
+        if (this == parent.get())
+            return glm::mat4(1);
+        if (_parent.expired())
+            return glm::inverse(parent->getWorldTransformMatrix()) * getTransformMatrix();
+        return _parent.lock()->getParentNodeRelativeTransformMatrix(parent) * getTransformMatrix();
+    }
+
     bool Node::isActive() const {
         return _active;
     }
