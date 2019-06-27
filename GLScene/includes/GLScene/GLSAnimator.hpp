@@ -50,12 +50,14 @@ namespace GLS {
         }
 
         Animator(std::ifstream& input) : _keyframes() {
-            Aframe frame = Aframe();
-            std::string line;
-            while (std::getline(input, line)) {
-                std::vector<std::string> words = _splitWithSpaces(line);
-                if (readValueFromWords(words, frame) == 0)
-                    frame.readValuesFromWords(words);
+            if (input.is_open()) {
+                Aframe frame = Aframe();
+                std::string line;
+                while (std::getline(input, line)) {
+                    std::vector<std::string> words = _splitWithSpaces(line);
+                    if (readValueFromWords(words, frame) == 0)
+                        frame.readValuesFromWords(words);
+                }
             }
         }
 
@@ -83,6 +85,8 @@ namespace GLS {
         }
 
         Aframe frameAt(double time) const {
+            if (_keyframes.empty())
+                return Aframe();
             auto it = _keyframes.begin();
             if (it->first > time) {
                 return it->second;
@@ -102,6 +106,8 @@ namespace GLS {
         }
 
         Aframe& firstFrameAfter(double time) {
+            if (_keyframes.empty())
+                throw std::exception();
             for (auto it = _keyframes.begin(); it != _keyframes.end(); ++it) {
                 if (it->first > time)
                     return it->second;

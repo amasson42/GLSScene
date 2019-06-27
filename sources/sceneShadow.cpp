@@ -5,15 +5,18 @@ float degreeToRadians(float deg) {
     return deg * M_PI / 180.0;
 }
 
-static std::shared_ptr<GLS::Node> bigCubeNode = nullptr;
-static std::shared_ptr<GLS::Node> lightPivotNode = nullptr;
-static std::shared_ptr<GLS::Node> cubesPivotNode = nullptr;
-static std::shared_ptr<GLS::InstancedMesh> instancedMeshFloater = nullptr;
-static std::weak_ptr<GLS::ParticleSystem> particleSystem;
+ShadowSceneController::ShadowSceneController(AppEnv *e) :
+ISceneController(e) {
 
-void updateSceneShadow(const AppEnv& env) {
-    double et = env.currentTime;
-    double dt = env.deltaTime;
+}
+
+ShadowSceneController::~ShadowSceneController() {
+
+}
+
+void ShadowSceneController::update() {
+    double et = env->currentTime;
+    double dt = env->deltaTime;
 
     if (bigCubeNode != nullptr) {
         bigCubeNode->transform().setEulerAngles(glm::vec3(sin(et * 0.3) * 0.5, et * 0.2, 0));
@@ -45,18 +48,18 @@ float randFloat() {
     return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 }
 
-void loadSceneShadow(const AppEnv& env) {
+void ShadowSceneController::makeScene() {
 
-    GLS::Scene& scene(*env.scene);
+    GLS::Scene& scene(*env->scene);
 
     auto texturedMaterial = std::make_shared<GLS::Material>();
     texturedMaterial->specular = glm::vec3(0.1);
     texturedMaterial->shininess = 64;
     try {
-        std::shared_ptr<std::string> diffuseName = env.getArgument("-diffuse");
+        std::shared_ptr<std::string> diffuseName = env->getArgument("-diffuse");
         if (diffuseName != nullptr)
             texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(*diffuseName);
-        std::shared_ptr<std::string> normalName = env.getArgument("-normal");
+        std::shared_ptr<std::string> normalName = env->getArgument("-normal");
         if (normalName)
             texturedMaterial->texture_normal = std::make_shared<GLS::Texture>(*normalName);
     } catch (std::exception& e) {

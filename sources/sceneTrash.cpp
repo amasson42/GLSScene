@@ -1,8 +1,17 @@
 
 #include "sceneTest.hpp"
 
-void loadSceneTrash(const AppEnv& env) {
-    GLS::Scene& scene(*env.scene);
+TrashSceneController::TrashSceneController(AppEnv *e) :
+ISceneController(e) {
+
+}
+
+TrashSceneController::~TrashSceneController() {
+    
+}
+
+void TrashSceneController::makeScene() {
+    GLS::Scene& scene(*env->scene);
 
     std::shared_ptr<GLS::Node> triangleNode = std::make_shared<GLS::Node>();
     triangleNode->setName("triangles");
@@ -63,8 +72,8 @@ void loadSceneTrash(const AppEnv& env) {
     try {
         std::shared_ptr<GLS::Node> nsNode = std::make_shared<GLS::Node>();
         std::string nsPath = "../models/nanosuit/nanosuit.obj";
-        if (env.getArgument("-model") != nullptr)
-            nsPath = *env.getArgument("-model");
+        if (env->getArgument("-model") != nullptr)
+            nsPath = *env->getArgument("-model");
         nsNode->loadFromFile(nsPath);
         scene.rootNode()->addChildNode(nsNode);
     } catch (std::exception& e) {
@@ -151,5 +160,9 @@ void loadSceneTrash(const AppEnv& env) {
     } catch (std::exception& e) {
         std::cout << "can't load skybox textures with exception: " << e.what() << std::endl;
     }
+
+}
+
+void TrashSceneController::update() {
 
 }

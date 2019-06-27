@@ -1,15 +1,19 @@
 
 #include "sceneTest.hpp"
 
-static std::weak_ptr<GLS::ParticleSystem> particleSystem;
-static std::shared_ptr<GLS::Node> cameraNode = nullptr;
-static std::shared_ptr<GLS::Node> gravityCenterNode = nullptr;
-static std::shared_ptr<GLS::Texture> particleTexture = nullptr;
+ParticuleSystemSceneController::ParticuleSystemSceneController(AppEnv *e) :
+ISceneController(e) {
 
-void updateSceneParticuleSystem(const AppEnv& env) {
-    double dt = env.deltaTime;
+}
 
-    glm::vec2 windowMousePos = env.mouseContextPosition();
+ParticuleSystemSceneController::~ParticuleSystemSceneController() {
+    
+}
+
+void ParticuleSystemSceneController::update() {
+    double dt = env->deltaTime;
+
+    glm::vec2 windowMousePos = env->mouseContextPosition();
 
     if (!particleSystem.expired()) {
         std::shared_ptr<GLS::ParticleSystem> ps = particleSystem.lock();
@@ -22,18 +26,17 @@ void updateSceneParticuleSystem(const AppEnv& env) {
         if (gravityCenterNode != nullptr)
             gravityCenterNode->transform().setPosition(gc);
 
-        if (glfwGetKey(env.window, GLFW_KEY_T) == GLFW_PRESS) {
+        if (glfwGetKey(env->window, GLFW_KEY_T) == GLFW_PRESS) {
             ps->setTexture(nullptr);
         }
-        if (glfwGetKey(env.window, GLFW_KEY_Y) == GLFW_PRESS) {
+        if (glfwGetKey(env->window, GLFW_KEY_Y) == GLFW_PRESS) {
             ps->setTexture(particleTexture);
         }
     }
 }
 
-void loadSceneParticuleSystem(const AppEnv& env) {
-
-    GLS::Scene& scene(*env.scene);
+void ParticuleSystemSceneController::makeScene() {
+    GLS::Scene& scene(*env->scene);
 
     cameraNode = std::make_shared<GLS::Node>();
     {
@@ -47,7 +50,7 @@ void loadSceneParticuleSystem(const AppEnv& env) {
     scene.rootNode()->addChildNode(cameraNode);
 
     GLS::ParticleSystemProperties psProperties;
-    std::shared_ptr<std::string> kernelFilename = env.getArgument("-kernel");
+    std::shared_ptr<std::string> kernelFilename = env->getArgument("-kernel");
     if (kernelFilename != nullptr) {
         std::ifstream file(*kernelFilename);
         file.seekg(0, file.end);
@@ -60,12 +63,12 @@ void loadSceneParticuleSystem(const AppEnv& env) {
         delete[] buffer;
     }
 
-    std::shared_ptr<std::string> particleCount = env.getArgument("-count");
+    std::shared_ptr<std::string> particleCount = env->getArgument("-count");
     if (particleCount != nullptr) {
         psProperties.count = atoi(particleCount->c_str());
     }
 
-    std::shared_ptr<std::string> textureFilename = env.getArgument("-texture");
+    std::shared_ptr<std::string> textureFilename = env->getArgument("-texture");
     if (textureFilename != nullptr) {
         particleTexture = std::make_shared<GLS::Texture>(*textureFilename);
     }

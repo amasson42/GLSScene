@@ -8,24 +8,6 @@
 
 #include "sceneTest.hpp"
 
-void (*loadScene)(const AppEnv& env)     = loadSceneTrash;
-void (*updateScene)(const AppEnv& env)   = nullptr;
-
-// void (*loadScene)(const AppEnv& env)     = loadSceneHuman;
-// void (*updateScene)(const AppEnv& env)   = updateSceneHuman;
-
-// void (*loadScene)(const AppEnv& env)     = loadSceneShadow;
-// void (*updateScene)(const AppEnv& env)   = updateSceneShadow;
-
-// void (*loadScene)(const AppEnv& env)     = loadSceneVoxel;
-// void (*updateScene)(const AppEnv& env)   = updateSceneVoxel;
-
-// void (*loadScene)(const AppEnv& env)     = loadSceneVoxelProcedural;
-// void (*updateScene)(const AppEnv& env)   = updateSceneVoxelProcedural;
-
-// void (*loadScene)(const AppEnv& env)     = loadSceneParticuleSystem;
-// void (*updateScene)(const AppEnv& env)   = updateSceneParticuleSystem;
-
 AppEnv::AppEnv(const std::vector<std::string>& as) :
     args(as),
     mustUpdate(true)
@@ -67,7 +49,9 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
     glfwGetFramebufferSize(window, &windowBufferWidth, &windowBufferHeight);
 
     scene = std::make_shared<GLS::Scene>(glm::vec2(windowBufferWidth, windowBufferHeight));
-    loadScene(*this);
+
+    controller = new VoxelProceduralSceneController(this);
+    controller->makeScene();
 
     scene->rootNode()->sendToFlux(std::cout, ":");
 
@@ -78,6 +62,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
 AppEnv::~AppEnv() {
     std::cout << "Ending..." << std::endl;
+    delete controller;
     scene = nullptr;
     GLS::glsDeinit();
     glfwTerminate();
@@ -129,8 +114,8 @@ void AppEnv::loop() {
 
         processInput();
 
-        if (mustUpdate && updateScene != nullptr)
-            updateScene(*this);
+        if (mustUpdate)
+            controller->update();
 
         scene->renderInContext(effectFramebuffer);
         effectFramebuffer->unbind();

@@ -1,15 +1,19 @@
 
 #include "sceneTest.hpp"
 
-static std::shared_ptr<GLS::Node> mainChunkNode = nullptr;
-static std::shared_ptr<GLS::VoxelChunk> mainChunk = nullptr;
-static std::array<std::weak_ptr<GLS::VoxelChunk>, 6> neighbourgsChunks;
+VoxelSceneController::VoxelSceneController(AppEnv *e) :
+ISceneController(e) {
+    removeBlockCD = 1.0;
+    i = 0;
+}
 
-void updateSceneVoxel(const AppEnv& env) {
-    double et = env.currentTime;
-    double dt = env.deltaTime;
-    static double removeBlockCD = 1.0;
-    static int i = 0;
+VoxelSceneController::~VoxelSceneController() {
+
+}
+
+void VoxelSceneController::update() {
+    double et = env->currentTime;
+    double dt = env->deltaTime;
 
     if (mainChunkNode != nullptr) {
         mainChunkNode->transform().setEulerAngles(glm::vec3(0, sin(et * 0.05), 0));
@@ -38,21 +42,21 @@ void updateSceneVoxel(const AppEnv& env) {
     }
 }
 
-void loadSceneVoxel(const AppEnv& env) {
+void VoxelSceneController::makeScene() {
 
-    GLS::Scene& scene(*env.scene);
+    GLS::Scene& scene(*env->scene);
 
     auto texturedMaterial = std::make_shared<GLS::Material>();
     texturedMaterial->specular = glm::vec3(0.1);
     texturedMaterial->shininess = 64;
     try {
-        std::shared_ptr<std::string> diffuseName = env.getArgument("-diffuse");
+        std::shared_ptr<std::string> diffuseName = env->getArgument("-diffuse");
         if (diffuseName != nullptr) {
             texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(*diffuseName);
             texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         }
-        std::shared_ptr<std::string> normalName = env.getArgument("-normal");
+        std::shared_ptr<std::string> normalName = env->getArgument("-normal");
         if (normalName != nullptr)
             texturedMaterial->texture_normal = std::make_shared<GLS::Texture>(*normalName);
     } catch (std::exception& e) {

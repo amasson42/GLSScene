@@ -211,11 +211,18 @@ class Human {
 
 };
 
-static std::shared_ptr<Human> hooman = nullptr;
-static std::shared_ptr<GLS::Animator<HumanAnimationState> > hoomanAnimator = nullptr;
+HumanSceneController::HumanSceneController(AppEnv *e) :
+ISceneController(e) {
+    hooman = nullptr;
+    hoomanAnimator = nullptr;
+}
 
-void loadSceneHuman(const AppEnv& env) {
-    GLS::Scene& scene(*env.scene);
+HumanSceneController::~HumanSceneController() {
+    
+}
+
+void HumanSceneController::makeScene() {
+    GLS::Scene& scene(*env->scene);
 
     // camera and light
     T_Node cameraNode = newNode();
@@ -242,7 +249,7 @@ void loadSceneHuman(const AppEnv& env) {
     humanNode->addChildNode(hooman->node());
     scene.rootNode()->addChildNode(humanNode);
 
-    std::shared_ptr<std::string> animationFilename = env.getArgument("-animation");
+    std::shared_ptr<std::string> animationFilename = env->getArgument("-animation");
     if (animationFilename != nullptr) {
         std::ifstream animationFile(*animationFilename);
         hoomanAnimator = std::make_shared<GLS::Animator<HumanAnimationState> >(animationFile);
@@ -262,10 +269,10 @@ void loadSceneHuman(const AppEnv& env) {
 
 }
 
-void updateSceneHuman(const AppEnv& env) {
+void HumanSceneController::update() {
 
     if (hoomanAnimator != nullptr && hooman != nullptr) {
-        float loopTime = fmod(env.currentTime, hoomanAnimator->time());
+        float loopTime = fmod(env->currentTime, hoomanAnimator->time());
         hooman->applyFrame(hoomanAnimator->frameAt(loopTime));
     }
 }

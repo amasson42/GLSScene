@@ -188,12 +188,17 @@ class VoxelWorld {
 
 };
 
-static std::shared_ptr<GLS::Node> worldNode = nullptr;
-static std::shared_ptr<GLS::Node> cameraNode = nullptr;
+VoxelProceduralSceneController::VoxelProceduralSceneController(AppEnv *e) :
+ISceneController(e) {
+    lt = 0;
+}
 
-void updateSceneVoxelProcedural(const AppEnv& env) {
-    double et = env.currentTime;
-    static double lt = et;
+VoxelProceduralSceneController::~VoxelProceduralSceneController() {
+
+}
+
+void VoxelProceduralSceneController::update() {
+    double et = env->currentTime;
 
     if (et - lt >= 0.3) {
         lt = et;
@@ -222,9 +227,9 @@ void updateSceneVoxelProcedural(const AppEnv& env) {
     }
 }
 
-void loadSceneVoxelProcedural(const AppEnv& env) {
+void VoxelProceduralSceneController::makeScene() {
 
-    GLS::Scene& scene(*env.scene);
+    GLS::Scene& scene(*env->scene);
 
     initNoise(time(NULL));
 
@@ -232,7 +237,7 @@ void loadSceneVoxelProcedural(const AppEnv& env) {
     texturedMaterial->specular = glm::vec3(0.1);
     texturedMaterial->shininess = 64;
     try {
-        std::shared_ptr<std::string> textureName = env.getArgument("-texture");
+        std::shared_ptr<std::string> textureName = env->getArgument("-texture");
         std::string filePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures.png";
         texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(filePath);
         texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
