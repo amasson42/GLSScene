@@ -13,7 +13,7 @@
 
 namespace GLS {
     
-    class Node {
+    class Node : public std::enable_shared_from_this<Node> {
         
         std::string _name;
         Transform _transform;
