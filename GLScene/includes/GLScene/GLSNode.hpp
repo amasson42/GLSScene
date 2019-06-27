@@ -52,13 +52,15 @@ namespace GLS {
 
         // Hierarchy
         
-        const std::vector<std::shared_ptr<Node> >& childNodes();
+        const std::vector<std::shared_ptr<Node> >& childNodes() const;
         std::shared_ptr<Node> childNodeAt(size_t i) const;
+        std::shared_ptr<Node> childNodeNamed(std::string name, bool recursively = false) const;
 
         void addChildNode(std::shared_ptr<Node> node);
         void removeChildNode(std::shared_ptr<Node> node);
         void removeChildNode(Node* node);
         
+        std::shared_ptr<Node> getParentNode() const;
         bool hasParentNode(std::shared_ptr<Node> node) const;
         void removeFromParent();
         
@@ -70,7 +72,7 @@ namespace GLS {
 
         const std::vector<std::shared_ptr<IRenderable> >& renderables() const;
         void addRenderable(std::shared_ptr<IRenderable> renderable);
-        void removeRenderableIndex(size_t i);
+        void removeRenderableAt(size_t i);
 
         std::pair<glm::vec3, glm::vec3> getBounds() const;
 

@@ -64,7 +64,7 @@ namespace GLS {
         _renderables.push_back(renderable);
     }
 
-    void Node::removeRenderableIndex(size_t i) {
+    void Node::removeRenderableAt(size_t i) {
         if (i < _renderables.size() - 1) {
             _renderables.erase(_renderables.begin() + i);
         } else if (i == _renderables.size() - 1) {

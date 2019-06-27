@@ -10,13 +10,27 @@
 
 namespace GLS {
 
-    const std::vector<std::shared_ptr<Node> >& Node::childNodes() {
+    const std::vector<std::shared_ptr<Node> >& Node::childNodes() const {
         return _childs;
     }
 
     std::shared_ptr<Node> Node::childNodeAt(size_t i) const {
         if (i < _childs.size())
             return _childs[i];
+        return nullptr;
+    }
+
+    std::shared_ptr<Node> Node::childNodeNamed(std::string name, bool recursively) const {
+        for (size_t i = 0; i < _childs.size(); i++) {
+            if (_childs[i]->_name == name) {
+                return _childs[i];
+            }
+            if (recursively) {
+                std::shared_ptr<Node> n = _childs[i]->childNodeNamed(name, recursively);
+                if (n != nullptr)
+                    return n;
+            }
+        }
         return nullptr;
     }
 
@@ -38,6 +52,12 @@ namespace GLS {
                 _childs.erase(it);
                 return;
             }
+    }
+
+    std::shared_ptr<Node> Node::getParentNode() const {
+        if (_parent.expired())
+            return nullptr;
+        return _parent.lock();
     }
 
     bool Node::hasParentNode(std::shared_ptr<Node> node) const {
