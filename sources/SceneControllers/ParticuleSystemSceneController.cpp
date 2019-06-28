@@ -1,5 +1,5 @@
 
-#include "sceneTest.hpp"
+#include "SceneController.hpp"
 
 ParticuleSystemSceneController::ParticuleSystemSceneController(AppEnv *e) :
 ISceneController(e) {
@@ -11,6 +11,9 @@ ParticuleSystemSceneController::~ParticuleSystemSceneController() {
 }
 
 void ParticuleSystemSceneController::update() {
+    ISceneController::update();
+    if (!mustUpdate)
+        return;
     double dt = env->deltaTime;
 
     glm::vec2 windowMousePos = env->mouseContextPosition();

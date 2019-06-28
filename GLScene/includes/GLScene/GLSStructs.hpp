@@ -60,6 +60,52 @@ namespace GLS {
         void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
     };
 
+    enum GLObjectType {
+        GLOBJECT_UNKNOWN,
+        GLOBJECT_BUFFER,
+        GLOBJECT_VERTEXARRAY,
+        GLOBJECT_FRAMEBUFFER,
+        GLOBJECT_RENDERBUFFER,
+        GLOBJECT_SHADER,
+        GLOBJECT_SHADERPROGRAM,
+        GLOBJECT_TEXTURE,
+        GLOBJECT_CLOBJECT
+    };
+
+    class GLObjectCreationException : public std::exception {
+        public:
+        const GLObjectType type;
+        GLObjectCreationException(GLObjectType type);
+        const char *what() const throw();
+    };
+
+    enum ShaderBuildingErrorType {
+        SHADERBUILDING_COMPILATION,
+        SHADERBUILDING_LINK
+    };
+
+    class ShaderBuildingException : public std::exception {
+        public:
+        const ShaderBuildingErrorType type;
+        const std::string infoLog;
+        ShaderBuildingException(ShaderBuildingErrorType type, std::string infoLog);
+        const char *what() const throw();
+    };
+
+    class FileLoadingException : public std::exception {
+        std::string _customMessage;
+        public:
+        FileLoadingException(std::string message);
+        const char *what() const throw();
+    };
+
+    class InvalidDataException : public std::exception {
+        std::string _customMessage;
+        public:
+        InvalidDataException(std::string message);
+        const char *what() const throw();
+    };
+
 }
 
 #endif /* GLSStructs_h */

@@ -14,7 +14,7 @@ namespace GLS {
     _size(100, 100),
     _rootNode(std::make_shared<Node>()),
     _cameraNode(), _skybox(nullptr),
-    _background(0.2)
+    _background(0)
     {
         _rootNode->setName("root");
     }

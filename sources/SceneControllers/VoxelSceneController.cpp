@@ -1,5 +1,5 @@
 
-#include "sceneTest.hpp"
+#include "SceneController.hpp"
 
 VoxelSceneController::VoxelSceneController(AppEnv *e) :
 ISceneController(e) {
@@ -12,6 +12,9 @@ VoxelSceneController::~VoxelSceneController() {
 }
 
 void VoxelSceneController::update() {
+    ISceneController::update();
+    if (!mustUpdate)
+        return;
     double et = env->currentTime;
     double dt = env->deltaTime;
 

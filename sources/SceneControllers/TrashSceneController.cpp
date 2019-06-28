@@ -1,5 +1,5 @@
 
-#include "sceneTest.hpp"
+#include "SceneController.hpp"
 
 TrashSceneController::TrashSceneController(AppEnv *e) :
 ISceneController(e) {
@@ -164,5 +164,7 @@ void TrashSceneController::makeScene() {
 }
 
 void TrashSceneController::update() {
-
+    ISceneController::update();
+    if (!mustUpdate)
+        return;
 }

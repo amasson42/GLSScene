@@ -10,7 +10,7 @@
 
 namespace GLS {
 
-    void InstancedMesh::generateBuffers() throw(BufferCreationException) {
+    void InstancedMesh::generateBuffers() {
         Mesh::generateBuffers();
         if (!Mesh::bufferGenerated())
             return;
@@ -18,7 +18,7 @@ namespace GLS {
         glGenBuffers(1, &_transformsBuffer);
         if (_transformsBuffer == 0) {
             Mesh::deleteBuffers();
-            throw BufferCreationException();
+            throw GLObjectCreationException(GLOBJECT_BUFFER);
         }
 
         glBindBuffer(GL_ARRAY_BUFFER, _transformsBuffer);

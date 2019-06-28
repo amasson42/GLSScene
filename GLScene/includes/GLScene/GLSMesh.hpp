@@ -98,16 +98,6 @@ namespace GLS {
 
     public:
 
-        class BufferCreationException : public std::exception {
-            public:
-            const char* what() const throw();
-        };
-
-        class LoadMeshException : public std::exception {
-            public:
-            const char* what() const throw();
-        };
-
         Mesh();
         Mesh(const Mesh& copy);
         virtual ~Mesh();
@@ -136,7 +126,7 @@ namespace GLS {
 
         // OpenGL Buffers
          
-        virtual void generateBuffers() throw(BufferCreationException);
+        virtual void generateBuffers();
         virtual void deleteBuffers();
         
         virtual bool bufferGenerated() const;
@@ -157,7 +147,7 @@ namespace GLS {
         static std::shared_ptr<Mesh> cube(GLfloat width, GLfloat height, GLfloat length, bool generateBuffers = true);
         static std::shared_ptr<Mesh> sphere(GLfloat radius, unsigned int ringCount = 12, bool generateBuffers = true);
         static std::shared_ptr<Mesh> thinLine(glm::vec3 start, glm::vec3 end, bool generateBuffers = true);
-        static std::shared_ptr<Mesh> objModel(std::string path, bool generateBuffers = true) /*throw(LoadMeshException)*/;
+        static std::shared_ptr<Mesh> objModel(std::string path, bool generateBuffers = true);
         static std::shared_ptr<Mesh> loadFromAiMesh(aiMesh *mesh, bool generateBuffers = true);
         static std::shared_ptr<Mesh> voxelChunk(std::shared_ptr<VoxelChunk> chunk, bool generateBuffers = true);
 
@@ -198,7 +188,7 @@ namespace GLS {
 
         // OpenGL Buffers
 
-        virtual void generateBuffers() throw(BufferCreationException);
+        virtual void generateBuffers();
         virtual void deleteBuffers();
 
         virtual bool bufferGenerated() const;

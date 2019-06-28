@@ -9,14 +9,6 @@
 #include "GLSMesh.hpp"
 
 namespace GLS {
-    
-    const char* Mesh::BufferCreationException::what() const throw() {
-        return "can't create additional buffer";
-    }
-
-    const char* Mesh::LoadMeshException::what() const throw() {
-        return "can't load mesh from file";
-    }
 
     Mesh::Mesh() : _vertices(), _indices(), _drawMode(GL_TRIANGLES),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),

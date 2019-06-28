@@ -32,15 +32,10 @@ namespace GLS {
 
         public:
         
-        class CreationException : public std::exception {
-            public:
-            const char *what() const throw();
-        };
-        
         Framebuffer(GLsizei width, GLsizei height,
             bool createRenderbuffer = true,
             GLint format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE,
-            GLenum attachment = GL_COLOR_ATTACHMENT0) throw(CreationException);
+            GLenum attachment = GL_COLOR_ATTACHMENT0);
 
         virtual ~Framebuffer();
 

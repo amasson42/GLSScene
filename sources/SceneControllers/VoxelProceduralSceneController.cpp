@@ -1,5 +1,5 @@
 
-#include "sceneTest.hpp"
+#include "SceneController.hpp"
 
 #define BLOCK_AIR 0
 #define BLOCK_BEDROCK 1
@@ -198,6 +198,9 @@ VoxelProceduralSceneController::~VoxelProceduralSceneController() {
 }
 
 void VoxelProceduralSceneController::update() {
+    ISceneController::update();
+    if (!mustUpdate)
+        return;
     double et = env->currentTime;
 
     if (et - lt >= 0.3) {

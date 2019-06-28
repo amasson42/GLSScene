@@ -1,5 +1,5 @@
 
-#include "sceneTest.hpp"
+#include "SceneController.hpp"
 
 float degreeToRadians(float deg) {
     return deg * M_PI / 180.0;
@@ -15,6 +15,9 @@ ShadowSceneController::~ShadowSceneController() {
 }
 
 void ShadowSceneController::update() {
+    ISceneController::update();
+    if (!mustUpdate)
+        return;
     double et = env->currentTime;
     double dt = env->deltaTime;
 

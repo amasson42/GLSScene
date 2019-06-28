@@ -10,18 +10,18 @@
 
 namespace GLS {
 
-    void VoxelChunk::generateBuffers() throw(BufferCreationException) {
+    void VoxelChunk::generateBuffers() {
         deleteBuffers();
 
         glGenVertexArrays(1, &_blocksArray);
         if (_blocksArray == 0)
-            throw BufferCreationException();
+            throw GLObjectCreationException(GLOBJECT_VERTEXARRAY);
         glBindVertexArray(_blocksArray);
 
         glGenBuffers(1, &_blocksBuffer);
         if (_blocksBuffer == 0) {
             glDeleteVertexArrays(1, &_blocksArray);
-            throw BufferCreationException();
+            throw GLObjectCreationException(GLOBJECT_BUFFER);
         }
         glBindBuffer(GL_ARRAY_BUFFER, _blocksBuffer);
 

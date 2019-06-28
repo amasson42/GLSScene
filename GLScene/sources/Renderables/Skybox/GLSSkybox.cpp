@@ -11,14 +11,6 @@
 
 namespace GLS {
 
-    const char* Skybox::LoadingException::what() const throw() {
-        return "can't load the texture";
-    }
-
-    const char* Skybox::CreationException::what() const throw() {
-        return "can't create the skybox";
-    }
-
    GLuint Skybox::_cubebuffer = 0;
    static GLuint _cubeVbo = 0;
 
@@ -70,10 +62,10 @@ namespace GLS {
 
     Skybox::Skybox(std::vector<std::string> faces) {
         if (faces.size() != 6)
-            throw CreationException();
+            throw InvalidDataException("skybox needs exactly 6 textures");
         glGenTextures(1, &_textureid);
         if (_textureid == 0)
-            throw CreationException();
+            throw GLObjectCreationException(GLOBJECT_TEXTURE);
         glBindTexture(GL_TEXTURE_CUBE_MAP, _textureid);
 
         int width, height, bpp;
@@ -86,7 +78,7 @@ namespace GLS {
                 stbi_image_free(data);
             } else {
                 glDeleteTextures(1, &_textureid);
-                throw LoadingException();
+                throw FileLoadingException("can't load texture from file " + faces[i]);
             }
         }
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

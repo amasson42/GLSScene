@@ -24,16 +24,6 @@ namespace GLS {
 
     public:
 
-        class LoadingException : public std::exception {
-        public:
-            const char* what() const throw();
-        };
-
-        class CreationException : public std::exception {
-        public:
-            const char* what() const throw();
-        };
-
         Skybox(std::vector<std::string> faces);
 
         virtual ~Skybox();

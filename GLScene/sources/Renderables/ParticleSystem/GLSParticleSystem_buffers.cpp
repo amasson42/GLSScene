@@ -10,18 +10,18 @@
 
 namespace GLS {
 
-    void ParticleSystem::generateBuffers() throw(BufferCreationException) {
+    void ParticleSystem::generateBuffers() {
         deleteBuffers();
 
         glGenVertexArrays(1, &_glVertexArray);
         if (_glVertexArray == 0)
-            throw BufferCreationException();
+            throw GLObjectCreationException(GLOBJECT_VERTEXARRAY);
         glBindVertexArray(_glVertexArray);
 
         glGenBuffers(1, &_glBuffer);
         if (_glBuffer == 0) {
             glDeleteVertexArrays(1, &_glVertexArray);
-            throw BufferCreationException();
+            throw GLObjectCreationException(GLOBJECT_BUFFER);
         }
         glBindBuffer(GL_ARRAY_BUFFER, _glBuffer);
 
@@ -44,8 +44,10 @@ namespace GLS {
         glBufferData(GL_ARRAY_BUFFER, sizeof(Particle) * _properties.count, NULL, GL_STREAM_DRAW);
 
         CLD::Buffer clBuffer = _device->createGLBuffer(_glBuffer, &_clBufferIndex);
-        if (_clBufferIndex < 0)
-            throw std::exception(); // TODO: throw can't create buffer exception
+        if (_clBufferIndex < 0) {
+            deleteBuffers();
+            throw GLObjectCreationException(GLOBJECT_CLOBJECT);
+        }
 
         CLD::Kernel *initKernel = _device->kernel(_initKernelIndex);
         initKernel->setArgument(0, clBuffer);

@@ -10,10 +10,6 @@
 
 namespace GLS {
 
-    const char* SkinnedMesh::BufferCreationException::what() const throw() {
-        return "can't create additional buffers";
-    }
-
     SkinnedMesh::SkinnedMesh() :
     _vertices(), _indices(), _drawMode(GL_TRIANGLES),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),

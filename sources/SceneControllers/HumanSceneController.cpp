@@ -1,5 +1,5 @@
 
-#include "sceneTest.hpp"
+#include "SceneController.hpp"
 
 using namespace GLS;
 
@@ -270,7 +270,9 @@ void HumanSceneController::makeScene() {
 }
 
 void HumanSceneController::update() {
-
+    ISceneController::update();
+    if (!mustUpdate)
+        return;
     if (hoomanAnimator != nullptr && hooman != nullptr) {
         float loopTime = fmod(env->currentTime, hoomanAnimator->time());
         hooman->applyFrame(hoomanAnimator->frameAt(loopTime));

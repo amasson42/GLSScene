@@ -9,23 +9,11 @@
 #include "GLSShader.hpp"
 
 namespace GLS {
-    
-    const char *Shader::CreationException::what() const throw() {
-        return "can't create shader";
-    }
-    
-    const char *Shader::CompilationException::what() const throw() {
-        return "shader compilation failed";
-    }
-    
-    const char *Shader::CompilationException::infoLog() const {
-        return _infoLogBuffer;
-    }
-    
-    void Shader::compile() throw(CreationException, CompilationException) {
+
+    void Shader::compile() {
         _shader = glCreateShader(_type);
         if (_shader == 0) {
-            throw CreationException();
+            throw GLObjectCreationException(GLOBJECT_SHADER);
         }
         
         const char* rstr = _src.c_str();
@@ -35,14 +23,14 @@ namespace GLS {
         GLint success;
         glGetShaderiv(_shader, GL_COMPILE_STATUS, &success);
         if (!success) {
-            CompilationException e;
-            glGetShaderInfoLog(_shader, 1024, NULL, e._infoLogBuffer);
+            char infoLog[1024];
+            glGetShaderInfoLog(_shader, 1024, NULL, infoLog);
             glDeleteShader(_shader);
-            throw e;
+            throw ShaderBuildingException(SHADERBUILDING_COMPILATION, infoLog);
         }
     }
     
-    Shader::Shader(std::ifstream& file, GLenum type) throw(CreationException, CompilationException) :
+    Shader::Shader(std::ifstream& file, GLenum type) :
     _src(), _shader(0), _type(type) {
         file.seekg(0, file.end);
         size_t length = file.tellg();
@@ -55,7 +43,7 @@ namespace GLS {
         compile();
     }
     
-    Shader::Shader(std::string src, GLenum type) throw(CreationException, CompilationException) :
+    Shader::Shader(std::string src, GLenum type) :
     _src(src), _shader(0), _type(type) {
         compile();
     }
@@ -72,23 +60,11 @@ namespace GLS {
     void Shader::clearSrcs() {
         _src.clear();
     }
-    
-    const char *ShaderProgram::CreationException::what() const throw() {
-        return "can't create program";
-    }
-    
-    const char *ShaderProgram::LinkException::what() const throw() {
-        return "can't link the shaders";
-    }
-    
-    const char *ShaderProgram::LinkException::infoLog() const {
-        return _infoLogBuffer;
-    }
-    
+
     ShaderProgram::ShaderProgram(const Shader& vertex, const Shader& fragment) {
         _program = glCreateProgram();
         if (_program == 0) {
-            throw CreationException();
+            throw GLObjectCreationException(GLOBJECT_SHADERPROGRAM);
         }
         glAttachShader(_program, vertex._shader);
         glAttachShader(_program, fragment._shader);
@@ -97,17 +73,17 @@ namespace GLS {
         GLint success;
         glGetProgramiv(_program, GL_LINK_STATUS, &success);
         if (!success) {
-            LinkException e;
-            glGetProgramInfoLog(_program, 1024, NULL, e._infoLogBuffer);
+            char infoLog[1024];
+            glGetProgramInfoLog(_program, 1024, NULL, infoLog);
             glDeleteProgram(_program);
-            throw e;
+            throw ShaderBuildingException(SHADERBUILDING_LINK, infoLog);
         }
     }
 
     ShaderProgram::ShaderProgram(const Shader& vertex, const Shader& geometry, const Shader& fragment) {
         _program = glCreateProgram();
         if (_program == 0) {
-            throw CreationException();
+            throw GLObjectCreationException(GLOBJECT_SHADERPROGRAM);
         }
         glAttachShader(_program, vertex._shader);
         glAttachShader(_program, geometry._shader);
@@ -117,10 +93,10 @@ namespace GLS {
         GLint success;
         glGetProgramiv(_program, GL_LINK_STATUS, &success);
         if (!success) {
-            LinkException e;
-            glGetProgramInfoLog(_program, 1024, NULL, e._infoLogBuffer);
+            char infoLog[1024];
+            glGetProgramInfoLog(_program, 1024, NULL, infoLog);
             glDeleteProgram(_program);
-            throw e;
+            throw ShaderBuildingException(SHADERBUILDING_LINK, infoLog);
         }
     }
     

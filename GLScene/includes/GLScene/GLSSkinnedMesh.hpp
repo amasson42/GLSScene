@@ -71,10 +71,6 @@ namespace GLS {
         void _sendBonesToShaderProgram(std::shared_ptr<ShaderProgram> program);
     public:
 
-        class BufferCreationException : public std::exception {
-            public: const char* what() const throw();
-        };
-
         SkinnedMesh();
         SkinnedMesh(const SkinnedMesh& copy);
         virtual ~SkinnedMesh();
@@ -102,7 +98,7 @@ namespace GLS {
 
         // OpenGL Buffers
         
-        virtual void generateBuffers() throw(BufferCreationException);
+        virtual void generateBuffers();
         virtual void deleteBuffers();
         
         virtual bool bufferGenerated() const;

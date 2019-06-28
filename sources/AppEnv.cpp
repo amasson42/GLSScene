@@ -6,11 +6,18 @@
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#include "sceneTest.hpp"
+#include "AppEnv.hpp"
+
+static void _keyCallBack(GLFWwindow *w, int k, int s, int a, int m) {
+    AppEnv *e = static_cast<AppEnv*>(glfwGetWindowUserPointer(w));
+    if (e == NULL)
+        std::cout << "No input handle" << std::endl;
+    else
+        e->controller->keyCallBack(w, k, s, a, m);
+}
 
 AppEnv::AppEnv(const std::vector<std::string>& as) :
-    args(as),
-    mustUpdate(true)
+    args(as)
 {
     if (!glfwInit()) {
         std::cerr << "Can't init GLFW" << std::endl;
@@ -38,9 +45,9 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
     try {
         GLS::glsInit();
-    } catch (GLS::Shader::CompilationException& e) {
+    } catch (GLS::ShaderBuildingException& e) {
         std::cout << e.what() << std::endl;
-        std::cout << e.infoLog() << std::endl;
+        std::cout << e.infoLog << std::endl;
         glfwSetWindowShouldClose(window, true);
         glfwTerminate();
         throw std::exception();
@@ -50,8 +57,11 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
     scene = std::make_shared<GLS::Scene>(glm::vec2(windowBufferWidth, windowBufferHeight));
 
-    controller = new TrashSceneController(this);
+    controller = new ShadowSceneController(this);
     controller->makeScene();
+
+    glfwSetWindowUserPointer(window, this);
+    glfwSetKeyCallback(window, _keyCallBack);
 
     scene->rootNode()->sendToFlux(std::cout, ":");
 
@@ -87,10 +97,10 @@ std::shared_ptr<GLS::Framebuffer> AppEnv::createEffectFramebuffer() {
                 std::shared_ptr<GLS::Shader> effectShader = std::make_shared<GLS::Shader>(effectShaderFile, GL_FRAGMENT_SHADER);
                 postProcessShaderProgram = std::make_shared<GLS::ShaderProgram>(*GLS::Shader::standardVertexScreenTexture(), *effectShader);
                 effectFrame->setProgram(postProcessShaderProgram);
-            } catch (GLS::Shader::CompilationException& e) {
+            } catch (GLS::ShaderBuildingException& e) {
                 std::cerr << "Post processing effect compilation error" << std::endl;
                 std::cerr << e.what() << std::endl;
-                std::cerr << e.infoLog() << std::endl;
+                std::cerr << e.infoLog << std::endl;
             } catch (std::exception& e) {
                 std::cerr << "Can't create post processing effect" << std::endl << e.what() << std::endl;
             }
@@ -108,14 +118,23 @@ void AppEnv::loop() {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+        mousePosition = glm::vec2(mouseX, mouseY);
+        if (postProcessShaderProgram != nullptr) {
+            glm::vec2 devicePos = mouseContextPosition();
+            postProcessShaderProgram->use();
+            glUniform2f(postProcessShaderProgram->getLocation("u_mouse_position"), devicePos.x, devicePos.y);
+            glUniform1f(postProcessShaderProgram->getLocation("u_time"), currentTime);
+        }
+        // std::cout << "mouse position: " << mousePosition << " -> " << mouseContextPosition() << std::endl;
+
+
         double newTime = glfwGetTime();
         deltaTime = newTime - currentTime;
         currentTime = newTime;
 
-        processInput();
-
-        if (mustUpdate)
-            controller->update();
+        controller->update();
 
         scene->renderInContext(effectFramebuffer);
         effectFramebuffer->unbind();
@@ -166,77 +185,6 @@ void AppEnv::checkSize(std::shared_ptr<GLS::Framebuffer> effectFramebuffer) {
         scene->setSize(newSize);
         effectFramebuffer = std::make_shared<GLS::Framebuffer>(windowBufferWidth, windowBufferHeight);
     }
-}
-
-void AppEnv::processInput() {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-    
-    if (!scene->cameraNode().expired()) {
-        GLS::Node& cam(*scene->cameraNode().lock());
-        static float cameraAngleX = cam.transform().eulerAngles().x;
-        static float cameraAngleY = cam.transform().eulerAngles().y;
-
-        float cameraSpeed = 5.0 * deltaTime;
-        glm::mat4 cameraMat = cam.getWorldTransformMatrix();
-        glm::vec3 cameraFront = glm::vec3(cameraMat * glm::vec4(0, 0, -1, 0));
-        glm::vec3 cameraRight = glm::vec3(cameraMat * glm::vec4(1, 0, 0, 0));
-        glm::vec3 cameraUp = glm::vec3(cameraMat * glm::vec4(0, 1, 0, 0));
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-            cam.transform().moveBy(cameraSpeed * cameraFront);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-            cam.transform().moveBy(-cameraSpeed * cameraFront);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-            cam.transform().moveBy(-cameraSpeed * cameraRight);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-            cam.transform().moveBy(cameraSpeed * cameraRight);
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-            cam.transform().moveBy(cameraSpeed * cameraUp);
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-            cam.transform().moveBy(-cameraSpeed * cameraUp);
-
-        float cameraRotateSpeed = 3.0 * deltaTime;
-        bool changeCamera = true;
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-            cameraAngleY += cameraRotateSpeed;
-        else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-            cameraAngleY -= cameraRotateSpeed;
-        else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-            cameraAngleX -= cameraRotateSpeed;
-        else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-            cameraAngleX += cameraRotateSpeed;
-        else
-            changeCamera = false;
-
-        if (changeCamera)
-            cam.transform().setEulerAngles(cameraAngleX, cameraAngleY, 0);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-        if (glIsEnabled(GL_FRAMEBUFFER_SRGB))
-            glDisable(GL_FRAMEBUFFER_SRGB);
-        else
-            glEnable(GL_FRAMEBUFFER_SRGB);
-    }
-
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-        mustUpdate = false;
-    }
-    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-        mustUpdate = true;
-    }
-
-    double mouseX, mouseY;
-    glfwGetCursorPos(window, &mouseX, &mouseY);
-    mousePosition = glm::vec2(mouseX, mouseY);
-    if (postProcessShaderProgram != nullptr) {
-        glm::vec2 devicePos = mouseContextPosition();
-        postProcessShaderProgram->use();
-        glUniform2f(postProcessShaderProgram->getLocation("u_mouse_position"), devicePos.x, devicePos.y);
-        glUniform1f(postProcessShaderProgram->getLocation("u_time"), currentTime);
-    }
-    // std::cout << "mouse position: " << mousePosition << " -> " << mouseContextPosition() << std::endl;
 }
 
 glm::vec2 AppEnv::mouseContextPosition() const {

@@ -51,18 +51,17 @@ namespace GLS {
         return nMesh;
     }
 
-    std::shared_ptr<Mesh> Mesh::objModel(std::string path, bool generateBuffers) /*throw(LoadMeshException)*/ {
+    std::shared_ptr<Mesh> Mesh::objModel(std::string path, bool generateBuffers) {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-            throw LoadMeshException();
+            throw FileLoadingException("can't open file " + path);
         }
 
-        if (!scene->HasMeshes())
-            throw LoadMeshException();
-
-        std::shared_ptr<Mesh> mesh = Mesh::loadFromAiMesh(scene->mMeshes[0]);
+        std::shared_ptr<Mesh> mesh;
+        if (scene->HasMeshes())
+            mesh = Mesh::loadFromAiMesh(scene->mMeshes[0]);
 
         if (generateBuffers)
             mesh->generateBuffers();

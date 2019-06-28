@@ -12,20 +12,12 @@
 
 namespace GLS {
 
-    const char* Texture::LoadingException::what() const throw() {
-        return "can't load the texture";
-    }
-
-    const char* Texture::CreationException::what() const throw() {
-        return "can't create additional texture";
-    }
-    
-    Texture::Texture(GLsizei width, GLsizei height, GLint format, GLenum type) throw(CreationException) {
+    Texture::Texture(GLsizei width, GLsizei height, GLint format, GLenum type) {
         _width = width;
         _height = height;
         glGenTextures(1, &_buffer);
         if (_buffer == 0) {
-            throw CreationException();
+            throw GLObjectCreationException(GLOBJECT_TEXTURE);
         }
         glBindTexture(GL_TEXTURE_2D, _buffer);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, type, NULL);
@@ -36,14 +28,14 @@ namespace GLS {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    Texture::Texture(std::string path) throw(CreationException, LoadingException){
+    Texture::Texture(std::string path) {
         int bpp;
         int width, height;
         uint8_t *data = stbi_load(path.c_str(), &width, &height, &bpp, 0);
         _width = width;
         _height = height;
         if (data == NULL) {
-            throw LoadingException();
+            throw FileLoadingException("can't load texture from file " + path);
         }
         GLuint format;
         switch (bpp) {
@@ -52,12 +44,12 @@ namespace GLS {
             case 4: format = GL_RGBA; break;
             default:
                 stbi_image_free(data);
-                throw CreationException();
+                throw InvalidDataException("unknown format of texture in file " + path);
         }
         glGenTextures(1, &_buffer);
         if (_buffer == 0) {
             stbi_image_free(data);
-            throw CreationException();
+            throw GLObjectCreationException(GLOBJECT_TEXTURE);
         }
         glBindTexture(GL_TEXTURE_2D, _buffer);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

@@ -24,19 +24,9 @@ namespace GLS {
         Texture& operator=(const Texture& copy);
         
     public:
-        
-        class LoadingException : public std::exception {
-            public:
-            const char* what() const throw();
-        };
 
-        class CreationException : public std::exception {
-            public:
-            const char* what() const throw();
-        };
-
-        Texture(GLsizei width, GLsizei height, GLint format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE) throw(CreationException);
-        Texture(std::string path) throw(CreationException, LoadingException);
+        Texture(GLsizei width, GLsizei height, GLint format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE);
+        Texture(std::string path);
         virtual ~Texture();
 
         GLuint buffer() const;

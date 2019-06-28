@@ -47,8 +47,7 @@ namespace GLS {
         
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             std::cout << "invalid scene " << path << std::endl;
-            return;
-            // TODO: throw LoadFileException();
+            throw FileLoadingException("can't load scene from " + path);
         }
         std::string directory = path.substr(0, path.find_last_of('/'));
         std::vector<std::shared_ptr<Material> > materials;

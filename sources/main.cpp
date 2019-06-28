@@ -6,7 +6,7 @@
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#include "sceneTest.hpp"
+#include "AppEnv.hpp"
 
 int main(int argc, const char * argv[]) {
     bool loopLeaks = false;

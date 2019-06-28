@@ -10,10 +10,6 @@
 
 namespace GLS {
 
-    const char *VoxelChunk::BufferCreationException::what() const throw() {
-        return "could not create additional buffer";
-    }
-
     VoxelChunk::VoxelChunk() :
     _blocksBuffer(0), _blocksArray(0),
     _shaderProgram(nullptr),

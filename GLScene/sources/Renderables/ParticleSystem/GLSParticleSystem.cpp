@@ -41,10 +41,6 @@ namespace GLS {
         _device = nullptr;
     }
 
-    const char* ParticleSystem::BufferCreationException::what() const throw() {
-        return "can't create additional buffers";
-    }
-
     ParticleSystem::ParticleSystem(ParticleSystemProperties properties) throw(CLD::GPUDevice::BuildProgramException) :
     _properties(properties),
     _texture(nullptr),
@@ -61,19 +57,19 @@ namespace GLS {
         _device->createProgram(&src, &prgmIndex); // will throw if can't compile
 
         if (prgmIndex < 0)
-            throw std::exception(); // TODO: throw can't create program exception
+            throw GLObjectCreationException(GLOBJECT_CLOBJECT);
 
         _device->createKernel(prgmIndex, "particlesystem_init", &_initKernelIndex);
         if (_initKernelIndex < 0) {
             _device->destroyProgram(prgmIndex);
-            throw std::exception(); // TODO: throw can't create kernel exception
+            throw GLObjectCreationException(GLOBJECT_CLOBJECT);
         }
 
         _device->createKernel(prgmIndex, "particlesystem_update", &_updateKernelIndex);
         if (_updateKernelIndex < 0) {
             _device->destroyKernel(_initKernelIndex);
             _device->destroyProgram(prgmIndex);
-            throw std::exception(); // TODO: throw can't create kernel exception
+            throw GLObjectCreationException(GLOBJECT_CLOBJECT);
         }
 
         _device->destroyProgram(prgmIndex);

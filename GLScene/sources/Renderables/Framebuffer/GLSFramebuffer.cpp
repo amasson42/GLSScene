@@ -9,10 +9,6 @@
 #include "GLSFramebuffer.hpp"
 
 namespace GLS {
-    
-    const char *Framebuffer::CreationException::what() const throw() {
-        return "can't create framebuffer";
-    }
 
     GLuint Framebuffer::_rectbuffer = 0;
     static GLuint _rectVbo = 0;
@@ -46,14 +42,14 @@ namespace GLS {
         glDeleteBuffers(1, &_rectVbo);
     }
 
-    Framebuffer::Framebuffer(GLsizei width, GLsizei height, bool createRenderbuffer, GLint format, GLenum type, GLenum attachment) throw(CreationException) :
+    Framebuffer::Framebuffer(GLsizei width, GLsizei height, bool createRenderbuffer, GLint format, GLenum type, GLenum attachment) :
         _framebuffer(0), _renderbuffer(0),
         _colorTexture(nullptr),
         _program(nullptr)
     {
         glGenFramebuffers(1, &_framebuffer);
         if (_framebuffer == 0) {
-            throw CreationException();
+            throw GLObjectCreationException(GLOBJECT_FRAMEBUFFER);
         }
         glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
         
@@ -61,7 +57,7 @@ namespace GLS {
             _colorTexture = std::make_shared<Texture>(width, height, format, type);
         } catch (std::exception& e) {
             glDeleteFramebuffers(1, &_framebuffer);
-            throw CreationException();
+            throw e;
         }
         _colorTexture->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         _colorTexture->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -72,7 +68,7 @@ namespace GLS {
             glGenRenderbuffers(1, &_renderbuffer);
             if (_renderbuffer == 0) {
                 glDeleteFramebuffers(1, &_framebuffer);
-                throw CreationException();
+                throw GLObjectCreationException(GLOBJECT_RENDERBUFFER);
             }
             glBindRenderbuffer(GL_RENDERBUFFER, _renderbuffer);
             glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
@@ -81,7 +77,7 @@ namespace GLS {
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
                 glDeleteFramebuffers(1, &_framebuffer);
                 glDeleteRenderbuffers(1, &_renderbuffer);
-                throw CreationException();
+                throw InvalidDataException("invalid renderbuffer");
             }
         }
 

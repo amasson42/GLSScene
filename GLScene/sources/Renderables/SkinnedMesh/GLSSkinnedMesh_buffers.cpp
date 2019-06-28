@@ -10,22 +10,22 @@
 
 namespace GLS {
 
-    void SkinnedMesh::generateBuffers() throw(BufferCreationException) {
+    void SkinnedMesh::generateBuffers() {
         deleteBuffers();
 
         glGenVertexArrays(1, &_elementsBuffer);
         if (_elementsBuffer == 0)
-            throw BufferCreationException();
+            throw GLObjectCreationException(GLOBJECT_VERTEXARRAY);
         glGenBuffers(1, &_verticesBuffer);
         if (_verticesBuffer == 0) {
             glDeleteVertexArrays(1, &_elementsBuffer);
-            throw BufferCreationException();
+            throw GLObjectCreationException(GLOBJECT_BUFFER);
         }
         glGenBuffers(1, &_indicesBuffer);
         if (_indicesBuffer == 0) {
             glDeleteVertexArrays(1, &_elementsBuffer);
             glDeleteBuffers(1, &_verticesBuffer);
-            throw BufferCreationException();
+            throw GLObjectCreationException(GLOBJECT_BUFFER);
         }
 
         glBindVertexArray(_elementsBuffer);

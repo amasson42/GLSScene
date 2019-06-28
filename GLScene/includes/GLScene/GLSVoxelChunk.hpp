@@ -41,11 +41,6 @@ namespace GLS {
 
     public:
 
-        class BufferCreationException : public std::exception {
-            public:
-            const char* what() const throw();
-        };
-
         VoxelChunk();
         VoxelChunk(const VoxelChunk& copy);
         virtual ~VoxelChunk();
@@ -81,7 +76,7 @@ namespace GLS {
 
         // OpenGL Buffers
         
-        void generateBuffers() throw(BufferCreationException);
+        void generateBuffers();
         void deleteBuffers();
         
         bool bufferGenerated() const;

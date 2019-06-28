@@ -57,11 +57,6 @@ namespace GLS {
         friend void glsDeinit();
 
     public:
-        
-        class BufferCreationException : public std::exception {
-            public:
-            const char* what() const throw();
-        };
 
         ParticleSystem(ParticleSystemProperties properties = ParticleSystemProperties()) throw(CLD::GPUDevice::BuildProgramException);
         ParticleSystem(const ParticleSystem& copy);
@@ -75,7 +70,7 @@ namespace GLS {
 
         // OpenGL Buffers
 
-        void generateBuffers() throw(BufferCreationException);
+        void generateBuffers();
         void deleteBuffers();
 
         bool bufferGenerated() const;
