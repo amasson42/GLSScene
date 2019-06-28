@@ -42,9 +42,6 @@ void ShadowSceneController::update() {
         }
         instancedMeshFloater->updateTransformsBufferValues();
     }
-    if (!particleSystem.expired()) {
-        particleSystem.lock()->animateWithDeltaTime(dt);
-    }
 }
 
 float randFloat() {
@@ -166,4 +163,5 @@ void ShadowSceneController::makeScene() {
     particleNode->addRenderable(ps);
     scene.rootNode()->addChildNode(particleNode);
     particleSystem = ps;
+    scene.addAnimatable(ps);
 }

@@ -20,6 +20,8 @@
 #include <vector>
 #include <array>
 #include <map>
+#include <set>
+#include <algorithm>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -38,6 +40,7 @@
 #include "GLScene/GLSTexture.hpp"
 
 #include "GLScene/GLSIRenderable.hpp"
+#include "GLScene/GLSIAnimatable.hpp"
 #include "GLScene/GLSFramebuffer.hpp"
 #include "GLScene/GLSMesh.hpp"
 #include "GLScene/GLSSkinnedMesh.hpp"

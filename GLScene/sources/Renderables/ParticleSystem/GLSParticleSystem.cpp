@@ -159,7 +159,7 @@ namespace GLS {
         "    else printf(\"init out... bye !\\n\");\n"
         "}\n"
         "\n"
-        "kernel void particlesystem_update(global float *buffer, const unsigned int count, double dt) {\n"
+        "kernel void particlesystem_update(global float *buffer, const unsigned int count, float dt) {\n"
         "    unsigned int i = get_global_id(0);\n"
         "    if (i < count) {\n"
         "        int p_i = i * " + std::to_string(sizeof(Particle) / sizeof(float)) + ";\n"

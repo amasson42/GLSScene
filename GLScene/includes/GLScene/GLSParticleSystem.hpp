@@ -35,7 +35,7 @@ namespace GLS {
         ParticleSystemProperties();
     };
 
-    class ParticleSystem : public IRenderable {
+    class ParticleSystem : public IRenderable, public IAnimatable {
 
         ParticleSystemProperties _properties;
         std::shared_ptr<Texture> _texture;
@@ -85,11 +85,10 @@ namespace GLS {
 
         // Animating
 
-        // TODO: create a new IInterface for animated objects
         CLD::Kernel *getInitKernel();
         CLD::Kernel *getAnimationKernel();
         virtual void initAnimation();
-        virtual void animateWithDeltaTime(double deltaTime);
+        virtual void animate(float deltaTime);
 
     };
 

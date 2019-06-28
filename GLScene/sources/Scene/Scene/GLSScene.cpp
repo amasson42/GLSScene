@@ -14,7 +14,8 @@ namespace GLS {
     _size(100, 100),
     _rootNode(std::make_shared<Node>()),
     _cameraNode(), _skybox(nullptr),
-    _background(0)
+    _background(0),
+    _animatables()
     {
         _rootNode->setName("root");
     }
@@ -29,7 +30,8 @@ namespace GLS {
     _size(copy._size),
     _rootNode(std::make_shared<Node>(*copy.rootNode())),
     _cameraNode(), _skybox(copy._skybox),
-    _background(copy._background)
+    _background(copy._background),
+    _animatables()
     {
 
     }
@@ -44,43 +46,8 @@ namespace GLS {
         _cameraNode = _rootNode;
         _background = copy._background;
         _skybox = copy._skybox;
+        _animatables.clear();
         return *this;
-    }
-
-    void Scene::setSize(glm::vec2 size) {
-        _size = size;
-    }
-
-    glm::vec2 Scene::getSize() const {
-        return _size;
-    }
-
-    float Scene::getAspect() const {
-        return _size.x / _size.y;
-    }
-
-    std::shared_ptr<Node> Scene::rootNode() {
-        return _rootNode;
-    }
-    
-    const std::shared_ptr<Node> Scene::rootNode() const {
-        return _rootNode;
-    }
-    
-    std::weak_ptr<Node> Scene::cameraNode() const {
-        return _cameraNode;
-    }
-    
-    void Scene::setCameraNode(std::weak_ptr<Node> node) {
-        _cameraNode = node;
-    }
-
-    std::shared_ptr<Skybox> Scene::skybox() const {
-        return _skybox;
-    }
-
-    void Scene::setSkybox(std::shared_ptr<Skybox> skybox) {
-        _skybox = skybox;
     }
 
 }

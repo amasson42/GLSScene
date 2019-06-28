@@ -57,6 +57,7 @@ struct AppEnv {
 
     std::shared_ptr<GLS::Framebuffer> createEffectFramebuffer();
     void loop();
+    void updateEventsState();
     bool displayFps();
     void checkSize(std::shared_ptr<GLS::Framebuffer> effectFramebuffer);
 };

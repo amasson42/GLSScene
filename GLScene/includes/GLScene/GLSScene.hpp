@@ -23,6 +23,9 @@ namespace GLS {
         std::shared_ptr<Skybox> _skybox;
         glm::vec4 _background;
 
+        std::set<std::shared_ptr<IAnimatable> > _animatables;
+
+        // per frame info
         std::vector<Light> _frameLights;
         std::vector<LightCaster> _frameLightCasters;
         void _renderInLightCasterContext(LightCaster& caster);
@@ -63,6 +66,12 @@ namespace GLS {
 		void renderInContext(std::shared_ptr<Framebuffer> framebuffer = nullptr);
         void sendLightsValueToShader(std::shared_ptr<ShaderProgram> program);
         void subscribeToPostRenderable(IRenderable *renderable, const RenderUniforms& uniforms, float priority);
+
+        // Animation
+
+        void addAnimatable(std::shared_ptr<IAnimatable> animatable);
+        void removeAnimatable(std::shared_ptr<IAnimatable> animatable);
+        void updateAnimations(float deltaTime);
 
     };
     

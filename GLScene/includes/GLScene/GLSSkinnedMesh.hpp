@@ -39,7 +39,7 @@ namespace GLS {
         bool addWeight(int id, float weight);
     };
 
-    class SkinnedMesh : public IRenderable {
+    class SkinnedMesh : public IRenderable, public IAnimatable {
 
     public:
         static const int maxBones = 64;
@@ -111,6 +111,12 @@ namespace GLS {
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
+
+
+        // Animating
+
+        virtual void initAnimation();
+        virtual void animate(float deltaTime);
 
 
         // Shader uniforms

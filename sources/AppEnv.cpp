@@ -8,6 +8,8 @@
 
 #include "AppEnv.hpp"
 
+#define USED_SCENE_CONTROLLER ParticuleSystemSceneController
+
 static void _keyCallBack(GLFWwindow *w, int k, int s, int a, int m) {
     AppEnv *e = static_cast<AppEnv*>(glfwGetWindowUserPointer(w));
     if (e == NULL)
@@ -57,7 +59,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
     scene = std::make_shared<GLS::Scene>(glm::vec2(windowBufferWidth, windowBufferHeight));
 
-    controller = new ShadowSceneController(this);
+    controller = new USED_SCENE_CONTROLLER(this);
     controller->makeScene();
 
     glfwSetWindowUserPointer(window, this);
@@ -118,22 +120,9 @@ void AppEnv::loop() {
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        double mouseX, mouseY;
-        glfwGetCursorPos(window, &mouseX, &mouseY);
-        mousePosition = glm::vec2(mouseX, mouseY);
-        if (postProcessShaderProgram != nullptr) {
-            glm::vec2 devicePos = mouseContextPosition();
-            postProcessShaderProgram->use();
-            glUniform2f(postProcessShaderProgram->getLocation("u_mouse_position"), devicePos.x, devicePos.y);
-            glUniform1f(postProcessShaderProgram->getLocation("u_time"), currentTime);
-        }
-        // std::cout << "mouse position: " << mousePosition << " -> " << mouseContextPosition() << std::endl;
+        updateEventsState();
 
-
-        double newTime = glfwGetTime();
-        deltaTime = newTime - currentTime;
-        currentTime = newTime;
-
+        scene->updateAnimations(deltaTime);
         controller->update();
 
         scene->renderInContext(effectFramebuffer);
@@ -158,6 +147,23 @@ void AppEnv::loop() {
         glfwSwapBuffers(window);
     }
 
+}
+
+void AppEnv::updateEventsState() {
+    double mouseX, mouseY;
+    glfwGetCursorPos(window, &mouseX, &mouseY);
+    mousePosition = glm::vec2(mouseX, mouseY);
+    if (postProcessShaderProgram != nullptr) {
+        glm::vec2 devicePos = mouseContextPosition();
+        postProcessShaderProgram->use();
+        glUniform2f(postProcessShaderProgram->getLocation("u_mouse_position"), devicePos.x, devicePos.y);
+        glUniform1f(postProcessShaderProgram->getLocation("u_time"), currentTime);
+    }
+    // std::cout << "mouse position: " << mousePosition << " -> " << mouseContextPosition() << std::endl;
+
+    double newTime = glfwGetTime();
+    deltaTime = newTime - currentTime;
+    currentTime = newTime;
 }
 
 bool AppEnv::displayFps() {

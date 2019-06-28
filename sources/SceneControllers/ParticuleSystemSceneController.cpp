@@ -14,13 +14,11 @@ void ParticuleSystemSceneController::update() {
     ISceneController::update();
     if (!mustUpdate)
         return;
-    double dt = env->deltaTime;
 
     glm::vec2 windowMousePos = env->mouseContextPosition();
 
     if (!particleSystem.expired()) {
         std::shared_ptr<GLS::ParticleSystem> ps = particleSystem.lock();
-        ps->animateWithDeltaTime(dt);
         glm::vec3 gc(0);
         if (cameraNode != nullptr) {
             gc = glm::vec3(cameraNode->getWorldTransformMatrix() * glm::vec4(windowMousePos.x, windowMousePos.y, -10, 1));
@@ -85,6 +83,7 @@ void ParticuleSystemSceneController::makeScene() {
         particleNode->addRenderable(ps);
         scene.rootNode()->addChildNode(particleNode);
         particleSystem = ps;
+        scene.addAnimatable(ps);
     } catch (CLD::GPUDevice::BuildProgramException& e) {
         std::cout << e.what() << std::endl;
     }
