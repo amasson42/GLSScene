@@ -18,7 +18,7 @@ namespace GLS {
         return "can't load mesh from file";
     }
 
-    Mesh::Mesh() : _vertices(), _indices(),
+    Mesh::Mesh() : _vertices(), _indices(), _drawMode(GL_TRIANGLES),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _shaderProgram(nullptr),
     _material(nullptr),
@@ -28,7 +28,7 @@ namespace GLS {
     }
 
     Mesh::Mesh(const Mesh& copy) :
-    _vertices(copy._vertices), _indices(copy._indices),
+    _vertices(copy._vertices), _indices(copy._indices), _drawMode(copy._drawMode),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _shaderProgram(copy._shaderProgram),
     _material(copy._material),
@@ -45,6 +45,7 @@ namespace GLS {
     Mesh& Mesh::operator=(const Mesh& copy) {
         _vertices = copy._vertices;
         _indices = copy._indices;
+        _drawMode = copy._drawMode;
         _shaderProgram = copy._shaderProgram;
         deleteBuffers();
         if (copy.bufferGenerated())

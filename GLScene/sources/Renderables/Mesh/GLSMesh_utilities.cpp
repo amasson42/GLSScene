@@ -17,6 +17,10 @@ namespace GLS {
     std::vector<GLuint>& Mesh::indicesRef() {
         return _indices;
     }
+
+    void Mesh::setDrawMode(GLenum mode) {
+        _drawMode = mode;
+    }
     
     static void calculNormal_normeWith(Vertex& v, glm::vec3 n, int& c) {
         glm::vec3 average = (v.normal * GLfloat(c)) + n;

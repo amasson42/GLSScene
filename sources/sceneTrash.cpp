@@ -65,9 +65,9 @@ void TrashSceneController::makeScene() {
         sphereMesh->generateBuffers();
         sphereNode->addRenderable(sphereMesh);
     }
-    planeNode->addChildNode(sphereNode);
     sphereNode->setName("sphere");
     sphereNode->transform().setPosition(glm::vec3(2, 1, 0));
+    planeNode->addChildNode(sphereNode);
 
     try {
         std::shared_ptr<GLS::Node> nsNode = std::make_shared<GLS::Node>();
@@ -83,8 +83,8 @@ void TrashSceneController::makeScene() {
     try {
         std::shared_ptr<GLS::Node> ftNode = std::make_shared<GLS::Node>();
         ftNode->loadFromFile("../models/42.obj");
-        scene.rootNode()->addChildNode(ftNode);
         ftNode->setName("ft");
+        scene.rootNode()->addChildNode(ftNode);
     } catch (std::exception& e) {
         std::cout << "can't create 42 node with exception: " << e.what() << std::endl;
     }
@@ -96,16 +96,16 @@ void TrashSceneController::makeScene() {
     spotlightNode->transform().setEulerAngles(0.5, -0.4, 0);
     spotlight->angle = 1.5;
     spotlightNode->setLight(spotlight);
-    scene.rootNode()->addChildNode(spotlightNode);
     spotlightNode->setName("spotlight");
+    scene.rootNode()->addChildNode(spotlightNode);
 
     std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
     pointlight->type = (GLS::light_point);
     pointLightNode->transform().setPosition(glm::vec3(0, 15, -7));
     pointLightNode->setLight(pointlight);
-    scene.rootNode()->addChildNode(pointLightNode);
     pointLightNode->setName("pointight");
+    scene.rootNode()->addChildNode(pointLightNode);
 
     std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1.5);
@@ -127,8 +127,8 @@ void TrashSceneController::makeScene() {
     cubeNode->setName("cube");
     cubeNode->addRenderable(cubeMesh);
     cubeNode->transform().setPosition(glm::vec3(4, 1, 0));
-    scene.rootNode()->addChildNode(cubeNode);
     cubeNode->setName("cube");
+    scene.rootNode()->addChildNode(cubeNode);
 
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
     {

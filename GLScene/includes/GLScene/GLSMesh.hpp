@@ -83,6 +83,7 @@ namespace GLS {
     protected:
         std::vector<Vertex> _vertices;
         std::vector<GLuint> _indices;
+        GLenum _drawMode;
         
         GLuint _verticesBuffer;
         GLuint _indicesBuffer;
@@ -118,6 +119,7 @@ namespace GLS {
         
         std::vector<Vertex>& verticesRef();
         std::vector<GLuint>& indicesRef();
+        void setDrawMode(GLenum mode);
         
         void calculNormals();
         
@@ -154,6 +156,7 @@ namespace GLS {
         static std::shared_ptr<Mesh> plane(GLfloat width, GLfloat height, bool generateBuffers = true);
         static std::shared_ptr<Mesh> cube(GLfloat width, GLfloat height, GLfloat length, bool generateBuffers = true);
         static std::shared_ptr<Mesh> sphere(GLfloat radius, unsigned int ringCount = 12, bool generateBuffers = true);
+        static std::shared_ptr<Mesh> thinLine(glm::vec3 start, glm::vec3 end, bool generateBuffers = true);
         static std::shared_ptr<Mesh> objModel(std::string path, bool generateBuffers = true) /*throw(LoadMeshException)*/;
         static std::shared_ptr<Mesh> loadFromAiMesh(aiMesh *mesh, bool generateBuffers = true);
         static std::shared_ptr<Mesh> voxelChunk(std::shared_ptr<VoxelChunk> chunk, bool generateBuffers = true);

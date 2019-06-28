@@ -50,7 +50,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
     scene = std::make_shared<GLS::Scene>(glm::vec2(windowBufferWidth, windowBufferHeight));
 
-    controller = new VoxelProceduralSceneController(this);
+    controller = new TrashSceneController(this);
     controller->makeScene();
 
     scene->rootNode()->sendToFlux(std::cout, ":");

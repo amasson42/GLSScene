@@ -15,7 +15,7 @@ namespace GLS {
     }
 
     SkinnedMesh::SkinnedMesh() :
-    _vertices(), _indices(),
+    _vertices(), _indices(), _drawMode(GL_TRIANGLES),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _rootBone(), _bones(),
     _shaderProgram(nullptr),
@@ -26,7 +26,7 @@ namespace GLS {
     }
 
     SkinnedMesh::SkinnedMesh(const SkinnedMesh& copy) :
-    _vertices(copy._vertices), _indices(copy._indices),
+    _vertices(copy._vertices), _indices(copy._indices), _drawMode(copy._drawMode),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _rootBone(copy._rootBone), _bones(copy._bones),
     _shaderProgram(copy._shaderProgram),
@@ -44,6 +44,7 @@ namespace GLS {
     SkinnedMesh& SkinnedMesh::operator=(const SkinnedMesh& copy) {
         _vertices = copy._vertices;
         _indices = copy._indices;
+        _drawMode = copy._drawMode;
         _rootBone = copy._rootBone;
         _shaderProgram = copy._shaderProgram;
         deleteBuffers();

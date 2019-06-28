@@ -11,9 +11,6 @@
 namespace GLS {
 
     static void _processLoadNode(std::shared_ptr<Node> n, aiNode *node, const aiScene *scene, std::shared_ptr<Node> rootNode, std::vector<std::shared_ptr<Material> >& materials) {
-        if (n == nullptr) {
-            std::cout << "send nullptr" << std::endl;
-        }
         {
             n->setName(std::string(node->mName.C_Str()));
             aiVector3D scale;

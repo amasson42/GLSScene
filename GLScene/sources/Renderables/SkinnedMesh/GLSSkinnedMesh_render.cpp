@@ -16,29 +16,38 @@ namespace GLS {
 
     void SkinnedMesh::_sendBonesToShaderProgram(std::shared_ptr<ShaderProgram> program) {
         if (_rootBone.node.expired()) {
+
+            // TODO: remove this when everything works
             static bool expired_once = true;
             if (expired_once) {
                 std::cout << "expired root bone" << std::endl;
                 expired_once = false;
             }
+
             return;
         }
         std::shared_ptr<Node> rootBone = _rootBone.node.lock();
         program->use();
         for (size_t i = 0; i < _bones.size() && i < maxBones; i++) {
             if (_bones[i].node.expired()) {
+
+                // TODO: remove this when everything works
                 static bool expired_bone_once = true;
                 if (expired_bone_once) {
                     std::cout << "expired bone" << std::endl;
                     expired_bone_once = false;
                 }
+
                 continue;
             }
             std::shared_ptr<Node> node = _bones[i].node.lock();
             glm::mat4 modelMatrix = glm::inverse(rootBone->getTransformMatrix()) * node->getParentNodeRelativeTransformMatrix(rootBone) * _bones[i].offset;
+
+            // FIXME: what the maths ?
             modelMatrix = glm::mat4(1);
+
             glUniformMatrix4fv(program->getLocation("u_mat_joints[" + std::to_string(i) + "]"),
-                1, GL_FALSE, glm::value_ptr(modelMatrix));
+                1, GL_TRUE, glm::value_ptr(modelMatrix));
         }
     }
 
@@ -86,7 +95,7 @@ namespace GLS {
             _material->sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_elementsBuffer);
-        glDrawElements(GL_TRIANGLES,
+        glDrawElements(_drawMode,
                        static_cast<GLsizei>(_indices.size()),
                        GL_UNSIGNED_INT, 0);
     }
@@ -107,7 +116,7 @@ namespace GLS {
             _sendBonesToShaderProgram(program);
 
             glBindVertexArray(_elementsBuffer);
-            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
+            glDrawElements(_drawMode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
             glStencilMask(0xFF);
         }
     }
@@ -132,7 +141,7 @@ namespace GLS {
         _sendBonesToShaderProgram(program);
 
         glBindVertexArray(_elementsBuffer);
-        glDrawElements(GL_TRIANGLES,
+        glDrawElements(_drawMode,
                        static_cast<GLsizei>(_indices.size()),
                        GL_UNSIGNED_INT, 0);
     }

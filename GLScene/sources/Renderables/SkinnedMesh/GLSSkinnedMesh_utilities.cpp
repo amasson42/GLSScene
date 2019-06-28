@@ -18,6 +18,10 @@ namespace GLS {
         return _indices;
     }
 
+    void SkinnedMesh::setDrawMode(GLenum mode) {
+        _drawMode = mode;
+    }
+
     std::shared_ptr<Node> SkinnedMesh::rootBone() const {
         if (_rootBone.node.expired())
             return nullptr;

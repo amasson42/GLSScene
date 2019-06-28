@@ -56,7 +56,7 @@ namespace GLS {
             _material->sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_elementsBuffer);
-        glDrawElements(GL_TRIANGLES,
+        glDrawElements(_drawMode,
                        static_cast<GLsizei>(_indices.size()),
                        GL_UNSIGNED_INT, 0);
         
@@ -76,7 +76,7 @@ namespace GLS {
             glUniform3f(program->getLocation("material.diffuse"), _outlineColor.x, _outlineColor.y, _outlineColor.z);
 
             glBindVertexArray(_elementsBuffer);
-            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
+            glDrawElements(_drawMode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
             glStencilMask(0xFF);
         }
     }
@@ -99,7 +99,7 @@ namespace GLS {
         uniforms.sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_elementsBuffer);
-        glDrawElements(GL_TRIANGLES,
+        glDrawElements(_drawMode,
                        static_cast<GLsizei>(_indices.size()),
                        GL_UNSIGNED_INT, 0);
     }

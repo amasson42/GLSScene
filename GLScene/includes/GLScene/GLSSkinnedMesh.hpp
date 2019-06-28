@@ -52,6 +52,7 @@ namespace GLS {
     protected:
         std::vector<SkinnedVertex> _vertices;
         std::vector<GLuint> _indices;
+        GLenum _drawMode;
         
         GLuint _verticesBuffer;
         GLuint _indicesBuffer;
@@ -86,6 +87,7 @@ namespace GLS {
 
         std::vector<SkinnedVertex>& verticesRef();
         std::vector<GLuint>& indicesRef();
+        void setDrawMode(GLenum mode);
 
         std::shared_ptr<Node> rootBone() const;
 

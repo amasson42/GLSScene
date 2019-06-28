@@ -22,7 +22,7 @@ int main(int argc, const char * argv[]) {
         AppEnv env(args);
         env.loop();
     } catch (std::exception& e) {
-        std::cerr << "Exception: " << e.what() << std::endl;
+        std::cerr << "Program stop with exception: " << e.what() << std::endl;
         return EXIT_FAILURE;
     }
     if (loopLeaks) {

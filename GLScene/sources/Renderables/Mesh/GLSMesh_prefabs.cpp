@@ -152,5 +152,22 @@ namespace GLS {
             mesh->generateBuffers();
         return mesh;
     }
+
+    std::shared_ptr<Mesh> Mesh::thinLine(glm::vec3 start, glm::vec3 end, bool generateBuffers) {
+        std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+
+        mesh->verticesRef().push_back(Vertex(start, glm::normalize(start - end), glm::vec2(0, 0)));
+        mesh->verticesRef().push_back(Vertex(end, glm::normalize(end - start), glm::vec2(1, 0)));
+
+        mesh->indicesRef().push_back(0);
+        mesh->indicesRef().push_back(1);
+
+        mesh->setDrawMode(GL_LINES);
+
+        if (generateBuffers)
+            mesh->generateBuffers();
+
+        return mesh;
+    }
     
 }
