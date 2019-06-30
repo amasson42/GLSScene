@@ -67,14 +67,16 @@ namespace GLS {
         RenderUniforms uniforms;
         if (!_cameraNode.expired()) {
             std::shared_ptr<Node> camera = _cameraNode.lock();
-            uniforms.view = glm::inverse(camera->getWorldTransformMatrix());
-            uniforms.camera_position = camera->transform().position();
+            glm::mat4 camMatrix = camera->getWorldTransformMatrix();
+            uniforms.view = glm::inverse(camMatrix);
+            uniforms.camera_position = glm::vec3(camMatrix * glm::vec4(0, 0, 0, 1));
             if (camera->camera() != nullptr)
                 uniforms.projection = camera->camera()->projectionMatrix();
         }
         
         sendLightsValueToShader(ShaderProgram::standardShaderProgramMesh());
         sendLightsValueToShader(ShaderProgram::standardShaderProgramInstancedMesh());
+        sendLightsValueToShader(ShaderProgram::standardShaderProgramSkinnedMesh());
         sendLightsValueToShader(ShaderProgram::standardShaderProgramVoxelChunk());
         
         _rootNode->renderInContext(*this, uniforms);

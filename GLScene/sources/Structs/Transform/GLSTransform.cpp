@@ -147,6 +147,12 @@ namespace GLS {
 
     // Matrix
 
+    void Transform::setMatrix(const glm::mat4& mat) {
+        glm::vec3 skew;
+        glm::vec4 perspective;
+        glm::decompose(mat, _scale, _rotation, _position, skew, perspective);
+    }
+
     static const glm::mat4 calculTransformMatrix(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
         glm::mat4 mat(1);
         mat = glm::translate(mat, position);

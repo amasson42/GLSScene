@@ -8,7 +8,7 @@
 
 #include "AppEnv.hpp"
 
-#define USED_SCENE_CONTROLLER ParticuleSystemSceneController
+#define USED_SCENE_CONTROLLER TrashSceneController
 
 static void _keyCallBack(GLFWwindow *w, int k, int s, int a, int m) {
     AppEnv *e = static_cast<AppEnv*>(glfwGetWindowUserPointer(w));
@@ -133,7 +133,9 @@ void AppEnv::loop() {
         GLS::RenderUniforms uniforms;
         if (!scene->cameraNode().expired()) {
             std::shared_ptr<GLS::Node> cameraNode = scene->cameraNode().lock();
-            uniforms.view = glm::inverse(cameraNode->transform().matrix());
+            glm::mat4 cameraMat = cameraNode->getWorldTransformMatrix();
+            uniforms.camera_position = glm::vec3(cameraMat * glm::vec4(0, 0, 0, 1));
+            uniforms.view = glm::inverse(cameraMat);
             if (cameraNode->camera() != nullptr) {
                 uniforms.projection = cameraNode->camera()->projectionMatrix();
             }

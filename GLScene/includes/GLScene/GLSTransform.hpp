@@ -21,6 +21,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 namespace GLS {
 
@@ -132,6 +133,7 @@ namespace GLS {
 
         // Matrix
 
+        void setMatrix(const glm::mat4& mat);
         const glm::mat4& matrix();
         const glm::mat4 matrix() const;
         void updateMatrix();
