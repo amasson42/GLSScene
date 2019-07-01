@@ -34,7 +34,7 @@ namespace GLS {
         "\n"
         "in VS_OUT {\n"
         "    vec2 uv;\n"
-        "} gs_in;\n"
+        "} gs_in[];\n"
         "\n"
         "out VS_OUT {\n"
         "    vec2 uv;\n"

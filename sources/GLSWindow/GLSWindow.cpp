@@ -71,7 +71,7 @@ _framebuffer(nullptr) {
     glfwSetKeyCallback(_glfwWindow, _keyCallBack);
     glfwSetWindowCloseCallback(_glfwWindow, _windowCloseCallBack);
     glfwSetWindowSizeCallback(_glfwWindow, _windowResizeCallBack);
-    // glfwSwapInterval(1);
+    glfwSwapInterval(1);
 
     _elapsedTime = glfwGetTime();
     _deltaTime = 0;
@@ -196,7 +196,12 @@ void GLSWindow::loopOnce() {
     if (_glfwWindow == NULL || glfwWindowShouldClose(_glfwWindow))
         return;
     glfwMakeContextCurrent(_glfwWindow);
+
+    float roundTime = floor(_elapsedTime);
     updateEvents();
+    if (roundTime != floor(_elapsedTime))
+        setTitle("FPS: " + std::to_string(1.0 / _deltaTime));
+
     _scene->updateAnimations(_deltaTime);
     if (!_controller.expired())
         _controller.lock()->update();

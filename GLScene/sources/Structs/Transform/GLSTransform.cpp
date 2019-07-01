@@ -175,10 +175,8 @@ namespace GLS {
     }
 
     void Transform::updateMatrix() {
-        if (!_transformUpdated) {
-            _transform = calculTransformMatrix(_position, _rotation, _scale);
-            _transformUpdated = true;
-        }
+        _transform = calculTransformMatrix(_position, _rotation, _scale);
+        _transformUpdated = true;
     }
     
 }

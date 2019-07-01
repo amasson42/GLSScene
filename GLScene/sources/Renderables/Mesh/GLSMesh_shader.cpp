@@ -35,7 +35,7 @@ namespace GLS {
         "\n";
     }
 
-    std::string Mesh::shaderUniformsGeometry() { // FIXME: untested
+    std::string Mesh::shaderUniformsGeometry() {
         return
         "uniform mat3 u_mat_normal;\n"
         "uniform mat4 u_mat_projection;\n"
@@ -50,7 +50,7 @@ namespace GLS {
         "    vec3 wnormal;\n"
         "    vec3 wtangent;\n"
         "    vec3 wbitangent;\n"
-        "} gs_in;\n"
+        "} gs_in[];\n"
         "\n"
         "out VS_OUT {\n"
         "    vec4 position;\n"

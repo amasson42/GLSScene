@@ -18,8 +18,9 @@ namespace GLS {
             aiVector3D translate;
             node->mTransformation.Decompose(scale, rotation, translate);
             n->transform().setPosition(glm::vec3(translate.x, translate.y, translate.z));
-            n->transform().setRotation(glm::quat(rotation.x, rotation.y, rotation.z, rotation.z));
+            n->transform().setRotation(glm::quat(rotation.x, rotation.y, rotation.z, rotation.w));
             n->transform().setScale(glm::vec3(scale.x, scale.y, scale.z));
+            n->transform().updateMatrix();
         }
         for (unsigned int i = 0; i < node->mNumChildren; i++) {
             std::shared_ptr<Node> newChild = std::make_shared<Node>();
@@ -28,7 +29,7 @@ namespace GLS {
         }
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-            if (mesh->HasBones()) {
+            if (false && mesh->HasBones()) {
                 std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(mesh, rootNode, n);
                 nSkinnedMesh->setMaterial(materials[mesh->mMaterialIndex]);
                 n->addRenderable(nSkinnedMesh);
@@ -46,15 +47,15 @@ namespace GLS {
             aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
         
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-            std::cout << "invalid scene " << path << std::endl;
             throw FileLoadingException("can't load scene from " + path);
         }
+
         std::string directory = path.substr(0, path.find_last_of('/'));
         std::vector<std::shared_ptr<Material> > materials;
-        for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
+        for (unsigned int i = 0; i < scene->mNumMaterials; i++)
             materials.push_back(Material::loadFromAiMaterial(scene->mMaterials[i], directory));
-        }
         materials.push_back(std::make_shared<Material>());
+
         _processLoadNode(shared_from_this(), scene->mRootNode, scene, shared_from_this(), materials);
 
         std::cout << "scene: " << scene->mNumAnimations << std::endl;
