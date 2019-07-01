@@ -8,6 +8,15 @@
 
 #include "AppEnv.hpp"
 
+void AppEnv::printAvailableScenes() {
+    std::cout << "available scenes:" << std::endl;
+    std::cout << "  trash" << std::endl;
+    std::cout << "  human" << std::endl;
+    std::cout << "  shadow" << std::endl;
+    std::cout << "  voxel" << std::endl;
+    std::cout << "  voxelWorld" << std::endl;
+    std::cout << "  particles" << std::endl;
+}
 
 AppEnv::AppEnv(const std::vector<std::string>& as) :
     args(as)
@@ -34,8 +43,23 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
     }
     windows.push_back(mainWindow);
 
-    // TODO: do the controller choice
-    sceneController = std::make_shared<TrashSceneController>(mainWindow);
+    if (as.size() > 0) {
+        if (as[0] == "trash") {
+            sceneController = std::make_shared<TrashSceneController>(mainWindow);
+        } else if (as[0] == "human") {
+            sceneController = std::make_shared<HumanSceneController>(mainWindow);
+        } else if (as[0] == "shadow") {
+            sceneController = std::make_shared<ShadowSceneController>(mainWindow);
+        } else if (as[0] == "voxel") {
+            sceneController = std::make_shared<VoxelSceneController>(mainWindow);
+        } else if (as[0] == "voxelWorld") {
+            sceneController = std::make_shared<VoxelProceduralSceneController>(mainWindow);
+        } else if (as[0] == "particles") {
+            sceneController = std::make_shared<ParticuleSystemSceneController>(mainWindow);
+        } else {
+            throw std::exception();
+        }
+    }
 
     mainWindow->setController(sceneController);
 
@@ -66,6 +90,8 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
 AppEnv::~AppEnv() {
     std::cout << "Ending..." << std::endl;
+    sceneController = nullptr;
+    GLS::glsDeinit();
     glfwTerminate();
 }
 

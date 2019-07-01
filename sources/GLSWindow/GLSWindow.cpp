@@ -32,7 +32,7 @@ void GLSWindow::_incrementWindowCount() {
 
 void GLSWindow::_decrementWindowCount() {
     if (--_windowCount == 0) {
-        GLS::glsDeinit();
+        // GLS::glsDeinit();
     }
 }
 
@@ -71,7 +71,7 @@ _framebuffer(nullptr) {
     glfwSetKeyCallback(_glfwWindow, _keyCallBack);
     glfwSetWindowCloseCallback(_glfwWindow, _windowCloseCallBack);
     glfwSetWindowSizeCallback(_glfwWindow, _windowResizeCallBack);
-    glfwSwapInterval(1);
+    // glfwSwapInterval(1);
 
     _elapsedTime = glfwGetTime();
     _deltaTime = 0;

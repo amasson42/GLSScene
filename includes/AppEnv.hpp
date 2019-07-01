@@ -17,6 +17,8 @@ class ISceneController;
 
 struct AppEnv {
 
+    static void printAvailableScenes();
+
     std::vector<std::string> args;
 
     std::vector<std::shared_ptr<GLSWindow> > windows;

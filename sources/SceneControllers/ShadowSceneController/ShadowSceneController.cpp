@@ -11,7 +11,7 @@ ISceneController(window) {
 }
 
 ShadowSceneController::~ShadowSceneController() {
-
+    
 }
 
 void ShadowSceneController::update() {

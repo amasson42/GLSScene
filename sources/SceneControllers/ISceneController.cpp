@@ -4,7 +4,7 @@
 ISceneController::ISceneController(std::shared_ptr<GLSWindow> window) :
     _window(window),
     _scene(window->scene()) {
-    
+    mustUpdate = true;
 }
 
 ISceneController::~ISceneController() {
