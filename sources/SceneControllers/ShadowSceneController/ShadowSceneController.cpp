@@ -1,12 +1,12 @@
 
-#include "SceneController.hpp"
+#include "AppEnv.hpp"
 
 float degreeToRadians(float deg) {
     return deg * M_PI / 180.0;
 }
 
-ShadowSceneController::ShadowSceneController(AppEnv *e) :
-ISceneController(e) {
+ShadowSceneController::ShadowSceneController(std::shared_ptr<GLSWindow> window) :
+ISceneController(window) {
 
 }
 
@@ -18,8 +18,10 @@ void ShadowSceneController::update() {
     ISceneController::update();
     if (!mustUpdate)
         return;
-    double et = env->currentTime;
-    double dt = env->deltaTime;
+    if (_window.expired())
+        return;
+    float et = _window.lock()->elapsedTime();
+    float dt = _window.lock()->deltaTime();
 
     if (bigCubeNode != nullptr) {
         bigCubeNode->transform().setEulerAngles(glm::vec3(sin(et * 0.3) * 0.5, et * 0.2, 0));
@@ -49,8 +51,10 @@ float randFloat() {
 }
 
 void ShadowSceneController::makeScene() {
-
-    GLS::Scene& scene(*env->scene);
+    if (_window.expired())
+        return;
+    GLS::Scene& scene(*_scene);
+    AppEnv *env = _window.lock()->getAppEnvPtr();
 
     auto texturedMaterial = std::make_shared<GLS::Material>();
     texturedMaterial->specular = glm::vec3(0.1);

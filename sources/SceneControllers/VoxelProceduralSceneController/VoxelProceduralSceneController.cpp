@@ -1,5 +1,5 @@
 
-#include "SceneController.hpp"
+#include "AppEnv.hpp"
 
 #define BLOCK_AIR 0
 #define BLOCK_BEDROCK 1
@@ -188,8 +188,8 @@ class VoxelWorld {
 
 };
 
-VoxelProceduralSceneController::VoxelProceduralSceneController(AppEnv *e) :
-ISceneController(e) {
+VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window) :
+ISceneController(window) {
     lt = 0;
 }
 
@@ -201,7 +201,9 @@ void VoxelProceduralSceneController::update() {
     ISceneController::update();
     if (!mustUpdate)
         return;
-    double et = env->currentTime;
+    if (_window.expired())
+        return;
+    float et = _window.lock()->elapsedTime();
 
     if (et - lt >= 0.3) {
         lt = et;
@@ -232,7 +234,10 @@ void VoxelProceduralSceneController::update() {
 
 void VoxelProceduralSceneController::makeScene() {
 
-    GLS::Scene& scene(*env->scene);
+    GLS::Scene& scene(*_scene);
+    if (_window.expired())
+        return;
+    AppEnv *env = _window.lock()->getAppEnvPtr();
 
     initNoise(time(NULL));
 

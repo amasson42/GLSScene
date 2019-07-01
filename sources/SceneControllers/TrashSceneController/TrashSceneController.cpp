@@ -1,8 +1,8 @@
 
-#include "SceneController.hpp"
+#include "AppEnv.hpp"
 
-TrashSceneController::TrashSceneController(AppEnv *e) :
-ISceneController(e) {
+TrashSceneController::TrashSceneController(std::shared_ptr<GLSWindow> window) :
+ISceneController(window) {
 
 }
 
@@ -11,7 +11,10 @@ TrashSceneController::~TrashSceneController() {
 }
 
 void TrashSceneController::makeScene() {
-    GLS::Scene& scene(*env->scene);
+    if (_window.expired())
+        return;
+    GLS::Scene& scene(*_scene);
+    AppEnv *env = _window.lock()->getAppEnvPtr();
 
     std::shared_ptr<GLS::Node> triangleNode = std::make_shared<GLS::Node>();
     triangleNode->setName("triangles");

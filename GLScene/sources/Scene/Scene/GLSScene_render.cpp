@@ -34,6 +34,19 @@ namespace GLS {
         }
     }
 
+    RenderUniforms Scene::makeUniforms() const {
+        RenderUniforms uniforms;
+        if (!_cameraNode.expired()) {
+            std::shared_ptr<Node> camera = _cameraNode.lock();
+            glm::mat4 camMatrix = camera->getWorldTransformMatrix();
+            uniforms.view = glm::inverse(camMatrix);
+            uniforms.camera_position = glm::vec3(camMatrix * glm::vec4(0, 0, 0, 1));
+            if (camera->camera() != nullptr)
+                uniforms.projection = camera->camera()->projectionMatrix();
+        }
+        return uniforms;
+    }
+
     void Scene::sendLightsValueToShader(std::shared_ptr<ShaderProgram> program) {
         program->use();
         for (size_t i = 0; i < _frameLights.size() && i < 16; i++) {
@@ -64,15 +77,7 @@ namespace GLS {
         glClearColor(_background.x, _background.y, _background.z, _background.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        RenderUniforms uniforms;
-        if (!_cameraNode.expired()) {
-            std::shared_ptr<Node> camera = _cameraNode.lock();
-            glm::mat4 camMatrix = camera->getWorldTransformMatrix();
-            uniforms.view = glm::inverse(camMatrix);
-            uniforms.camera_position = glm::vec3(camMatrix * glm::vec4(0, 0, 0, 1));
-            if (camera->camera() != nullptr)
-                uniforms.projection = camera->camera()->projectionMatrix();
-        }
+        RenderUniforms uniforms = makeUniforms();
         
         sendLightsValueToShader(ShaderProgram::standardShaderProgramMesh());
         sendLightsValueToShader(ShaderProgram::standardShaderProgramInstancedMesh());

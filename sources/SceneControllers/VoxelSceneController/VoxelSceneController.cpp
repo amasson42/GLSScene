@@ -1,8 +1,8 @@
 
-#include "SceneController.hpp"
+#include "AppEnv.hpp"
 
-VoxelSceneController::VoxelSceneController(AppEnv *e) :
-ISceneController(e) {
+VoxelSceneController::VoxelSceneController(std::shared_ptr<GLSWindow> window) :
+ISceneController(window) {
     removeBlockCD = 1.0;
     i = 0;
 }
@@ -15,8 +15,11 @@ void VoxelSceneController::update() {
     ISceneController::update();
     if (!mustUpdate)
         return;
-    double et = env->currentTime;
-    double dt = env->deltaTime;
+    if (_window.expired())
+        return;
+    std::shared_ptr<GLSWindow> win = _window.lock();
+    float et = win->elapsedTime();
+    float dt = win->deltaTime();
 
     if (mainChunkNode != nullptr) {
         mainChunkNode->transform().setEulerAngles(glm::vec3(0, sin(et * 0.05), 0));
@@ -46,8 +49,11 @@ void VoxelSceneController::update() {
 }
 
 void VoxelSceneController::makeScene() {
+    if (_window.expired())
+        return;
+    AppEnv *env = _window.lock()->getAppEnvPtr();
+    GLS::Scene& scene(*_scene);
 
-    GLS::Scene& scene(*env->scene);
 
     auto texturedMaterial = std::make_shared<GLS::Material>();
     texturedMaterial->specular = glm::vec3(0.1);

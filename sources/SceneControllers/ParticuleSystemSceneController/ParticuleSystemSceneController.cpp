@@ -1,8 +1,8 @@
 
-#include "SceneController.hpp"
+#include "AppEnv.hpp"
 
-ParticuleSystemSceneController::ParticuleSystemSceneController(AppEnv *e) :
-ISceneController(e) {
+ParticuleSystemSceneController::ParticuleSystemSceneController(std::shared_ptr<GLSWindow> window) :
+ISceneController(window) {
 
 }
 
@@ -14,8 +14,11 @@ void ParticuleSystemSceneController::update() {
     ISceneController::update();
     if (!mustUpdate)
         return;
+    if (_window.expired())
+        return;
+    std::shared_ptr<GLSWindow> win = _window.lock();
 
-    glm::vec2 windowMousePos = env->mouseContextPosition();
+    glm::vec2 windowMousePos = win->mouseContextPosition();
 
     if (!particleSystem.expired()) {
         std::shared_ptr<GLS::ParticleSystem> ps = particleSystem.lock();
@@ -27,17 +30,20 @@ void ParticuleSystemSceneController::update() {
         if (gravityCenterNode != nullptr)
             gravityCenterNode->transform().setPosition(gc);
 
-        if (glfwGetKey(env->window, GLFW_KEY_T) == GLFW_PRESS) {
+        if (win->keyPressed(GLFW_KEY_T)) {
             ps->setTexture(nullptr);
         }
-        if (glfwGetKey(env->window, GLFW_KEY_Y) == GLFW_PRESS) {
+        if (win->keyPressed(GLFW_KEY_Y)) {
             ps->setTexture(particleTexture);
         }
     }
 }
 
 void ParticuleSystemSceneController::makeScene() {
-    GLS::Scene& scene(*env->scene);
+    if (_window.expired())
+        return;
+    GLS::Scene& scene(*_scene);
+    AppEnv *env = _window.lock()->getAppEnvPtr();
 
     cameraNode = std::make_shared<GLS::Node>();
     {

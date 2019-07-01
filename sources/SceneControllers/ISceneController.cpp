@@ -1,57 +1,56 @@
 
-#include "SceneController.hpp"
+#include "ISceneController.hpp"
 
-ISceneController::ISceneController(AppEnv *e) : env(e) {
-    mustUpdate = true;
+ISceneController::ISceneController(std::shared_ptr<GLSWindow> window) :
+    _window(window),
+    _scene(window->scene()) {
+    
 }
 
 ISceneController::~ISceneController() {
-
-}
-
-std::shared_ptr<GLS::Scene> ISceneController::scene() {
-    return env->scene;
+    _scene = nullptr;
 }
 
 void ISceneController::update() {
-    GLFWwindow *window = env->window;
-    GLS::Scene *scene = env->scene.get();
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-    
-    if (!scene->cameraNode().expired()) {
-        GLS::Node& cam(*scene->cameraNode().lock());
+    if (_window.expired()) {
+        std::cout << "windos out" << std::endl;
+        return;
+    }
+    std::shared_ptr<GLSWindow> win = _window.lock();
+
+    if (!_scene->cameraNode().expired()) {
+        GLS::Node& cam(*_scene->cameraNode().lock());
         static float cameraAngleX = cam.transform().eulerAngles().x;
         static float cameraAngleY = cam.transform().eulerAngles().y;
 
-        float cameraSpeed = 5.0 * env->deltaTime;
+        float cameraSpeed = 5.0 * win->deltaTime();
         glm::mat4 cameraMat = cam.getWorldTransformMatrix();
         glm::vec3 cameraFront = glm::vec3(cameraMat * glm::vec4(0, 0, -1, 0));
         glm::vec3 cameraRight = glm::vec3(cameraMat * glm::vec4(1, 0, 0, 0));
         glm::vec3 cameraUp = glm::vec3(cameraMat * glm::vec4(0, 1, 0, 0));
 
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        if (win->keyPressed(GLFW_KEY_W))
             cam.transform().moveBy(cameraSpeed * cameraFront);
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        if (win->keyPressed(GLFW_KEY_S))
             cam.transform().moveBy(-cameraSpeed * cameraFront);
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        if (win->keyPressed(GLFW_KEY_A))
             cam.transform().moveBy(-cameraSpeed * cameraRight);
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        if (win->keyPressed(GLFW_KEY_D))
             cam.transform().moveBy(cameraSpeed * cameraRight);
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        if (win->keyPressed(GLFW_KEY_SPACE))
             cam.transform().moveBy(cameraSpeed * cameraUp);
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        if (win->keyPressed(GLFW_KEY_LEFT_SHIFT))
             cam.transform().moveBy(-cameraSpeed * cameraUp);
 
-        float cameraRotateSpeed = 3.0 * env->deltaTime;
+        float cameraRotateSpeed = 3.0 * win->deltaTime();
         bool changeCamera = true;
-        if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        if (win->keyPressed(GLFW_KEY_LEFT))
             cameraAngleY += cameraRotateSpeed;
-        else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        else if (win->keyPressed(GLFW_KEY_RIGHT))
             cameraAngleY -= cameraRotateSpeed;
-        else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        else if (win->keyPressed(GLFW_KEY_UP))
             cameraAngleX -= cameraRotateSpeed;
-        else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        else if (win->keyPressed(GLFW_KEY_DOWN))
             cameraAngleX += cameraRotateSpeed;
         else
             changeCamera = false;
@@ -60,16 +59,25 @@ void ISceneController::update() {
             cam.transform().setEulerAngles(cameraAngleX, cameraAngleY, 0);
     }
 
-    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+    if (win->keyPressed(GLFW_KEY_P)) {
         mustUpdate = false;
     }
-    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+    if (win->keyPressed(GLFW_KEY_O)) {
         mustUpdate = true;
     }
 }
 
-void ISceneController::keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    (void)window;
+void ISceneController::resizeWindowCallBack(glm::vec2 newSize) {
+    (void)newSize;
+    if (!_scene->cameraNode().expired()) {
+        std::shared_ptr<GLS::Node> camNode = _scene->cameraNode().lock();
+        if (camNode->camera() != nullptr) {
+            camNode->camera()->aspect = _scene->getAspect();
+        }
+    }
+}
+
+void ISceneController::keyCallBack(int key, int scancode, int action, int mods) {
     (void)key;
     (void)scancode;
     (void)action;

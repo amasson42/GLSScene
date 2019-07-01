@@ -1,5 +1,5 @@
 
-#include "SceneController.hpp"
+#include "AppEnv.hpp"
 
 using namespace GLS;
 
@@ -211,8 +211,8 @@ class Human {
 
 };
 
-HumanSceneController::HumanSceneController(AppEnv *e) :
-ISceneController(e) {
+HumanSceneController::HumanSceneController(std::shared_ptr<GLSWindow> window) :
+ISceneController(window) {
     hooman = nullptr;
     hoomanAnimator = nullptr;
 }
@@ -222,7 +222,10 @@ HumanSceneController::~HumanSceneController() {
 }
 
 void HumanSceneController::makeScene() {
-    GLS::Scene& scene(*env->scene);
+    if (_window.expired())
+        return;
+    AppEnv *env = _window.lock()->getAppEnvPtr();
+    GLS::Scene& scene(*_scene);
 
     // camera and light
     T_Node cameraNode = newNode();
@@ -273,8 +276,9 @@ void HumanSceneController::update() {
     ISceneController::update();
     if (!mustUpdate)
         return;
+    float currentTime = _window.expired() ? 0 : _window.lock()->elapsedTime();
     if (hoomanAnimator != nullptr && hooman != nullptr) {
-        float loopTime = fmod(env->currentTime, hoomanAnimator->time());
+        float loopTime = fmod(currentTime, hoomanAnimator->time());
         hooman->applyFrame(hoomanAnimator->frameAt(loopTime));
     }
 }
