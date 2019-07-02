@@ -40,7 +40,7 @@ class GLSWindow {
 
     public:
 
-    GLSWindow(AppEnv *env, glm::vec2 size, std::string title);
+    GLSWindow(AppEnv *env, glm::vec2 size, std::string title, bool fullScreen = false, GLSWindow *shareContext = nullptr);
     virtual ~GLSWindow();
 
     void setTitle(std::string title);

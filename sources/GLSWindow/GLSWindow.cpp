@@ -32,18 +32,18 @@ void GLSWindow::_incrementWindowCount() {
 
 void GLSWindow::_decrementWindowCount() {
     if (--_windowCount == 0) {
-        // GLS::glsDeinit();
+        GLS::glsDeinit();
     }
 }
 
-GLSWindow::GLSWindow(AppEnv *env, glm::vec2 size, std::string title) :
+GLSWindow::GLSWindow(AppEnv *env, glm::vec2 size, std::string title, bool fullScreen, GLSWindow *shareContext) :
 _env(env),
 _postProcessShaderProgram(nullptr),
 _framebuffer(nullptr) {
 
     _width = size.x;
     _height = size.y;
-    _glfwWindow = glfwCreateWindow(_width, _height, title.c_str(), NULL, NULL);
+    _glfwWindow = glfwCreateWindow(_width, _height, title.c_str(), fullScreen ? glfwGetPrimaryMonitor() : NULL, shareContext != nullptr ? shareContext->_glfwWindow : NULL);
     if (_glfwWindow == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         throw std::exception();

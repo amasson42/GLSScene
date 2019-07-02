@@ -35,7 +35,8 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
     std::shared_ptr<GLSWindow> mainWindow;
     try {
-        mainWindow = std::make_shared<GLSWindow>(this, glm::vec2(1200, 800), "GLS");
+        int win_w = 1200, win_h = 800;
+        mainWindow = std::make_shared<GLSWindow>(this, glm::vec2(win_w, win_h), "GLS");
     } catch (std::exception& e) {
         std::cerr << "Error during main window creation" << std::endl;
         glfwTerminate();
@@ -86,12 +87,16 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
     sceneController->makeScene();
 
+    std::shared_ptr<GLSWindow> secondWindow = std::make_shared<GLSWindow>(this, glm::vec2(400, 400), "second", false, mainWindow.get());
+    windows.push_back(secondWindow);
+    std::shared_ptr<ISceneController> secondController = std::make_shared<ShadowSceneController>(secondWindow);
+    secondWindow->setController(secondController);
+    secondController->makeScene();
 }
 
 AppEnv::~AppEnv() {
     std::cout << "Ending..." << std::endl;
     sceneController = nullptr;
-    GLS::glsDeinit();
     glfwTerminate();
 }
 
