@@ -30,13 +30,15 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#define GL_SILENCE_DEPRECATION
 #ifdef __APPLE__
+# define GL_SILENCE_DEPRECATION
 # include <OpenGL/gl3.h>
 #elif defined _WIN32
-#  include <Windows.h>
-#  include <GL/glew.h>
-#  include <gl/GL.h>
+# include <Windows.h>
+# include <GL/glew.h>
+# include <gl/GL.h>
+#else
+# include <gl/gl.h>
 #endif
 
 #include "CLDevice.hpp"
