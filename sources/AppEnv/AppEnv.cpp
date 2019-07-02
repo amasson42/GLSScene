@@ -87,16 +87,12 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
     sceneController->makeScene();
 
-    std::shared_ptr<GLSWindow> secondWindow = std::make_shared<GLSWindow>(this, glm::vec2(400, 400), "second", false, mainWindow.get());
-    windows.push_back(secondWindow);
-    std::shared_ptr<ISceneController> secondController = std::make_shared<ShadowSceneController>(secondWindow);
-    secondWindow->setController(secondController);
-    secondController->makeScene();
 }
 
 AppEnv::~AppEnv() {
     std::cout << "Ending..." << std::endl;
     sceneController = nullptr;
+    GLS::glsDeinit();
     glfwTerminate();
 }
 

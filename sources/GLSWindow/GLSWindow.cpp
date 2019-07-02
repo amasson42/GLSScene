@@ -32,7 +32,7 @@ void GLSWindow::_incrementWindowCount() {
 
 void GLSWindow::_decrementWindowCount() {
     if (--_windowCount == 0) {
-        GLS::glsDeinit();
+        // GLS::glsDeinit();
     }
 }
 
