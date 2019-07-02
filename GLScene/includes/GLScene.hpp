@@ -12,6 +12,9 @@
 // TODO: why do we have to do this shit
 // #define SCHOOL_DUMPS
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
