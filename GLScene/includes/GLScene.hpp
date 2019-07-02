@@ -12,6 +12,9 @@
 // TODO: why do we have to do this shit
 // #define SCHOOL_DUMPS
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -27,8 +30,16 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#define GL_SILENCE_DEPRECATION
-#include <OpenGL/gl3.h>
+#ifdef __APPLE__
+# define GL_SILENCE_DEPRECATION
+# include <OpenGL/gl3.h>
+#elif defined _WIN32
+# include <Windows.h>
+# include <GL/glew.h>
+# include <gl/GL.h>
+#else
+# include <gl/gl.h>
+#endif
 
 #include "CLDevice.hpp"
 

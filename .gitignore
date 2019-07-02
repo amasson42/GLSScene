@@ -7,3 +7,6 @@ objs
 *.dylib
 .vscode
 *.dSYM
+build
+*.dll
+libs

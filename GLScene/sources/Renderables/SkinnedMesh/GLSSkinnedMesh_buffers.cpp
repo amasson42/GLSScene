@@ -29,7 +29,7 @@ namespace GLS {
         }
 
         glBindVertexArray(_elementsBuffer);
-        glBindBuffer(GL_ARRAY_BUFFER, _verticesBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, _verticesBuffer);
         glBufferData(GL_ARRAY_BUFFER, sizeof(SkinnedVertex) * _vertices.size(),
                      _vertices.empty() ? NULL : &_vertices.front(), GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _indicesBuffer);

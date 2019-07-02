@@ -246,7 +246,11 @@ void VoxelProceduralSceneController::makeScene() {
     texturedMaterial->shininess = 64;
     try {
         std::shared_ptr<std::string> textureName = env->getArgument("-texture");
+		#ifdef _WIN32 // Just because of the build folder and cmake
+        std::string filePath = textureName != nullptr ? *textureName : "../assets/textures/ft_vox_textures.png";
+		#else
         std::string filePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures.png";
+		#endif
         texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(filePath);
         texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
