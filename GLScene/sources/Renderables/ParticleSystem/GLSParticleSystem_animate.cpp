@@ -13,7 +13,9 @@ namespace GLS {
     void ParticleSystem::initAnimation() {
         if (bufferGenerated()) {
             CLD::Kernel *ik = _device->kernel(_initKernelIndex);
+            _device->commandQueue(_commandQueueIndex)->acquireGLObject(*_device->buffer(_clBufferIndex));
             _device->commandQueue(_commandQueueIndex)->runNDRangeKernel(*ik, _properties.count);
+            _device->commandQueue(_commandQueueIndex)->releaseGLObject(*_device->buffer(_clBufferIndex));
             _device->commandQueue(_commandQueueIndex)->finish();
         }
     }
@@ -22,7 +24,9 @@ namespace GLS {
         if (bufferGenerated()) {
             CLD::Kernel *uk = _device->kernel(_updateKernelIndex);
             uk->setArgument(2, deltaTime);
+            _device->commandQueue(_commandQueueIndex)->acquireGLObject(*_device->buffer(_clBufferIndex));
             _device->commandQueue(_commandQueueIndex)->runNDRangeKernel(*uk, _properties.count);
+            _device->commandQueue(_commandQueueIndex)->releaseGLObject(*_device->buffer(_clBufferIndex));
             _device->commandQueue(_commandQueueIndex)->finish();
         }
     }

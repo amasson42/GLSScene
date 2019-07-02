@@ -101,3 +101,15 @@ void ParticuleSystemSceneController::makeScene() {
     GLS::Particle();
 
 }
+
+void ParticuleSystemSceneController::keyCallBack(int k, int s, int a, int m) {
+    (void)s;
+    (void)a;
+    (void)m;
+    if (k == GLFW_KEY_P) {
+        scene()->removeAnimatable(particleSystem.lock());
+    }
+    if (k == GLFW_KEY_O) {
+        scene()->addAnimatable(particleSystem.lock());
+    }
+}

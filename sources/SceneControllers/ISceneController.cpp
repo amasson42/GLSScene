@@ -11,6 +11,10 @@ ISceneController::~ISceneController() {
     _scene = nullptr;
 }
 
+std::shared_ptr<GLS::Scene> ISceneController::scene() {
+    return _scene;
+}
+
 void ISceneController::update() {
     if (_window.expired()) {
         std::cout << "windos out" << std::endl;

@@ -15,4 +15,5 @@ class ParticuleSystemSceneController: public ISceneController {
 
     virtual void makeScene();
     virtual void update();
+    virtual void keyCallBack(int key, int scancode, int action, int mods);
 };
