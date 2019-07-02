@@ -9,7 +9,14 @@
 #ifndef GLSTransform_h
 #define GLSTransform_h
 
-#include <OpenGL/gl3.h>
+#ifdef __APPLE__
+# include <OpenGL/gl3.h>
+#elif defined _WIN32
+# include <Windows.h>
+# include <GL/glew.h>
+# include <gl/GL.h>
+#endif
+
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 #include <glm/vec2.hpp>
@@ -142,4 +149,4 @@ namespace GLS {
 
 }
 
-#endif /* GLSTransform_h */
+#endif // GLSTransform_h

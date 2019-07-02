@@ -8,6 +8,10 @@
 
 #include "GLSLight.hpp"
 
+#ifndef M_PI
+# define M_PI 3.14159265359
+#endif
+
 namespace GLS {
     
     Light::Light() :

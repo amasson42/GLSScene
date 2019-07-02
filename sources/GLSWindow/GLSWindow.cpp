@@ -49,6 +49,14 @@ _framebuffer(nullptr) {
         throw std::exception();
     }
     glfwMakeContextCurrent(_glfwWindow);
+
+	#ifdef _WIN32
+	glewExperimental = GL_FALSE;
+	if (glewInit() != GLEW_OK) {
+		exit(EXIT_FAILURE);
+	} 
+	#endif
+
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     glEnable(GL_MULTISAMPLE);
     glfwGetFramebufferSize(_glfwWindow, &_bufferWidth, &_bufferHeight);

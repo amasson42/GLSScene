@@ -12,6 +12,9 @@
 #include "GLScene.hpp"
 #ifdef __APPLE__
 # include <OpenCL/OpenCL.h>
+#elif defined _WIN32
+# include <GLFW/glfw3.h>
+# include <CL/cl.h>
 #else
 # include <OpenCL/cl.h>
 #endif

@@ -15,6 +15,13 @@ class ISceneController;
 # include "GLSWindow.hpp"
 # include "ISceneController.hpp"
 
+#ifndef M_PI
+# define M_PI 3.14159265359
+#endif
+#ifndef M_PI_2
+# define M_PI_2 3.14159265359 / 2.0
+#endif
+
 struct AppEnv {
 
     static void printAvailableScenes();
