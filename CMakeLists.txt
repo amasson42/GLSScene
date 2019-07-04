@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(ft_vox)
 
 if (UNIX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Werror -Wall -Werror -g")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 endif (UNIX)
 
 if (NOT EXISTS ../libs/)
@@ -37,6 +37,7 @@ add_subdirectory(GLScene/libs/assimp)
 # find_library(GLSCENE_LIBRARY GLScene)
 
 link_directories(${OpenCL_LIBRARY})
+link_directories(build)
 # link_directories(GLScene/build/Debug)
 # link_directories(${OpenCL_LIBRARY} GLScene/libs/glfw/build/src/Release/)
 # link_directories(GLScene/build/Debug)

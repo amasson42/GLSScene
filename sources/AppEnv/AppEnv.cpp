@@ -56,6 +56,8 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
             sceneController = std::make_shared<VoxelProceduralSceneController>(mainWindow);
         } else if (as[0] == "particles") {
             sceneController = std::make_shared<ParticuleSystemSceneController>(mainWindow);
+        } else if (as[0] == "gros") {
+            sceneController = std::make_shared<GrosSceneController>(mainWindow);
         } else {
             throw std::exception();
         }
