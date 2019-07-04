@@ -22,6 +22,10 @@ namespace GLS {
         return _size.x / _size.y;
     }
 
+    void Scene::setBackgroundColor(glm::vec4 color) {
+        _background = color;
+    }
+
     std::shared_ptr<Node> Scene::rootNode() {
         return _rootNode;
     }

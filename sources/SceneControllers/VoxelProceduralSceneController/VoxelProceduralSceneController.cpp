@@ -29,8 +29,8 @@ double noise(glm::vec3 v) {
 
 class VoxelWorld {
 
-    static const int worldSize = 16;
-    static const int worldHeight = 32 / CHUNKSIZE;
+    static const int worldSize = 8;
+    static const int worldHeight = 256 / CHUNKSIZE;
     typedef std::array<std::array<std::array<std::shared_ptr<GLS::VoxelChunk>, worldSize>, worldHeight>, worldSize> VoxelMap;
     VoxelMap _voxels;
 
@@ -283,6 +283,7 @@ void VoxelProceduralSceneController::makeScene() {
     camera->fogFar = 300;
     camera->fogNear = 100;
     camera->fov = (80.0) * M_PI / 180;
+    scene.setBackgroundColor(glm::vec4(0.2, 0.1, 0.6, 1));
     camera->aspect = (scene.getAspect());
     cameraNode->setCamera(camera);
     cameraNode->transform().moveBy(0, 100, 150);

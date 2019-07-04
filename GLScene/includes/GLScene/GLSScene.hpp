@@ -49,6 +49,7 @@ namespace GLS {
         glm::vec2 getSize() const;
         float getAspect() const;
 
+        void setBackgroundColor(glm::vec4 color);
 
         // Node utilities
 
