@@ -30,3 +30,4 @@ class ISceneController {
 # include "CustomSceneControllers/Trash.hpp"
 # include "CustomSceneControllers/Voxel.hpp"
 # include "CustomSceneControllers/VoxelProcedural.hpp"
+# include "CustomSceneControllers/Gros.hpp"
