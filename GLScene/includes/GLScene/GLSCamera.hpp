@@ -15,13 +15,16 @@ namespace GLS {
     
     struct Camera {
         
-        GLfloat fov;
-        GLfloat aspect;
-        GLfloat nearZ;
-        GLfloat farZ;
+        float fov;
+        float aspect;
+        float nearZ;
+        float farZ;
         
-        Camera(GLfloat fov = 1.5708, GLfloat aspect = 1.0f,
-               GLfloat nearZ = 0.1f, GLfloat farZ = 100.0f);
+        float fogNear;
+        float fogFar;
+        
+        Camera(float fov = 1.5708, float aspect = 1.0f,
+               float nearZ = 0.1f, float farZ = 100.0f);
         
         glm::mat4 projectionMatrix() const;
         

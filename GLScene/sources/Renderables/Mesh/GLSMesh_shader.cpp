@@ -124,13 +124,21 @@ namespace GLS {
         // sent by scene :
         "uniform Light lights[16];\n"
         "uniform int lights_count;\n"
-        "uniform vec3 u_camera_position;\n"
         #ifdef SCHOOL_DUMPS
         "uniform mat4 light_casters_vp[4];\n"
         "uniform sampler2D light_casters_depth_map[4];\n"
         #else
         "uniform LightCaster light_casters[4];\n"
         #endif
+        "\n"
+        "uniform mat3 u_mat_normal;\n"
+        "uniform mat4 u_mat_projection;\n"
+        "uniform mat4 u_mat_view;\n"
+        "uniform mat4 u_mat_model;\n"
+        "uniform vec3 u_camera_position;\n"
+        "uniform float u_fog_near;\n"
+        "uniform float u_fog_far;\n"
+        "uniform vec3 u_fog_color;\n"
         "\n"
         "out vec4 FragColor;\n"
         "\n";

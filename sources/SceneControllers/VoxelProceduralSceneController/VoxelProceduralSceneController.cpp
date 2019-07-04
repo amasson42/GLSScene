@@ -29,8 +29,8 @@ double noise(glm::vec3 v) {
 
 class VoxelWorld {
 
-    static const int worldSize = 8;
-    static const int worldHeight = 256 / CHUNKSIZE;
+    static const int worldSize = 16;
+    static const int worldHeight = 32 / CHUNKSIZE;
     typedef std::array<std::array<std::array<std::shared_ptr<GLS::VoxelChunk>, worldSize>, worldHeight>, worldSize> VoxelMap;
     VoxelMap _voxels;
 
@@ -218,7 +218,7 @@ void VoxelProceduralSceneController::update() {
                 float length = glm::length(chunkDirection);
                 if (length < CHUNKSIZE * 1.5)
                     a = true;
-                else if (length > 350)
+                else if (length > camera->farZ)
                     a = false;
                 else {
                     chunkDirection /= length;
@@ -254,6 +254,8 @@ void VoxelProceduralSceneController::makeScene() {
         texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(filePath);
         texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         texturedMaterial->texture_mask = texturedMaterial->texture_diffuse;
         texturedMaterial->shininess = 0;
     } catch (std::exception& e) {
@@ -277,7 +279,9 @@ void VoxelProceduralSceneController::makeScene() {
     cameraNode = std::make_shared<GLS::Node>();
     cameraNode->transform().moveBy(5, 10, 20);
     std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-    camera->farZ = 450;
+    camera->farZ = 300;
+    camera->fogFar = 300;
+    camera->fogNear = 100;
     camera->fov = (80.0) * M_PI / 180;
     camera->aspect = (scene.getAspect());
     cameraNode->setCamera(camera);

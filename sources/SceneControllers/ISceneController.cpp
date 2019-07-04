@@ -27,7 +27,7 @@ void ISceneController::update() {
         static float cameraAngleX = cam.transform().eulerAngles().x;
         static float cameraAngleY = cam.transform().eulerAngles().y;
 
-        float cameraSpeed = 5.0 * win->deltaTime();
+        float cameraSpeed = 50.0 * win->deltaTime();
         glm::mat4 cameraMat = cam.getWorldTransformMatrix();
         glm::vec3 cameraFront = glm::vec3(cameraMat * glm::vec4(0, 0, -1, 0));
         glm::vec3 cameraRight = glm::vec3(cameraMat * glm::vec4(1, 0, 0, 0));

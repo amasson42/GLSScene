@@ -49,13 +49,19 @@ namespace GLS {
         glm::mat4 view;
         glm::mat4 model;
         glm::vec3 camera_position;
+        float fog_near;
+        float fog_far;
+        glm::vec3 fog_color;
 
         RenderUniforms();
 
         RenderUniforms(const glm::mat4& p,
                        const glm::mat4& v,
                        const glm::mat4& m,
-                       const glm::vec3& c);
+                       const glm::vec3& c,
+                       float fn,
+                       float ff,
+                       const glm::vec3& fc);
         
         void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
     };

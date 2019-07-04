@@ -41,9 +41,13 @@ namespace GLS {
             glm::mat4 camMatrix = camera->getWorldTransformMatrix();
             uniforms.view = glm::inverse(camMatrix);
             uniforms.camera_position = glm::vec3(camMatrix * glm::vec4(0, 0, 0, 1));
-            if (camera->camera() != nullptr)
+            if (camera->camera() != nullptr) {
                 uniforms.projection = camera->camera()->projectionMatrix();
+                uniforms.fog_far = camera->camera()->fogFar;
+                uniforms.fog_near = camera->camera()->fogNear;
+            }
         }
+        uniforms.fog_color = glm::vec3(_background);
         return uniforms;
     }
 

@@ -34,10 +34,11 @@ namespace GLS {
         "#version 400 core\n\n"
 
         + Mesh::shaderUniformsFragment() +
-        // "    float near = 0.1;"
-        // "    float far = 15.0;"
-        // "    float z = gl_FragCoord.z * 2.0 - 1.0;"
-        // "    float linearDepth = (2.0 * near * far) / (far + near - z * (far - near)) / far;"
+
+        // "    float near = u_mat_projection[2][3] / (u_mat_projection[2][2] - 1.0);\n"
+        // "    float far = u_mat_projection[2][3] / (u_mat_projection[2][2] + 1.0);\n"
+        // "    float z = gl_FragCoord.z * 2.0 - 1.0;\n"
+        // "    float linearDepth = (2.0 * near * far) / (far + near - z * (far - near)) / far;\n"
 
         #ifdef SCHOOL_DUMPS
         "float calculShadow(Light light) {\n"
@@ -160,6 +161,14 @@ namespace GLS {
         "    }\n"
         "}\n"
 
+        "float calculFogVisibility() {\n"
+        "    float fogDistance = length(fs_in.wposition - u_camera_position);\n"
+        // "    float visibility = exp(-pow((fogDistance * fogDensity), fogGradient));\n"
+        "    float visibility = clamp((fogDistance - u_fog_far) / (u_fog_near - u_fog_far), 0, 1);\n"
+        "    visibility = pow(visibility, 2.5);"
+        "    return visibility;\n"
+        "}\n"
+
         "void main() {\n"
         "    if ((texturebitmask & 128) != 0) {\n"
         "       if (texture(texture_mask, (mask_transform * vec3(fs_in.uv, 1.0)).xy).a == 0.0)\n"
@@ -189,6 +198,9 @@ namespace GLS {
         "    for (int i = 0; i < lights_count; i++) {\n"
         "        color += calculLight(lights[i], fragMat, normal_direction, fcamera_position);\n"
         "    }\n"
+
+        "    color = mix(u_fog_color, color, calculFogVisibility());\n"
+
         "    FragColor = vec4(color, 1.0);\n"
         "}\n"
 
@@ -250,6 +262,7 @@ namespace GLS {
         "        + (joint_weights.w * u_mat_joints[joint_ids.w]);\n"
         // FIXME: skinned mesh why the maths ?
         "    skin_matrix = mat4(vec4(1, 0, 0, 0), vec4(0, 1, 0, 0), vec4(0, 0, 1, 0), vec4(0, 0, 0, 1));"
+
         "    vs_out.wposition = vec3(u_mat_model * skin_matrix * vec4(position, 1.0));\n"
         "    gl_Position = u_mat_projection * u_mat_view * vec4(vs_out.wposition, 1.0);\n"
         "    vs_out.position = gl_Position;\n"
