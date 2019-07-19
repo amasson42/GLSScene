@@ -33,18 +33,7 @@ GrosSceneController::~GrosSceneController() {
 
 void GrosSceneController::update() {
     ISceneController::update();
-
-	static float time = 0;
-	float deltaTime = _window.lock()->deltaTime();
-
-	time += deltaTime;
-
-	if (time > 1) {
-		time = 0;
-		// std::cout << "FPS: " << 1 / _window.lock()->deltaTime() << std::endl;
-		_window.lock()->setTitle("ft_fox | FPS: " + std::to_string(static_cast<int>(1 / deltaTime)));
-	}
-	
+	// float deltaTime = _window.lock()->deltaTime();
 
 }
 
@@ -70,8 +59,8 @@ void GrosSceneController::makeScene() {
 		#ifdef _WIN32 // Just because of the build folder and cmake
         std::string filePath = textureName != nullptr ? *textureName : "../assets/textures/ft_vox_textures.png";
 		#else
-        std::string filePath = textureName != nullptr ? *textureName : "../assets/textures/ft_vox_textures.png";
-        // std::string filePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures.png";
+        // std::string filePath = textureName != nullptr ? *textureName : "../assets/textures/ft_vox_textures.png";
+        std::string filePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures.png";
 		#endif
         texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(filePath);
         texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -100,8 +89,8 @@ void GrosSceneController::makeScene() {
 	initNoise(seed);
 	int blockType = (rand() % 5) + 1;
 
-	// std::cout << "NOISE " << noise(1 + 0.5, 1 + 0.5, 1 + 0.5) << std::endl;
-	// std::cout << "NOISE " << noise(100 + 0.5, 100 + 0.5, 100 + 0.5) << std::endl;
+	std::cout << "NOISE " << smoothNoise(1 + 0.5, 1 + 0.5, 1 + 0.5) << std::endl;
+	std::cout << "NOISE " << smoothNoise(100 + 0.5, 100 + 0.5, 100 + 0.5) << std::endl;
 
 	std::shared_ptr<GLS::VoxelChunk> chunk = std::make_shared<GLS::VoxelChunk>();
 	chunk->setMaterial(texturedMaterial);
@@ -111,7 +100,7 @@ void GrosSceneController::makeScene() {
 		for (int z = 0; z < CHUNKSIZE; z++) {
 			// for (int y = 0; y < CHUNKSIZE; y++) {
 				// std::cout << "set block at " << x << "  " << y <<  "  " << z << std::endl; 
-			double height = noise(x + 1.5, 1.5, z + 1.5) + 0.75;
+			double height = smoothNoise(x + 1.5, 1.5, z + 1.5) + 0.75;
 			// std::cout << "height: " << height / 2 << std::endl;
 			chunk->setBlockIdAt(x, 0, z, blockType);
 			if (height > 0.1) {

@@ -26,6 +26,9 @@ int main(int argc, const char * argv[]) {
             args.push_back(argv[i]);
         }
     }
+    if (args.empty()) {
+        args.push_back("voxelWorld");
+    }
     if (helpDisplay)
         printHelp(argv[0]);
     if (args.empty()) {

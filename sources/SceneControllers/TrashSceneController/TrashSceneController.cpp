@@ -145,18 +145,18 @@ void TrashSceneController::makeScene() {
     scene.rootNode()->addChildNode(cameraNode);
 
     std::vector<std::string> skyboxFaces;
-    // skyboxFaces.push_back("../textures/lac_skybox/right.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/left.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/top.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/bottom.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/front.jpg");
-    // skyboxFaces.push_back("../textures/lac_skybox/back.jpg");
-    skyboxFaces.push_back("../textures/elbrus/elbrus_ft.jpg");
-    skyboxFaces.push_back("../textures/elbrus/elbrus_bk.jpg");
-    skyboxFaces.push_back("../textures/elbrus/elbrus_up.jpg");
-    skyboxFaces.push_back("../textures/elbrus/elbrus_dn.jpg");
-    skyboxFaces.push_back("../textures/elbrus/elbrus_rt.jpg");
-    skyboxFaces.push_back("../textures/elbrus/elbrus_lf.jpg");
+    // skyboxFaces.push_back("assets/textures/skybox/lac_skybox/right.jpg");
+    // skyboxFaces.push_back("assets/textures/skybox/lac_skybox/left.jpg");
+    // skyboxFaces.push_back("assets/textures/skybox/lac_skybox/top.jpg");
+    // skyboxFaces.push_back("assets/textures/skybox/lac_skybox/bottom.jpg");
+    // skyboxFaces.push_back("assets/textures/skybox/lac_skybox/front.jpg");
+    // skyboxFaces.push_back("assets/textures/skybox/lac_skybox/back.jpg");
+    skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_ft.jpg");
+    skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_bk.jpg");
+    skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_up.jpg");
+    skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_dn.jpg");
+    skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_rt.jpg");
+    skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_lf.jpg");
     try {
         std::shared_ptr<GLS::Skybox> skybox = std::make_shared<GLS::Skybox>(skyboxFaces);
         scene.setSkybox(skybox);

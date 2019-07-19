@@ -60,6 +60,7 @@ namespace GLS {
         bool isFullOnEdge(int edgeIndex) const; // contains full blocks on the indexed edge
         bool isSurrounded() const; // all adjacent are full on the edge
 
+        void setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, int adji);
         void setAdjacentChunks(std::array<std::weak_ptr<VoxelChunk>, 6> adjChunks);
         std::shared_ptr<VoxelChunk> adjacentChunk(int edgeIndex);
         std::array<std::shared_ptr<VoxelChunk>, 6> adjacentChunks();

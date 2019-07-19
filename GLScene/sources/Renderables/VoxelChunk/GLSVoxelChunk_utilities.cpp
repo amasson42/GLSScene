@@ -189,6 +189,10 @@ namespace GLS {
         return true;
     }
 
+    void VoxelChunk::setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, int adji) {
+        _adjChunks[adji] = adjChunk;
+    }
+
     void VoxelChunk::setAdjacentChunks(std::array<std::weak_ptr<VoxelChunk>, 6> adjChunks) {
         _adjChunks = adjChunks;
     }

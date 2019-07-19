@@ -73,10 +73,18 @@ clean:
 fclean: clean
 	make -C GLScene fclean
 	rm -f $(NAME)
+	rm -fr $(NAME).app
 
 re: fclean all
 
+app: all
+	mkdir -p $(NAME).app/Contents/MacOS
+	mkdir -p $(NAME).app/Contents/Resources
+	cp $(NAME) $(NAME).app/Contents/MacOS/glscene
+	cp Info.plist $(NAME).app/Contents
+	cp -r assets $(NAME).app/Contents/Resources
+
 -include $(DEPS)
 
-.PHONY: all GLScene $(NAME) install clean fclean re
+.PHONY: all GLScene $(NAME) install clean fclean re app
 .SILENT:

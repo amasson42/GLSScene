@@ -46,7 +46,7 @@ float calculEdgeValue() {
 
 void main() {
     vec3 color = texture(screen_texture, fs_in.uv).xyz;
-    float hashing = 255;
+    float hashing = 10;
     color = floor(color * hashing) / hashing;
     FragColor = vec4(color - vec3(calculEdgeValue()), 1.0);
 }
