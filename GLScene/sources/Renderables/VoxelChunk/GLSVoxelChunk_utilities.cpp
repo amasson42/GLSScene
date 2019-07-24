@@ -310,6 +310,26 @@ namespace GLS {
 
     }
 
+    void VoxelChunk::calculBlockAdjacenceEdge(int edge) {
+        int xs, xe, ys, ye, zs, ze;
+        const int cs = chunkSize - 1;
+        switch (edge) {
+            case 0: xs = cs;        xe = chunkSize; ys = 0;         ye = chunkSize; zs = 0;         ze = chunkSize; break; // +X
+            case 1: xs = 0;         xe = 1;         ys = 0;         ye = chunkSize; zs = 0;         ze = chunkSize; break; // -X
+            case 2: xs = 0;         xe = chunkSize; ys = cs;        ye = chunkSize; zs = 0;         ze = chunkSize; break; // +Y
+            case 3: xs = 0;         xe = chunkSize; ys = 0;         ye = 1;         zs = 0;         ze = chunkSize; break; // -Y
+            case 4: xs = 0;         xe = chunkSize; ys = 0;         ye = chunkSize; zs = cs;        ze = chunkSize; break; // +Z
+            case 5: xs = 0;         xe = chunkSize; ys = 0;         ye = chunkSize; zs = 0;         ze = 1;         break; // -Z
+            default: xs = xe = ys = ye = zs = ze = 0; break;
+        }
+        std::array<std::shared_ptr<VoxelChunk>, 6> adjChunks = adjacentChunks();
+        for (int x = xs; x < xe; x++)
+            for (int y = ys; y < ye; y++)
+                for (int z = zs; z < ze; z++) {
+                    _blockIds[indexOfBlock(x, y, z)] = blockIdAt(x, y, z) | (_calculBlockAdjacence(*this, x, y, z, adjChunks) << 16);
+                }
+    }
+
     std::pair<glm::vec3, glm::vec3> VoxelChunk::getBounds(glm::mat4 transform) const {
         (void)transform;
         return std::pair<glm::vec3, glm::vec3>(0, 0);

@@ -76,6 +76,10 @@ namespace GLS {
         return _renderables;
     }
 
+    std::vector<std::shared_ptr<IRenderable> >& Node::renderables() {
+        return _renderables;
+    }
+
     void Node::addRenderable(std::shared_ptr<IRenderable> renderable) {
         _renderables.push_back(renderable);
     }

@@ -68,6 +68,7 @@ namespace GLS {
         // TODO: add the possibility to update the target part of the buffer with glBufferSubData
         void calculBlockAdjacence();
         void calculBlockAdjacence(int x, int y, int z);
+        void calculBlockAdjacenceEdge(int edge);
 
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
 

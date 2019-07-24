@@ -73,6 +73,7 @@ namespace GLS {
         void setActive(bool active);
 
         const std::vector<std::shared_ptr<IRenderable> >& renderables() const;
+        std::vector<std::shared_ptr<IRenderable> >& renderables();
         void addRenderable(std::shared_ptr<IRenderable> renderable);
         void removeRenderableAt(size_t i);
 
