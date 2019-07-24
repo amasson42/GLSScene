@@ -5,16 +5,16 @@ if (UNIX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 endif (UNIX)
 
-if (NOT EXISTS ../libs/)
-	execute_process(COMMAND mkdir ../libs/)
+if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/)
+	execute_process(COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/libs/)
 endif()
 
-if (NOT EXISTS ../libs/glfw)
+if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw)
 	message(STATUS "Downloading glfw...")
-	file(DOWNLOAD https://github.com/glfw/glfw/releases/download/3.3/glfw-3.3.zip ../libs/glfw.zip)
-	execute_process(COMMAND unzip -q ../libs/glfw.zip -d ../libs/)
-	execute_process(COMMAND mv ../libs/glfw-3.3 ../libs/glfw)
-	execute_process(COMMAND rm ../libs/glfw.zip)
+	file(DOWNLOAD https://github.com/glfw/glfw/releases/download/3.3/glfw-3.3.zip ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw.zip)
+	execute_process(COMMAND unzip -q ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw.zip -d ${CMAKE_CURRENT_BINARY_DIR}/libs/)
+	execute_process(COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw-3.3 ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw)
+	execute_process(COMMAND rm ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw.zip)
 endif()
 
 include_directories(includes/)
@@ -25,14 +25,22 @@ include_directories(GLScene/CLDevice/includes/)
 find_package(OpenCL REQUIRED)
 find_package(OpenGL REQUIRED)
 
-include_directories(GLScene/libs/glfw/include)
-include_directories(GLScene/libs/assimp/include)
-include_directories(GLScene/libs/glm)
-include_directories(GLScene/libs/glew/include)
 include_directories(${OpenCL_INCLUDE_DIRS})
 
-add_subdirectory(GLScene/libs/glfw)
-add_subdirectory(GLScene/libs/assimp)
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(GLScene ${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build)
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/libs/glfw)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/libs/assimp/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/build/libs/assimp/include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/libs/glm)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/libs/glew/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/glfw/include)
+
+# add_subdirectory(GLScene/libs/assimp)
 
 # find_library(GLSCENE_LIBRARY GLScene)
 
@@ -49,4 +57,4 @@ file(GLOB_RECURSE SOURCE_FILES
 )
 
 add_executable(ft_vox ${SOURCE_FILES})
-target_link_libraries(ft_vox glfw assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${OpenCL_LIBRARY} GLScened)
+target_link_libraries(ft_vox glfw assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${OpenCL_LIBRARY} GLScene)
