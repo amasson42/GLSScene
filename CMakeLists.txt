@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(ft_vox)
+project(game)
 
 if (UNIX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
@@ -56,5 +56,5 @@ file(GLOB_RECURSE SOURCE_FILES
 	GLScene/libs/glew/src/glew.c
 )
 
-add_executable(ft_vox ${SOURCE_FILES})
-target_link_libraries(ft_vox glfw assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${OpenCL_LIBRARY} GLScene)
+add_executable(game ${SOURCE_FILES})
+target_link_libraries(game glfw assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${OpenCL_LIBRARY} GLScene)

@@ -2,8 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleIconFile</key>
+	<string>assets/AppIcon.icns</string>
 	<key>CFBundleExecutable</key>
-	<string>glscene</string>
+	<string>game</string>
 	<key>CFBundleSignature</key>
 	<string>glsg</string>
 	<key>CFBundlePackageType</key>
@@ -11,10 +13,10 @@
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.giantwow.glscene</string>
+	<string>com.giantwow.game</string>
 	<key>CFBundleDisplayName</key>
-	<string>GLScene</string>
+	<string>game</string>
 	<key>CFBundleName</key>
-	<string>GLScene</string>
+	<string>game</string>
 </dict>
 </plist>
