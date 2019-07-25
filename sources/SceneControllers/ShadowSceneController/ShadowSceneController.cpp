@@ -50,6 +50,16 @@ float randFloat() {
     return static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 }
 
+void ShadowSceneController::keyCallBack(int key, int scancode, int action, int mods) {
+    if (key == 84) {
+        if (action) {
+            cubesPivotNode->removeFromParent();
+        } else {
+            _scene->rootNode()->addChildNode(cubesPivotNode);
+        }
+    }
+}
+
 void ShadowSceneController::makeScene() {
     if (_window.expired())
         return;
