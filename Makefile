@@ -1,114 +1,92 @@
 
 NAME = game
 
-# CC = clang++
+CC = clang++
 
-# SRCS = sources
-# OBJS = objs
-# INCS = includes
+SRCS = sources
+OBJS = objs
+INCS = includes
 
-# FRAMEWORKS = -lm \
-# 		-framework OpenGL \
-# 		-framework OpenCL \
-# 		`pkg-config --static --libs glfw3` \
-# 		`pkg-config --static --libs glm` \
-# 		`pkg-config --static --libs assimp` \
-# 		`pkg-config glfw3 --cflags-only-I` \
-# 		`pkg-config glm --cflags-only-I` \
-# 		`pkg-config assimp --cflags-only-I` \
-# 		-L GLScene -lGLScene
+FRAMEWORKS = -lm \
+		-framework OpenGL \
+		-framework OpenCL \
+		`pkg-config --static --libs glfw3` \
+		`pkg-config --static --libs glm` \
+		`pkg-config --static --libs assimp` \
+		`pkg-config glfw3 --cflags-only-I` \
+		`pkg-config glm --cflags-only-I` \
+		`pkg-config assimp --cflags-only-I` \
+		-L GLScene -lGLScene
 
-# INCLUDES =	-I $(INCS) \
-# 		-I GLScene/includes \
-# 		-I GLScene/CLDevice/includes \
+INCLUDES =	-I $(INCS) \
+		-I GLScene/includes \
+		-I GLScene/CLDevice/includes \
 
-# FLAGS = -std=c++11 -Wall -Werror -Wextra
+FLAGS = -std=c++11 -Wall -Werror -Wextra
 
-# CPP_FILES = $(shell find $(SRCS) -type f -name *.cpp)
-# CPP_DIRS = $(shell find $(SRCS) -depth -type d)
+CPP_FILES = $(shell find $(SRCS) -type f -name *.cpp)
+CPP_DIRS = $(shell find $(SRCS) -depth -type d)
 
-# O_DIRS = $(addprefix $(OBJS)/,$(CPP_DIRS))
-# O_FILES_TMP = $(CPP_FILES:%.cpp=$(OBJS)/%.o)
-# O_FILES = $(O_FILES_TMP:%.s=$(OBJS)/%.o)
+O_DIRS = $(addprefix $(OBJS)/,$(CPP_DIRS))
+O_FILES_TMP = $(CPP_FILES:%.cpp=$(OBJS)/%.o)
+O_FILES = $(O_FILES_TMP:%.s=$(OBJS)/%.o)
 
-# DEPS = $(O_FILES:.o=.d)
+DEPS = $(O_FILES:.o=.d)
 
-# # Print
-# ACTUAL = $(words $(COUNT))
-# TOTAL = $(words $(filter %.cpp,$(CPP_FILES)))
-# INCREMENT = $(eval COUNT+=1)
+# Print
+ACTUAL = $(words $(COUNT))
+TOTAL = $(words $(filter %.cpp,$(CPP_FILES)))
+INCREMENT = $(eval COUNT+=1)
 
-# PRINTINC = $(INCREMENT) $(PRINT)
-# PRINT = printf "\r \033[31;1m%3s%%\033[0m\t -->>\t\033[31;1m%-65s\033[0m\r" "$(shell echo $(ACTUAL)\*100\/$(TOTAL) | bc)" "$^"
-# PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" "$(shell echo $(ACTUAL)\*100\/$(TOTAL) | bc)" "$@"
+PRINTINC = $(INCREMENT) $(PRINT)
+PRINT = printf "\r \033[31;1m%3s%%\033[0m\t -->>\t\033[31;1m%-65s\033[0m\r" "$(shell echo $(ACTUAL)\*100\/$(TOTAL) | bc)" "$^"
+PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" "$(shell echo $(ACTUAL)\*100\/$(TOTAL) | bc)" "$@"
 
-# all:
-# 	mkdir -p $(O_DIRS) $(OBJS)
-# 	make $(NAME)
+all:
+	mkdir -p $(O_DIRS) $(OBJS)
+	make $(NAME)
 
-# install:
-# 	brew update
-# 	brew install pkg-config || brew upgrade pkg-config
-# 	brew install glfw || brew upgrade glfw
-# 	brew install glm || brew upgrade glm
-# 	brew install assimp || brew upgrade assimp
+install:
+	brew update
+	brew install pkg-config || brew upgrade pkg-config
+	brew install glfw || brew upgrade glfw
+	brew install glm || brew upgrade glm
+	brew install assimp || brew upgrade assimp
 
-# GLScene:
-# 	make -C GLScene
+GLScene:
+	make -C GLScene
 
-# $(NAME): GLScene $(O_FILES)
-# 	$(CC) $(FLAGS) \
-# 		$(INCLUDES) \
-# 		$(FRAMEWORKS) \
-# 		-o $@ $(O_FILES) && $(PRINTDONE) && echo || exit
+$(NAME): GLScene $(O_FILES)
+	$(CC) $(FLAGS) \
+		$(INCLUDES) \
+		$(FRAMEWORKS) \
+		-o $@ $(O_FILES) && $(PRINTDONE) && echo || exit
 
-# $(OBJS)/%.o: %.cpp
-# 	$(CC) $(FLAGS) \
-# 		$(INCLUDES) \
-# 		-o $@ -c $< && $(PRINTINC) || exit
+$(OBJS)/%.o: %.cpp
+	$(CC) $(FLAGS) \
+		$(INCLUDES) \
+		-o $@ -c $< && $(PRINTINC) || exit
 
-# clean:
-# 	rm -fr $(O_FILES) $(OBJS)
+clean:
+	rm -fr $(O_FILES) $(OBJS)
 
-# fclean: clean
-# 	make -C GLScene fclean
-# 	rm -f $(NAME)
-# 	rm -fr $(NAME).app
+fclean: clean
+	make -C GLScene fclean
+	rm -f $(NAME)
+	rm -fr $(NAME).app
+	rm -fr build
 
-# re: fclean all
+re: fclean all
 
-# app: all
-# 	mkdir -p $(NAME).app/Contents/MacOS
-# 	mkdir -p $(NAME).app/Contents/Resources
-# 	cp $(NAME) $(NAME).app/Contents/MacOS/glscene
-# 	cp Info.plist $(NAME).app/Contents
-# 	cp -r assets $(NAME).app/Contents/Resources
-
-# -include $(DEPS)
-
-# .PHONY: all GLScene $(NAME) install clean fclean re app
-# .SILENT:
-
-all: $(NAME)
-
-$(NAME):
-	cd build && make -j
+app:
 	mkdir -p $(NAME).app/Contents/MacOS
 	mkdir -p $(NAME).app/Contents/Resources
-	cp build/$(NAME) $(NAME).app/Contents/MacOS/game
+	cp build/$(NAME) $(NAME).app/Contents/MacOS/game 2> /dev/null \
+	|| cp $(NAME) $(NAME).app/Contents/MacOS/game 2> /dev/null
 	cp Info.plist $(NAME).app/Contents
 	cp -r assets $(NAME).app/Contents/Resources
 
-libs:
-	mkdir build
-	cd build && cmake ..
+-include $(DEPS)
 
-clean:
-
-fclean:
-	rm -fr build
-	rm -fr $(NAME).app
-
-re: all
-
-.PHONY: all $(NAME) libs clean fclean re app
+.PHONY: all GLScene $(NAME) install clean fclean re app
+.SILENT:

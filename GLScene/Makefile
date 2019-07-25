@@ -70,9 +70,10 @@ clean:
 	rm -fr tmp_*
 
 fclean: clean
+	make -C CLDevice fclean
 	rm -f $(NAME).dylib
 	rm -f lib$(NAME).a
-	make -C CLDevice fclean
+	rm -fr build
 
 re: fclean all
 
