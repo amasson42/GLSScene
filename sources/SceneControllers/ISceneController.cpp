@@ -86,8 +86,8 @@ void ISceneController::keyCallBack(int key, int scancode, int action, int mods) 
     (void)scancode;
     (void)action;
     (void)mods;
-    std::cout << "{key: " << key << ", scancode: " << scancode
-        << ", action: " << action << ", mods: " << mods << "}" << std::endl;
+    // std::cout << "{key: " << key << ", scancode: " << scancode
+    //     << ", action: " << action << ", mods: " << mods << "}" << std::endl;
     if (key == GLFW_KEY_G && action == 1) {
         if (glIsEnabled(GL_FRAMEBUFFER_SRGB))
             glDisable(GL_FRAMEBUFFER_SRGB);
