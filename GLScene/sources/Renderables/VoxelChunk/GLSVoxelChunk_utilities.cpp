@@ -10,6 +10,11 @@
 
 namespace GLS {
 
+	// tgros WiP
+	int* VoxelChunk::getBlocks() {
+		return _blockIds;
+	}
+
     int VoxelChunk::indexOfBlock(int x, int y, int z) {
         return (z * chunkSize * chunkSize + y * chunkSize + x);
     }

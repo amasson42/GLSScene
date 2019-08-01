@@ -4,10 +4,11 @@
 
 static int p[512];
 
-void initNoise(unsigned int seed) {
+int* initNoise(unsigned int seed) {
     srand(seed);
     for (int i = 0; i < 256 ; i++)
         p[256+i] = p[i] = rand() % 256;
+	return p;
 }
 
 double fade(double t) {

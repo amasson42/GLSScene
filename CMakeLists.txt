@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(game)
 
 if (UNIX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
 endif (UNIX)
 
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/)
@@ -18,6 +18,7 @@ if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw)
 endif()
 
 include_directories(includes/)
+include_directories(includes/CustomSceneControllers/VoxelProcedural/)
 include_directories(GLScene/includes/)
 include_directories(GLScene/includes/GLScene)
 include_directories(GLScene/CLDevice/includes/)
@@ -55,6 +56,8 @@ file(GLOB_RECURSE SOURCE_FILES
     "includes/*.hpp"
 	GLScene/libs/glew/src/glew.c
 )
+
+message(${SOURCE_FILES})
 
 add_executable(game ${SOURCE_FILES})
 target_link_libraries(game glfw assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${OpenCL_LIBRARY} GLScene)

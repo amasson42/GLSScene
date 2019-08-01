@@ -3,15 +3,22 @@
 
 #include "AppEnv.hpp"
 
-void initNoise(unsigned int seed);
+#include "BigChunk.hpp"
+#include "DynamicWorld.hpp"
+#include "ProceduralWorldGenerator.hpp"
+
+
+
+int* initNoise(unsigned int seed);
 double smoothNoise(double x, double y, double z);
 double linearNoise(double x, double y, double z);
 
-class VoxelWorld;
+class DynamicWorld;
 class VoxelProceduralSceneController: public ISceneController {
     std::shared_ptr<GLS::Node> worldNode;
     std::shared_ptr<GLS::Node> cameraNode;
     double lt;
+	std::shared_ptr<DynamicWorld> _dynamicWorld;
 
     public:
     VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window);

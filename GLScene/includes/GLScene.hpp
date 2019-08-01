@@ -25,6 +25,7 @@
 #include <map>
 #include <set>
 #include <algorithm>
+#include <future>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

@@ -1,566 +1,6 @@
 
 #include "AppEnv.hpp"
 
-#include <future>
-
-#define BLOCK_AIR 0
-#define BLOCK_BEDROCK 1
-#define BLOCK_STONE 2
-#define BLOCK_DIRT 3
-#define BLOCK_GRASS 4
-#define BLOCK_SAND 5
-#define BLOCK_GRAVEL 6
-#define BLOCK_GRASS_BROWN 11
-#define BLOCK_WOOD 12
-#define BLOCK_LEAFS 13
-#define BLOCK_WOOD_PLANKS 14
-#define BLOCK_BRICKS 15
-#define BLOCK_COBBLESTONE 16
-#define BLOCK_ICE 21
-#define BLOCK_ICE_BROKEN 22
-#define BLOCK_OBSIDIAN 25
-#define BLOCK_GRASS_PURPLE 31
-#define BLOCK_GOLD 35
-#define BLOCK_TNT 92
-
-#define CHUNKSIZE GLS::VoxelChunk::chunkSize
-
-double linearNoise(glm::vec3 v) {
-	return linearNoise(v.x, v.y, v.z);
-}
-
-namespace glm {
-	bool operator<(const glm::ivec2& lhs, const glm::ivec2& rhs) {
-		if (lhs.x < rhs.x)
-			return true;
-		else
-			return lhs.y < rhs.y;
-	}
-
-	std::ostream& operator<<(std::ostream& out, const glm::ivec2& iv) {
-		out << "[" << iv.x << "; " << iv.y << "]";
-		return out;
-	}
-}
-
-/**
- * a GameVoxelChunk is the packing of a game node, a voxel object and its corresponding mesh in a struct
- * the voxel is only used for utilities purposes and always transformed into mesh for the render
- * when we modify the voxel values, we must set the mustUpdateMesh variable to true
- */
-struct GameVoxelChunk {
-	std::shared_ptr<GLS::Node> node;
-	std::shared_ptr<GLS::VoxelChunk> voxel;
-	std::shared_ptr<GLS::Mesh> mesh;
-	bool mustUpdateMesh;
-
-	GameVoxelChunk() {
-		node = std::make_shared<GLS::Node>();
-		voxel = std::make_shared<GLS::VoxelChunk>();
-		mesh = nullptr;
-		mustUpdateMesh = true;
-	}
-
-	void updateMesh() {
-		node->renderables().clear();
-		mesh = GLS::Mesh::voxelChunk(voxel);
-		mesh->generateBuffers();
-		node->addRenderable(mesh);
-		mustUpdateMesh = false;
-	}
-};
-
-/**
- * A big chunk is an array of many game voxel chunks embeded into a big cube
- * it can use adjacency mechanism delegating to the voxel adjacency mechanism
- * it can be save and loaded from a file.
- */
-class BigChunk {
-	// TODO: load and save into files
-	public:
-	static const int bigChunkWidth = 2;
-	static const int bigChunkHeight = 16;
-	static const int bigChunkCount = bigChunkWidth * bigChunkWidth * bigChunkHeight;
-
-	private:
-	std::shared_ptr<GLS::Node> _node;
-	std::array<GameVoxelChunk, bigChunkCount> _chunks;
-	std::array<std::weak_ptr<BigChunk>, 4> _adjacents; // 0: +X | 1: -X | 2: +Z | 3: -Z
-
-	public:
-
-	BigChunk(std::shared_ptr<GLS::Material> material = nullptr) :
-	_node(std::make_shared<GLS::Node>()),
-	_chunks(),
-	_adjacents() {
-
-		for (int x = 0; x < bigChunkWidth; x++) {
-			for (int y = 0; y < bigChunkHeight; y++) {
-				for (int z = 0; z < bigChunkWidth; z++) {
-					std::weak_ptr<GLS::VoxelChunk> noChunkPtr;
-					GameVoxelChunk& chunk(chunkAt(x, y, z));
-					chunk.voxel->setMaterial(material);
-					chunk.voxel->setAdjacentChunks({
-						x == bigChunkWidth - 1 ? noChunkPtr : chunkAt(x + 1, y, z).voxel,
-						x == 0 ? noChunkPtr : chunkAt(x - 1, y, z).voxel,
-						y == bigChunkHeight - 1 ? noChunkPtr : chunkAt(x, y + 1, z).voxel,
-						y == 0 ? noChunkPtr : chunkAt(x, y - 1, z).voxel,
-						z == bigChunkWidth - 1 ? noChunkPtr : chunkAt(x, y, z + 1).voxel,
-						z == 0 ? noChunkPtr : chunkAt(x, y, z - 1).voxel
-					});
-					chunk.node->transform().setPosition(glm::vec3(CHUNKSIZE * x, CHUNKSIZE * y, CHUNKSIZE * z));
-					chunk.node->setName("VX_" + std::to_string(x) + "_" + std::to_string(y) + "_" + std::to_string(z));
-					chunk.mustUpdateMesh = true;
-					_node->addChildNode(chunk.node);
-				}
-			}
-		}
-	}
-
-	~BigChunk() {
-		_node->removeFromParent();
-	}
-
-	GameVoxelChunk& chunkAt(int i) {
-		if (i < 0 || i >= bigChunkCount)
-			throw std::runtime_error("fuck off");
-		return _chunks[i];
-	}
-
-	GameVoxelChunk& chunkAt(int x, int y, int z) {
-		// TODO: remove when all is over
-		if (x < 0 || x >= bigChunkWidth || y < 0 || y >= bigChunkHeight || z < 0 || z >= bigChunkWidth)
-			throw std::runtime_error("bad values sent to bigChunk::chunkAt");
-		int index = bigChunkWidth * bigChunkWidth * y + bigChunkWidth * x + z;
-		return _chunks[index];
-	}
-
-	/**
-	 * update all the voxel adjacent chunks on the edge
-	 */
-	void setAdjacentBigChunk_positiveX(std::shared_ptr<BigChunk> adj) {
-		_adjacents[0] = adj;
-		const int bcs = bigChunkWidth - 1;
-		int x = bcs;
-		for (int y = 0; y < bigChunkHeight; y++) {
-			for (int z = 0; z < bigChunkWidth; z++) {
-				GameVoxelChunk& chunk(chunkAt(x, y, z));
-				chunk.voxel->setAdjacentChunk(adj->chunkAt(0, y, z).voxel, 0);
-				chunk.voxel->calculBlockAdjacenceEdge(0);
-				chunk.mustUpdateMesh = true;
-			}
-		}
-	}
-
-	void setAdjacentBigChunk_negativeX(std::shared_ptr<BigChunk> adj) {
-		_adjacents[1] = adj;
-		const int bcs = bigChunkWidth - 1;
-		int x = 0;
-		for (int y = 0; y < bigChunkHeight; y++) {
-			for (int z = 0; z < bigChunkWidth; z++) {
-				GameVoxelChunk& chunk(chunkAt(x, y, z));
-				chunk.voxel->setAdjacentChunk(adj->chunkAt(bcs, y, z).voxel, 1);
-				chunk.voxel->calculBlockAdjacenceEdge(1);
-				chunk.mustUpdateMesh = true;
-			}
-		}
-	}
-
-	void setAdjacentBigChunk_positiveZ(std::shared_ptr<BigChunk> adj) {
-		_adjacents[2] = adj;
-		const int bcs = bigChunkWidth - 1;
-		for (int x = 0; x < bigChunkWidth; x++) {
-			for (int y = 0; y < bigChunkHeight; y++) {
-				int z = bcs;
-				GameVoxelChunk& chunk(chunkAt(x, y, z));
-				chunk.voxel->setAdjacentChunk(adj->chunkAt(x, y, 0).voxel, 4);
-				chunk.voxel->calculBlockAdjacenceEdge(4);
-				chunk.mustUpdateMesh = true;
-			}
-		}
-	}
-
-	void setAdjacentBigChunk_negativeZ(std::shared_ptr<BigChunk> adj) {
-		_adjacents[3] = adj;
-		const int bcs = bigChunkWidth - 1;
-		for (int x = 0; x < bigChunkWidth; x++) {
-			for (int y = 0; y < bigChunkHeight; y++) {
-				int z = 0;
-				GameVoxelChunk& chunk(chunkAt(x, y, z));
-				chunk.voxel->setAdjacentChunk(adj->chunkAt(x, y, bcs).voxel, 5);
-				chunk.voxel->calculBlockAdjacenceEdge(5);
-				chunk.mustUpdateMesh = true;
-			}
-		}
-	}
-
-	/**
-	 * iterate trought all of the voxels
-	 * - calcul all of their adjacent values
-	 * - create the meshes
-	 * - generate buffers 
-	 * (preferable to do it only once)
-	 */
-	void generateAllMeshes() {
-		for (int x = 0; x < bigChunkWidth; x++) {
-			for (int y = 0; y < bigChunkHeight; y++) {
-				for (int z = 0; z < bigChunkWidth; z++) {
-					GameVoxelChunk& chunk(chunkAt(x, y, z));
-					chunk.voxel->calculBlockAdjacence();
-					chunk.updateMesh();
-				}
-			}
-		}
-	}
-
-	/**
-	 * return the root node of the big chunk
-	 */
-	std::shared_ptr<GLS::Node> getNode() {
-		return _node;
-	}
-
-};
-
-/**
- * the class that is able to generate chunks with cool environnements
- */
-class ProceduralWorldGenerator {
-
-	public:
-
-	std::shared_ptr<GLS::Material> usedMaterial;
-
-	ProceduralWorldGenerator() {
-
-	}
-
-	std::shared_ptr<BigChunk> generateBigChunkAt(glm::ivec2 bigChunkPos) {
-		std::shared_ptr<BigChunk> bc = std::make_shared<BigChunk>(usedMaterial);
-
-		for (int cx = 0; cx < BigChunk::bigChunkWidth; cx++) {
-			for (int cy = 0; cy < BigChunk::bigChunkHeight; cy++) {
-				for (int cz = 0; cz < BigChunk::bigChunkWidth; cz++) {
-
-					glm::vec3 chunk_wpos = glm::vec3(bigChunkPos.x * CHUNKSIZE * BigChunk::bigChunkWidth + cx * CHUNKSIZE,
-													 cy * CHUNKSIZE,
-													 bigChunkPos.y * CHUNKSIZE * BigChunk::bigChunkWidth + cz * CHUNKSIZE);
-
-					std::shared_ptr<GLS::VoxelChunk> voxel = bc->chunkAt(cx, cy, cz).voxel;
-
-					for (int x = 0; x < CHUNKSIZE; x++) {
-						for (int z = 0; z < CHUNKSIZE; z++) {
-							glm::vec3 wpos = chunk_wpos + glm::vec3(x, 0, z);
-							// voxel->setBlockIdAt(x, 0, z, BLOCK_STONE);
-							// continue;
-							int h = 0;
-							if (cy == 0) {
-								voxel->setBlockIdAt(x, h++, z, BLOCK_BEDROCK);
-								for (; h < 4; h++) {
-									float nValue = linearNoise(wpos.x * 1.2454, h + 5.24, wpos.z * 4.6378);
-									voxel->setBlockIdAt(x, h, z, nValue >= 0.1 * h ? BLOCK_BEDROCK : BLOCK_STONE);
-								}
-							}
-
-							int groundHeight = 4.6 * linearNoise(wpos * glm::vec3(0.046, 0, 0.073)) + 50;
-
-							int snowHeight = 0;
-							{
-								float nValue = linearNoise(wpos * glm::vec3(0.035, 0, 0.33));
-								snowHeight = nValue * 8 + 110;
-							}
-
-							for (; h <= groundHeight && h < CHUNKSIZE; h++) {
-								float nValue = linearNoise(glm::vec3(0.03, 0.12, 0.04) * (wpos + glm::vec3(0, h, 0)));
-								int caveBlockValue = nValue > -0.40 ? BLOCK_STONE :
-													nValue > -0.41 ? BLOCK_COBBLESTONE :
-													BLOCK_AIR;
-
-								int wh = wpos.y + h;
-								int groundBlockValue = wh > groundHeight ? BLOCK_AIR :
-													wh > snowHeight ? BLOCK_ICE :
-													wh == groundHeight ? BLOCK_GRASS :
-													wh > groundHeight - 3 ? BLOCK_DIRT :
-													BLOCK_STONE;
-
-								int blockValue = caveBlockValue == BLOCK_AIR ? BLOCK_AIR :
-													wh > groundHeight - 3 ? groundBlockValue :
-													caveBlockValue;
-
-								voxel->setBlockIdAt(x, h, z, blockValue);
-							}
-
-						}
-					}
-
-				}
-			}
-		}
-		return bc;
-	}
-
-};
-
-/**
- * the class that will manage chunk loading/saving and all those shits
- */
-class DynamicWorld {
-
-	public:
-	std::string _worldDirName;
-	std::shared_ptr<GLS::Node> _worldNode;
-	std::shared_ptr<ProceduralWorldGenerator> _generator;
-
-	std::map<glm::ivec2, std::shared_ptr<BigChunk> > _loadedChunks;
-	std::map<glm::ivec2, std::future<std::shared_ptr<BigChunk>>> _loadingChunks;
-
-
-	// world/
-	//  info.json -> {"seed": 421337}
-	//  C_X_Z.chunk
-	//  C_[...]_[...].chunk
-	DynamicWorld(std::shared_ptr<GLS::Node> worldNode, std::string worldName) :
-	_loadedChunks() {
-		_worldNode = worldNode;
-		_worldDirName = worldName;
-		_generator = std::make_shared<ProceduralWorldGenerator>();
-	}
-
-	glm::ivec2 worldToBigChunkPosition(glm::vec3 position) {
-		return glm::ivec2(position.x / (BigChunk::bigChunkWidth * CHUNKSIZE),
-						  position.z / (BigChunk::bigChunkWidth * CHUNKSIZE));
-	}
-
-	glm::vec3 bigChunkPositionToWorld(glm::ivec2 position) {
-		return glm::vec3(position.x * BigChunk::bigChunkWidth * CHUNKSIZE,
-						 0,
-						 position.y * BigChunk::bigChunkWidth * CHUNKSIZE);
-	}
-
-	// TODO: private
-	void _cleanChunks(glm::vec3& cameraFlatPosition) {
-		float loadingDistance = 120.0;
-
- 		glm::vec3 chunkMid = glm::vec3(CHUNKSIZE * BigChunk::bigChunkWidth / 2,
-										0,
-									   	CHUNKSIZE * BigChunk::bigChunkWidth / 2);
-
-		std::map<glm::ivec2, std::shared_ptr<BigChunk> >::iterator it = _loadedChunks.begin();
-
-		while (it != _loadedChunks.end()) {
-			glm::vec3 chunkOffset = (it->second->getNode()->transform().position() + chunkMid) - cameraFlatPosition;
-			if (glm::dot(chunkOffset, chunkOffset) > loadingDistance * loadingDistance) {
-
-				// TODO: save and destroy the chunk
-				// std::cout << "_cleanChunks remove from _loadedChunks: " << it->first << std::endl;
-				// it->second->getNode()->removeFromParent();
-
-				it = _loadedChunks.erase(it);
-			} else {
-
-				// std::shared_ptr<BigChunk> bigChunk = it->second;
-				// for (int i = 0; i < BigChunk::bigChunkCount; i++) {
-				//	 GameVoxelChunk& chunk(bigChunk->chunkAt(i));
-				//	 if (chunk.mustUpdateMesh) {
-				//		 chunk.updateMesh();
-				//	 }
-				//	 glm::vec3 chunkWorldPos = bigChunk->getNode()->transform().position() + chunk.node->transform().position() + glm::vec3(CHUNKSIZE / 2);
-				//	 glm::vec3 cameraPos = cameraNode->transform().position();
-				//	 glm::vec3 chunkDirection = chunkWorldPos - cameraPos;
-				//	 float squaredLength = glm::dot(chunkDirection, chunkDirection);
-				//	 if (squaredLength < visibleDistance * visibleDistance) {
-				//		 if (squaredLength < 1.75 * CHUNKSIZE) {
-				//			 chunk.node->setActive(true);
-				//		 } else {
-				//			 chunkDirection = glm::normalize(chunkDirection);
-				//			 glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
-				//			 float cosangle = glm::dot(chunkDirection, cameraDirection);
-				//			 chunk.node->setActive(cosangle > minCosCameraVision);
-				//		 }
-				//	 } else {
-				//		 chunk.node->setActive(false);
-				//	 }
-				// }
-
-				++it;
-			}
-
-		}
-	}
-
-	void _generateChunks(glm::vec3& cameraFlatPosition, std::shared_ptr<GLS::Node> cameraNode) {
-		float loadingDistance = 120.0;
-		std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
-		if (camera == nullptr)
-			return;
-		float minCosCameraVision = cos(1.4 * camera->fov * camera->aspect / 2);
- 		glm::vec3 chunkMid = glm::vec3(CHUNKSIZE * BigChunk::bigChunkWidth / 2,
-										0,
-									   	CHUNKSIZE * BigChunk::bigChunkWidth / 2);
-
- 		glm::ivec2 minPosition = worldToBigChunkPosition(cameraFlatPosition - glm::vec3(loadingDistance, 0, loadingDistance));
-		glm::ivec2 maxPosition = worldToBigChunkPosition(cameraFlatPosition + glm::vec3(loadingDistance, 0, loadingDistance));
-
-		for (int x = minPosition.x; x < maxPosition.x; x++) {
-			for (int y = minPosition.y; y < maxPosition.y; y++) {
-
-				if (_loadedChunks.count(glm::ivec2(x, y)) > 0 || _loadingChunks.count(glm::ivec2(x, y)) > 0)
-					continue;
-				glm::vec3 chunkOffset = bigChunkPositionToWorld(glm::ivec2(x, y)) + chunkMid - cameraFlatPosition;
-
-				float chunkOffsetSquaredLength = glm::dot(chunkOffset, chunkOffset);
-				if (chunkOffsetSquaredLength < loadingDistance * loadingDistance) {
-
-					glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
-					cameraDirection = glm::normalize(glm::vec3(1, 0, 1) * cameraDirection);
-
-					if (chunkOffsetSquaredLength < glm::dot(chunkMid, chunkMid)
-						|| glm::dot(glm::normalize(chunkOffset), cameraDirection) > minCosCameraVision) {
-
-						// std::cout << "_generateChunks insert into _loadingChunks: " << glm::ivec2(x, y) << std::endl;
-					
-						_loadingChunks[glm::ivec2(x, y)] = (std::async(std::launch::async, [this](glm::ivec2 pos) {
-							return _generator->generateBigChunkAt(pos);
-						}, glm::ivec2(x, y)));
-					}
-
-				}
-
-			}
-		}
-
-		for (auto it = _loadingChunks.begin(); it != _loadingChunks.end();) {
-			auto status = it->second.wait_for(std::chrono::milliseconds(0));
-        	if (status != std::future_status::ready) {
-				++it;
-				continue;
-			}
-			std::shared_ptr<BigChunk> generatedChunk = it->second.get();
-
-			int x = it->first.x;
-			int y = it->first.y;
-
-			generatedChunk->getNode()->transform().setPosition(bigChunkPositionToWorld(it->first));
-
-			// std::cout << "_generateChunks insert into _loadedChunks: " << it->first << std::endl;
-			_loadedChunks[it->first] = generatedChunk;
-			_worldNode->addChildNode(generatedChunk->getNode());
-
-			// define adjacent
-			// auto adjacent = _loadedChunks.begin();
-
-			// adjacent = _loadedChunks.find(glm::ivec2(x + 1, y));
-			// if (adjacent != _loadedChunks.end()) {
-			// 	generatedChunk->setAdjacentBigChunk_positiveX(adjacent->second);
-			// 	adjacent->second->setAdjacentBigChunk_negativeX(generatedChunk);
-			// }
-
-			// adjacent = _loadedChunks.find(glm::ivec2(x - 1, y));
-			// if (adjacent != _loadedChunks.end()) {
-			// 	generatedChunk->setAdjacentBigChunk_negativeX(adjacent->second);
-			// 	adjacent->second->setAdjacentBigChunk_positiveX(generatedChunk);
-			// }
-
-			// adjacent = _loadedChunks.find(glm::ivec2(x, y + 1));
-			// if (adjacent != _loadedChunks.end()) {
-			// 	generatedChunk->setAdjacentBigChunk_positiveZ(adjacent->second);
-			// 	adjacent->second->setAdjacentBigChunk_negativeZ(generatedChunk);
-			// }
-
-			// adjacent = _loadedChunks.find(glm::ivec2(x, y - 1));
-			// if (adjacent != _loadedChunks.end()) {
-			// 	generatedChunk->setAdjacentBigChunk_negativeZ(adjacent->second);
-			// 	adjacent->second->setAdjacentBigChunk_positiveZ(generatedChunk);
-			// }
-
-			generatedChunk->generateAllMeshes();
-			// std::cout << "_generateChunks remove from _loadingChunks: " << it->first << std::endl;
-			it = _loadingChunks.erase(it);
-		}
-
-		std::cout << "_generateChunks end. _loadingChunks: " << _loadingChunks.size() << ", _loadedChunks: " << _loadedChunks.size() << std::endl;
-	}
-
-	void _generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
-
-		std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
-		if (camera == nullptr)
-			return;
-		float visibleDistance = 100;
-		float minCosCameraVision = cos(1.4 * camera->fov * camera->aspect / 2);
-
-		std::map<glm::ivec2, std::shared_ptr<BigChunk> >::iterator it = _loadedChunks.begin();
-		it = _loadedChunks.begin();
-		while (it != _loadedChunks.end()) {
-			std::shared_ptr<BigChunk> bigChunk = it->second;
-			for (int i = 0; i < BigChunk::bigChunkCount; i++) {
-				GameVoxelChunk& chunk(bigChunk->chunkAt(i));
-				if (chunk.mustUpdateMesh) {
-					chunk.updateMesh();
-				}
-				glm::vec3 chunkWorldPos = bigChunk->getNode()->transform().position() + chunk.node->transform().position() + glm::vec3(CHUNKSIZE / 2);
-				glm::vec3 cameraPos = cameraNode->transform().position();
-				glm::vec3 chunkDirection = chunkWorldPos - cameraPos;
-				float squaredLength = glm::dot(chunkDirection, chunkDirection);
-				if (squaredLength < visibleDistance * visibleDistance) {
-					if (squaredLength < 1.75 * CHUNKSIZE) {
-						chunk.node->setActive(true);
-					} else {
-						chunkDirection = glm::normalize(chunkDirection);
-						glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
-						float cosangle = glm::dot(chunkDirection, cameraDirection);
-						chunk.node->setActive(cosangle > minCosCameraVision);
-					}
-				} else {
-					chunk.node->setActive(false);
-				}
-				// chunk.node->setActive(true); //
-			}
-
-			++it;
-		}
-	}
-
-	/**
-	 * the method called every frame
-	 * send the position of the player
-	 * will load the unloaded chunks near enough
-	 * will unload the loaded chunks far enough
-	 */
-	void loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
-
-		float loadingDistance = 120.0;
-		float visibleDistance = 100;
-
-		glm::vec3 cameraFlatPosition = cameraNode->transform().position();
-		cameraFlatPosition.y = 0;
-
-		
-		auto start = std::chrono::system_clock::now();
-		_cleanChunks(cameraFlatPosition);
-		auto end = std::chrono::system_clock::now();
-		// std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
-
-
-
-		start = std::chrono::system_clock::now();	   
-	   	_generateChunks(cameraFlatPosition, cameraNode);
-		end = std::chrono::system_clock::now();
-		std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
-
-
-		start = std::chrono::system_clock::now();
-		_generateMeshes(cameraNode);
-		end = std::chrono::system_clock::now();
-		// std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
-
-		// std::cout << "We have " << _loadedChunks.size() << " chunks" << std::endl;
-	}
-
-};
-
-static std::shared_ptr<DynamicWorld> _dynamicWorld = nullptr;
-
 VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window) :
 ISceneController(window) {
 	lt = 0;
@@ -577,20 +17,22 @@ void VoxelProceduralSceneController::update() {
 	if (_window.expired())
 		return;
 	float et = _window.lock()->elapsedTime();
-	static int doneTimes = -200000;
 
-	if (doneTimes < 2 && et - lt >= 0.2) {
+	if (et - lt >= 0.05) {
 		lt = et;
 		_dynamicWorld->loadPosition(cameraNode);
-		// _scene->rootNode()->sendToFlux(std::cout, "");
-		doneTimes++;
 	}
 }
 
 void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int action, int mods) {
 	ISceneController::keyCallBack(key, scancode, action, mods);
-	if (key == 84 && action == 1) {
-		_dynamicWorld->loadPosition(cameraNode);
+
+	if (key == GLFW_KEY_LEFT_SHIFT) {
+		if (action == GLFW_PRESS) {
+			cameraMoveSpeed = 50.0f;
+		} else if (action == GLFW_RELEASE) {
+			cameraMoveSpeed = 3.0f;
+		}
 	}
 }
 
@@ -600,8 +42,6 @@ void VoxelProceduralSceneController::makeScene() {
 	if (_window.expired())
 		return;
 	AppEnv *env = _window.lock()->getAppEnvPtr();
-
-	initNoise(time(NULL));
 
 	// Material initialisation
 	auto texturedMaterial = std::make_shared<GLS::Material>();
@@ -676,6 +116,39 @@ void VoxelProceduralSceneController::makeScene() {
 	} catch (std::exception& e) {
 		std::cout << "can't load skybox textures with exception: " << e.what() << std::endl;
 	}
+
+	std::shared_ptr<GLS::Material> axe_x_material = std::make_shared<GLS::Material>();
+	axe_x_material->diffuse = glm::vec3(1, 0, 0);
+	std::shared_ptr<GLS::Material> axe_y_material = std::make_shared<GLS::Material>();
+	axe_y_material->diffuse = glm::vec3(0, 1, 0);
+	std::shared_ptr<GLS::Material> axe_z_material = std::make_shared<GLS::Material>();
+	axe_z_material->diffuse = glm::vec3(0, 0, 1);
+
+	std::shared_ptr<GLS::Mesh> axe_x_mesh = GLS::Mesh::cube(160, 1, 1);
+	axe_x_mesh->setMaterial(axe_x_material);
+	std::shared_ptr<GLS::Mesh> axe_y_mesh = GLS::Mesh::cube(1, 16, 1);
+	axe_y_mesh->setMaterial(axe_y_material);
+	std::shared_ptr<GLS::Mesh> axe_z_mesh = GLS::Mesh::cube(1, 1, 16);
+	axe_z_mesh->setMaterial(axe_z_material);
+
+	std::shared_ptr<GLS::Node> axes_node = std::make_shared<GLS::Node>();
+	axes_node->transform().position().y = 60;
+	scene.rootNode()->addChildNode(axes_node);
+
+	std::shared_ptr<GLS::Node> axe_x_node = std::make_shared<GLS::Node>();
+	axe_x_node->addRenderable(axe_x_mesh);
+	axe_x_node->transform().position().x = 8;
+	axes_node->addChildNode(axe_x_node);
+
+	std::shared_ptr<GLS::Node> axe_y_node = std::make_shared<GLS::Node>();
+	axe_y_node->addRenderable(axe_y_mesh);
+	axe_y_node->transform().position().y = 8;
+	axes_node->addChildNode(axe_y_node);
+
+	std::shared_ptr<GLS::Node> axe_z_node = std::make_shared<GLS::Node>();
+	axe_z_node->addRenderable(axe_z_mesh);
+	axe_z_node->transform().position().z = 8;
+	axes_node->addChildNode(axe_z_node);
 
 	// _dynamicWorld->_loadedChunks[glm::ivec2(10, 0)] = _dynamicWorld->_generator->generateBigChunkAt(glm::vec3(4));
 	// _dynamicWorld->_loadedChunks[glm::ivec2(11, 0)] = _dynamicWorld->_generator->generateBigChunkAt(glm::vec3(1));

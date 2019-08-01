@@ -62,11 +62,11 @@ float smoothMin(float a, float b, float k) {
 }
 
 float distanceToScene(vec3 position) {
-    float d = distanceToTorus(position.yxz);
-    d = smoothMin(d, distanceToCube(position), 0.2);
-    d = max(d, -distanceToSphere(position));
-    return d;
-    // return distanceToFractal(position);
+    // float d = distanceToTorus(position.yxz);
+    // d = smoothMin(d, distanceToCube(position), 0.2);
+    // d = max(d, -distanceToSphere(position));
+    // return d;
+    return distanceToFractal(position);
 }
 
 void main() {

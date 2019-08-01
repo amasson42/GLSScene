@@ -100,6 +100,8 @@ namespace GLS {
         static std::string shaderUniformsGeometry();
         static std::string shaderUniformsFragment();
 
+		// tgros WiP
+		int* getBlocks();
     };
 
 }

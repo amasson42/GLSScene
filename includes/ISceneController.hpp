@@ -12,6 +12,7 @@ class ISceneController {
     public:
 
     bool mustUpdate;
+	float cameraMoveSpeed;
 
     ISceneController(std::shared_ptr<GLSWindow> window);
     virtual ~ISceneController();
@@ -22,6 +23,9 @@ class ISceneController {
     virtual void update();
     virtual void resizeWindowCallBack(glm::vec2 newSize);
     virtual void keyCallBack(int key, int scancode, int action, int mods);
+
+	private:
+		glm::vec2 lastMousePosition;
 };
 
 # include "CustomSceneControllers/Human.hpp"
@@ -29,5 +33,5 @@ class ISceneController {
 # include "CustomSceneControllers/Shadow.hpp"
 # include "CustomSceneControllers/Trash.hpp"
 # include "CustomSceneControllers/Voxel.hpp"
-# include "CustomSceneControllers/VoxelProcedural.hpp"
+# include "CustomSceneControllers/VoxelProcedural/VoxelProcedural.hpp"
 # include "CustomSceneControllers/Gros.hpp"
