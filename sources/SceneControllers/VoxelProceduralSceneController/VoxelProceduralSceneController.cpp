@@ -4,6 +4,7 @@
 VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window) :
 ISceneController(window) {
 	lt = 0;
+	cameraMoveSpeed = 5;
 }
 
 VoxelProceduralSceneController::~VoxelProceduralSceneController() {
@@ -27,12 +28,11 @@ void VoxelProceduralSceneController::update() {
 void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int action, int mods) {
 	ISceneController::keyCallBack(key, scancode, action, mods);
 
-	if (key == GLFW_KEY_LEFT_SHIFT) {
-		if (action == GLFW_PRESS) {
-			cameraMoveSpeed = 50.0f;
-		} else if (action == GLFW_RELEASE) {
-			cameraMoveSpeed = 3.0f;
-		}
+	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_EQUAL)
+			cameraMoveSpeed *= 2.0;
+		if (key == GLFW_KEY_MINUS)
+			cameraMoveSpeed /= 2.0;
 	}
 }
 

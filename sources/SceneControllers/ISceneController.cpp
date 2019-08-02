@@ -42,9 +42,9 @@ void ISceneController::update() {
             cam.transform().moveBy(-cameraSpeed * cameraRight);
         if (win->keyPressed(GLFW_KEY_D))
             cam.transform().moveBy(cameraSpeed * cameraRight);
-        if (win->keyPressed(GLFW_KEY_E))
+        if (win->keyPressed(GLFW_KEY_SPACE))
             cam.transform().moveBy(cameraSpeed * cameraUp);
-        if (win->keyPressed(GLFW_KEY_Q))
+        if (win->keyPressed(GLFW_KEY_LEFT_SHIFT))
             cam.transform().moveBy(-cameraSpeed * cameraUp);
 
         float cameraRotateSpeed = 3.0 * win->deltaTime();
