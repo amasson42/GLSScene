@@ -68,8 +68,6 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 	glm::ivec2 minPosition = worldToBigChunkPosition(cameraFlatPosition - glm::vec3(_loadingDistance, 0, _loadingDistance));
 	glm::ivec2 maxPosition = worldToBigChunkPosition(cameraFlatPosition + glm::vec3(_loadingDistance, 0, _loadingDistance));
 
-	bool stop = false;
-
 	for (int x = minPosition.x; x < maxPosition.x; x++) {
 		for (int y = minPosition.y; y < maxPosition.y; y++) {
 
@@ -87,7 +85,6 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 					|| glm::dot(glm::normalize(chunkOffset), cameraDirection) > minCosCameraVision) {
 
 					_loadingChunks[glm::ivec2(x, y)] = (std::async(std::launch::async, [this](glm::ivec2 pos) {
-						auto start = std::chrono::system_clock::now();
 						std::ifstream chunkStream(getBigChunkFileNameAt(pos), std::ios::binary);
 						std::shared_ptr<BigChunk> chunk;
 						if (false && chunkStream.good()) {
@@ -97,8 +94,6 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 						} else {
 							chunk =  _generator->generateBigChunkAt(pos);
 						}
-						auto end = std::chrono::system_clock::now();
-						// std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
 						return chunk;
 					}, glm::ivec2(x, y)));
 
@@ -116,9 +111,6 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 		}
 		
 		std::shared_ptr<BigChunk> generatedChunk = it->second.get();
-
-		int x = it->first.x;
-		int y = it->first.y;
 
 		generatedChunk->getNode()->transform().setPosition(bigChunkPositionToWorld(it->first));
 

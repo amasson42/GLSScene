@@ -19,6 +19,8 @@ FRAMEWORKS = -lm \
 		-L GLScene -lGLScene
 
 INCLUDES =	-I $(INCS) \
+			-I $(INCS)/CustomSceneControllers/ \
+			-I $(INCS)/CustomSceneControllers/VoxelProcedural/ \
 		-I GLScene/includes \
 		-I GLScene/CLDevice/includes \
 

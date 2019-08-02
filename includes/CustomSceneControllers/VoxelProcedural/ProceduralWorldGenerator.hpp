@@ -24,7 +24,6 @@ class ProceduralWorldGenerator {
 	int _programIndex;
 	int _commandQueueIndex;
 	int _kernelIndex;
-	int _bufferIndex;
 	int _perlinPermutationBufferIndex;
 	CLD::Buffer _perlinPermutationBuffer;
 

@@ -53,7 +53,7 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 	k->setArgument(3, CHUNKSIZE);
 	k->setArgument(4, BigChunk::bigChunkWidth);
 	
-	int ret = _device.commandQueue(_commandQueueIndex)->runNDRangeKernel(*k, blocks.size());
+	_device.commandQueue(_commandQueueIndex)->runNDRangeKernel(*k, blocks.size());
 	
 	_device.commandQueue(_commandQueueIndex)->readBuffer(blocksArrayPointersBuffer, &blocks[0], blocks.size() * sizeof(int));
 	_device.commandQueue(_commandQueueIndex)->finish();

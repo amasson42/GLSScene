@@ -51,6 +51,7 @@ float randFloat() {
 }
 
 void ShadowSceneController::keyCallBack(int key, int scancode, int action, int mods) {
+    (void)scancode;(void)mods;
     if (key == 84) {
         if (action) {
             cubesPivotNode->removeFromParent();
