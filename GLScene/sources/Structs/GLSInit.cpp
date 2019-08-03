@@ -10,7 +10,17 @@
 
 namespace GLS {
 
+    static std::shared_ptr<CLD::GPUDevice> _gpuDevice = nullptr;
+
+    std::shared_ptr<CLD::GPUDevice> getSharedDevice() {
+        return _gpuDevice;
+    }
+
     void glsInit() {
+
+        _gpuDevice = std::make_shared<CLD::GPUDevice>();
+        _gpuDevice->createContext(true);
+
         Framebuffer::_createRectBuffer();
         Skybox::_createCubeBuffer();
         ParticleSystem::_createDevice();
@@ -46,6 +56,8 @@ namespace GLS {
         ShaderProgram::_standardShaderProgramVoxelChunkSimpleColor = nullptr;
         ShaderProgram::_standardShaderProgramDotParticleSystem = nullptr;
         ShaderProgram::_standardShaderProgramTexturedParticleSystem = nullptr;
+
+        _gpuDevice = nullptr;
     }
 
 }

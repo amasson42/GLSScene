@@ -14,6 +14,7 @@ class ProceduralWorldGenerator {
 	public:
 
 	ProceduralWorldGenerator();
+	virtual ~ProceduralWorldGenerator();
 	std::shared_ptr<BigChunk> generateBigChunkAt(glm::ivec2 bigChunkPos);
 
 	std::shared_ptr<GLS::Material> usedMaterial;
@@ -21,13 +22,12 @@ class ProceduralWorldGenerator {
 	private:
 
 	// tgros WiP
-	int _programIndex;
 	int _commandQueueIndex;
 	int _kernelIndex;
 	int _perlinPermutationBufferIndex;
 	CLD::Buffer _perlinPermutationBuffer;
 
-	CLD::GPUDevice _device;
+	std::shared_ptr<CLD::GPUDevice> _device;
 	// end WiP
 
 };

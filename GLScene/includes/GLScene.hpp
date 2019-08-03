@@ -42,8 +42,6 @@
 # include <gl/gl.h>
 #endif
 
-#include "CLDevice.hpp"
-
 #include "GLScene/GLSStructs.hpp"
 #include "GLScene/GLSTransform.hpp"
 

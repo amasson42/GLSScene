@@ -10,7 +10,7 @@
 #define GLSStructs_h
 
 #include "GLScene/GLSTransform.hpp"
-
+#include "CLDevice.hpp"
 
 namespace GLS {
 
@@ -20,6 +20,7 @@ namespace GLS {
     std::ostream& operator<<(std::ostream& stream, const glm::vec2& v);
     std::ostream& operator<<(std::ostream& stream, const glm::quat& q);
 
+    std::shared_ptr<CLD::GPUDevice> getSharedDevice();
     void glsInit();
     void glsDeinit();
 

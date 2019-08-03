@@ -24,20 +24,16 @@ namespace GLS {
     int ParticleSystem::_commandQueueIndex = -1;
 
     void ParticleSystem::_createDevice() {
-        _device = std::make_shared<CLD::GPUDevice>();
-        if (_device->createContext(true) < 0) {
-            std::cout << "ParticuleSystem FAILED TO INITIALIZE" << std::endl;
-            return;
-        }
+        _device = getSharedDevice();
         _device->createCommandQueue(&_commandQueueIndex);
         if (_commandQueueIndex < 0) {
-            _device->destroyContext();
             std::cout << "ParticuleSystem FAILED TO INITIALIZE" << std::endl;
             return;
         }
     }
 
     void ParticleSystem::_destroyDevice() {
+        _device->destroyCommandQueue(_commandQueueIndex);
         _device = nullptr;
     }
 
