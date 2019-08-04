@@ -70,13 +70,7 @@ class BigChunk {
 	void setAdjacentBigChunk_positiveZ(std::shared_ptr<BigChunk> adj);
 	void setAdjacentBigChunk_negativeZ(std::shared_ptr<BigChunk> adj);
 
-	/**
-	 * iterate trought all of the voxels
-	 * - calcul all of their adjacent values
-	 * - create the meshes
-	 * - generate buffers 
-	 * (preferable to do it only once)
-	 */
+	void calculAllAdjacences();
 	void generateAllMeshes();
 
 	/**

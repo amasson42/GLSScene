@@ -94,6 +94,7 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 						} else {
 							chunk =  _generator->generateBigChunkAt(pos);
 						}
+						chunk->calculAllAdjacences();
 						return chunk;
 					}, glm::ivec2(x, y)));
 
@@ -119,31 +120,33 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 		_worldNode->addChildNode(generatedChunk->getNode());
 
 		// define adjacent
-		// auto adjacent = _loadedChunks.begin();
+		auto adjacent = _loadedChunks.begin();
+		int x = it->first.x;
+		int y = it->first.y;
 
-		// adjacent = _loadedChunks.find(glm::ivec2(x + 1, y));
-		// if (adjacent != _loadedChunks.end()) {
-		// 	generatedChunk->setAdjacentBigChunk_positiveX(adjacent->second);
-		// 	adjacent->second->setAdjacentBigChunk_negativeX(generatedChunk);
-		// }
+		adjacent = _loadedChunks.find(glm::ivec2(x + 1, y));
+		if (adjacent != _loadedChunks.end()) {
+			generatedChunk->setAdjacentBigChunk_positiveX(adjacent->second);
+			adjacent->second->setAdjacentBigChunk_negativeX(generatedChunk);
+		}
 
-		// adjacent = _loadedChunks.find(glm::ivec2(x - 1, y));
-		// if (adjacent != _loadedChunks.end()) {
-		// 	generatedChunk->setAdjacentBigChunk_negativeX(adjacent->second);
-		// 	adjacent->second->setAdjacentBigChunk_positiveX(generatedChunk);
-		// }
+		adjacent = _loadedChunks.find(glm::ivec2(x - 1, y));
+		if (adjacent != _loadedChunks.end()) {
+			generatedChunk->setAdjacentBigChunk_negativeX(adjacent->second);
+			adjacent->second->setAdjacentBigChunk_positiveX(generatedChunk);
+		}
 
-		// adjacent = _loadedChunks.find(glm::ivec2(x, y + 1));
-		// if (adjacent != _loadedChunks.end()) {
-		// 	generatedChunk->setAdjacentBigChunk_positiveZ(adjacent->second);
-		// 	adjacent->second->setAdjacentBigChunk_negativeZ(generatedChunk);
-		// }
+		adjacent = _loadedChunks.find(glm::ivec2(x, y + 1));
+		if (adjacent != _loadedChunks.end()) {
+			generatedChunk->setAdjacentBigChunk_positiveZ(adjacent->second);
+			adjacent->second->setAdjacentBigChunk_negativeZ(generatedChunk);
+		}
 
-		// adjacent = _loadedChunks.find(glm::ivec2(x, y - 1));
-		// if (adjacent != _loadedChunks.end()) {
-		// 	generatedChunk->setAdjacentBigChunk_negativeZ(adjacent->second);
-		// 	adjacent->second->setAdjacentBigChunk_positiveZ(generatedChunk);
-		// }
+		adjacent = _loadedChunks.find(glm::ivec2(x, y - 1));
+		if (adjacent != _loadedChunks.end()) {
+			generatedChunk->setAdjacentBigChunk_negativeZ(adjacent->second);
+			adjacent->second->setAdjacentBigChunk_positiveZ(generatedChunk);
+		}
 
 		generatedChunk->generateAllMeshes();
 		// std::cout << "_generateChunks remove from _loadingChunks: " << it->first << std::endl;
@@ -196,18 +199,17 @@ void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
 	glm::vec3 cameraFlatPosition = cameraNode->transform().position();
 	cameraFlatPosition.y = 0;
 
-	
+
 	auto start = std::chrono::system_clock::now();
 	_cleanChunks(cameraFlatPosition);
 	auto end = std::chrono::system_clock::now();
 	// std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
 
 
-
 	start = std::chrono::system_clock::now();	   
 	_generateChunks(cameraFlatPosition, cameraNode);
 	end = std::chrono::system_clock::now();
-	// std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
+	std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
 
 
 	start = std::chrono::system_clock::now();

@@ -74,8 +74,8 @@ void ISceneController::update() {
 
 		cameraAngleX = glm::clamp(cameraAngleX, -89.0f, 89.0f);
 
-		std::cout << "Offset: " << xOffset << ", " << yOffset << std::endl;
-		std::cout << "Camera Angle: " << cameraAngleX << ", " << cameraAngleY << std::endl;
+		// std::cout << "Offset: " << xOffset << ", " << yOffset << std::endl;
+		// std::cout << "Camera Angle: " << cameraAngleX << ", " << cameraAngleY << std::endl;
 
 		cam.transform().setEulerAngles(cameraAngleX, cameraAngleY, 0);
     }

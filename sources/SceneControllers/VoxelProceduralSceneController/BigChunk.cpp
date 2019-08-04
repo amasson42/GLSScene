@@ -150,15 +150,15 @@ void BigChunk::setAdjacentBigChunk_negativeZ(std::shared_ptr<BigChunk> adj) {
 	}
 }
 
+void BigChunk::calculAllAdjacences() {
+	for (int i = 0; i < BigChunk::bigChunkCount; i++) {
+		chunkAt(i).voxel->calculBlockAdjacence();
+	}
+}
+
 void BigChunk::generateAllMeshes() {
-	for (int x = 0; x < bigChunkWidth; x++) {
-		for (int y = 0; y < bigChunkHeight; y++) {
-			for (int z = 0; z < bigChunkWidth; z++) {
-				GameVoxelChunk& chunk(chunkAt(x, y, z));
-				chunk.voxel->calculBlockAdjacence();
-				chunk.updateMesh();
-			}
-		}
+	for (int i = 0; i < BigChunk::bigChunkCount; i++) {
+		chunkAt(i).updateMesh();
 	}
 }
 
