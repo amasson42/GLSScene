@@ -24,8 +24,12 @@ class ISceneController {
     virtual void resizeWindowCallBack(glm::vec2 newSize);
     virtual void keyCallBack(int key, int scancode, int action, int mods);
 
+	void setCameraMouseControl(bool enabled);
+
 	private:
-		glm::vec2 lastMousePosition;
+		glm::vec2 _lastMousePosition;
+		bool _cameraMouseControlEnabled;
+
 };
 
 # include "CustomSceneControllers/Human.hpp"

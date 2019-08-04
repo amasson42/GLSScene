@@ -1,15 +1,94 @@
 
 #include "AppEnv.hpp"
 
-VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window) :
+VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window):
 ISceneController(window) {
 	lt = 0;
 	cameraMoveSpeed = 5;
+	this->setCameraMouseControl(true);
+	window->setMouseInputMode(GLFW_CURSOR_DISABLED);
+
+	_displayInterface = false;
+
+	// Create the "screen", the nanogui base object
+	_nanoguiScreen = new nanogui::Screen();
+	_nanoguiScreen->initialize(window->getGLFWWindow(), false);
+
+	// Create a window, the draggable panel
+	nanogui::Window *nanoguiWindow = new nanogui::Window(_nanoguiScreen, "Information");
+	nanoguiWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+	nanoguiWindow->setPosition(nanogui::Vector2i(10, 10));
+
+	// Create a widget, with a layout
+	auto fpsCounterWidget = new nanogui::Widget(nanoguiWindow);
+	fpsCounterWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+
+	// Add ui elements to this widget
+	new nanogui::Label(fpsCounterWidget, "FPS: ");
+	_fpsValueLabel = new nanogui::Label(fpsCounterWidget, "-");
+
+	auto playerPositionWidget = new nanogui::Widget(nanoguiWindow);
+	playerPositionWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+
+	for (int i = 0; i < 3; i++) {
+		_playerPositionLabel[i] = new nanogui::IntBox<int>(playerPositionWidget, 0);
+		_playerPositionLabel[i]->setEditable(true);
+	}
+
+	// Callbacks for player teleportation (triggered when int box are modified)
+	_playerPositionLabel[0]->setCallback([this](int posX) {
+		this->cameraNode->transform().position().x = posX;
+	});
+	_playerPositionLabel[1]->setCallback([this](int posY) {
+		this->cameraNode->transform().position().y = posY;
+	});
+	_playerPositionLabel[2]->setCallback([this](int posZ) {
+		this->cameraNode->transform().position().z = posZ;
+	});
+
+	// Compute the layout (width, height)
+	_nanoguiScreen->performLayout();
+
+	// We have to override some glfw callbacks and propagate them to nanogui and our own code
+	glfwSetCursorPosCallback(window->getGLFWWindow(), [](GLFWwindow *win, double x, double y) {
+		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
+
+		auto controller = std::dynamic_pointer_cast<VoxelProceduralSceneController>(window->controller());
+		controller->getScreen()->cursorPosCallbackEvent(x, y);
+	});
+
+    glfwSetMouseButtonCallback(window->getGLFWWindow(), [](GLFWwindow *win, int button, int action, int modifiers) {
+		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
+
+		auto controller = std::dynamic_pointer_cast<VoxelProceduralSceneController>(window->controller());
+        controller->getScreen()->mouseButtonCallbackEvent(button, action, modifiers);
+    });
+
+	glfwSetKeyCallback(window->getGLFWWindow(), [](GLFWwindow *win, int key, int scancode, int action, int mods) {
+		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
+
+		auto controller = std::dynamic_pointer_cast<VoxelProceduralSceneController>(window->controller());
+		window->keyCallBack(key, scancode, action, mods);
+        controller->getScreen()->keyCallbackEvent(key, scancode, action, mods);
+	});
+
+	glfwSetCharCallback(window->getGLFWWindow(), [](GLFWwindow *win, unsigned int codepoint) {
+		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
+
+		auto controller = std::dynamic_pointer_cast<VoxelProceduralSceneController>(window->controller());
+    	controller->getScreen()->charCallbackEvent(codepoint);
+	});
 }
 
 VoxelProceduralSceneController::~VoxelProceduralSceneController() {
 
 }
+
+
+nanogui::Screen* VoxelProceduralSceneController::getScreen() {
+	return _nanoguiScreen;
+}
+
 
 void VoxelProceduralSceneController::update() {
 	ISceneController::update();
@@ -22,6 +101,23 @@ void VoxelProceduralSceneController::update() {
 	if (et - lt >= 0.05) {
 		lt = et;
 		_dynamicWorld->loadPosition(cameraNode);
+		
+		// Update the ui if needed
+		if (_displayInterface) {
+			_fpsValueLabel->setCaption(std::to_string(static_cast<int>(1.0f / _window.lock()->deltaTime())));
+			glm::vec3 playerPosition = cameraNode->transform().position();
+			_playerPositionLabel[0]->setValue(static_cast<int>(playerPosition.x));
+			_playerPositionLabel[1]->setValue(static_cast<int>(playerPosition.y));
+			_playerPositionLabel[2]->setValue(static_cast<int>(playerPosition.z));
+
+			_nanoguiScreen->performLayout();
+		}
+	}
+
+	// Display the interface if needed
+	if (_displayInterface) {
+		glEnable(GL_DEPTH_TEST);
+		_nanoguiScreen->drawWidgets();
 	}
 }
 
@@ -33,6 +129,19 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 			cameraMoveSpeed *= 2.0;
 		if (key == GLFW_KEY_MINUS)
 			cameraMoveSpeed /= 2.0;
+	}
+
+	// Open the nanogui interface and display information
+	// Also disable the mouse camera control
+	if (key == GLFW_KEY_I && action == GLFW_PRESS) {
+		_displayInterface = !_displayInterface;
+		if (_displayInterface) {
+			_window.lock()->setMouseInputMode(GLFW_CURSOR_NORMAL);
+		}
+		else {
+			_window.lock()->setMouseInputMode(GLFW_CURSOR_DISABLED);
+		}
+		this->setCameraMouseControl(!_displayInterface);
 	}
 }
 

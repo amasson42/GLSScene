@@ -209,7 +209,7 @@ void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
 	start = std::chrono::system_clock::now();	   
 	_generateChunks(cameraFlatPosition, cameraNode);
 	end = std::chrono::system_clock::now();
-	std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
+	// std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
 
 
 	start = std::chrono::system_clock::now();
