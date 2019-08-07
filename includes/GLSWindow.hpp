@@ -62,6 +62,8 @@ class GLSWindow {
     glm::vec2 mousePosition() const;
     glm::vec2 mouseContextPosition() const;
 
+	void setMouseInputMode(int mode);
+
     bool keyPressed(int key) const;
 
     float elapsedTime() const;
@@ -69,4 +71,6 @@ class GLSWindow {
 
     // GameLoop
     void loopOnce();
+
+	GLFWwindow* getGLFWWindow() const;
 };

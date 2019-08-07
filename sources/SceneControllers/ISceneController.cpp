@@ -3,7 +3,8 @@
 
 ISceneController::ISceneController(std::shared_ptr<GLSWindow> window) :
     _window(window),
-    _scene(window->scene()) {
+    _scene(window->scene()), 
+	_cameraMouseControlEnabled(false) {
 	cameraMoveSpeed = 1;
     mustUpdate = true;
 }
@@ -48,6 +49,7 @@ void ISceneController::update() {
             cam.transform().moveBy(-cameraSpeed * cameraUp);
 
         float cameraRotateSpeed = 3.0 * win->deltaTime();
+        float cameraMouseRotateSpeed = 20.0 * win->deltaTime();
         bool changeCamera = true;
         if (win->keyPressed(GLFW_KEY_LEFT))
             cameraAngleY += cameraRotateSpeed;
@@ -59,23 +61,22 @@ void ISceneController::update() {
             cameraAngleX += cameraRotateSpeed;
 		else
 			changeCamera = true;
-		glm::vec2 mousePosition = win->mouseContextPosition();
-		float xOffset = mousePosition.x - this->lastMousePosition.x;
-		float yOffset = mousePosition.y - this->lastMousePosition.y;
 
-		this->lastMousePosition = mousePosition;
+		if (_cameraMouseControlEnabled) {
+			glm::vec2 mousePosition = win->mouseContextPosition();
+			float xOffset = mousePosition.x - _lastMousePosition.x;
+			float yOffset = mousePosition.y - _lastMousePosition.y;
 
-		float sensitivity = 0.5f;
-		xOffset *= sensitivity;
-		yOffset *= sensitivity;
+			_lastMousePosition = mousePosition;
 
-		cameraAngleY += xOffset;
-		cameraAngleX += yOffset;
+			xOffset *= cameraMouseRotateSpeed;
+			yOffset *= cameraMouseRotateSpeed;
 
-		cameraAngleX = glm::clamp(cameraAngleX, -89.0f, 89.0f);
+			cameraAngleY -= xOffset;
+			cameraAngleX += yOffset;
 
-		// std::cout << "Offset: " << xOffset << ", " << yOffset << std::endl;
-		// std::cout << "Camera Angle: " << cameraAngleX << ", " << cameraAngleY << std::endl;
+			cameraAngleX = glm::clamp(cameraAngleX, -1.60f, 1.6f);
+		}
 
 		cam.transform().setEulerAngles(cameraAngleX, cameraAngleY, 0);
     }
@@ -111,4 +112,18 @@ void ISceneController::keyCallBack(int key, int scancode, int action, int mods) 
         else
             glEnable(GL_FRAMEBUFFER_SRGB);
     }
+}
+
+void ISceneController::setCameraMouseControl(bool enabled) {
+	_cameraMouseControlEnabled = enabled;
+
+	if (_window.expired()) {
+        std::cout << "windos out" << std::endl;
+        return;
+    }
+    std::shared_ptr<GLSWindow> win = _window.lock();
+
+	if (enabled) {
+		_lastMousePosition = win->mouseContextPosition();
+	}
 }

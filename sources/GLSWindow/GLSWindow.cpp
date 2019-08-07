@@ -185,6 +185,14 @@ glm::vec2 GLSWindow::mouseContextPosition() const {
     return glm::vec2(1, -1) * _mousePosition / glm::vec2(_width / 2, _height / 2) + glm::vec2(-1, 1);
 }
 
+void GLSWindow::setMouseInputMode(int mode) {
+	glfwSetInputMode(_glfwWindow, GLFW_CURSOR, mode);
+}
+
+GLFWwindow* GLSWindow::getGLFWWindow() const {
+	return _glfwWindow;
+}
+
 bool GLSWindow::keyPressed(int key) const {
     if (_glfwWindow == NULL)
         return false;
@@ -210,8 +218,6 @@ void GLSWindow::loopOnce() {
         setTitle("FPS: " + std::to_string(1.0 / _deltaTime));
 
     _scene->updateAnimations(_deltaTime);
-    if (!_controller.expired())
-        _controller.lock()->update();
 
     if (_framebuffer != nullptr) {
         _scene->renderInContext(_framebuffer);
@@ -224,5 +230,7 @@ void GLSWindow::loopOnce() {
         _scene->renderInContext();
     }
 
+    if (!_controller.expired())
+        _controller.lock()->update();
     glfwSwapBuffers(_glfwWindow);
 }
