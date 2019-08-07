@@ -95,6 +95,7 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 							chunk =  _generator->generateBigChunkAt(pos);
 						}
 						chunk->calculAllAdjacences();
+						chunk->generateAllMeshes();
 						return chunk;
 					}, glm::ivec2(x, y)));
 

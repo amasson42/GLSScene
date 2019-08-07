@@ -24,8 +24,7 @@ struct GameVoxelChunk {
 
 	void updateMesh() {
 		node->renderables().clear();
-		mesh = GLS::Mesh::voxelChunk(voxel);
-		mesh->generateBuffers();
+		mesh = GLS::Mesh::voxelChunk(voxel, false);
 		node->addRenderable(mesh);
 		mustUpdateMesh = false;
 	}
