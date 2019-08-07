@@ -9,6 +9,14 @@
 #include "GLScene.hpp"
 
 #include <GLFW/glfw3.h>
+#include <nanogui/screen.h>
+#include <nanogui/window.h>
+#include <nanogui/checkbox.h>
+#include <nanogui/label.h>
+#include <nanogui/layout.h>
+#include <nanogui/textbox.h>
+#include <nanogui/slider.h>
+#include <nanogui/button.h>
 
 #include "AppEnv.hpp"
 
@@ -16,6 +24,7 @@ class GLSWindow {
 
     AppEnv *_env;
     GLFWwindow *_glfwWindow;
+    nanogui::Screen *_nanoguiScreen;
     int _width;
     int _height;
     int _bufferWidth;
@@ -48,10 +57,13 @@ class GLSWindow {
     void setController(std::shared_ptr<ISceneController> controller);
 
     // Getters
+    glm::ivec2 size() const;
+    glm::ivec2 bufferSize() const;
     bool isActive() const;
     std::shared_ptr<GLS::Scene> scene();
     std::shared_ptr<ISceneController> controller();
     AppEnv *getAppEnvPtr() const;
+    nanogui::Screen *nanoguiScreen();
 
     // Window events
     void close();
@@ -72,5 +84,4 @@ class GLSWindow {
     // GameLoop
     void loopOnce();
 
-	GLFWwindow* getGLFWWindow() const;
 };

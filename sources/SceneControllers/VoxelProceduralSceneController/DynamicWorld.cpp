@@ -5,12 +5,15 @@ namespace glm {
 	std::ostream& operator<<(std::ostream& out, const glm::ivec2& iv);
 }
 
+const float DynamicWorld::minRenderDistance = 50.0f;
+const float DynamicWorld::maxRenderDistance = 250.0f;
+
 // world/
 //  info.json -> {"seed": 421337}
 //  C_X_Z.chunk
 //  C_[...]_[...].chunk
 DynamicWorld::DynamicWorld(std::shared_ptr<GLS::Node> worldNode, std::string worldName) :
-	_loadedChunks(), _loadingDistance(200.0f), _visibleDistance(160.0f) {
+	_loadedChunks(), _loadingDistance(200.0f), _visibleDistance(200.0f) {
 		_worldNode = worldNode;
 		_worldDirName = worldName;
 		_generator = std::make_shared<ProceduralWorldGenerator>();
@@ -65,8 +68,8 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 									0,
 									CHUNKSIZE * BigChunk::bigChunkWidth / 2);
 
-	glm::ivec2 minPosition = worldToBigChunkPosition(cameraFlatPosition - glm::vec3(_loadingDistance, 0, _loadingDistance));
-	glm::ivec2 maxPosition = worldToBigChunkPosition(cameraFlatPosition + glm::vec3(_loadingDistance, 0, _loadingDistance));
+	glm::ivec2 minPosition = worldToBigChunkPosition(cameraFlatPosition - glm::vec3(_loadingDistance, 0, _loadingDistance) - chunkMid);
+	glm::ivec2 maxPosition = worldToBigChunkPosition(cameraFlatPosition + glm::vec3(_loadingDistance, 0, _loadingDistance) + chunkMid);
 
 	for (int x = minPosition.x; x < maxPosition.x; x++) {
 		for (int y = minPosition.y; y < maxPosition.y; y++) {
@@ -111,12 +114,10 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 			++it;
 			continue;
 		}
-		
 		std::shared_ptr<BigChunk> generatedChunk = it->second.get();
 
 		generatedChunk->getNode()->transform().setPosition(bigChunkPositionToWorld(it->first));
 
-		// std::cout << "_generateChunks insert into _loadedChunks: " << it->first << std::endl;
 		_loadedChunks[it->first] = generatedChunk;
 		_worldNode->addChildNode(generatedChunk->getNode());
 
@@ -149,12 +150,9 @@ void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_pt
 			adjacent->second->setAdjacentBigChunk_positiveZ(generatedChunk);
 		}
 
-		generatedChunk->generateAllMeshes();
-		// std::cout << "_generateChunks remove from _loadingChunks: " << it->first << std::endl;
 		it = _loadingChunks.erase(it);
 	}
 	
-	// std::cout << "_generateChunks end. _loadingChunks: " << _loadingChunks.size() << ", _loadedChunks: " << _loadedChunks.size() << std::endl;
 }
 
 void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
@@ -219,4 +217,17 @@ void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
 	// std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
 
 	// std::cout << "We have " << _loadedChunks.size() << " chunks" << std::endl;
+}
+
+void DynamicWorld::setRenderDistance(float distance) {
+	_visibleDistance = distance;
+	_loadingDistance = distance + 10.0;
+}
+
+float DynamicWorld::getRenderDistance() const {
+	return _visibleDistance;
+}
+
+std::shared_ptr<ProceduralWorldGenerator> DynamicWorld::getGenerator() {
+	return _generator;
 }

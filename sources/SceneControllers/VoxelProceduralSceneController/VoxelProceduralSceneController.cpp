@@ -5,90 +5,12 @@ VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<G
 ISceneController(window) {
 	lt = 0;
 	cameraMoveSpeed = 5;
-	this->setCameraMouseControl(true);
-	window->setMouseInputMode(GLFW_CURSOR_DISABLED);
-
-	_displayInterface = false;
-
-	// Create the "screen", the nanogui base object
-	_nanoguiScreen = new nanogui::Screen();
-	_nanoguiScreen->initialize(window->getGLFWWindow(), false);
-
-	// Create a window, the draggable panel
-	nanogui::Window *nanoguiWindow = new nanogui::Window(_nanoguiScreen, "Information");
-	nanoguiWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
-	nanoguiWindow->setPosition(nanogui::Vector2i(10, 10));
-
-	// Create a widget, with a layout
-	auto fpsCounterWidget = new nanogui::Widget(nanoguiWindow);
-	fpsCounterWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
-
-	// Add ui elements to this widget
-	new nanogui::Label(fpsCounterWidget, "FPS: ");
-	_fpsValueLabel = new nanogui::Label(fpsCounterWidget, "-");
-
-	auto playerPositionWidget = new nanogui::Widget(nanoguiWindow);
-	playerPositionWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
-
-	for (int i = 0; i < 3; i++) {
-		_playerPositionLabel[i] = new nanogui::IntBox<int>(playerPositionWidget, 0);
-		_playerPositionLabel[i]->setEditable(true);
-	}
-
-	// Callbacks for player teleportation (triggered when int box are modified)
-	_playerPositionLabel[0]->setCallback([this](int posX) {
-		this->cameraNode->transform().position().x = posX;
-	});
-	_playerPositionLabel[1]->setCallback([this](int posY) {
-		this->cameraNode->transform().position().y = posY;
-	});
-	_playerPositionLabel[2]->setCallback([this](int posZ) {
-		this->cameraNode->transform().position().z = posZ;
-	});
-
-	// Compute the layout (width, height)
-	_nanoguiScreen->performLayout();
-
-	// We have to override some glfw callbacks and propagate them to nanogui and our own code
-	glfwSetCursorPosCallback(window->getGLFWWindow(), [](GLFWwindow *win, double x, double y) {
-		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
-
-		auto controller = std::dynamic_pointer_cast<VoxelProceduralSceneController>(window->controller());
-		controller->getScreen()->cursorPosCallbackEvent(x, y);
-	});
-
-    glfwSetMouseButtonCallback(window->getGLFWWindow(), [](GLFWwindow *win, int button, int action, int modifiers) {
-		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
-
-		auto controller = std::dynamic_pointer_cast<VoxelProceduralSceneController>(window->controller());
-        controller->getScreen()->mouseButtonCallbackEvent(button, action, modifiers);
-    });
-
-	glfwSetKeyCallback(window->getGLFWWindow(), [](GLFWwindow *win, int key, int scancode, int action, int mods) {
-		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
-
-		auto controller = std::dynamic_pointer_cast<VoxelProceduralSceneController>(window->controller());
-		window->keyCallBack(key, scancode, action, mods);
-        controller->getScreen()->keyCallbackEvent(key, scancode, action, mods);
-	});
-
-	glfwSetCharCallback(window->getGLFWWindow(), [](GLFWwindow *win, unsigned int codepoint) {
-		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
-
-		auto controller = std::dynamic_pointer_cast<VoxelProceduralSceneController>(window->controller());
-    	controller->getScreen()->charCallbackEvent(codepoint);
-	});
+	_nanoguiScreen = _window.lock()->nanoguiScreen();
 }
 
 VoxelProceduralSceneController::~VoxelProceduralSceneController() {
 
 }
-
-
-nanogui::Screen* VoxelProceduralSceneController::getScreen() {
-	return _nanoguiScreen;
-}
-
 
 void VoxelProceduralSceneController::update() {
 	ISceneController::update();
@@ -110,14 +32,50 @@ void VoxelProceduralSceneController::update() {
 			_playerPositionLabel[1]->setValue(static_cast<int>(playerPosition.y));
 			_playerPositionLabel[2]->setValue(static_cast<int>(playerPosition.z));
 
+			_speedValueField->setValue(cameraMoveSpeed);
+
 			_nanoguiScreen->performLayout();
 		}
 	}
 
-	// Display the interface if needed
+	{
+		glm::vec3 axesOffset = cameraNode->transform().matrix() * glm::vec4(0, 0, -2, 1);
+		_axesNode->transform().setPosition(axesOffset);
+	}
+}
+
+void VoxelProceduralSceneController::updateUI() {
+	if (_window.expired())
+		return ;
+	auto window = _window.lock();
+
 	if (_displayInterface) {
-		glEnable(GL_DEPTH_TEST);
-		_nanoguiScreen->drawWidgets();
+		window->setMouseInputMode(GLFW_CURSOR_NORMAL);
+		this->setCameraMouseControl(false);
+		_axesNode->setActive(true);
+		_playerWindow->setVisible(true);
+		_environementWindow->setVisible(true);
+
+		nanogui::Vector2i playerWindowNewPos = _playerWindow->position();
+		if (_playerWindow->position().x() + _playerWindow->width() > window->size().x)
+			playerWindowNewPos.x() = window->size().x - _playerWindow->width();
+		if (_playerWindow->position().y() + _playerWindow->height() > window->size().y)
+			playerWindowNewPos.y() = window->size().y - _playerWindow->height();
+		_playerWindow->setPosition(playerWindowNewPos);
+
+		nanogui::Vector2i environementWindowNewPos = _environementWindow->position();
+		if (_environementWindow->position().x() + _environementWindow->width() > window->size().x)
+			environementWindowNewPos.x() = window->size().x - _environementWindow->width();
+		if (_environementWindow->position().y() + _environementWindow->height() > window->size().y)
+			environementWindowNewPos.y() = window->size().y - _environementWindow->height();
+		_environementWindow->setPosition(environementWindowNewPos);
+
+	} else {
+		window->setMouseInputMode(GLFW_CURSOR_DISABLED);
+		this->setCameraMouseControl(true);
+		_axesNode->setActive(false);
+		_playerWindow->setVisible(false);
+		_environementWindow->setVisible(false);
 	}
 }
 
@@ -135,14 +93,13 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 	// Also disable the mouse camera control
 	if (key == GLFW_KEY_I && action == GLFW_PRESS) {
 		_displayInterface = !_displayInterface;
-		if (_displayInterface) {
-			_window.lock()->setMouseInputMode(GLFW_CURSOR_NORMAL);
-		}
-		else {
-			_window.lock()->setMouseInputMode(GLFW_CURSOR_DISABLED);
-		}
-		this->setCameraMouseControl(!_displayInterface);
+		updateUI();
 	}
+}
+
+void VoxelProceduralSceneController::resizeWindowCallBack(glm::vec2 newSize) {
+	ISceneController::resizeWindowCallBack(newSize);
+	updateUI();
 }
 
 void VoxelProceduralSceneController::makeScene() {
@@ -150,7 +107,9 @@ void VoxelProceduralSceneController::makeScene() {
 	GLS::Scene& scene(*_scene);
 	if (_window.expired())
 		return;
-	AppEnv *env = _window.lock()->getAppEnvPtr();
+	
+	std::shared_ptr<GLSWindow> window = _window.lock();
+	AppEnv *env = window->getAppEnvPtr();
 
 	// Material initialisation
 	auto texturedMaterial = std::make_shared<GLS::Material>();
@@ -173,6 +132,12 @@ void VoxelProceduralSceneController::makeScene() {
 	} catch (std::exception& e) {
 		std::cout << "error " << e.what() << std::endl;
 	}
+
+	// World
+	worldNode = std::make_shared<GLS::Node>();
+	scene.rootNode()->addChildNode(worldNode);
+	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode, "world");
+	_dynamicWorld->getGenerator()->usedMaterial = texturedMaterial;
 
 	// Lights
 	auto pointlightNode = std::make_shared<GLS::Node>();
@@ -197,19 +162,12 @@ void VoxelProceduralSceneController::makeScene() {
 	camera->fogFar = 200;
 	camera->fogNear = 100;
 	camera->fov = (80.0) * M_PI / 180;
-	scene.setBackgroundColor(glm::vec4(0.4, 0.2, 0.1, 1));
+	scene.setBackgroundColor(glm::vec4(0.3, 0.3, 0.3, 1));
 	camera->aspect = (scene.getAspect());
 	cameraNode->setCamera(camera);
-	// cameraNode->transform().rotateEulerAnglesBy(-1.2, 0, 0);
 	scene.setCameraNode(cameraNode);
 	scene.rootNode()->addChildNode(cameraNode);
 	cameraNode->addChildNode(pointlightNode);
-
-	// World
-	worldNode = std::make_shared<GLS::Node>();
-	scene.rootNode()->addChildNode(worldNode);
-	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode, "world");
-	_dynamicWorld->_generator->usedMaterial = texturedMaterial;
 
 	// Skybox
 	std::vector<std::string> skyboxFaces;
@@ -226,6 +184,9 @@ void VoxelProceduralSceneController::makeScene() {
 		std::cout << "can't load skybox textures with exception: " << e.what() << std::endl;
 	}
 
+	// Interface creation
+	_displayInterface = true;
+
 	std::shared_ptr<GLS::Material> axe_x_material = std::make_shared<GLS::Material>();
 	axe_x_material->diffuse = glm::vec3(1, 0, 0);
 	std::shared_ptr<GLS::Material> axe_y_material = std::make_shared<GLS::Material>();
@@ -233,12 +194,15 @@ void VoxelProceduralSceneController::makeScene() {
 	std::shared_ptr<GLS::Material> axe_z_material = std::make_shared<GLS::Material>();
 	axe_z_material->diffuse = glm::vec3(0, 0, 1);
 
-	std::shared_ptr<GLS::Mesh> axe_x_mesh = GLS::Mesh::cube(160, 1, 1);
+	std::shared_ptr<GLS::Mesh> axe_x_mesh = GLS::Mesh::cube(1, 0, 0);
 	axe_x_mesh->setMaterial(axe_x_material);
-	std::shared_ptr<GLS::Mesh> axe_y_mesh = GLS::Mesh::cube(1, 16, 1);
+	axe_x_mesh->setDrawMode(GL_LINES);
+	std::shared_ptr<GLS::Mesh> axe_y_mesh = GLS::Mesh::cube(0, 1, 0);
 	axe_y_mesh->setMaterial(axe_y_material);
-	std::shared_ptr<GLS::Mesh> axe_z_mesh = GLS::Mesh::cube(1, 1, 16);
+	axe_y_mesh->setDrawMode(GL_LINES);
+	std::shared_ptr<GLS::Mesh> axe_z_mesh = GLS::Mesh::cube(0, 0, 1);
 	axe_z_mesh->setMaterial(axe_z_material);
+	axe_z_mesh->setDrawMode(GL_LINES);
 
 	std::shared_ptr<GLS::Node> axes_node = std::make_shared<GLS::Node>();
 	axes_node->transform().position().y = 60;
@@ -246,43 +210,114 @@ void VoxelProceduralSceneController::makeScene() {
 
 	std::shared_ptr<GLS::Node> axe_x_node = std::make_shared<GLS::Node>();
 	axe_x_node->addRenderable(axe_x_mesh);
-	axe_x_node->transform().position().x = 8;
+	axe_x_node->transform().position().x = 0.5;
 	axes_node->addChildNode(axe_x_node);
 
 	std::shared_ptr<GLS::Node> axe_y_node = std::make_shared<GLS::Node>();
 	axe_y_node->addRenderable(axe_y_mesh);
-	axe_y_node->transform().position().y = 8;
+	axe_y_node->transform().position().y = 0.5;
 	axes_node->addChildNode(axe_y_node);
 
 	std::shared_ptr<GLS::Node> axe_z_node = std::make_shared<GLS::Node>();
 	axe_z_node->addRenderable(axe_z_mesh);
-	axe_z_node->transform().position().z = 8;
+	axe_z_node->transform().position().z = 0.5;
 	axes_node->addChildNode(axe_z_node);
 
-	// _dynamicWorld->_loadedChunks[glm::ivec2(10, 0)] = _dynamicWorld->_generator->generateBigChunkAt(glm::vec3(4));
-	// _dynamicWorld->_loadedChunks[glm::ivec2(11, 0)] = _dynamicWorld->_generator->generateBigChunkAt(glm::vec3(1));
-	// _dynamicWorld->_loadedChunks[glm::ivec2(10, 1)] = _dynamicWorld->_generator->generateBigChunkAt(glm::vec3(2));
-	// _dynamicWorld->_loadedChunks[glm::ivec2(11, 1)] = _dynamicWorld->_generator->generateBigChunkAt(glm::vec3(3));
+	_axesNode = axes_node;
 
-	// std::shared_ptr<BigChunk> chunk00 = _dynamicWorld->_loadedChunks[glm::ivec2(10, 0)];
-	// std::shared_ptr<BigChunk> chunk01 = _dynamicWorld->_loadedChunks[glm::ivec2(10, 1)];
-	// std::shared_ptr<BigChunk> chunk10 = _dynamicWorld->_loadedChunks[glm::ivec2(11, 0)];
-	// std::shared_ptr<BigChunk> chunk11 = _dynamicWorld->_loadedChunks[glm::ivec2(11, 1)];
+	// Create a window, the draggable panel
 
-	// _dynamicWorld->_loadedChunks[glm::ivec2(10, 0)]->generateAllMeshes();
-	// _dynamicWorld->_loadedChunks[glm::ivec2(10, 0)]->getNode()->transform().setPosition(glm::vec3(0, 0, 0));
-	// scene.rootNode()->addChildNode(_dynamicWorld->_loadedChunks[glm::ivec2(10, 0)]->getNode());
+	_playerWindow = new nanogui::Window(_nanoguiScreen, "Player");
+	_playerWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+	_playerWindow->setPosition(nanogui::Vector2i(10, 10));
 
-	// _dynamicWorld->_loadedChunks[glm::ivec2(11, 0)]->generateAllMeshes();
-	// _dynamicWorld->_loadedChunks[glm::ivec2(11, 0)]->getNode()->transform().setPosition(glm::vec3(CHUNKSIZE * BigChunk::bigChunkWidth, 0, 0));
-	// scene.rootNode()->addChildNode(_dynamicWorld->_loadedChunks[glm::ivec2(11, 0)]->getNode());
+	// Create a widget, with a layout
+	auto fpsCounterWidget = new nanogui::Widget(_playerWindow);
+	fpsCounterWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 
-	// _dynamicWorld->_loadedChunks[glm::ivec2(10, 1)]->generateAllMeshes();
-	// _dynamicWorld->_loadedChunks[glm::ivec2(10, 1)]->getNode()->transform().setPosition(glm::vec3(0, 0, CHUNKSIZE * BigChunk::bigChunkWidth));
-	// scene.rootNode()->addChildNode(_dynamicWorld->_loadedChunks[glm::ivec2(10, 1)]->getNode());
+	// Add ui elements to this widget
+	new nanogui::Label(fpsCounterWidget, "FPS: ");
+	_fpsValueLabel = new nanogui::Label(fpsCounterWidget, "-");
 
-	// _dynamicWorld->_loadedChunks[glm::ivec2(11, 1)]->generateAllMeshes();
-	// _dynamicWorld->_loadedChunks[glm::ivec2(11, 1)]->getNode()->transform().setPosition(glm::vec3(CHUNKSIZE * BigChunk::bigChunkWidth, 0, CHUNKSIZE * BigChunk::bigChunkWidth));
-	// scene.rootNode()->addChildNode(_dynamicWorld->_loadedChunks[glm::ivec2(11, 1)]->getNode());
+	auto playerPositionWidget = new nanogui::Widget(_playerWindow);
+	playerPositionWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+
+	for (int i = 0; i < 3; i++) {
+		_playerPositionLabel[i] = new nanogui::IntBox<int>(playerPositionWidget, 0);
+		_playerPositionLabel[i]->setEditable(true);
+	}
+
+	// Callbacks for player teleportation (triggered when int box are modified)
+	_playerPositionLabel[0]->setCallback([this](int posX) {
+		this->cameraNode->transform().position().x = posX;
+	});
+	_playerPositionLabel[1]->setCallback([this](int posY) {
+		this->cameraNode->transform().position().y = posY;
+	});
+	_playerPositionLabel[2]->setCallback([this](int posZ) {
+		this->cameraNode->transform().position().z = posZ;
+	});
+
+	// Speed
+	
+	auto speedBox = new nanogui::Widget(_playerWindow);
+	speedBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	new nanogui::Label(speedBox, "Speed: ");
+	_speedValueField = new nanogui::FloatBox<float>(speedBox, cameraMoveSpeed);
+	_speedValueField->setEditable(true);
+	_speedValueField->setCallback([this](float speed) {
+		this->cameraMoveSpeed = speed;
+	});
+
+	const float minFov = M_PI * 0.16666f;
+	const float maxFov = M_PI * 0.83333f;
+	auto fovBox = new nanogui::Widget(_playerWindow);
+	fovBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	new nanogui::Label(fovBox, "Fov: ");
+	auto fovSlider = new nanogui::Slider(fovBox);
+	fovSlider->setValue((camera->fov - minFov) / (maxFov - minFov));
+	auto fovValue = new nanogui::FloatBox<float>(fovBox, camera->fov * 180.0f / M_PI);
+	fovSlider->setCallback([this, camera, fovValue, minFov, maxFov](float value) {
+		camera->fov = value * (maxFov - minFov) + minFov;
+		fovValue->setValue(camera->fov * 180.0f / M_PI);
+	});
+
+	// Environement GUI
+
+	_environementWindow = new nanogui::Window(_nanoguiScreen, "Environement");
+	_environementWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+
+	auto renderDistanceWidget = new nanogui::Widget(_environementWindow);
+	renderDistanceWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	new nanogui::Label(renderDistanceWidget, "Render distance: ");
+	auto renderDistanceSlider = new nanogui::Slider(renderDistanceWidget);
+
+	auto renderDistanceValue = new nanogui::IntBox<int>(renderDistanceWidget, _dynamicWorld->getRenderDistance());
+	renderDistanceSlider->setCallback([this, renderDistanceValue, camera](float value) {
+		float renderDistance = value * (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance)
+								+ DynamicWorld::minRenderDistance;
+		renderDistanceValue->setValue(renderDistance);
+		_dynamicWorld->setRenderDistance(renderDistance);
+		camera->farZ = renderDistance;
+		camera->fogFar = renderDistance;
+		camera->fogNear = renderDistance / 2;
+	});
+	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
+									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
+
+	auto applyButtonWidget = new nanogui::Widget(_environementWindow);
+	applyButtonWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	auto applyButton = new nanogui::Button(applyButtonWidget, "Boutton inutile");
+	applyButton->setCallback([]() {
+		std::cout << "Je ne sert a rien" << std::endl;
+	});
+	// _dynamicWorld->setRenderDistance(renderDistance);
+
+	updateUI();
+
+	// Compute the layout (width, height)
+	_nanoguiScreen->performLayout();
+
+	_environementWindow->setPosition(nanogui::Vector2i(window->size().x - _environementWindow->width() - 10, 10));
 
 }

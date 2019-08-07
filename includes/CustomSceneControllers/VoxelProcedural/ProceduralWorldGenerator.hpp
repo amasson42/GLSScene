@@ -21,13 +21,11 @@ class ProceduralWorldGenerator {
 
 	private:
 
-	// tgros WiP
 	int _commandQueueIndex;
 	int _kernelIndex;
 	int _perlinPermutationBufferIndex;
 	CLD::Buffer _perlinPermutationBuffer;
 
 	std::shared_ptr<CLD::GPUDevice> _device;
-	// end WiP
 
 };

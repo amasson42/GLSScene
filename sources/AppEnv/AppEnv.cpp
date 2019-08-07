@@ -36,7 +36,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
     std::shared_ptr<GLSWindow> mainWindow;
     try {
         int win_w = 1200, win_h = 800;
-        mainWindow = std::make_shared<GLSWindow>(this, glm::vec2(win_w, win_h), "GLS");
+        mainWindow = std::make_shared<GLSWindow>(this, glm::vec2(win_w, win_h), as[0]);
     } catch (std::exception& e) {
         std::cerr << "Error during main window creation" << std::endl;
         glfwTerminate();
