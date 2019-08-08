@@ -111,18 +111,36 @@ void VoxelProceduralSceneController::makeScene() {
 	std::shared_ptr<GLSWindow> window = _window.lock();
 	AppEnv *env = window->getAppEnvPtr();
 
+	std::string voxelTextureFilePath;
+	{
+		std::shared_ptr<std::string> textureName = env->getArgument("-texture");
+		#ifdef _WIN32 // Just because of the build folder and cmake
+		voxelTextureFilePath = textureName != nullptr ? *textureName : "../assets/textures/ft_vox_textures.png";
+		#else
+		voxelTextureFilePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures.png";
+		#endif
+	}
+	std::string generatorFilePath;
+	{
+		std::shared_ptr<std::string> argName = env->getArgument("-generator");
+		#ifdef _WIN32 // Just because of the build folder and cmake
+		generatorFilePath = argName != nullptr ? *argName : "../assets/voxelProceduralGeneratorSources/hillsGenerator.cl";
+		#else
+		generatorFilePath = argName != nullptr ? *argName : "assets/voxelProceduralGeneratorSources/hillsGenerator.cl";
+		#endif
+	}
+	std::string worldName;
+	{
+		std::shared_ptr<std::string> argName = env->getArgument("-world");
+		worldName = argName != nullptr ? *argName : "world";
+	}
+
 	// Material initialisation
 	auto texturedMaterial = std::make_shared<GLS::Material>();
 	texturedMaterial->specular = glm::vec3(0.1);
 	texturedMaterial->shininess = 64;
 	try {
-		std::shared_ptr<std::string> textureName = env->getArgument("-texture");
-		#ifdef _WIN32 // Just because of the build folder and cmake
-		std::string filePath = textureName != nullptr ? *textureName : "../assets/textures/ft_vox_textures.png";
-		#else
-		std::string filePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures.png";
-		#endif
-		texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(filePath);
+		texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(voxelTextureFilePath);
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -136,8 +154,10 @@ void VoxelProceduralSceneController::makeScene() {
 	// World
 	worldNode = std::make_shared<GLS::Node>();
 	scene.rootNode()->addChildNode(worldNode);
-	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode, "world");
+	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode, worldName);
 	_dynamicWorld->getGenerator()->usedMaterial = texturedMaterial;
+	_dynamicWorld->getGenerator()->setSeed(time(NULL));
+	_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath);
 
 	// Lights
 	auto pointlightNode = std::make_shared<GLS::Node>();
@@ -156,7 +176,7 @@ void VoxelProceduralSceneController::makeScene() {
 
 	// Camera
 	cameraNode = std::make_shared<GLS::Node>();
-	cameraNode->transform().moveBy(0, 10, 16);
+	cameraNode->transform().moveBy(0, 100, 16);
 	std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
 	camera->farZ = 200;
 	camera->fogFar = 200;
@@ -287,11 +307,11 @@ void VoxelProceduralSceneController::makeScene() {
 	_environementWindow = new nanogui::Window(_nanoguiScreen, "Environement");
 	_environementWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 
+		// render distance
 	auto renderDistanceWidget = new nanogui::Widget(_environementWindow);
 	renderDistanceWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(renderDistanceWidget, "Render distance: ");
 	auto renderDistanceSlider = new nanogui::Slider(renderDistanceWidget);
-
 	auto renderDistanceValue = new nanogui::IntBox<int>(renderDistanceWidget, _dynamicWorld->getRenderDistance());
 	renderDistanceSlider->setCallback([this, renderDistanceValue, camera](float value) {
 		float renderDistance = value * (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance)
@@ -305,13 +325,42 @@ void VoxelProceduralSceneController::makeScene() {
 	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
 
-	auto applyButtonWidget = new nanogui::Widget(_environementWindow);
-	applyButtonWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
-	auto applyButton = new nanogui::Button(applyButtonWidget, "Boutton inutile");
-	applyButton->setCallback([]() {
+		// useless button
+	auto uselessButtonWidget = new nanogui::Widget(_environementWindow);
+	uselessButtonWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	auto uselessButton = new nanogui::Button(uselessButtonWidget, "Boutton inutile");
+	uselessButton->setCallback([]() {
 		std::cout << "Je ne sert a rien" << std::endl;
 	});
-	// _dynamicWorld->setRenderDistance(renderDistance);
+
+		// seed field
+	auto seedWidget = new nanogui::Widget(_environementWindow);
+	seedWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	new nanogui::Label(seedWidget, "seed: ");
+	auto seedField = new nanogui::IntBox<unsigned int>(seedWidget, _dynamicWorld->getGenerator()->getSeed());
+	seedField->setEditable(true);
+	seedField->setCallback([this](unsigned int value) {
+		_dynamicWorld->getGenerator()->setSeed(value);
+	});
+
+		// generator kernel choosing
+	auto generatorKernelWidget = new nanogui::Widget(_environementWindow);
+	generatorKernelWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+	auto generatorKernelField = new nanogui::TextBox(generatorKernelWidget, generatorFilePath);
+	generatorKernelField->setEditable(true);
+
+		// reload button
+	auto reloadWidget = new nanogui::Widget(_environementWindow);
+	reloadWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	(new nanogui::Button(reloadWidget, "Reload"))
+		->setCallback([this, generatorKernelField]() {
+		try {
+			_dynamicWorld->getGenerator()->setGenerationKernel(generatorKernelField->value());
+		} catch (std::exception &e) {
+			std::cerr << e.what() << std::endl;
+		}
+		_dynamicWorld->reloadChunks();
+	});
 
 	updateUI();
 

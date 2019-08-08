@@ -1,49 +1,37 @@
 
 #include "ProceduralWorldGenerator.hpp"
 
-ProceduralWorldGenerator::ProceduralWorldGenerator() {
-	// tgros WiP
-	int* p = initNoise(time(NULL));
+ProceduralWorldGenerator::ProceduralWorldGenerator() :
+	_commandQueueIndex(-1),
+	_kernelIndex(-1),
+	_perlinPermutationBufferIndex(-1),
+	_seed(0) {
 
 	_device = GLS::getSharedDevice();
 
-	std::string sourceCode;
-	std::string line;
-	std::ifstream kernelCodeFile;
-
-	kernelCodeFile.open ("assets/voxelProceduralGeneratorSources/hillsGenerator.cl");
-	while(!kernelCodeFile.eof()) {
-		getline(kernelCodeFile, line);
-		sourceCode += line + '\n';
-	}
-	kernelCodeFile.close();
-
-	const char *programs[1];
-	programs[0] = sourceCode.c_str();
-
-	int programIndex;
-	try {
-		_device->createProgram(programs, &programIndex);
-	} catch (const CLD::GPUDevice::BuildProgramException& e) {
-		std::cout << e.what() << std::endl;
-	}
+	if (_device == nullptr)
+		throw std::runtime_error("GLS was not initialized");
 
 	// With one queue, kernel will be executed one after each other
 	_device->createCommandQueue(&_commandQueueIndex);
-	_device->createKernel(programIndex, "generateBigChunk", &_kernelIndex);
-	_device->destroyProgram(programIndex);
-
-	_perlinPermutationBuffer = _device->createFlagBuffer(sizeof(int) * 512, CL_MEM_USE_HOST_PTR, p, &_perlinPermutationBufferIndex);
+	if (_commandQueueIndex < 0)
+		throw std::runtime_error("Could not initilize a new cl command queue");
 }
 
 ProceduralWorldGenerator::~ProceduralWorldGenerator() {
-	_device->destroyBuffer(_perlinPermutationBuffer);
-	_device->destroyKernel(_kernelIndex);
+	if (_perlinPermutationBufferIndex >= 0)
+		_device->destroyBuffer(_perlinPermutationBuffer);
+	if (_kernelIndex >= 0)
+		_device->destroyKernel(_kernelIndex);
 	_device->destroyCommandQueue(_commandQueueIndex);
 }
 
 std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec2 bigChunkPos) {
 
+	if (_kernelIndex < 0)
+		throw std::runtime_error("world generator was used before reading a kernel");
+	if (_perlinPermutationBufferIndex < 0)
+		throw std::runtime_error("world generator was used before setting a seed");
 	std::shared_ptr<BigChunk> bc = std::make_shared<BigChunk>(usedMaterial);
 
 	std::vector<int> blocks = std::vector<int>(BigChunk::bigChunkCount * GLS::VoxelChunk::chunkBlockCount);
@@ -72,4 +60,47 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 
 	_device->destroyBuffer(blocksBufferIndex);
 	return bc;
+}
+
+void ProceduralWorldGenerator::setSeed(unsigned int seed) {
+	if (_perlinPermutationBufferIndex >= 0)
+		_device->destroyBuffer(_perlinPermutationBufferIndex);
+	int* p = initNoise(seed);
+	_perlinPermutationBuffer = _device->createFlagBuffer(sizeof(int) * 512, CL_MEM_USE_HOST_PTR, p, &_perlinPermutationBufferIndex);
+	if (_perlinPermutationBufferIndex < 0) {
+		_seed = 0;
+		return;
+	}
+	_seed = seed;
+}
+
+unsigned int ProceduralWorldGenerator::getSeed() const {
+	return _seed;
+}
+
+void ProceduralWorldGenerator::setGenerationKernel(std::string kernelName) {
+	std::string sourceCode;
+	std::string line;
+	std::ifstream kernelCodeFile;
+	kernelCodeFile.open(kernelName.c_str());
+	if (!kernelCodeFile.is_open())
+		throw std::runtime_error(("could not open file " + kernelName).c_str());
+	while(!kernelCodeFile.eof()) {
+		getline(kernelCodeFile, line);
+		sourceCode += line + '\n';
+	}
+	kernelCodeFile.close();
+	const char *programs[1];
+	programs[0] = sourceCode.c_str();
+	int programIndex;
+	try {
+		_device->createProgram(programs, &programIndex);
+	} catch (const CLD::GPUDevice::BuildProgramException& e) {
+		std::cout << e.what() << std::endl;
+		return;
+	}
+	if (_kernelIndex >= 0)
+		_device->destroyKernel(_kernelIndex);
+	_device->createKernel(programIndex, "generateBigChunk", &_kernelIndex);
+	_device->destroyProgram(programIndex);
 }

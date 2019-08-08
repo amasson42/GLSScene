@@ -106,12 +106,6 @@ void ISceneController::keyCallBack(int key, int scancode, int action, int mods) 
     (void)mods;
     // std::cout << "{key: " << key << ", scancode: " << scancode
     //     << ", action: " << action << ", mods: " << mods << "}" << std::endl;
-    if (key == GLFW_KEY_G && action == 1) {
-        if (glIsEnabled(GL_FRAMEBUFFER_SRGB))
-            glDisable(GL_FRAMEBUFFER_SRGB);
-        else
-            glEnable(GL_FRAMEBUFFER_SRGB);
-    }
 }
 
 void ISceneController::setCameraMouseControl(bool enabled) {

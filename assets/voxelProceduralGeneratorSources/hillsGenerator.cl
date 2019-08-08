@@ -86,9 +86,7 @@ kernel void generateBigChunk(__global int* perlinPermutations, __global int* blo
 						localPosition.y,
 						localPosition.z + bigChunkPos.y * chunkSize * bigChunkWidth);
 
-	
-
-	int groundHeight = 4.6 * linearNoise(perlinPermutations, wpos.x * 0.046, 0, wpos.z * 0.073) + 50;
+	int groundHeight = 15 * linearNoise(perlinPermutations, wpos.x * 0.046, 0, wpos.z * 0.073) + 50;
 
 	int snowHeight = 0;
 	{

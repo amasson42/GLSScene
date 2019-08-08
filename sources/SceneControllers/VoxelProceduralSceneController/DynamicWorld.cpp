@@ -35,7 +35,7 @@ const std::string DynamicWorld::getBigChunkFileNameAt(glm::ivec2 position) {
 }
 
 
-void DynamicWorld::_cleanChunks(glm::vec3& cameraFlatPosition) {
+void DynamicWorld::_cleanChunks(const glm::vec3& cameraFlatPosition) {
 
 	glm::vec3 chunkMid = glm::vec3(CHUNKSIZE * BigChunk::bigChunkWidth / 2,
 									0,
@@ -59,7 +59,7 @@ void DynamicWorld::_cleanChunks(glm::vec3& cameraFlatPosition) {
 	}
 }
 
-void DynamicWorld::_generateChunks(glm::vec3& cameraFlatPosition, std::shared_ptr<GLS::Node> cameraNode) {
+void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::shared_ptr<GLS::Node> cameraNode) {
 	std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
 	if (camera == nullptr)
 		return;
@@ -226,6 +226,14 @@ void DynamicWorld::setRenderDistance(float distance) {
 
 float DynamicWorld::getRenderDistance() const {
 	return _visibleDistance;
+}
+
+void DynamicWorld::reloadChunks() {
+	float loadingDistance = _loadingDistance;
+	_loadingDistance = 0;
+	_cleanChunks(glm::vec3(0));
+	_loadingDistance = loadingDistance;
+	_loadedChunks.clear();
 }
 
 std::shared_ptr<ProceduralWorldGenerator> DynamicWorld::getGenerator() {

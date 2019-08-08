@@ -30,6 +30,8 @@ public:
 	void setRenderDistance(float distance);
 	float getRenderDistance() const;
 
+	void reloadChunks();
+
 	std::shared_ptr<ProceduralWorldGenerator> getGenerator();
 
 	static const float minRenderDistance;
@@ -46,8 +48,8 @@ private:
 	float _loadingDistance;
 	float _visibleDistance;
 
-	void _cleanChunks(glm::vec3& cameraFlatPosition);
-	void _generateChunks(glm::vec3& cameraFlatPosition, std::shared_ptr<GLS::Node> cameraNode);
+	void _cleanChunks(const glm::vec3& cameraFlatPosition);
+	void _generateChunks(const glm::vec3& cameraFlatPosition, std::shared_ptr<GLS::Node> cameraNode);
 	void _generateMeshes(std::shared_ptr<GLS::Node> cameraNode);
 
 };
