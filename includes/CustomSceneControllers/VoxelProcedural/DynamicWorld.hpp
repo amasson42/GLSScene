@@ -34,6 +34,8 @@ public:
 
 	std::shared_ptr<ProceduralWorldGenerator> getGenerator();
 
+	void setBlockAt(const glm::vec3& worldPosition, int blockId);
+
 	static const float minRenderDistance;
 	static const float maxRenderDistance;
 

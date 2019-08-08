@@ -66,6 +66,7 @@ _framebuffer(nullptr) {
     glfwSetMouseButtonCallback(_glfwWindow, [](GLFWwindow* win, int button, int action, int modifiers) {
 		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
 
+        window->mouseButtonCallBack(button, action, modifiers);
         window->nanoguiScreen()->mouseButtonCallbackEvent(button, action, modifiers);
     });
 
@@ -93,6 +94,13 @@ _framebuffer(nullptr) {
         if (window != NULL)
             window->updateSize();
     	window->nanoguiScreen()->resizeCallbackEvent(width, height);
+    });
+
+    glfwSetScrollCallback(_glfwWindow, [](GLFWwindow* win, double x, double y) {
+        GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
+
+        window->scrollCallBack(x, y);
+        window->nanoguiScreen()->scrollCallbackEvent(x, y);
     });
 
     glfwSwapInterval(1);

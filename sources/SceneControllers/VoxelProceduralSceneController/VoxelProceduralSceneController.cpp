@@ -1,11 +1,32 @@
 
 #include "AppEnv.hpp"
 
+#define BLOCK_AIR 0
+#define BLOCK_BEDROCK 1
+#define BLOCK_STONE 2
+#define BLOCK_DIRT 3
+#define BLOCK_GRASS 4
+#define BLOCK_SAND 5
+#define BLOCK_GRAVEL 6
+#define BLOCK_GRASS_BROWN 11
+#define BLOCK_WOOD 12
+#define BLOCK_LEAFS 13
+#define BLOCK_WOOD_PLANKS 14
+#define BLOCK_BRICKS 15
+#define BLOCK_COBBLESTONE 16
+#define BLOCK_ICE 21
+#define BLOCK_ICE_BROKEN 22
+#define BLOCK_OBSIDIAN 25
+#define BLOCK_GRASS_PURPLE 31
+#define BLOCK_GOLD 35
+#define BLOCK_TNT 92
+
 VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window):
 ISceneController(window) {
 	lt = 0;
 	cameraMoveSpeed = 5;
 	_nanoguiScreen = _window.lock()->nanoguiScreen();
+	_pickedBlock = 1;
 }
 
 VoxelProceduralSceneController::~VoxelProceduralSceneController() {
@@ -23,7 +44,7 @@ void VoxelProceduralSceneController::update() {
 	if (et - lt >= 0.05) {
 		lt = et;
 		_dynamicWorld->loadPosition(cameraNode);
-		
+
 		// Update the ui if needed
 		if (_displayInterface) {
 			_fpsValueLabel->setCaption(std::to_string(static_cast<int>(1.0f / _window.lock()->deltaTime())));
@@ -35,12 +56,26 @@ void VoxelProceduralSceneController::update() {
 			_speedValueField->setValue(cameraMoveSpeed);
 
 			_nanoguiScreen->performLayout();
+
+			float offsetX = 3 * (_pickedBlock % 10 - 1) + 1;
+			float offsetY = (_pickedBlock / 10);
+			float imgViewOffsetX = _pickedBlockTexture->sizeF().x() * offsetX;
+			float imgViewOffsetY = _pickedBlockTexture->sizeF().y() * offsetY;
+			_pickedBlockTexture->setOffset(nanogui::Vector2f(-imgViewOffsetX, -imgViewOffsetY));
+
+			// _handBlockMaterial->diffuse_transform.setOffset(glm::vec2(offsetX / 30.0f, offsetY / 10.0f));
+			// _handBlockMaterial->mask_transform.setOffset(glm::vec2(offsetX / 30.0f, offsetY / 10.0f));
 		}
 	}
 
 	{
 		glm::vec3 axesOffset = cameraNode->transform().matrix() * glm::vec4(0, 0, -2, 1);
 		_axesNode->transform().setPosition(axesOffset);
+		glm::vec3 placePositionOfDoom = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -2, 1));
+		placePositionOfDoom.x = std::floor(placePositionOfDoom.x) + 0.5;
+		placePositionOfDoom.y = std::floor(placePositionOfDoom.y) + 0.5;
+		placePositionOfDoom.z = std::floor(placePositionOfDoom.z) + 0.5;
+		_placeHolderBlockOfDoom->transform().setPosition(placePositionOfDoom);
 	}
 }
 
@@ -91,9 +126,48 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 
 	// Open the nanogui interface and display information
 	// Also disable the mouse camera control
-	if (key == GLFW_KEY_I && action == GLFW_PRESS) {
+	if (key == GLFW_KEY_I && action == GLFW_PRESS && !_generatorKernelField->focused()) {
 		_displayInterface = !_displayInterface;
 		updateUI();
+	}
+}
+
+void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
+	std::map<int, std::string>::const_iterator it;
+
+	if (y > 0.0) {
+		it = VoxelProceduralSceneController::_BlockNames.find(_pickedBlock);
+		if (std::next(it) != VoxelProceduralSceneController::_BlockNames.end()) {
+			it++;
+		} else {
+			it = VoxelProceduralSceneController::_BlockNames.begin();
+		}
+	} else if (y < 0.0) {
+		it = VoxelProceduralSceneController::_BlockNames.find(_pickedBlock);
+		
+		if (it == VoxelProceduralSceneController::_BlockNames.begin()) {
+			it = std::prev(VoxelProceduralSceneController::_BlockNames.end());
+		} else {
+			it--;
+		}
+	}
+	if (y != 0.0) {
+		_pickedBlock = it->first;
+		_pickedBlockLabel->setCaption(it->second);
+		_handBlock->voxel->setBlockIdAt(0, 0, 0, _pickedBlock);
+		_handBlock->voxel->calculBlockAdjacence();
+		_handBlock->updateMesh();
+	}
+}
+
+void VoxelProceduralSceneController::mouseButtonCallBack(int button, int action, int modifiers) {
+	// std::cout << button << " => " << action << std::endl;
+	glm::vec3 targetWorldPos = _placeHolderBlockOfDoom->transform().position();
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		_dynamicWorld->setBlockAt(targetWorldPos, BLOCK_AIR);
+	}
+	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+		_dynamicWorld->setBlockAt(targetWorldPos, _pickedBlock);
 	}
 }
 
@@ -107,7 +181,7 @@ void VoxelProceduralSceneController::makeScene() {
 	GLS::Scene& scene(*_scene);
 	if (_window.expired())
 		return;
-	
+
 	std::shared_ptr<GLSWindow> window = _window.lock();
 	AppEnv *env = window->getAppEnvPtr();
 
@@ -245,8 +319,25 @@ void VoxelProceduralSceneController::makeScene() {
 
 	_axesNode = axes_node;
 
-	// Create a window, the draggable panel
+	// Player right hand block
 
+	_handBlock = std::make_shared<GameVoxelChunk>();
+	_handBlock->voxel->setMaterial(texturedMaterial);
+	_handBlock->voxel->setBlockIdAt(0, 0, 0, _pickedBlock);
+	_handBlock->voxel->calculBlockAdjacence();
+	_handBlock->updateMesh();
+	_handBlock->node->transform().scaleBy(glm::vec3(0.5));
+	_handBlock->node->transform().setPosition(glm::vec3(0.65, -0.8, -1.5));
+
+	cameraNode->addChildNode(_handBlock->node);
+
+	_placeHolderBlockOfDoom = std::make_shared<GLS::Node>();
+	std::shared_ptr<GLS::Mesh> placeHolderMesh = GLS::Mesh::cube(1.02, 1.02, 1.02);
+	placeHolderMesh->setDrawMode(GL_LINES);
+	_placeHolderBlockOfDoom->addRenderable(placeHolderMesh);
+	scene.rootNode()->addChildNode(_placeHolderBlockOfDoom);
+
+	// Player Window
 	_playerWindow = new nanogui::Window(_nanoguiScreen, "Player");
 	_playerWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 	_playerWindow->setPosition(nanogui::Vector2i(10, 10));
@@ -279,7 +370,6 @@ void VoxelProceduralSceneController::makeScene() {
 	});
 
 	// Speed
-	
 	auto speedBox = new nanogui::Widget(_playerWindow);
 	speedBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(speedBox, "Speed: ");
@@ -289,6 +379,7 @@ void VoxelProceduralSceneController::makeScene() {
 		this->cameraMoveSpeed = speed;
 	});
 
+	// FOV
 	const float minFov = M_PI * 0.16666f;
 	const float maxFov = M_PI * 0.83333f;
 	auto fovBox = new nanogui::Widget(_playerWindow);
@@ -301,6 +392,18 @@ void VoxelProceduralSceneController::makeScene() {
 		camera->fov = value * (maxFov - minFov) + minFov;
 		fovValue->setValue(camera->fov * 180.0f / M_PI);
 	});
+
+	// Picked Block
+	auto pickedBlockBox = new nanogui::Widget(_playerWindow);
+	pickedBlockBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+	
+	const int blockImageSize = 50;
+	_pickedBlockTexture = new nanogui::ImageView(pickedBlockBox, _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->buffer());
+	_pickedBlockTexture->setFixedSize(nanogui::Vector2i(blockImageSize, blockImageSize));
+	_pickedBlockTexture->setScale((float)blockImageSize / texturedMaterial->texture_diffuse->width() * 30.0); 
+	_pickedBlockTexture->setFixedScale(true);
+	_pickedBlockTexture->setFixedOffset(false);
+	_pickedBlockLabel = new nanogui::Label(pickedBlockBox, VoxelProceduralSceneController::_BlockNames.at(_pickedBlock));
 
 	// Environement GUI
 
@@ -320,7 +423,7 @@ void VoxelProceduralSceneController::makeScene() {
 		_dynamicWorld->setRenderDistance(renderDistance);
 		camera->farZ = renderDistance;
 		camera->fogFar = renderDistance;
-		camera->fogNear = renderDistance / 2;
+		camera->fogNear = renderDistance * 0.9f;
 	});
 	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
@@ -346,16 +449,16 @@ void VoxelProceduralSceneController::makeScene() {
 		// generator kernel choosing
 	auto generatorKernelWidget = new nanogui::Widget(_environementWindow);
 	generatorKernelWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
-	auto generatorKernelField = new nanogui::TextBox(generatorKernelWidget, generatorFilePath);
-	generatorKernelField->setEditable(true);
+	_generatorKernelField = new nanogui::TextBox(generatorKernelWidget, generatorFilePath);
+	_generatorKernelField->setEditable(true);
 
 		// reload button
 	auto reloadWidget = new nanogui::Widget(_environementWindow);
 	reloadWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	(new nanogui::Button(reloadWidget, "Reload"))
-		->setCallback([this, generatorKernelField]() {
+		->setCallback([this]() {
 		try {
-			_dynamicWorld->getGenerator()->setGenerationKernel(generatorKernelField->value());
+			_dynamicWorld->getGenerator()->setGenerationKernel(_generatorKernelField->value());
 		} catch (std::exception &e) {
 			std::cerr << e.what() << std::endl;
 		}
@@ -370,3 +473,24 @@ void VoxelProceduralSceneController::makeScene() {
 	_environementWindow->setPosition(nanogui::Vector2i(window->size().x - _environementWindow->width() - 10, 10));
 
 }
+
+const std::map<int, std::string> VoxelProceduralSceneController::_BlockNames = {
+	{ BLOCK_BEDROCK, "Bedrock" },
+	{ BLOCK_STONE, "Stone" },
+	{ BLOCK_DIRT, "Dirt" },
+	{ BLOCK_GRASS, "Grass" },
+	{ BLOCK_SAND, "Sand" },
+	{ BLOCK_GRAVEL, "Gravel" },
+	{ BLOCK_GRASS_BROWN, "Brown Grass" },
+	{ BLOCK_WOOD, "Wood" },
+	{ BLOCK_LEAFS, "Leaf" },
+	{ BLOCK_WOOD_PLANKS, "Oak Plank" },
+	{ BLOCK_BRICKS, "Brick" },
+	{ BLOCK_COBBLESTONE, "Cobblestone" },
+	{ BLOCK_ICE, "Ice" },
+	{ BLOCK_ICE_BROKEN, "Broken Ice" },
+	{ BLOCK_OBSIDIAN, "Obsidian" },
+	{ BLOCK_GRASS_PURPLE, "Purple Grass" },
+	{ BLOCK_GOLD, "Gold" },
+	{ BLOCK_TNT, "TNT" },
+};

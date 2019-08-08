@@ -1,3 +1,4 @@
+
 #include "BigChunk.hpp"
 
 BigChunk::BigChunk(std::shared_ptr<GLS::Material> material) :
@@ -92,6 +93,15 @@ GameVoxelChunk& BigChunk::chunkAt(int x, int y, int z) {
 		throw std::runtime_error("bad values sent to bigChunk::chunkAt");
 	int index = bigChunkWidth * bigChunkWidth * y + bigChunkWidth * x + z;
 	return _chunks[index];
+}
+
+GameVoxelChunk* BigChunk::chunkAt(const glm::vec3& pos) {
+	int x = pos.x / CHUNKSIZE;
+	int y = pos.y / CHUNKSIZE;
+	int z = pos.z / CHUNKSIZE;
+	if (x < 0 || x >= bigChunkWidth || y < 0 || y >= bigChunkHeight || z < 0 || z >= bigChunkWidth)
+		return nullptr;
+	return &chunkAt(x, y, z);
 }
 
 void BigChunk::setAdjacentBigChunk_positiveX(std::shared_ptr<BigChunk> adj) {

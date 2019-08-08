@@ -108,6 +108,17 @@ void ISceneController::keyCallBack(int key, int scancode, int action, int mods) 
     //     << ", action: " << action << ", mods: " << mods << "}" << std::endl;
 }
 
+void ISceneController::scrollCallBack(double x, double y) {
+    (void)x;
+    (void)y;
+}
+
+void ISceneController::mouseButtonCallBack(int button, int action, int modifiers) {
+    (void)button;
+    (void)action;
+    (void)modifiers;
+}
+
 void ISceneController::setCameraMouseControl(bool enabled) {
 	_cameraMouseControlEnabled = enabled;
 

@@ -48,6 +48,16 @@ void GLSWindow::keyCallBack(int key, int scan, int action, int mods) {
         _controller.lock()->keyCallBack(key, scan, action, mods);
 }
 
+void GLSWindow::scrollCallBack(double x, double y) {
+    if (!_controller.expired())
+        _controller.lock()->scrollCallBack(x, y);
+}
+
+void GLSWindow::mouseButtonCallBack(int button, int action, int modifier) {
+    if (!_controller.expired())
+        _controller.lock()->mouseButtonCallBack(button, action, modifier);
+}
+
 glm::vec2 GLSWindow::mousePosition() const {
     return _mousePosition;
 }

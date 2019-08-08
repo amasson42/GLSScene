@@ -1,5 +1,5 @@
 
-// hillsGenerator.cl
+// floatingIslands.cl
 
 #define BLOCK_AIR 0
 #define BLOCK_BEDROCK 1
@@ -22,8 +22,8 @@
 #define BLOCK_TNT 92
 
 double grad(int hash, double x, double y, double z);
-double noise(__global int* p, double x, double y, double z);
 double lerp(double t, double a, double b);
+double fade(double t);
 
 double grad(int hash, double x, double y, double z) {
     int h = hash & 15;
@@ -36,6 +36,10 @@ double lerp(double t, double a, double b) {
     return a + t * (b - a);
 }
 
+double fade(double t) {
+    return t * t * t * (t * (t * 6 - 15) + 10);
+}
+
 double noise(__global int* p, double x, double y, double z) {
     int X = (int)floor(x) & 255;
     int Y = (int)floor(y) & 255;
@@ -45,9 +49,9 @@ double noise(__global int* p, double x, double y, double z) {
     y -= floor(y);
     z -= floor(z);
 
-    double u = x;
-    double v = y;
-    double w = z;
+    double u = fade(x);
+    double v = fade(y);
+    double w = fade(z);
 
     int A = p[X] + Y;
     int AA = p[A] + Z;
@@ -80,38 +84,26 @@ int3 getLocalPosition(int i, const int chunkSize, const int bigChunkWidth) {
 	);
 }
 
-float3 getWorldPosition(const int3 localPosition, const int2 bigChunkPos, const int bigChunkFullWidth) {
-	return (float3)(localPosition.x + bigChunkPos.x * bigChunkFullWidth,
+int3 getWorldPosition(const int3 localPosition, const int2 bigChunkPos, const int bigChunkFullWidth) {
+	return (int3)(localPosition.x + bigChunkPos.x * bigChunkFullWidth,
 				localPosition.y,
 				localPosition.z + bigChunkPos.y * bigChunkFullWidth);
 }
 
-int calculBlockAt(__global int* ppm, float3 wpos);
-
-float biomesIntensity_grass(__global int* ppm, float3 wpos) {
-	return noise(ppm, wpos.x * 0.01 + 265.42, 0.75, wpos.z * 0.01 + 23.41);
-}
-
-#define BIOMES_COUNT 6
-
-int calculBlockAt(__global int* ppm, float3 wpos) {
-	if (wpos.y > 1)
-		return BLOCK_AIR;
-	if (biomesIntensity_grass(ppm, wpos) > 0)
-		return BLOCK_GRASS;
-	else
-		return BLOCK_DIRT;
-	float biomesIntensity[6];
-
-}
+double noise(__global int* p, double x, double y, double z);
 
 kernel void generateBigChunk(__global int* ppm, __global int* blocks, const int2 bigChunkPos, const int chunkSize, const int bigChunkWidth) {
 	size_t i = get_global_id(0);
 	int3 localPosition = getLocalPosition(i, chunkSize, bigChunkWidth);
-	float3 wpos = getWorldPosition(localPosition, bigChunkPos, chunkSize * bigChunkWidth);
+	int3 wpos = getWorldPosition(localPosition, bigChunkPos, chunkSize * bigChunkWidth);
     int block = BLOCK_AIR;
 
-	block = calculBlockAt(ppm, wpos);
+    float islandIntensity = pow(noise(ppm, wpos.x * 0.02, 0.5, wpos.z * 0.02) + noise(ppm, wpos.x * 0.02, 0.5, wpos.z * 0.02) + 1.0, 2.0) - 1.0;
 
-	blocks[i] = block;
+    int height = islandIntensity * 16 + 16;
+    if (wpos.y < height) {
+        block = height > 16 ? BLOCK_STONE : BLOCK_WOOD;
+    }
+
+    blocks[i] = block;
 }

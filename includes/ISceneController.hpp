@@ -23,6 +23,8 @@ class ISceneController {
     virtual void update();
     virtual void resizeWindowCallBack(glm::vec2 newSize);
     virtual void keyCallBack(int key, int scancode, int action, int mods);
+    virtual void scrollCallBack(double x, double y);
+    virtual void mouseButtonCallBack(int button, int action, int modifiers);
 
 	void setCameraMouseControl(bool enabled);
 
@@ -37,5 +39,5 @@ class ISceneController {
 # include "CustomSceneControllers/Shadow.hpp"
 # include "CustomSceneControllers/Trash.hpp"
 # include "CustomSceneControllers/Voxel.hpp"
-# include "CustomSceneControllers/VoxelProcedural/VoxelProcedural.hpp"
+# include "CustomSceneControllers/VoxelProcedural/VoxelProceduralSceneController.hpp"
 # include "CustomSceneControllers/Gros.hpp"

@@ -34,6 +34,16 @@ namespace GLS {
         return stream;
     }
 
+    std::ostream& operator<<(std::ostream& stream, const glm::ivec3& v) {
+        stream << '(' << v.x << ',' << v.y << ',' << v.z << ')';
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const glm::ivec2& v) {
+        stream << '(' << v.x << ',' << v.y << ')';
+        return stream;
+    }
+
     std::ostream& operator<<(std::ostream& stream, const glm::quat& q) {
         stream << '(' << q.x << ',' << q.y << ',' << q.z << ',' << q.w << ')';
         return stream;

@@ -17,6 +17,7 @@
 #include <nanogui/textbox.h>
 #include <nanogui/slider.h>
 #include <nanogui/button.h>
+#include <nanogui/imageview.h>
 
 #include "AppEnv.hpp"
 
@@ -70,6 +71,8 @@ class GLSWindow {
     void updateSize();
     void updateEvents();
     void keyCallBack(int key, int scan, int action, int mods);
+    void scrollCallBack(double x, double y);
+    void mouseButtonCallBack(int button, int action, int modifiers);
 
     glm::vec2 mousePosition() const;
     glm::vec2 mouseContextPosition() const;

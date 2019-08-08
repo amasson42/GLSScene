@@ -2,7 +2,7 @@
 
 namespace glm {
 	bool operator<(const glm::ivec2& lhs, const glm::ivec2& rhs);
-	std::ostream& operator<<(std::ostream& out, const glm::ivec2& iv);
+	// std::ostream& operator<<(std::ostream& out, const glm::ivec2& iv);
 }
 
 const float DynamicWorld::minRenderDistance = 50.0f;
@@ -33,7 +33,6 @@ glm::vec3 DynamicWorld::bigChunkPositionToWorld(glm::ivec2 position) {
 const std::string DynamicWorld::getBigChunkFileNameAt(glm::ivec2 position) {
 	return _worldDirName + "/C_" + std::to_string(position.x) + "_" + std::to_string(position.y) + ".chunk";
 }
-
 
 void DynamicWorld::_cleanChunks(const glm::vec3& cameraFlatPosition) {
 
@@ -238,4 +237,19 @@ void DynamicWorld::reloadChunks() {
 
 std::shared_ptr<ProceduralWorldGenerator> DynamicWorld::getGenerator() {
 	return _generator;
+}
+
+void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, int blockId) {
+	glm::ivec2 bigChunkTargetPos = worldToBigChunkPosition(worldPosition);
+	if (worldPosition.x < 0)
+		bigChunkTargetPos.x--;
+	if (worldPosition.z < 0)
+		bigChunkTargetPos.y--;
+	std::shared_ptr<BigChunk> targetBigChunk = _loadedChunks[bigChunkTargetPos];
+	glm::vec3 inBigChunkPos = worldPosition - targetBigChunk->getNode()->transform().position();
+	GameVoxelChunk *targetVoxel = targetBigChunk->chunkAt(inBigChunkPos);
+	if (targetVoxel == nullptr)
+		return;
+	glm::vec3 inVoxelPos = inBigChunkPos - targetVoxel->node->transform().position();
+	targetVoxel->setBlockAt(glm::ivec3(inVoxelPos), blockId);
 }
