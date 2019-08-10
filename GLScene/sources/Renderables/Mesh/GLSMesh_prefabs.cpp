@@ -125,7 +125,7 @@ namespace GLS {
         std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
         std::vector<Vertex>& vertices(mesh->verticesRef());
         std::vector<GLuint>& indices(mesh->indicesRef());
-        const float PI = 3.141592;
+        const float PI = 3.141592f;
         int rx = 2 * ringCount + 1;
         int ry = ringCount + 2;
         vertices.resize(rx * ry);

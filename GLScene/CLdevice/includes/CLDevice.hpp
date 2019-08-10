@@ -179,28 +179,28 @@ namespace CLD {
         /* What openCL can do is using a command queue to store the instruction
             we're going to send to the device
         */
-        CommandQueue createCommandQueue(int *index = NULL) throw();
+		CommandQueue createCommandQueue(int* index = NULL);
         void destroyCommandQueue(int index);
         void destroyCommandQueue(CommandQueue cq);
         CommandQueue *commandQueue(int index);
 
-        Program createProgram(const char** sources, int *index = NULL) throw();
+        Program createProgram(const char** sources, int *index = NULL);
         void destroyProgram(int index);
         void destroyProgram(Program p);
         Program *program(int index);
 
-        Kernel createKernel(int programIndex, const std::string& functionName, int *index = NULL) throw();
-        Kernel createKernel(Program program, const std::string& functionName, int *index = NULL) throw();
+        Kernel createKernel(int programIndex, const std::string& functionName, int *index = NULL);
+        Kernel createKernel(Program program, const std::string& functionName, int *index = NULL);
         void destroyKernel(int index);
         void destroyKernel(Kernel k);
         Kernel *kernel(int index);
 
-        Buffer createFlagBuffer(size_t size, cl_mem_flags flags, int *index = NULL) throw();
-        Buffer createFlagBuffer(size_t size, cl_mem_flags flags, void* data, int *index = NULL) throw();
-        Buffer createGLBuffer(unsigned int glbuffer, int *index = NULL) throw();
-        Buffer createBuffer(size_t size, int *index = NULL) throw();
-        Buffer createWriteBuffer(size_t size, int *index = NULL) throw();
-        Buffer createReadBuffer(size_t size, int *index = NULL) throw();
+        Buffer createFlagBuffer(size_t size, cl_mem_flags flags, int *index = NULL);
+        Buffer createFlagBuffer(size_t size, cl_mem_flags flags, void* data, int *index = NULL);
+        Buffer createGLBuffer(unsigned int glbuffer, int *index = NULL);
+        Buffer createBuffer(size_t size, int *index = NULL);
+        Buffer createWriteBuffer(size_t size, int *index = NULL);
+        Buffer createReadBuffer(size_t size, int *index = NULL);
         void destroyBuffer(int index);
         void destroyBuffer(Buffer b);
         Buffer *buffer(int index);

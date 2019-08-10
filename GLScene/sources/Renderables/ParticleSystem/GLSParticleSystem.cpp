@@ -37,7 +37,7 @@ namespace GLS {
         _device = nullptr;
     }
 
-    ParticleSystem::ParticleSystem(ParticleSystemProperties properties) throw(CLD::GPUDevice::BuildProgramException) :
+    ParticleSystem::ParticleSystem(ParticleSystemProperties properties) :
     _properties(properties),
     _texture(nullptr),
     _glBuffer(0), _glVertexArray(0),

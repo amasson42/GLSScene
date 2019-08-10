@@ -64,11 +64,11 @@ namespace CLD {
         for (size_t i = 0; i < _contexes.size(); i++)
             if (_contexes[i] == nullptr) {
                 _contexes[i] = context;
-                _currentContext = i;
+                _currentContext = static_cast<int>(i);
                 return (int)i;
             }
         _contexes.push_back(context);
-        _currentContext = _contexes.size() - 1;
+        _currentContext = static_cast<int>(_contexes.size()) - 1;
         return _currentContext;
     }
 

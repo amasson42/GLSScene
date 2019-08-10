@@ -67,7 +67,7 @@ namespace GLS {
             nMesh->_bones.push_back(nBone);
             for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
                 aiVertexWeight weight = mesh->mBones[i]->mWeights[j];
-                if (!nMesh->verticesRef()[weight.mVertexId].addWeight(nMesh->_bones.size() - 1, weight.mWeight))
+                if (!nMesh->verticesRef()[weight.mVertexId].addWeight(static_cast<int>(nMesh->_bones.size()) - 1, weight.mWeight))
                     std::cout << "join overflow" << std::endl;
             }
         }

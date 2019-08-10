@@ -51,7 +51,7 @@ namespace GLS {
         glBindVertexArray(_elementsBuffer);
         glDrawElementsInstanced(_drawMode,
                                 static_cast<GLsizei>(_indices.size()),
-                                GL_UNSIGNED_INT, 0, _instancesTransforms.size());
+                                GL_UNSIGNED_INT, 0, static_cast<GLsizei>(_instancesTransforms.size()));
     }
     
     void InstancedMesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
@@ -69,7 +69,7 @@ namespace GLS {
             glUniform3f(program->getLocation("material.diffuse"), _outlineColor.x, _outlineColor.y, _outlineColor.z);
 
             glBindVertexArray(_elementsBuffer);
-            glDrawElementsInstanced(_drawMode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0, _instancesTransforms.size());
+            glDrawElementsInstanced(_drawMode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0, static_cast<GLsizei>(_instancesTransforms.size()));
             glStencilMask(0xFF);
         }
     }
@@ -93,7 +93,7 @@ namespace GLS {
         glBindVertexArray(_elementsBuffer);
         glDrawElementsInstanced(_drawMode,
                                 static_cast<GLsizei>(_indices.size()),
-                                GL_UNSIGNED_INT, 0, _instancesTransforms.size());
+                                GL_UNSIGNED_INT, 0, static_cast<GLsizei>(_instancesTransforms.size()));
     }
 
 }

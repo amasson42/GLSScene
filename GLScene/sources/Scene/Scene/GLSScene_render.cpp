@@ -29,7 +29,7 @@ namespace GLS {
                 LightCaster caster(_frameLights[i]);
                 _renderInLightCasterContext(caster);
                 _frameLightCasters.push_back(caster);
-                _frameLights[i]._caster_index = _frameLightCasters.size() - 1;
+                _frameLights[i]._caster_index = static_cast<int>(_frameLightCasters.size()) - 1;
             }
         }
     }
@@ -77,7 +77,7 @@ namespace GLS {
             framebuffer->bind();
         }
 
-        glViewport(0, 0, _size.x, _size.y);
+        glViewport(0, 0, static_cast<GLsizei>(_size.x), static_cast<GLsizei>(_size.y));
         glClearColor(_background.x, _background.y, _background.z, _background.w);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 

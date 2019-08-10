@@ -12,7 +12,7 @@ namespace GLS {
     
     Camera::Camera(GLfloat f, GLfloat a, GLfloat nZ, GLfloat fZ) : 
     fov(f), aspect(a), nearZ(nZ), farZ(fZ),
-    fogNear(0.8 * fZ), fogFar(fZ) {
+    fogNear(0.8f * fZ), fogFar(fZ) {
         
     }
     

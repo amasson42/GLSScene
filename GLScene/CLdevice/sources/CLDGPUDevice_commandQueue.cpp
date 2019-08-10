@@ -3,7 +3,7 @@
 
 namespace CLD {
 
-    CommandQueue GPUDevice::createCommandQueue(int *index) throw(InvalidContextException) {
+    CommandQueue GPUDevice::createCommandQueue(int *index) {
         Context *c = getContext();
         if (c == NULL)
             throw InvalidContextException();

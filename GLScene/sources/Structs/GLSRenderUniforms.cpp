@@ -17,7 +17,7 @@ namespace GLS {
         camera_position = glm::vec3(0);
         fog_near = 80;
         fog_far = 100;
-        fog_color = glm::vec3(0.1);
+        fog_color = glm::vec3(0.1f);
     }
 
     RenderUniforms::RenderUniforms(const glm::mat4& p,

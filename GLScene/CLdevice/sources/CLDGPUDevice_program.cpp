@@ -3,7 +3,7 @@
 
 namespace CLD {
 
-    Program GPUDevice::createProgram(const char **sources, int *index) throw(BuildProgramException, InvalidContextException) {
+    Program GPUDevice::createProgram(const char **sources, int *index) {
         Context *c = getContext();
         if (c == NULL)
             throw InvalidContextException();
@@ -23,7 +23,7 @@ namespace CLD {
                     if (vp[i].program == 0) {
                         vp[i] = p;
                         if (index)
-                            *index = i;
+                            *index = static_cast<int>(i);
                         return p;
                     }
                 }

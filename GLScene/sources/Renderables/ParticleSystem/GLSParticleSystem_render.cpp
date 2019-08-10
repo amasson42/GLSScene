@@ -35,7 +35,7 @@ namespace GLS {
         uniforms.sendUniformsToShaderProgram(program);
 
         glBindVertexArray(_glVertexArray);
-        glDrawArrays(GL_POINTS, 0, _properties.count);
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_properties.count));
     }
 
     void ParticleSystem::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {

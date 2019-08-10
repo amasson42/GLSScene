@@ -3,8 +3,7 @@
 
 namespace CLD {
 
-	// tgros WiP
-	Buffer GPUDevice::createFlagBuffer(size_t size, cl_mem_flags flags, void* data, int *index) throw(InvalidContextException) {
+	Buffer GPUDevice::createFlagBuffer(size_t size, cl_mem_flags flags, void* data, int *index) {
         Context *c = getContext();
         if (c == NULL)
             throw InvalidContextException();
@@ -36,13 +35,13 @@ namespace CLD {
         return nullb;
 	}
 
-    Buffer GPUDevice::createFlagBuffer(size_t size, cl_mem_flags flags, int *index) throw(InvalidContextException) {
+    Buffer GPUDevice::createFlagBuffer(size_t size, cl_mem_flags flags, int *index) {
 		return createFlagBuffer(size, flags, NULL, index);
     }
 
 
 
-    Buffer GPUDevice::createGLBuffer(unsigned int glbuffer, int *index) throw(InvalidContextException) {
+    Buffer GPUDevice::createGLBuffer(unsigned int glbuffer, int *index) {
         Context *c = getContext();
         if (c == NULL)
             throw InvalidContextException();
@@ -75,15 +74,15 @@ namespace CLD {
         return nullb;
     }
 
-    Buffer GPUDevice::createBuffer(size_t size, int *index) throw(InvalidContextException) {
+    Buffer GPUDevice::createBuffer(size_t size, int *index) {
         return createFlagBuffer(size, CL_MEM_READ_WRITE, index);
     }
 
-    Buffer GPUDevice::createWriteBuffer(size_t size, int *index) throw(InvalidContextException) {
+    Buffer GPUDevice::createWriteBuffer(size_t size, int *index) {
         return createFlagBuffer(size, CL_MEM_WRITE_ONLY, index);
     }
 
-    Buffer GPUDevice::createReadBuffer(size_t size, int *index) throw(InvalidContextException) {
+    Buffer GPUDevice::createReadBuffer(size_t size, int *index) {
         return createFlagBuffer(size, CL_MEM_READ_ONLY, index);
     }
 

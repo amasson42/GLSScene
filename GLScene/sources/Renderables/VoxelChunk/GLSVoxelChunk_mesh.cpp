@@ -14,18 +14,18 @@ namespace GLS {
         blockId--;
         int gridX = (blockId % 10);
         int gridY = (blockId / 10);
-        uv.x = ((gridX * 3) + face + uv.x) * (1.0 / 30.0);
-        uv.y = (gridY + (1 - uv.y)) * (1.0 / 10.0);
+        uv.x = ((gridX * 3.0f) + face + uv.x) * (1.0f / 30.0f);
+        uv.y = (gridY + (1.0f - uv.y)) * (1.0f / 10.0f);
         return uv;
     }
 
     static void _indices_appendFace(std::vector<GLuint>& indices, size_t verticesSize) {
-        indices.push_back(verticesSize - 4);
-        indices.push_back(verticesSize - 3);
-        indices.push_back(verticesSize - 2);
-        indices.push_back(verticesSize - 3);
-        indices.push_back(verticesSize - 1);
-        indices.push_back(verticesSize - 2);
+        indices.push_back(static_cast<GLuint>(verticesSize - 4));
+        indices.push_back(static_cast<GLuint>(verticesSize - 3));
+        indices.push_back(static_cast<GLuint>(verticesSize - 2));
+        indices.push_back(static_cast<GLuint>(verticesSize - 3));
+        indices.push_back(static_cast<GLuint>(verticesSize - 1));
+        indices.push_back(static_cast<GLuint>(verticesSize - 2));
     }
 
     static void _drawFace_positiveX_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {

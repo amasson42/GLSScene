@@ -53,7 +53,7 @@ namespace GLS {
 
     public:
 
-        ParticleSystem(ParticleSystemProperties properties = ParticleSystemProperties()) throw(CLD::GPUDevice::BuildProgramException);
+        ParticleSystem(ParticleSystemProperties properties = ParticleSystemProperties());
         ParticleSystem(const ParticleSystem& copy);
         virtual ~ParticleSystem();
 

@@ -3,7 +3,7 @@
 
 namespace CLD {
 
-    Kernel GPUDevice::createKernel(int programIndex, const std::string& functionName, int *index) throw(InvalidContextException) {
+    Kernel GPUDevice::createKernel(int programIndex, const std::string& functionName, int *index) {
         Context *c = getContext();
         if (c == NULL)
             throw InvalidContextException();
@@ -15,7 +15,7 @@ namespace CLD {
         return nullk;
     }
 
-    Kernel GPUDevice::createKernel(Program program, const std::string& functionName, int *index) throw(InvalidContextException) {
+    Kernel GPUDevice::createKernel(Program program, const std::string& functionName, int *index) {
         Context *c = program.context;
         if (c == NULL)
             throw InvalidContextException();

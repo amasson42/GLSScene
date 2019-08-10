@@ -62,7 +62,7 @@ namespace GLS {
     void SkinnedMesh::setOutline(float size, const glm::vec3& color) {
         _outlined = true;
         _outlineColor = color;
-        _outlineSize = 1.0 + size;
+        _outlineSize = 1.0f + size;
     }
 
     void SkinnedMesh::removeOutline() {

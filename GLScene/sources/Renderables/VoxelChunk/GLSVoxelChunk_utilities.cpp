@@ -337,7 +337,7 @@ namespace GLS {
 
     std::pair<glm::vec3, glm::vec3> VoxelChunk::getBounds(glm::mat4 transform) const {
         (void)transform;
-        return std::pair<glm::vec3, glm::vec3>(0, 0);
+        return std::pair<glm::vec3, glm::vec3>(0.0f, 0.0f);
     }
 
     void VoxelChunk::setMaterial(std::shared_ptr<Material> mat) {
