@@ -36,8 +36,7 @@
 # include <OpenGL/gl3.h>
 #elif defined _WIN32
 # include <Windows.h>
-# include <GL/glew.h>
-# include <gl/GL.h>
+#  include <glad/glad.h>
 #else
 # include <gl/gl.h>
 #endif

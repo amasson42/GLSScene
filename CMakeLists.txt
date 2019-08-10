@@ -9,13 +9,6 @@ if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/)
 	execute_process(COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/libs/)
 endif()
 
-# if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw)
-# 	message(STATUS "Downloading glfw...")
-# 	file(DOWNLOAD https://github.com/glfw/glfw/releases/download/3.3/glfw-3.3.zip ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw.zip)
-# 	execute_process(COMMAND unzip -q ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw.zip -d ${CMAKE_CURRENT_BINARY_DIR}/libs/)
-# 	execute_process(COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw-3.3 ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw)
-# 	execute_process(COMMAND rm ${CMAKE_CURRENT_BINARY_DIR}/libs/glfw.zip)
-# endif()
 
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
 	execute_process(COMMAND git clone https://github.com/wjakob/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
@@ -51,8 +44,6 @@ add_definitions(${NANOGUI_EXTRA_DEFS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/libs/assimp/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/build/libs/assimp/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/libs/glm)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/libs/glew/include)
-# include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/glfw/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui/include)
 
 # add_subdirectory(GLScene/libs/assimp)
@@ -67,8 +58,8 @@ link_directories(build)
 
 file(GLOB_RECURSE SOURCE_FILES
     "sources/*.cpp"
-    "includes/*.hpp"
-	GLScene/libs/glew/src/glew.c
+	"includes/*.hpp"
+	${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui/ext/glad/src/glad.c
 )
 
 add_executable(game ${SOURCE_FILES})

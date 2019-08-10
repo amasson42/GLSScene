@@ -19,7 +19,7 @@ namespace GLS {
         static GLuint _cubebuffer;
         static void _createCubeBuffer();
         static void _destroyCubeBuffer();
-        friend void glsInit();
+        friend void glsInit(void* addr);
         friend void glsDeinit();
 
     public:

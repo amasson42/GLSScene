@@ -16,14 +16,20 @@ namespace GLS {
         return _gpuDevice;
     }
 
-    void glsInit() {
+    void glsInit(void* addr) {
 
         _gpuDevice = std::make_shared<CLD::GPUDevice>();
         _gpuDevice->createContext(true);
 
-        Framebuffer::_createRectBuffer();
-        Skybox::_createCubeBuffer();
-        ParticleSystem::_createDevice();
+
+		if (!gladLoadGLLoader((GLADloadproc)addr)) {
+			std::cout << "Glad Init Error" << std::endl;
+			exit(EXIT_FAILURE);
+		}
+
+		Framebuffer::_createRectBuffer();
+		Skybox::_createCubeBuffer();
+		ParticleSystem::_createDevice();
         
         ShaderProgram::standardShaderProgramMesh();
         ShaderProgram::standardShaderProgramMeshSimpleColor();

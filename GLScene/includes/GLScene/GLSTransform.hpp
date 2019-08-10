@@ -13,8 +13,10 @@
 # include <OpenGL/gl3.h>
 #elif defined _WIN32
 # include <Windows.h>
-# include <GL/glew.h>
-# include <gl/GL.h>
+#  include <glad/glad.h>
+#ifndef GLFW_INCLUDE_NONE
+#  include <gl/GL.h>
+#endif
 #endif
 
 #include <glm/glm.hpp>

@@ -40,7 +40,7 @@ void DynamicWorld::_cleanChunks(const glm::vec3& cameraFlatPosition) {
 									0,
 									CHUNKSIZE * BigChunk::bigChunkWidth / 2);
 
-	std::map<glm::ivec2, std::shared_ptr<BigChunk> >::iterator it = _loadedChunks.begin();
+	std::vector < std::pair<glm::ivec2, std::shared_ptr<BigChunk>>>::iterator it = _loadedChunks.begin();
 
 	while (it != _loadedChunks.end()) {
 		glm::vec3 chunkPosition = it->second->getNode()->transform().position();
@@ -62,7 +62,7 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 	std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
 	if (camera == nullptr)
 		return;
-	float minCosCameraVision = cos(1.4 * camera->fov * camera->aspect / 2);
+	float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * camera->aspect / 2));
 	glm::vec3 chunkMid = glm::vec3(CHUNKSIZE * BigChunk::bigChunkWidth / 2,
 									0,
 									CHUNKSIZE * BigChunk::bigChunkWidth / 2);
@@ -73,8 +73,16 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 	for (int x = minPosition.x; x < maxPosition.x; x++) {
 		for (int y = minPosition.y; y < maxPosition.y; y++) {
 
-			if (_loadedChunks.count(glm::ivec2(x, y)) > 0 || _loadingChunks.count(glm::ivec2(x, y)) > 0)
+			glm::ivec2 pos(x, y);
+			auto it1 = std::find_if(_loadedChunks.begin(), _loadedChunks.end(), [pos](std::pair<glm::ivec2, std::shared_ptr<BigChunk>>& elem) {
+				return elem.first.x == pos.x && elem.first.y == pos.y;
+			});
+			auto it2 = std::find_if(_loadingChunks.begin(), _loadingChunks.end(), [pos](std::pair<glm::ivec2, std::future<std::shared_ptr<BigChunk>>>& elem) {
+				return elem.first.x == pos.x && elem.first.y == pos.y;
+			});
+			if (it1 != _loadedChunks.end() || it2 != _loadingChunks.end()) {
 				continue;
+			}
 			glm::vec3 chunkOffset = bigChunkPositionToWorld(glm::ivec2(x, y)) + chunkMid - cameraFlatPosition;
 
 			float chunkOffsetSquaredLength = glm::dot(chunkOffset, chunkOffset);
@@ -86,7 +94,7 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 				if (chunkOffsetSquaredLength < glm::dot(chunkMid, chunkMid)
 					|| glm::dot(glm::normalize(chunkOffset), cameraDirection) > minCosCameraVision) {
 
-					_loadingChunks[glm::ivec2(x, y)] = (std::async(std::launch::async, [this](glm::ivec2 pos) {
+					_loadingChunks.push_back(std::make_pair(glm::ivec2(x, y), (std::async(std::launch::async, [this](glm::ivec2 pos) {
 						std::ifstream chunkStream(getBigChunkFileNameAt(pos), std::ios::binary);
 						std::shared_ptr<BigChunk> chunk;
 						if (false && chunkStream.good()) {
@@ -97,10 +105,14 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 							chunk =  _generator->generateBigChunkAt(pos);
 						}
 						chunk->calculAllAdjacences();
-						chunk->generateAllMeshes();
+						try {
+							chunk->generateAllMeshes();
+						}
+						catch (const std::exception& e) {
+							std::cout << e.what() << std::endl;
+						}
 						return chunk;
-					}, glm::ivec2(x, y)));
-
+					}, glm::ivec2(x, y)))));
 				}
 
 			}
@@ -117,7 +129,7 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 
 		generatedChunk->getNode()->transform().setPosition(bigChunkPositionToWorld(it->first));
 
-		_loadedChunks[it->first] = generatedChunk;
+		_loadedChunks.push_back(std::make_pair(it->first, generatedChunk));
 		_worldNode->addChildNode(generatedChunk->getNode());
 
 		// define adjacent
@@ -125,25 +137,37 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 		int x = it->first.x;
 		int y = it->first.y;
 
-		adjacent = _loadedChunks.find(glm::ivec2(x + 1, y));
+		glm::ivec2 pos(x + 1, y);
+		adjacent == std::find_if(_loadedChunks.begin(), _loadedChunks.end(), [pos](std::pair<glm::ivec2, std::shared_ptr<BigChunk>>& elem) {
+			return elem.first.x == pos.x && elem.first.y == pos.y;
+		});
 		if (adjacent != _loadedChunks.end()) {
 			generatedChunk->setAdjacentBigChunk_positiveX(adjacent->second);
 			adjacent->second->setAdjacentBigChunk_negativeX(generatedChunk);
 		}
 
-		adjacent = _loadedChunks.find(glm::ivec2(x - 1, y));
+		pos = glm::ivec2(x - 1, y);
+		adjacent == std::find_if(_loadedChunks.begin(), _loadedChunks.end(), [pos](std::pair<glm::ivec2, std::shared_ptr<BigChunk>>& elem) {
+			return elem.first.x == pos.x && elem.first.y == pos.y;
+		});
 		if (adjacent != _loadedChunks.end()) {
 			generatedChunk->setAdjacentBigChunk_negativeX(adjacent->second);
 			adjacent->second->setAdjacentBigChunk_positiveX(generatedChunk);
 		}
 
-		adjacent = _loadedChunks.find(glm::ivec2(x, y + 1));
+		pos = glm::ivec2(x, y + 1);
+		adjacent == std::find_if(_loadedChunks.begin(), _loadedChunks.end(), [pos](std::pair<glm::ivec2, std::shared_ptr<BigChunk>>& elem) {
+			return elem.first.x == pos.x && elem.first.y == pos.y;
+		});
 		if (adjacent != _loadedChunks.end()) {
 			generatedChunk->setAdjacentBigChunk_positiveZ(adjacent->second);
 			adjacent->second->setAdjacentBigChunk_negativeZ(generatedChunk);
 		}
 
-		adjacent = _loadedChunks.find(glm::ivec2(x, y - 1));
+		pos = glm::ivec2(x, y - 1);
+		adjacent == std::find_if(_loadedChunks.begin(), _loadedChunks.end(), [pos](std::pair<glm::ivec2, std::shared_ptr<BigChunk>>& elem) {
+			return elem.first.x == pos.x && elem.first.y == pos.y;
+		});
 		if (adjacent != _loadedChunks.end()) {
 			generatedChunk->setAdjacentBigChunk_negativeZ(adjacent->second);
 			adjacent->second->setAdjacentBigChunk_positiveZ(generatedChunk);
@@ -159,9 +183,9 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 	std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
 	if (camera == nullptr)
 		return;
-	float minCosCameraVision = cos(1.4 * camera->fov * camera->aspect / 2);
+	float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * camera->aspect / 2));
 
-	std::map<glm::ivec2, std::shared_ptr<BigChunk> >::iterator it = _loadedChunks.begin();
+	std::vector < std::pair <glm::ivec2, std::shared_ptr<BigChunk> >>::iterator it = _loadedChunks.begin();
 	it = _loadedChunks.begin();
 	while (it != _loadedChunks.end()) {
 		std::shared_ptr<BigChunk> bigChunk = it->second;
@@ -220,7 +244,7 @@ void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
 
 void DynamicWorld::setRenderDistance(float distance) {
 	_visibleDistance = distance;
-	_loadingDistance = distance + 10.0;
+	_loadingDistance = distance + 10.0f;
 }
 
 float DynamicWorld::getRenderDistance() const {
@@ -245,7 +269,14 @@ void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, int blockId) {
 		bigChunkTargetPos.x--;
 	if (worldPosition.z < 0)
 		bigChunkTargetPos.y--;
-	std::shared_ptr<BigChunk> targetBigChunk = _loadedChunks[bigChunkTargetPos];
+
+	auto it = std::find_if(_loadedChunks.begin(), _loadedChunks.end(), [bigChunkTargetPos](std::pair<glm::ivec2, std::shared_ptr<BigChunk>>& elem) {
+		return bigChunkTargetPos.x == elem.first.x && bigChunkTargetPos.y == elem.first.y;
+	});
+	if (it == _loadedChunks.end()) {
+		return;
+	}
+	std::shared_ptr<BigChunk> targetBigChunk = it->second;
 	glm::vec3 inBigChunkPos = worldPosition - targetBigChunk->getNode()->transform().position();
 	GameVoxelChunk *targetVoxel = targetBigChunk->chunkAt(inBigChunkPos);
 	if (targetVoxel == nullptr)

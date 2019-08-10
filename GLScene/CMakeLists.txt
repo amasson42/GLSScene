@@ -10,12 +10,11 @@ if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/)
 endif()
 
 if (WIN32)
-	if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/glew)
-		message(STATUS "Downloading glew...")
-		file(DOWNLOAD https://github.com/nigels-com/glew/releases/download/glew-2.1.0/glew-2.1.0.zip ${CMAKE_CURRENT_BINARY_DIR}/libs/glew.zip)
-		execute_process(COMMAND unzip -q ${CMAKE_CURRENT_BINARY_DIR}/libs/glew.zip -d ${CMAKE_CURRENT_BINARY_DIR}/libs/)
-		execute_process(COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/libs/glew-2.1.0 ${CMAKE_CURRENT_BINARY_DIR}/libs/glew)
-		execute_process(COMMAND rm ${CMAKE_CURRENT_BINARY_DIR}/libs/glew.zip)
+	if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/glad)
+		message(STATUS "Downloading glad...")
+		file(DOWNLOAD https://glad.dav1d.de/generated/tmpmAXKDPglad/glad.zip ${CMAKE_CURRENT_BINARY_DIR}/libs/glad.zip)
+		execute_process(COMMAND unzip -q ${CMAKE_CURRENT_BINARY_DIR}/libs/glad.zip -d ${CMAKE_CURRENT_BINARY_DIR}/libs/glad)
+		execute_process(COMMAND rm ${CMAKE_CURRENT_BINARY_DIR}/libs/glad.zip)
 	endif()
 endif()
 
@@ -37,12 +36,11 @@ endif()
 
 
 file(GLOB_RECURSE SOURCE_FILES
-libs/glew/src/glew.c
-"sources/*.cpp"
-"CLDevice/sources/*.cpp"
+	"sources/*.cpp"
+	"CLDevice/sources/*.cpp"
 
-"includes/*.hpp"
-"CLDevice/includes/*.hpp"
+	"includes/*.hpp"
+	"CLDevice/includes/*.hpp"
 )
 
 find_package(OpenCL REQUIRED)
@@ -57,7 +55,7 @@ include_directories(CLDevice/includes/)
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/build/libs/assimp/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/assimp/include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/glew/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/glad/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/glm)
 
 include_directories(${OpenCL_INCLUDE_DIRS})

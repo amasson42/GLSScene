@@ -48,7 +48,7 @@ namespace GLS {
         static int _commandQueueIndex;
         static void _createDevice();
         static void _destroyDevice();
-        friend void glsInit();
+        friend void glsInit(void* addr);
         friend void glsDeinit();
 
     public:

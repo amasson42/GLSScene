@@ -1,23 +1,18 @@
 
 #pragma once
 
+#define GLFW_INCLUDE_NONE
+
 #ifdef __APPLE__
 # define __gl_h_
 # define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
 #endif
 
-#include "GLScene.hpp"
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <nanogui/screen.h>
-#include <nanogui/window.h>
-#include <nanogui/checkbox.h>
-#include <nanogui/label.h>
-#include <nanogui/layout.h>
-#include <nanogui/textbox.h>
-#include <nanogui/slider.h>
-#include <nanogui/button.h>
-#include <nanogui/imageview.h>
+#include <nanogui/nanogui.h>
+#include "GLScene.hpp"
 
 #include "AppEnv.hpp"
 

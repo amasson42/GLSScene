@@ -23,7 +23,7 @@ namespace GLS {
         static GLuint _rectbuffer;
         static void _createRectBuffer();
         static void _destroyRectBuffer();
-        friend void glsInit();
+        friend void glsInit(void* addr);
         friend void glsDeinit();
 
         Framebuffer();

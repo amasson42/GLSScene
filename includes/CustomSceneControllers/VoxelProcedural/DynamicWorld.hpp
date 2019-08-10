@@ -45,8 +45,9 @@ private:
 	std::shared_ptr<GLS::Node> _worldNode;
 	std::shared_ptr<ProceduralWorldGenerator> _generator;
 
-	std::map<glm::ivec2, std::shared_ptr<BigChunk> > _loadedChunks;
-	std::map<glm::ivec2, std::future<std::shared_ptr<BigChunk>>> _loadingChunks;
+	std::vector < std::pair<glm::ivec2, std::shared_ptr<BigChunk>>> _loadedChunks;
+	std::vector < std::pair<glm::ivec2, std::future<std::shared_ptr<BigChunk>>>> _loadingChunks;
+
 	float _loadingDistance;
 	float _visibleDistance;
 

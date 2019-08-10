@@ -13,8 +13,7 @@
 #  include <OpenCL/cl_gl_ext.h>
 # elif defined _WIN32
 #  include <windows.h>
-#  include <GL/glew.h>
-#  include <gl/GL.h>
+#  include <glad/glad.h>
 #  include <CL/cl.h>
 #  include <CL/cl_gl.h>
 # else
@@ -180,28 +179,28 @@ namespace CLD {
         /* What openCL can do is using a command queue to store the instruction
             we're going to send to the device
         */
-        CommandQueue createCommandQueue(int *index = NULL) throw(InvalidContextException);
+        CommandQueue createCommandQueue(int *index = NULL) throw();
         void destroyCommandQueue(int index);
         void destroyCommandQueue(CommandQueue cq);
         CommandQueue *commandQueue(int index);
 
-        Program createProgram(const char** sources, int *index = NULL) throw(BuildProgramException, InvalidContextException);
+        Program createProgram(const char** sources, int *index = NULL) throw();
         void destroyProgram(int index);
         void destroyProgram(Program p);
         Program *program(int index);
 
-        Kernel createKernel(int programIndex, const std::string& functionName, int *index = NULL) throw(InvalidContextException);
-        Kernel createKernel(Program program, const std::string& functionName, int *index = NULL) throw(InvalidContextException);
+        Kernel createKernel(int programIndex, const std::string& functionName, int *index = NULL) throw();
+        Kernel createKernel(Program program, const std::string& functionName, int *index = NULL) throw();
         void destroyKernel(int index);
         void destroyKernel(Kernel k);
         Kernel *kernel(int index);
 
-        Buffer createFlagBuffer(size_t size, cl_mem_flags flags, int *index = NULL) throw(InvalidContextException);
-        Buffer createFlagBuffer(size_t size, cl_mem_flags flags, void* data, int *index = NULL) throw(InvalidContextException);
-        Buffer createGLBuffer(unsigned int glbuffer, int *index = NULL) throw(InvalidContextException);
-        Buffer createBuffer(size_t size, int *index = NULL) throw(InvalidContextException);
-        Buffer createWriteBuffer(size_t size, int *index = NULL) throw(InvalidContextException);
-        Buffer createReadBuffer(size_t size, int *index = NULL) throw(InvalidContextException);
+        Buffer createFlagBuffer(size_t size, cl_mem_flags flags, int *index = NULL) throw();
+        Buffer createFlagBuffer(size_t size, cl_mem_flags flags, void* data, int *index = NULL) throw();
+        Buffer createGLBuffer(unsigned int glbuffer, int *index = NULL) throw();
+        Buffer createBuffer(size_t size, int *index = NULL) throw();
+        Buffer createWriteBuffer(size_t size, int *index = NULL) throw();
+        Buffer createReadBuffer(size_t size, int *index = NULL) throw();
         void destroyBuffer(int index);
         void destroyBuffer(Buffer b);
         Buffer *buffer(int index);

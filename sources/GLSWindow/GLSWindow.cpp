@@ -4,13 +4,7 @@
 int GLSWindow::_windowCount = 0;
 void GLSWindow::_incrementWindowCount() {
     if (_windowCount++ == 0) {
-        #ifdef _WIN32
-            glewExperimental = GL_FALSE;
-            if (glewInit() != GLEW_OK) {
-                exit(EXIT_FAILURE);
-            }
-        #endif
-        GLS::glsInit();
+        GLS::glsInit(&glfwGetProcAddress);
     }
 }
 
@@ -35,6 +29,8 @@ _framebuffer(nullptr) {
     glfwSetWindowSizeLimits(_glfwWindow, 300, 200, GLFW_DONT_CARE, GLFW_DONT_CARE);
     glfwMakeContextCurrent(_glfwWindow);
 
+	_nanoguiScreen = new nanogui::Screen();
+	_nanoguiScreen->initialize(_glfwWindow, false);
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     glEnable(GL_MULTISAMPLE);
     glfwGetFramebufferSize(_glfwWindow, &_bufferWidth, &_bufferHeight);
@@ -51,8 +47,6 @@ _framebuffer(nullptr) {
         throw std::exception();
     }
 
-	_nanoguiScreen = new nanogui::Screen();
-    _nanoguiScreen->initialize(_glfwWindow, false);
 
     glfwSetWindowUserPointer(_glfwWindow, this);
     
