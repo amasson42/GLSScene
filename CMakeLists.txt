@@ -62,7 +62,8 @@ file(GLOB_RECURSE SOURCE_FILES
 )
 
 if (WIN32)
-	file(SOURCE_FILES ${SOURCE_FILES} ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui/ext/glad/src/glad.c)
+	set(SOURCE_FILES ${SOURCE_FILES} ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui/ext/glad/src/glad.c)
+
 endif()
 
 add_executable(game ${SOURCE_FILES})

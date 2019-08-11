@@ -12,7 +12,7 @@ double smoothNoise(double x, double y, double z);
 double linearNoise(double x, double y, double z);
 
 class DynamicWorld;
-class GameVoxelChunk;
+struct GameVoxelChunk;
 
 class VoxelProceduralSceneController: public ISceneController {
 

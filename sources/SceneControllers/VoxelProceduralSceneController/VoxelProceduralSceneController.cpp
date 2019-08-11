@@ -57,8 +57,8 @@ void VoxelProceduralSceneController::update() {
 
 			_nanoguiScreen->performLayout();
 
-			float offsetX = 3 * (_pickedBlock % 10 - 1) + 1;
-			float offsetY = (_pickedBlock / 10);
+			float offsetX = static_cast<float>(3 * (_pickedBlock % 10 - 1) + 1);
+			float offsetY = static_cast<float>(_pickedBlock / 10);
 			float imgViewOffsetX = _pickedBlockTexture->sizeF().x() * offsetX;
 			float imgViewOffsetY = _pickedBlockTexture->sizeF().y() * offsetY;
 			_pickedBlockTexture->setOffset(nanogui::Vector2f(-imgViewOffsetX, -imgViewOffsetY));
@@ -72,9 +72,9 @@ void VoxelProceduralSceneController::update() {
 		glm::vec3 axesOffset = cameraNode->transform().matrix() * glm::vec4(0, 0, -2, 1);
 		_axesNode->transform().setPosition(axesOffset);
 		glm::vec3 placePositionOfDoom = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -2, 1));
-		placePositionOfDoom.x = std::floor(placePositionOfDoom.x) + 0.5;
-		placePositionOfDoom.y = std::floor(placePositionOfDoom.y) + 0.5;
-		placePositionOfDoom.z = std::floor(placePositionOfDoom.z) + 0.5;
+		placePositionOfDoom.x = std::floor(placePositionOfDoom.x) + 0.5f;
+		placePositionOfDoom.y = std::floor(placePositionOfDoom.y) + 0.5f;
+		placePositionOfDoom.z = std::floor(placePositionOfDoom.z) + 0.5f;
 		_placeHolderBlockOfDoom->transform().setPosition(placePositionOfDoom);
 	}
 }
@@ -211,8 +211,8 @@ void VoxelProceduralSceneController::makeScene() {
 
 	// Material initialisation
 	auto texturedMaterial = std::make_shared<GLS::Material>();
-	texturedMaterial->specular = glm::vec3(0.1);
-	texturedMaterial->shininess = 64;
+	texturedMaterial->specular = glm::vec3(0.1f);
+	texturedMaterial->shininess = 64.0f;
 	try {
 		texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(voxelTextureFilePath);
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -230,21 +230,21 @@ void VoxelProceduralSceneController::makeScene() {
 	scene.rootNode()->addChildNode(worldNode);
 	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode, worldName);
 	_dynamicWorld->getGenerator()->usedMaterial = texturedMaterial;
-	_dynamicWorld->getGenerator()->setSeed(time(NULL));
+	_dynamicWorld->getGenerator()->setSeed(static_cast<unsigned>(time(NULL)));
 	_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath);
 
 	// Lights
 	auto pointlightNode = std::make_shared<GLS::Node>();
 	auto pointlight = std::make_shared<GLS::Light>();
 	pointlight->type = GLS::light_spot;
-	pointlight->color = glm::vec3(0.8);
-	pointlight->angle *= 1.4;
+	pointlight->color = glm::vec3(0.8f);
+	pointlight->angle *= 1.4f;
 	pointlightNode->setLight(pointlight);
 
 	auto ambiantlightNode = std::make_shared<GLS::Node>();
 	auto ambiantlight = std::make_shared<GLS::Light>();
 	ambiantlight->type = GLS::light_ambiant;
-	ambiantlight->color = glm::vec3(0.2);
+	ambiantlight->color = glm::vec3(0.5f);
 	ambiantlightNode->setLight(ambiantlight);
 	scene.rootNode()->addChildNode(ambiantlightNode);
 
@@ -252,10 +252,10 @@ void VoxelProceduralSceneController::makeScene() {
 	cameraNode = std::make_shared<GLS::Node>();
 	cameraNode->transform().moveBy(0, 100, 16);
 	std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-	camera->farZ = 200;
-	camera->fogFar = 200;
-	camera->fogNear = 100;
-	camera->fov = (80.0) * M_PI / 180;
+	camera->farZ = 200.0f;
+	camera->fogFar = 200.0f;
+	camera->fogNear = 100.0f;
+	camera->fov = static_cast<float>((80.0f) * M_PI / 180.0f);
 	scene.setBackgroundColor(glm::vec4(0.3, 0.3, 0.3, 1));
 	camera->aspect = (scene.getAspect());
 	cameraNode->setCamera(camera);
@@ -265,12 +265,18 @@ void VoxelProceduralSceneController::makeScene() {
 
 	// Skybox
 	std::vector<std::string> skyboxFaces;
-	skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_ft.jpg");
-	skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_bk.jpg");
-	skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_up.jpg");
-	skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_dn.jpg");
-	skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_rt.jpg");
-	skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_lf.jpg");
+	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_ft.jpg");
+	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_bk.jpg");
+	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_up.jpg");
+	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_dn.jpg");
+	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_rt.jpg");
+	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_lf.jpg");
+	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_ft.jpg");
+	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_bk.jpg");
+	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_up.jpg");
+	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_dn.jpg");
+	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_rt.jpg");
+	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_lf.jpg");
 	try {
 		std::shared_ptr<GLS::Skybox> skybox = std::make_shared<GLS::Skybox>(skyboxFaces);
 		scene.setSkybox(skybox);
@@ -332,7 +338,7 @@ void VoxelProceduralSceneController::makeScene() {
 	cameraNode->addChildNode(_handBlock->node);
 
 	_placeHolderBlockOfDoom = std::make_shared<GLS::Node>();
-	std::shared_ptr<GLS::Mesh> placeHolderMesh = GLS::Mesh::cube(1.02, 1.02, 1.02);
+	std::shared_ptr<GLS::Mesh> placeHolderMesh = GLS::Mesh::cube(1.02f, 1.02f, 1.02f);
 	placeHolderMesh->setDrawMode(GL_LINES);
 	_placeHolderBlockOfDoom->addRenderable(placeHolderMesh);
 	scene.rootNode()->addChildNode(_placeHolderBlockOfDoom);
@@ -360,13 +366,13 @@ void VoxelProceduralSceneController::makeScene() {
 
 	// Callbacks for player teleportation (triggered when int box are modified)
 	_playerPositionLabel[0]->setCallback([this](int posX) {
-		this->cameraNode->transform().position().x = posX;
+		this->cameraNode->transform().position().x = static_cast<float>(posX);
 	});
 	_playerPositionLabel[1]->setCallback([this](int posY) {
-		this->cameraNode->transform().position().y = posY;
+		this->cameraNode->transform().position().y = static_cast<float>(posY);
 	});
 	_playerPositionLabel[2]->setCallback([this](int posZ) {
-		this->cameraNode->transform().position().z = posZ;
+		this->cameraNode->transform().position().z = static_cast<float>(posZ);
 	});
 
 	// Speed
@@ -380,17 +386,17 @@ void VoxelProceduralSceneController::makeScene() {
 	});
 
 	// FOV
-	const float minFov = M_PI * 0.16666f;
-	const float maxFov = M_PI * 0.83333f;
+	const float minFov = static_cast<float>(M_PI * 0.16666f);
+	const float maxFov = static_cast<float>(M_PI * 0.83333f);
 	auto fovBox = new nanogui::Widget(_playerWindow);
 	fovBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(fovBox, "Fov: ");
 	auto fovSlider = new nanogui::Slider(fovBox);
 	fovSlider->setValue((camera->fov - minFov) / (maxFov - minFov));
-	auto fovValue = new nanogui::FloatBox<float>(fovBox, camera->fov * 180.0f / M_PI);
+	auto fovValue = new nanogui::FloatBox<float>(fovBox, static_cast<float>((camera->fov * 180.0f) / M_PI));
 	fovSlider->setCallback([this, camera, fovValue, minFov, maxFov](float value) {
 		camera->fov = value * (maxFov - minFov) + minFov;
-		fovValue->setValue(camera->fov * 180.0f / M_PI);
+		fovValue->setValue(static_cast<float>((camera->fov * 180.0f) / M_PI));
 	});
 
 	// Picked Block
@@ -400,7 +406,7 @@ void VoxelProceduralSceneController::makeScene() {
 	const int blockImageSize = 50;
 	_pickedBlockTexture = new nanogui::ImageView(pickedBlockBox, _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->buffer());
 	_pickedBlockTexture->setFixedSize(nanogui::Vector2i(blockImageSize, blockImageSize));
-	_pickedBlockTexture->setScale((float)blockImageSize / texturedMaterial->texture_diffuse->width() * 30.0); 
+	_pickedBlockTexture->setScale((float)blockImageSize / texturedMaterial->texture_diffuse->width() * 30.0f); 
 	_pickedBlockTexture->setFixedScale(true);
 	_pickedBlockTexture->setFixedOffset(false);
 	_pickedBlockLabel = new nanogui::Label(pickedBlockBox, VoxelProceduralSceneController::_BlockNames.at(_pickedBlock));
@@ -415,11 +421,11 @@ void VoxelProceduralSceneController::makeScene() {
 	renderDistanceWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(renderDistanceWidget, "Render distance: ");
 	auto renderDistanceSlider = new nanogui::Slider(renderDistanceWidget);
-	auto renderDistanceValue = new nanogui::IntBox<int>(renderDistanceWidget, _dynamicWorld->getRenderDistance());
+	auto renderDistanceValue = new nanogui::IntBox<int>(renderDistanceWidget, static_cast<int>(_dynamicWorld->getRenderDistance()));
 	renderDistanceSlider->setCallback([this, renderDistanceValue, camera](float value) {
 		float renderDistance = value * (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance)
 								+ DynamicWorld::minRenderDistance;
-		renderDistanceValue->setValue(renderDistance);
+		renderDistanceValue->setValue(static_cast<int>(renderDistance));
 		_dynamicWorld->setRenderDistance(renderDistance);
 		camera->farZ = renderDistance;
 		camera->fogFar = renderDistance;
