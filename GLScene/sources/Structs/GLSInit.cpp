@@ -22,10 +22,12 @@ namespace GLS {
         _gpuDevice->createContext(true);
 
 
+		#ifdef WIN32
 		if (!gladLoadGLLoader((GLADloadproc)addr)) {
 			std::cout << "Glad Init Error" << std::endl;
 			exit(EXIT_FAILURE);
 		}
+		#endif
 
 		Framebuffer::_createRectBuffer();
 		Skybox::_createCubeBuffer();

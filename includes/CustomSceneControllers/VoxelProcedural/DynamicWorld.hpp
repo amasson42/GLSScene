@@ -55,4 +55,6 @@ private:
 	void _generateChunks(const glm::vec3& cameraFlatPosition, std::shared_ptr<GLS::Node> cameraNode);
 	void _generateMeshes(std::shared_ptr<GLS::Node> cameraNode);
 
+	std::mutex _chunkGenerationMutex;
+
 };

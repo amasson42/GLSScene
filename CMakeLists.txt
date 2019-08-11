@@ -59,8 +59,11 @@ link_directories(build)
 file(GLOB_RECURSE SOURCE_FILES
     "sources/*.cpp"
 	"includes/*.hpp"
-	${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui/ext/glad/src/glad.c
 )
+
+if (WIN32)
+	file(SOURCE_FILES ${SOURCE_FILES} ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui/ext/glad/src/glad.c)
+endif()
 
 add_executable(game ${SOURCE_FILES})
 target_link_libraries(game nanogui assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${OpenCL_LIBRARY} GLScene)

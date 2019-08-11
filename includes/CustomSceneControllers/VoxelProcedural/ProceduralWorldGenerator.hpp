@@ -33,5 +33,6 @@ class ProceduralWorldGenerator {
 	CLD::Buffer _perlinPermutationBuffer;
 
 	std::shared_ptr<CLD::GPUDevice> _device;
+	std::mutex _generationMutex;
 
 };

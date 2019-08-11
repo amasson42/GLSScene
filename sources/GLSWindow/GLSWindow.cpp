@@ -4,7 +4,11 @@
 int GLSWindow::_windowCount = 0;
 void GLSWindow::_incrementWindowCount() {
     if (_windowCount++ == 0) {
+		#ifdef WIN32
         GLS::glsInit(&glfwGetProcAddress);
+		#else
+        GLS::glsInit(nullptr);
+		#endif
     }
 }
 

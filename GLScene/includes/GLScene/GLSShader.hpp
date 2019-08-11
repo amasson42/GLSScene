@@ -79,7 +79,7 @@ namespace GLS {
         static std::shared_ptr<ShaderProgram> _standardShaderProgramVoxelChunkSimpleColor;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramDotParticleSystem;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramTexturedParticleSystem;
-        friend void glsInit();
+        friend void glsInit(void* addr);
         friend void glsDeinit();
 
     public:

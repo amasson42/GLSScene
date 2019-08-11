@@ -41,13 +41,19 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 
 	CLD::Buffer blocksArrayPointersBuffer = _device->createFlagBuffer(BigChunk::bigChunkCount * sizeof(int) * GLS::VoxelChunk::chunkBlockCount, CL_MEM_USE_HOST_PTR, &blocks[0], &blocksBufferIndex);
 
+	cl_int2 bcPos;
+	bcPos.s[0] = bigChunkPos.x;
+	bcPos.s[1] = bigChunkPos.y;
+
+	_generationMutex.lock();
 	k->setArgument(0, _perlinPermutationBuffer);
 	k->setArgument(1, blocksArrayPointersBuffer);
-	k->setArgument(2, *(cl_int2*)&bigChunkPos);
+	k->setArgument(2, bcPos);
 	k->setArgument(3, CHUNKSIZE);
 	k->setArgument(4, BigChunk::bigChunkWidth);
 	
 	_device->commandQueue(_commandQueueIndex)->runNDRangeKernel(*k, blocks.size());
+	_generationMutex.unlock();
 	
 	_device->commandQueue(_commandQueueIndex)->readBuffer(blocksArrayPointersBuffer, &blocks[0], blocks.size() * sizeof(int));
 	_device->commandQueue(_commandQueueIndex)->finish();

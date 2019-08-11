@@ -23,7 +23,7 @@ namespace GLS {
     std::ostream& operator<<(std::ostream& stream, const glm::quat& q);
 
     std::shared_ptr<CLD::GPUDevice> getSharedDevice();
-    void glsInit();
+    void glsInit(void* addr);
     void glsDeinit();
 
     class Transform;

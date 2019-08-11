@@ -9,9 +9,12 @@
 #endif
 
 
+#ifdef WIN32
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#endif
+
 #include <nanogui/nanogui.h>
+#include <GLFW/glfw3.h>
 #include "GLScene.hpp"
 
 #include "AppEnv.hpp"
