@@ -16,6 +16,8 @@ struct GameVoxelChunk {
 	bool mustUpdateMesh;
 	std::array<std::weak_ptr<GameVoxelChunk>, 6> adjacents; // TODO: this
 
+	static float meshmerizerIntensity;
+
 	GameVoxelChunk();
 	void updateMesh();
 	void setBlockAt(glm::ivec3 coord, int blockId);

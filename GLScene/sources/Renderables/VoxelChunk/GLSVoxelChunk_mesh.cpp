@@ -11,6 +11,8 @@
 namespace GLS {
 
     static glm::vec2 _getBlockIdUvs(glm::vec2 uv, int blockId, int face) {
+		const float inside = 2.0 / 18.0;
+		uv = (uv - glm::vec2(0.5)) * glm::vec2(1.0 - inside) + glm::vec2(0.5);
         blockId--;
         int gridX = (blockId % 10);
         int gridY = (blockId / 10);
@@ -28,7 +30,9 @@ namespace GLS {
         indices.push_back(static_cast<GLuint>(verticesSize - 2));
     }
 
-    static void _drawFace_positiveX_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+	typedef std::function<void(glm::vec3&)> MeshmerizeFunction;
+
+    static void _drawFace_positiveX_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
         Vertex v;
         v.position = coords + glm::vec3(1, 0, 0) + glm::vec3(0, 1, 0) * uv.y + glm::vec3(0, 0, 1) * (1 - uv.x);
         v.normal = glm::vec3(1, 0, 0);
@@ -36,17 +40,19 @@ namespace GLS {
         v.bitangent = glm::vec3(0, 1, 0);
         v.uv = _getBlockIdUvs(uv, blockId, 1);
         vertices.push_back(v);
+		if (meshmerizer)
+			meshmerizer(vertices[vertices.size() - 1].position);
     }
 
-    static void _drawFace_positiveX(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
-        _drawFace_positiveX_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
-        _drawFace_positiveX_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
-        _drawFace_positiveX_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
-        _drawFace_positiveX_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+    static void _drawFace_positiveX(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
+        _drawFace_positiveX_emitVertex(vertices, glm::vec2(0, 0), blockId, coords, meshmerizer);
+        _drawFace_positiveX_emitVertex(vertices, glm::vec2(1, 0), blockId, coords, meshmerizer);
+        _drawFace_positiveX_emitVertex(vertices, glm::vec2(0, 1), blockId, coords, meshmerizer);
+        _drawFace_positiveX_emitVertex(vertices, glm::vec2(1, 1), blockId, coords, meshmerizer);
         _indices_appendFace(indices, vertices.size());
     }
 
-    static void _drawFace_negativeX_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+    static void _drawFace_negativeX_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
         Vertex v;
         v.position = coords + glm::vec3(0, 1, 0) * uv.y + glm::vec3(0, 0, 1) * uv.x;
         v.normal = glm::vec3(-1, 0, 0);
@@ -54,17 +60,19 @@ namespace GLS {
         v.bitangent = glm::vec3(0, 1, 0);
         v.uv = _getBlockIdUvs(uv, blockId, 1);
         vertices.push_back(v);
+		if (meshmerizer)
+			meshmerizer(vertices[vertices.size() - 1].position);
     }
 
-    static void _drawFace_negativeX(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
-        _drawFace_negativeX_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
-        _drawFace_negativeX_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
-        _drawFace_negativeX_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
-        _drawFace_negativeX_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+    static void _drawFace_negativeX(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
+        _drawFace_negativeX_emitVertex(vertices, glm::vec2(0, 0), blockId, coords, meshmerizer);
+        _drawFace_negativeX_emitVertex(vertices, glm::vec2(1, 0), blockId, coords, meshmerizer);
+        _drawFace_negativeX_emitVertex(vertices, glm::vec2(0, 1), blockId, coords, meshmerizer);
+        _drawFace_negativeX_emitVertex(vertices, glm::vec2(1, 1), blockId, coords, meshmerizer);
         _indices_appendFace(indices, vertices.size());
     }
 
-    static void _drawFace_positiveY_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+    static void _drawFace_positiveY_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
         Vertex v;
         v.position = coords + glm::vec3(1, 0, 0) * uv.x + glm::vec3(0, 1, 0) + glm::vec3(0, 0, 1) * (1 - uv.y);
         v.normal = glm::vec3(0, 1, 0);
@@ -72,17 +80,19 @@ namespace GLS {
         v.bitangent = glm::vec3(0, 0, -1);
         v.uv = _getBlockIdUvs(uv, blockId, 2);
         vertices.push_back(v);
+		if (meshmerizer)
+			meshmerizer(vertices[vertices.size() - 1].position);
     }
 
-    static void _drawFace_positiveY(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
-        _drawFace_positiveY_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
-        _drawFace_positiveY_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
-        _drawFace_positiveY_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
-        _drawFace_positiveY_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+    static void _drawFace_positiveY(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
+        _drawFace_positiveY_emitVertex(vertices, glm::vec2(0, 0), blockId, coords, meshmerizer);
+        _drawFace_positiveY_emitVertex(vertices, glm::vec2(1, 0), blockId, coords, meshmerizer);
+        _drawFace_positiveY_emitVertex(vertices, glm::vec2(0, 1), blockId, coords, meshmerizer);
+        _drawFace_positiveY_emitVertex(vertices, glm::vec2(1, 1), blockId, coords, meshmerizer);
         _indices_appendFace(indices, vertices.size());
     }
 
-    static void _drawFace_negativeY_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+    static void _drawFace_negativeY_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
         Vertex v;
         v.position = coords + glm::vec3(1, 0, 0) * (1 - uv.x) + glm::vec3(0, 0, 1) * (1 - uv.y);
         v.normal = glm::vec3(0, -1, 0);
@@ -90,17 +100,19 @@ namespace GLS {
         v.bitangent = glm::vec3(0, 0, -1);
         v.uv = _getBlockIdUvs(uv, blockId, 0);
         vertices.push_back(v);
+		if (meshmerizer)
+			meshmerizer(vertices[vertices.size() - 1].position);
     }
 
-    static void _drawFace_negativeY(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
-        _drawFace_negativeY_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
-        _drawFace_negativeY_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
-        _drawFace_negativeY_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
-        _drawFace_negativeY_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+    static void _drawFace_negativeY(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
+        _drawFace_negativeY_emitVertex(vertices, glm::vec2(0, 0), blockId, coords, meshmerizer);
+        _drawFace_negativeY_emitVertex(vertices, glm::vec2(1, 0), blockId, coords, meshmerizer);
+        _drawFace_negativeY_emitVertex(vertices, glm::vec2(0, 1), blockId, coords, meshmerizer);
+        _drawFace_negativeY_emitVertex(vertices, glm::vec2(1, 1), blockId, coords, meshmerizer);
         _indices_appendFace(indices, vertices.size());
     }
 
-    static void _drawFace_positiveZ_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+    static void _drawFace_positiveZ_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
         Vertex v;
         v.position = coords + glm::vec3(1, 0, 0) * uv.x + glm::vec3(0, 1, 0) * uv.y + glm::vec3(0, 0, 1);
         v.normal = glm::vec3(0, 0, 1);
@@ -108,17 +120,19 @@ namespace GLS {
         v.bitangent = glm::vec3(0, 1, 0);
         v.uv = _getBlockIdUvs(uv, blockId, 1);
         vertices.push_back(v);
+		if (meshmerizer)
+			meshmerizer(vertices[vertices.size() - 1].position);
     }
 
-    static void _drawFace_positiveZ(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
-        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
-        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
-        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
-        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+    static void _drawFace_positiveZ(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
+        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(0, 0), blockId, coords, meshmerizer);
+        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(1, 0), blockId, coords, meshmerizer);
+        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(0, 1), blockId, coords, meshmerizer);
+        _drawFace_positiveZ_emitVertex(vertices, glm::vec2(1, 1), blockId, coords, meshmerizer);
         _indices_appendFace(indices, vertices.size());
     }
 
-    static void _drawFace_negativeZ_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords) {
+    static void _drawFace_negativeZ_emitVertex(std::vector<Vertex>& vertices, glm::vec2 uv, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
         Vertex v;
         v.position = coords + glm::vec3(1, 0, 0) * (1 - uv.x) + glm::vec3(0, 1, 0) * uv.y;
         v.normal = glm::vec3(0, 0, -1);
@@ -126,18 +140,19 @@ namespace GLS {
         v.bitangent = glm::vec3(0, 1, 0);
         v.uv = _getBlockIdUvs(uv, blockId, 1);
         vertices.push_back(v);
+		if (meshmerizer)
+			meshmerizer(vertices[vertices.size() - 1].position);
     }
 
-    static void _drawFace_negativeZ(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords) {
-        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(0, 0), blockId, coords);
-        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(1, 0), blockId, coords);
-        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(0, 1), blockId, coords);
-        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(1, 1), blockId, coords);
+    static void _drawFace_negativeZ(std::vector<Vertex>& vertices, std::vector<GLuint>& indices, int blockId, glm::vec3 coords, MeshmerizeFunction meshmerizer) {
+        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(0, 0), blockId, coords, meshmerizer);
+        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(1, 0), blockId, coords, meshmerizer);
+        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(0, 1), blockId, coords, meshmerizer);
+        _drawFace_negativeZ_emitVertex(vertices, glm::vec2(1, 1), blockId, coords, meshmerizer);
         _indices_appendFace(indices, vertices.size());
     }
     
-
-    std::shared_ptr<Mesh> Mesh::voxelChunk(std::shared_ptr<VoxelChunk> chunk, bool generateBuffers) {
+    std::shared_ptr<Mesh> Mesh::voxelChunk(std::shared_ptr<VoxelChunk> chunk, MeshmerizeFunction meshmerizer, bool generateBuffers) {
         std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
 
         std::vector<Vertex>& vertices(mesh->verticesRef());
@@ -152,17 +167,17 @@ namespace GLS {
                     int blockAdj = chunk->blockAdjAt(x, y, z);
                     glm::vec3 coords(x, y, z);
                     if ((blockAdj & (1 << 0)) != 0)
-                        _drawFace_positiveX(vertices, indices, blockId, coords);
+                        _drawFace_positiveX(vertices, indices, blockId, coords, meshmerizer);
                     if ((blockAdj & (1 << 1)) != 0)
-                        _drawFace_negativeX(vertices, indices, blockId, coords);
+                        _drawFace_negativeX(vertices, indices, blockId, coords, meshmerizer);
                     if ((blockAdj & (1 << 2)) != 0)
-                        _drawFace_positiveY(vertices, indices, blockId, coords);
+                        _drawFace_positiveY(vertices, indices, blockId, coords, meshmerizer);
                     if ((blockAdj & (1 << 3)) != 0)
-                        _drawFace_negativeY(vertices, indices, blockId, coords);
+                        _drawFace_negativeY(vertices, indices, blockId, coords, meshmerizer);
                     if ((blockAdj & (1 << 4)) != 0)
-                        _drawFace_positiveZ(vertices, indices, blockId, coords);
+                        _drawFace_positiveZ(vertices, indices, blockId, coords, meshmerizer);
                     if ((blockAdj & (1 << 5)) != 0)
-                        _drawFace_negativeZ(vertices, indices, blockId, coords);
+                        _drawFace_negativeZ(vertices, indices, blockId, coords, meshmerizer);
                 }
             }
         }

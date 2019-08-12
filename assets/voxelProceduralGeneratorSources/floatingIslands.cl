@@ -8,6 +8,7 @@
 #define BLOCK_GRASS 4
 #define BLOCK_SAND 5
 #define BLOCK_GRAVEL 6
+#define BLOCK_WATER 7
 #define BLOCK_GRASS_BROWN 11
 #define BLOCK_WOOD 12
 #define BLOCK_LEAFS 13

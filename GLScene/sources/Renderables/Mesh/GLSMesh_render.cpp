@@ -94,7 +94,7 @@ namespace GLS {
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
         glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
+        glCullFace(GL_BACK);
 
         uniforms.sendUniformsToShaderProgram(program);
 

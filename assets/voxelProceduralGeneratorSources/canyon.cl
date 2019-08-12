@@ -1,5 +1,4 @@
-
-// hillsGenerator.cl
+// canyon.cl
 
 #define BLOCK_AIR 0
 #define BLOCK_BEDROCK 1
@@ -69,50 +68,76 @@ double noise(__global int* p, double x, double y, double z) {
 }
 
 int3 getLocalPosition(int i, const int chunkSize, const int bigChunkWidth) {
-	const int chunkSize_2 = chunkSize * chunkSize;
-	const int chunkSize_3 = chunkSize_2 * chunkSize;
-	const int bigChunkWidth_2 = bigChunkWidth * bigChunkWidth;
-	const int iByChunkSize_3 = i / chunkSize_3;
-	const int iModChunkSize_3 = i % chunkSize_3;
-	return (int3)(
-		((iByChunkSize_3 % bigChunkWidth_2) / bigChunkWidth) * chunkSize + (iModChunkSize_3 % chunkSize),
-		(iByChunkSize_3 / bigChunkWidth_2) * chunkSize + ((iModChunkSize_3 % chunkSize_2) / chunkSize),
-		((iByChunkSize_3 % bigChunkWidth_2) % bigChunkWidth) * chunkSize + (iModChunkSize_3 / chunkSize_2)
-	);
+    const int chunkSize_2 = chunkSize * chunkSize;
+    const int chunkSize_3 = chunkSize_2 * chunkSize;
+    const int bigChunkWidth_2 = bigChunkWidth * bigChunkWidth;
+    const int iByChunkSize_3 = i / chunkSize_3;
+    const int iModChunkSize_3 = i % chunkSize_3;
+    return (int3)(
+        ((iByChunkSize_3 % bigChunkWidth_2) / bigChunkWidth) * chunkSize + (iModChunkSize_3 % chunkSize),
+        (iByChunkSize_3 / bigChunkWidth_2) * chunkSize + ((iModChunkSize_3 % chunkSize_2) / chunkSize),
+        ((iByChunkSize_3 % bigChunkWidth_2) % bigChunkWidth) * chunkSize + (iModChunkSize_3 / chunkSize_2)
+    );
 }
 
 float3 getWorldPosition(const int3 localPosition, const int2 bigChunkPos, const int bigChunkFullWidth) {
-	return (float3)(localPosition.x + bigChunkPos.x * bigChunkFullWidth,
-				localPosition.y,
-				localPosition.z + bigChunkPos.y * bigChunkFullWidth);
+    return (float3)(localPosition.x + bigChunkPos.x * bigChunkFullWidth,
+                localPosition.y,
+                localPosition.z + bigChunkPos.y * bigChunkFullWidth);
 }
 
 int calculBlockAt(__global int* ppm, float3 wpos);
 
 float biomesIntensity_grass(__global int* ppm, float3 wpos) {
-	return noise(ppm, wpos.x * 0.01 + 265.42, 0.75, wpos.z * 0.01 + 23.41);
+    return noise(ppm, wpos.x * 0.01 + 265.42, 0.75, wpos.z * 0.01 + 23.41);
 }
 
 #define BIOMES_COUNT 6
 
 int calculBlockAt(__global int* ppm, float3 wpos) {
-	if (wpos.y > 1)
-		return BLOCK_AIR;
-	if (biomesIntensity_grass(ppm, wpos) > 0)
-		return BLOCK_GRASS;
-	else
-		return BLOCK_DIRT;
-	float biomesIntensity[6];
+    if (wpos.y > 1)
+        return BLOCK_AIR;
+    if (biomesIntensity_grass(ppm, wpos) > 0)
+        return BLOCK_GRASS;
+    else
+        return BLOCK_DIRT;
+    float biomesIntensity[6];
 
 }
 
 kernel void generateBigChunk(__global int* ppm, __global int* blocks, const int2 bigChunkPos, const int chunkSize, const int bigChunkWidth) {
-	size_t i = get_global_id(0);
-	int3 localPosition = getLocalPosition(i, chunkSize, bigChunkWidth);
-	float3 wpos = getWorldPosition(localPosition, bigChunkPos, chunkSize * bigChunkWidth);
+    size_t i = get_global_id(0);
+    int3 localPosition = getLocalPosition(i, chunkSize, bigChunkWidth);
+    float3 wpos = getWorldPosition(localPosition, bigChunkPos, chunkSize * bigChunkWidth);
     int block = BLOCK_AIR;
 
-	block = calculBlockAt(ppm, wpos);
+	float height = noise(ppm, wpos.x * 0.01, 0, wpos.z * 0.01) * 400;
 
-	blocks[i] = block;
+
+	if (height >= wpos.y) {
+		// float surface = noise(ppm, wpos.x * 0.02, 0, wpos.z * 0.02) * 100;
+
+    	height = clamp(height, 0.0f, 30.0f);
+    	// height = clamp(height, 0.0f, surface);
+	}
+
+
+    if (wpos.y < 3) {
+        block = BLOCK_SAND;
+        block = BLOCK_BEDROCK;
+        block = BLOCK_WATER;
+    } 
+    else if (height >= wpos.y) {
+        block = BLOCK_TNT;
+        block = BLOCK_SAND;
+        block = BLOCK_COBBLESTONE;
+        block = BLOCK_DIRT;
+    }
+    // else {
+    //     block = BLOCK_STONE;
+    // }
+
+    // block = calculBlockAt(ppm, wpos);
+
+    blocks[i] = block;
 }

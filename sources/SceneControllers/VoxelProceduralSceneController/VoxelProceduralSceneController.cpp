@@ -8,6 +8,7 @@
 #define BLOCK_GRASS 4
 #define BLOCK_SAND 5
 #define BLOCK_GRAVEL 6
+#define BLOCK_WATER 7
 #define BLOCK_GRASS_BROWN 11
 #define BLOCK_WOOD 12
 #define BLOCK_LEAFS 13
@@ -45,6 +46,8 @@ void VoxelProceduralSceneController::update() {
 		lt = et;
 		_dynamicWorld->loadPosition(cameraNode);
 
+		_lightNode->transform().setPosition(cameraNode->transform().position());
+
 		// Update the ui if needed
 		if (_displayInterface) {
 			_fpsValueLabel->setCaption(std::to_string(static_cast<int>(1.0f / _window.lock()->deltaTime())));
@@ -62,9 +65,6 @@ void VoxelProceduralSceneController::update() {
 			float imgViewOffsetX = _pickedBlockTexture->sizeF().x() * offsetX;
 			float imgViewOffsetY = _pickedBlockTexture->sizeF().y() * offsetY;
 			_pickedBlockTexture->setOffset(nanogui::Vector2f(-imgViewOffsetX, -imgViewOffsetY));
-
-			// _handBlockMaterial->diffuse_transform.setOffset(glm::vec2(offsetX / 30.0f, offsetY / 10.0f));
-			// _handBlockMaterial->mask_transform.setOffset(glm::vec2(offsetX / 30.0f, offsetY / 10.0f));
 		}
 	}
 
@@ -130,6 +130,16 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 		_displayInterface = !_displayInterface;
 		updateUI();
 	}
+
+	if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
+		for (int i = 0; i < 2; i++) {
+			if (_playerPositionLabel[i]->focused()) {
+				_playerPositionLabel[i]->focusEvent(false);
+				_playerPositionLabel[i + 1]->requestFocus();
+				break;
+			}
+		}
+	}
 }
 
 void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
@@ -188,20 +198,13 @@ void VoxelProceduralSceneController::makeScene() {
 	std::string voxelTextureFilePath;
 	{
 		std::shared_ptr<std::string> textureName = env->getArgument("-texture");
-		#ifdef _WIN32 // Just because of the build folder and cmake
-		voxelTextureFilePath = textureName != nullptr ? *textureName : "../assets/textures/ft_vox_textures.png";
-		#else
-		voxelTextureFilePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures.png";
-		#endif
+		voxelTextureFilePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures_2.png";
 	}
 	std::string generatorFilePath;
 	{
 		std::shared_ptr<std::string> argName = env->getArgument("-generator");
-		#ifdef _WIN32 // Just because of the build folder and cmake
-		generatorFilePath = argName != nullptr ? *argName : "../assets/voxelProceduralGeneratorSources/hillsGenerator.cl";
-		#else
-		generatorFilePath = argName != nullptr ? *argName : "assets/voxelProceduralGeneratorSources/hillsGenerator.cl";
-		#endif
+		// generatorFilePath = argName != nullptr ? *argName : "assets/voxelProceduralGeneratorSources/hillsGenerator.cl";
+		generatorFilePath = argName != nullptr ? *argName : "assets/voxelProceduralGeneratorSources/canyon.cl";
 	}
 	std::string worldName;
 	{
@@ -215,7 +218,11 @@ void VoxelProceduralSceneController::makeScene() {
 	texturedMaterial->shininess = 64.0f;
 	try {
 		texturedMaterial->texture_diffuse = std::make_shared<GLS::Texture>(voxelTextureFilePath);
-		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		// texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+		// texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -234,17 +241,33 @@ void VoxelProceduralSceneController::makeScene() {
 	_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath);
 
 	// Lights
+
+	_lightNode = std::make_shared<GLS::Node>();
+
+	auto directionLightNode = std::make_shared<GLS::Node>();
+	directionLightNode->transform().setEulerAngles(glm::vec3(-M_PI / 5, M_PI / 3, 0));
+	_lightNode->addChildNode(directionLightNode);
+
 	auto pointlightNode = std::make_shared<GLS::Node>();
+	pointlightNode->transform().setPosition(glm::vec3(0, 0, 120));
+	directionLightNode->addChildNode(pointlightNode);
+
 	auto pointlight = std::make_shared<GLS::Light>();
-	pointlight->type = GLS::light_spot;
-	pointlight->color = glm::vec3(0.8f);
-	pointlight->angle *= 1.4f;
+	pointlight->type = GLS::light_directional;
+	pointlight->color = glm::vec3(1, 1, 1);
+	pointlight->cast_shadow = true;
+	pointlight->cast_shadow_clip_far = 300;
+	pointlight->cast_shadow_map_size_width = 4000;
+	pointlight->cast_shadow_map_size_height = 4000;
 	pointlightNode->setLight(pointlight);
+	pointlightNode->transform().scaleBy(glm::vec3(10.0, 10.0, 1.0));
+
+	scene.rootNode()->addChildNode(_lightNode);
 
 	auto ambiantlightNode = std::make_shared<GLS::Node>();
 	auto ambiantlight = std::make_shared<GLS::Light>();
 	ambiantlight->type = GLS::light_ambiant;
-	ambiantlight->color = glm::vec3(0.5f);
+	ambiantlight->color = glm::vec3(0.3f);
 	ambiantlightNode->setLight(ambiantlight);
 	scene.rootNode()->addChildNode(ambiantlightNode);
 
@@ -254,14 +277,13 @@ void VoxelProceduralSceneController::makeScene() {
 	std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
 	camera->farZ = 200.0f;
 	camera->fogFar = 200.0f;
-	camera->fogNear = 100.0f;
+	camera->fogNear = 200.0f * 0.9f;
 	camera->fov = static_cast<float>((80.0f) * M_PI / 180.0f);
-	scene.setBackgroundColor(glm::vec4(0.3, 0.3, 0.3, 1));
+	scene.setBackgroundColor(glm::vec4(115 / 255.0f, 195 / 255.0f, 1, 1));
 	camera->aspect = (scene.getAspect());
 	cameraNode->setCamera(camera);
 	scene.setCameraNode(cameraNode);
 	scene.rootNode()->addChildNode(cameraNode);
-	cameraNode->addChildNode(pointlightNode);
 
 	// Skybox
 	std::vector<std::string> skyboxFaces;
@@ -434,6 +456,19 @@ void VoxelProceduralSceneController::makeScene() {
 	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
 
+		// meshmerize effect
+	auto meshmerizerWidget = new nanogui::Widget(_environementWindow);
+	meshmerizerWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	new nanogui::Label(meshmerizerWidget, "Meshmerize effect: ");
+	auto meshmerizerSlider = new nanogui::Slider(meshmerizerWidget);
+	auto meshmerizerValue = new nanogui::FloatBox<float>(meshmerizerWidget, GameVoxelChunk::meshmerizerIntensity);
+	meshmerizerSlider->setCallback([this, meshmerizerValue](float value) {
+		GameVoxelChunk::meshmerizerIntensity = value;
+		meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
+	});
+	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
+									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
+
 		// useless button
 	auto uselessButtonWidget = new nanogui::Widget(_environementWindow);
 	uselessButtonWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
@@ -487,6 +522,7 @@ const std::map<int, std::string> VoxelProceduralSceneController::_BlockNames = {
 	{ BLOCK_GRASS, "Grass" },
 	{ BLOCK_SAND, "Sand" },
 	{ BLOCK_GRAVEL, "Gravel" },
+	{ BLOCK_WATER, "Water" },
 	{ BLOCK_GRASS_BROWN, "Brown Grass" },
 	{ BLOCK_WOOD, "Wood" },
 	{ BLOCK_LEAFS, "Leaf" },

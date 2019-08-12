@@ -14,7 +14,7 @@ uniform sampler2D screen_texture;
 out vec4 FragColor;
 
 void main() {
-    const float offset = 1.0 / 300.0;
+    const float offset = 1.0 / 500.0;
     vec2 offsets[9] = vec2[](
         vec2(-offset,  offset),
         vec2( 0.0f,    offset),

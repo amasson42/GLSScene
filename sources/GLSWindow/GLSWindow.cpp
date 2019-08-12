@@ -64,8 +64,9 @@ _framebuffer(nullptr) {
     glfwSetMouseButtonCallback(_glfwWindow, [](GLFWwindow* win, int button, int action, int modifiers) {
 		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
 
-        window->mouseButtonCallBack(button, action, modifiers);
-        window->nanoguiScreen()->mouseButtonCallbackEvent(button, action, modifiers);
+       if (!window->nanoguiScreen()->mouseButtonCallbackEvent(button, action, modifiers)) {
+        	window->mouseButtonCallBack(button, action, modifiers);
+	   }
     });
 
 	glfwSetKeyCallback(_glfwWindow, [](GLFWwindow* win, int key, int scancode, int action, int mods) {
