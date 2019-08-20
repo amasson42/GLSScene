@@ -34,6 +34,7 @@ private:
     std::shared_ptr<GLS::Node> worldNode;
     std::shared_ptr<GLS::Node> cameraNode;
 	std::shared_ptr<GLS::Node> _lightNode;
+	std::shared_ptr<GLS::Node> _ambiantlightNode;
     std::shared_ptr<GLS::Node> _axesNode;
     double lt;
 	std::shared_ptr<DynamicWorld> _dynamicWorld;
@@ -57,7 +58,9 @@ private:
 	bool _displayInterface;
 
     int _pickedBlock;
-    
+
+	void _createWorldFolder();
+
     static const std::map<int, std::string> _BlockNames;
 
 };
