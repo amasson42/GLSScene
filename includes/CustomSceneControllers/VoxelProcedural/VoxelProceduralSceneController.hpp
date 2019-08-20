@@ -58,7 +58,9 @@ private:
 	bool _displayInterface;
 
     int _pickedBlock;
-    
+
+	void _createWorldFolder();
+
     static const std::map<int, std::string> _BlockNames;
 
 };

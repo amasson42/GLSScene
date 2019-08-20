@@ -3,7 +3,9 @@ project(game)
 
 if (UNIX)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
-endif (UNIX)
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /O2")
+endif()
 
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/)
 	execute_process(COMMAND mkdir ${CMAKE_CURRENT_BINARY_DIR}/libs/)

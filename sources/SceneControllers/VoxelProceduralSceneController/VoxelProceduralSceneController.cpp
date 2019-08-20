@@ -239,6 +239,7 @@ void VoxelProceduralSceneController::makeScene() {
 	_dynamicWorld->getGenerator()->usedMaterial = texturedMaterial;
 	_dynamicWorld->getGenerator()->setSeed(static_cast<unsigned>(time(NULL)));
 	_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath);
+	_createWorldFolder();
 
 	// Lights
 
@@ -502,6 +503,7 @@ void VoxelProceduralSceneController::makeScene() {
 	seedField->setEditable(true);
 	seedField->setCallback([this](unsigned int value) {
 		_dynamicWorld->getGenerator()->setSeed(value);
+		_createWorldFolder();
 	});
 
 		// generator kernel choosing
@@ -530,6 +532,21 @@ void VoxelProceduralSceneController::makeScene() {
 
 	_environementWindow->setPosition(nanogui::Vector2i(window->size().x - _environementWindow->width() - 10, 10));
 
+}
+
+void VoxelProceduralSceneController::_createWorldFolder() {
+#ifdef WIN32
+	std::wstring folderName = (L"world_" + std::to_wstring(_dynamicWorld->getGenerator()->getSeed())).c_str();
+	std::string worldName = std::string(folderName.begin(), folderName.end());
+	if (_wmkdir(folderName.c_str()) == -1) {
+		std::cerr << "Can't create the folder" << std::endl;
+	}
+	_dynamicWorld->setWorldDirName(worldName);
+#else
+	// if  (mkdir("world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed())) == -1) {
+	// 	std::cerr << "Can't create the folder" << std::endl;
+	// }
+#endif
 }
 
 const std::map<int, std::string> VoxelProceduralSceneController::_BlockNames = {
