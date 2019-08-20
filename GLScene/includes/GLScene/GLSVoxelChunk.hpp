@@ -39,6 +39,8 @@ namespace GLS {
         bool _isEmpty;
         bool _fullEdges[6];
 
+        void _calculBlockAdjacence(int x, int y, int z);
+
     public:
 
         VoxelChunk();

@@ -59,7 +59,7 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 	_device->commandQueue(_commandQueueIndex)->finish();
 
 	for (int arrayPointerIndex = 0; arrayPointerIndex < BigChunk::bigChunkCount; arrayPointerIndex++) {
-		std::memcpy(bc->chunkAt(arrayPointerIndex).voxel->getBlocks(),
+		std::memcpy(bc->chunkAt(arrayPointerIndex)->voxel->getBlocks(),
 			&blocks[arrayPointerIndex * GLS::VoxelChunk::chunkBlockCount],
 			sizeof(int) * GLS::VoxelChunk::chunkBlockCount);
 	}

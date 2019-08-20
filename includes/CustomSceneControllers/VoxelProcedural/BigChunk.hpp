@@ -22,7 +22,8 @@ struct GameVoxelChunk {
 	void updateMesh();
 	void setBlockAt(glm::ivec3 coord, int blockId);
 
-	void setAdjacent(std::shared_ptr<GameVoxelChunk> chunk, int edge);
+	void setAdjacentChunk(std::shared_ptr<GameVoxelChunk> chunk, int edge);
+	void setAdjacentChunk(std::weak_ptr<GameVoxelChunk> chunk, int edge);
 };
 
 /**
@@ -39,7 +40,7 @@ class BigChunk {
 
 	private:
 	std::shared_ptr<GLS::Node> _node;
-	std::array<GameVoxelChunk, bigChunkCount> _chunks;
+	std::array<std::shared_ptr<GameVoxelChunk>, bigChunkCount> _chunks;
 	std::array<std::weak_ptr<BigChunk>, 4> _adjacents; // 0: +X | 1: -X | 2: +Z | 3: -Z
 
 	public:
@@ -53,9 +54,9 @@ class BigChunk {
 	void loadFromStream(std::istream& stream);
 
 
-	GameVoxelChunk& chunkAt(int i);
-	GameVoxelChunk& chunkAt(int x, int y, int z);
-	GameVoxelChunk* chunkAt(const glm::vec3& pos);
+	std::shared_ptr<GameVoxelChunk> chunkAt(int i);
+	std::shared_ptr<GameVoxelChunk> chunkAt(int x, int y, int z);
+	std::shared_ptr<GameVoxelChunk> chunkAt(const glm::vec3& pos);
 
 	/**
 	 * update all the voxel adjacent chunks on the edge

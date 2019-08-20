@@ -91,6 +91,7 @@ namespace GLS {
         
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
+        GLuint _castShadowFace;
 
         bool _outlined;
         glm::vec3 _outlineColor;
@@ -110,6 +111,7 @@ namespace GLS {
         std::vector<Vertex>& verticesRef();
         std::vector<GLuint>& indicesRef();
         void setDrawMode(GLenum mode);
+        void setCastShadowFace(GLuint face);
         
         void calculNormals();
         

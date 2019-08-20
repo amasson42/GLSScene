@@ -189,25 +189,25 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 	while (it != _loadedChunks.end()) {
 		std::shared_ptr<BigChunk> bigChunk = it->second;
 		for (int i = 0; i < BigChunk::bigChunkCount; i++) {
-			GameVoxelChunk& chunk(bigChunk->chunkAt(i));
-			if (chunk.mustUpdateMesh) {
-				chunk.updateMesh();
+			std::shared_ptr<GameVoxelChunk> chunk(bigChunk->chunkAt(i));
+			if (chunk->mustUpdateMesh) {
+				chunk->updateMesh();
 			}
-			glm::vec3 chunkWorldPos = bigChunk->getNode()->transform().position() + chunk.node->transform().position() + glm::vec3(CHUNKSIZE / 2);
+			glm::vec3 chunkWorldPos = bigChunk->getNode()->transform().position() + chunk->node->transform().position() + glm::vec3(CHUNKSIZE / 2);
 			glm::vec3 cameraPos = cameraNode->transform().position();
 			glm::vec3 chunkDirection = chunkWorldPos - cameraPos;
 			float squaredLength = glm::dot(chunkDirection, chunkDirection);
 			if (squaredLength < _visibleDistance * _visibleDistance) {
 				if (squaredLength < 3 * CHUNKSIZE * CHUNKSIZE) {
-					chunk.node->setActive(true);
+					chunk->node->setActive(true);
 				} else {
 					chunkDirection = glm::normalize(chunkDirection);
 					glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
 					float cosangle = glm::dot(chunkDirection, cameraDirection);
-					chunk.node->setActive(cosangle > minCosCameraVision);
+					chunk->node->setActive(cosangle > minCosCameraVision);
 				}
 			} else {
-				chunk.node->setActive(false);
+				chunk->node->setActive(false);
 			}
 		}
 
@@ -277,7 +277,7 @@ void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, int blockId) {
 	}
 	std::shared_ptr<BigChunk> targetBigChunk = it->second;
 	glm::vec3 inBigChunkPos = worldPosition - targetBigChunk->getNode()->transform().position();
-	GameVoxelChunk *targetVoxel = targetBigChunk->chunkAt(inBigChunkPos);
+	std::shared_ptr<GameVoxelChunk> targetVoxel = targetBigChunk->chunkAt(inBigChunkPos);
 	if (targetVoxel == nullptr)
 		return;
 	glm::vec3 inVoxelPos = inBigChunkPos - targetVoxel->node->transform().position();

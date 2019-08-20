@@ -14,6 +14,7 @@ namespace GLS {
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _shaderProgram(nullptr),
     _material(nullptr),
+    _castShadowFace(GL_FRONT),
     _outlined(false)
     {
 

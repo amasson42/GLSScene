@@ -362,6 +362,7 @@ void VoxelProceduralSceneController::makeScene() {
 	_placeHolderBlockOfDoom = std::make_shared<GLS::Node>();
 	std::shared_ptr<GLS::Mesh> placeHolderMesh = GLS::Mesh::cube(1.02f, 1.02f, 1.02f);
 	placeHolderMesh->setDrawMode(GL_LINES);
+	placeHolderMesh->setCastShadowFace(GL_NONE);
 	_placeHolderBlockOfDoom->addRenderable(placeHolderMesh);
 	scene.rootNode()->addChildNode(_placeHolderBlockOfDoom);
 

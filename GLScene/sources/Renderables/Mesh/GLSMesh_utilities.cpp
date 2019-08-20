@@ -21,7 +21,11 @@ namespace GLS {
     void Mesh::setDrawMode(GLenum mode) {
         _drawMode = mode;
     }
-    
+
+    void Mesh::setCastShadowFace(GLuint face) {
+        _castShadowFace = face;
+    }
+
     static void calculNormal_normeWith(Vertex& v, glm::vec3 n, int& c) {
         glm::vec3 average = (v.normal * GLfloat(c)) + n;
         average = glm::normalize(average);
