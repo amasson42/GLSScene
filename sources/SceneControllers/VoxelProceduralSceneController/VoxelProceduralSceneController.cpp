@@ -203,8 +203,8 @@ void VoxelProceduralSceneController::makeScene() {
 	std::string generatorFilePath;
 	{
 		std::shared_ptr<std::string> argName = env->getArgument("-generator");
-		// generatorFilePath = argName != nullptr ? *argName : "assets/voxelProceduralGeneratorSources/hillsGenerator.cl";
-		generatorFilePath = argName != nullptr ? *argName : "assets/voxelProceduralGeneratorSources/canyon.cl";
+		generatorFilePath = argName != nullptr ? *argName : "assets/voxelProceduralGeneratorSources/hillsGenerator.cl";
+		// generatorFilePath = argName != nullptr ? *argName : "../assets/voxelProceduralGeneratorSources/canyon.cl";
 	}
 	std::string worldName;
 	{
@@ -246,6 +246,7 @@ void VoxelProceduralSceneController::makeScene() {
 
 	auto directionLightNode = std::make_shared<GLS::Node>();
 	directionLightNode->transform().setEulerAngles(glm::vec3(-M_PI / 5, M_PI / 3, 0));
+	_lightNode->setActive(false);
 	_lightNode->addChildNode(directionLightNode);
 
 	auto pointlightNode = std::make_shared<GLS::Node>();
@@ -264,12 +265,12 @@ void VoxelProceduralSceneController::makeScene() {
 
 	scene.rootNode()->addChildNode(_lightNode);
 
-	auto ambiantlightNode = std::make_shared<GLS::Node>();
+	_ambiantlightNode = std::make_shared<GLS::Node>();
 	auto ambiantlight = std::make_shared<GLS::Light>();
 	ambiantlight->type = GLS::light_ambiant;
-	ambiantlight->color = glm::vec3(0.3f);
-	ambiantlightNode->setLight(ambiantlight);
-	scene.rootNode()->addChildNode(ambiantlightNode);
+	ambiantlight->color = glm::vec3(0.8f);
+	_ambiantlightNode->setLight(ambiantlight);
+	scene.rootNode()->addChildNode(_ambiantlightNode);
 
 	// Camera
 	cameraNode = std::make_shared<GLS::Node>();
@@ -367,7 +368,7 @@ void VoxelProceduralSceneController::makeScene() {
 
 	// Player Window
 	_playerWindow = new nanogui::Window(_nanoguiScreen, "Player");
-	_playerWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+	_playerWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 3));
 	_playerWindow->setPosition(nanogui::Vector2i(10, 10));
 
 	// Create a widget, with a layout
@@ -436,18 +437,21 @@ void VoxelProceduralSceneController::makeScene() {
 	// Environement GUI
 
 	_environementWindow = new nanogui::Window(_nanoguiScreen, "Environement");
-	_environementWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+	_environementWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 3));
 
 		// render distance
 	auto renderDistanceWidget = new nanogui::Widget(_environementWindow);
 	renderDistanceWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
-	new nanogui::Label(renderDistanceWidget, "Render distance: ");
+	auto renderDistanceLabel = new nanogui::Label(renderDistanceWidget, "Render distance: ");
 	auto renderDistanceSlider = new nanogui::Slider(renderDistanceWidget);
-	auto renderDistanceValue = new nanogui::IntBox<int>(renderDistanceWidget, static_cast<int>(_dynamicWorld->getRenderDistance()));
+	auto renderDistanceValue = new nanogui::FloatBox<float>(renderDistanceWidget, _dynamicWorld->getRenderDistance());
+	renderDistanceValue->numberFormat("%3.0f");
+	renderDistanceValue->setFixedWidth(75);
+	renderDistanceLabel->setFixedWidth(125);
 	renderDistanceSlider->setCallback([this, renderDistanceValue, camera](float value) {
 		float renderDistance = value * (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance)
 								+ DynamicWorld::minRenderDistance;
-		renderDistanceValue->setValue(static_cast<int>(renderDistance));
+		renderDistanceValue->setValue(renderDistance);
 		_dynamicWorld->setRenderDistance(renderDistance);
 		camera->farZ = renderDistance;
 		camera->fogFar = renderDistance;
@@ -459,15 +463,27 @@ void VoxelProceduralSceneController::makeScene() {
 		// meshmerize effect
 	auto meshmerizerWidget = new nanogui::Widget(_environementWindow);
 	meshmerizerWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
-	new nanogui::Label(meshmerizerWidget, "Meshmerize effect: ");
+	auto meshmerizerLabel = new nanogui::Label(meshmerizerWidget, "Meshmerize effect: ");
+	meshmerizerLabel->setFixedWidth(125);
 	auto meshmerizerSlider = new nanogui::Slider(meshmerizerWidget);
 	auto meshmerizerValue = new nanogui::FloatBox<float>(meshmerizerWidget, GameVoxelChunk::meshmerizerIntensity);
+	meshmerizerValue->numberFormat("%.4f");
+	meshmerizerValue->setFixedWidth(75);
+	meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
 	meshmerizerSlider->setCallback([this, meshmerizerValue](float value) {
 		GameVoxelChunk::meshmerizerIntensity = value;
 		meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
 	});
 	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
+
+	auto directionalLightWidget = new nanogui::Widget(_environementWindow);
+	directionalLightWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	auto directionalLightCheckbox = new nanogui::CheckBox(directionalLightWidget, "Cast shadows");
+	directionalLightCheckbox->setCallback([this](bool active) {
+		_lightNode->setActive(active);
+		_ambiantlightNode->light()->color = active ? glm::vec3(0.3f) : glm::vec3(0.8f);
+	});
 
 		// useless button
 	auto uselessButtonWidget = new nanogui::Widget(_environementWindow);
@@ -482,6 +498,7 @@ void VoxelProceduralSceneController::makeScene() {
 	seedWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(seedWidget, "seed: ");
 	auto seedField = new nanogui::IntBox<unsigned int>(seedWidget, _dynamicWorld->getGenerator()->getSeed());
+	seedField->setFixedWidth(125);
 	seedField->setEditable(true);
 	seedField->setCallback([this](unsigned int value) {
 		_dynamicWorld->getGenerator()->setSeed(value);
