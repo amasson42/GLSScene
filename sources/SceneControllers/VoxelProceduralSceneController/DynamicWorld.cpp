@@ -49,7 +49,6 @@ void DynamicWorld::_cleanChunks(const glm::vec3& cameraFlatPosition) {
 			// std::async(std::launch::async, &BigChunk::save, it->second, getBigChunkFileNameAt(it->first));
 			it = _loadedChunks.erase(it);
 		} else {
-
 			++it;
 		}
 

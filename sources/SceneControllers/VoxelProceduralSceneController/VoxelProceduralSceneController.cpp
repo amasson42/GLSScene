@@ -224,6 +224,7 @@ void VoxelProceduralSceneController::makeScene() {
 		// texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		texturedMaterial->texture_diffuse->setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		texturedMaterial->texture_mask = texturedMaterial->texture_diffuse;
@@ -542,12 +543,13 @@ void VoxelProceduralSceneController::_createWorldFolder() {
 	if (_wmkdir(folderName.c_str()) == -1) {
 		std::cerr << "Can't create the folder" << std::endl;
 	}
-	_dynamicWorld->setWorldDirName(worldName);
 #else
-	// if  (mkdir("world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed())) == -1) {
-	// 	std::cerr << "Can't create the folder" << std::endl;
-	// }
+	std::string worldName = "world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed());
+	if (mkdir(worldName.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1) {
+		std::cerr << "Can't create the folder" << std::endl;
+	}
 #endif
+	_dynamicWorld->setWorldDirName(worldName);
 }
 
 const std::map<int, std::string> VoxelProceduralSceneController::_BlockNames = {
