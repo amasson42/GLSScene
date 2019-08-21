@@ -10,49 +10,49 @@
 
 namespace GLS {
 
+	VoxelBlock::VoxelBlock() :
+	_adjacent(0),
+	orientation(VoxelBlockOrientation::BlockOrientation_PositiveZ),
+	meshType(VoxelBlockMeshType::Empty),
+	textureId(0)
+	{}
+
+	VoxelBlock::VoxelBlock(VoxelBlockMeshType type, uint8_t id) :
+	_adjacent(0),
+	orientation(VoxelBlockOrientation::BlockOrientation_PositiveX),
+	meshType(type),
+	textureId(id)
+	{}
+
+	VoxelBlock::VoxelBlock(VoxelBlockOrientation orient, VoxelBlockMeshType type, uint8_t id) :
+	_adjacent(0),
+	orientation(orient),
+	meshType(type),
+	textureId(id)
+	{}
+
     VoxelChunk::VoxelChunk() :
-    _blocksBuffer(0), _blocksArray(0),
-    _shaderProgram(nullptr),
-    _material(nullptr),
-    _adjChunks(),
-    _isEmpty(true)
-    {
-        for (int i = 0; i < chunkBlockCount; i++)
-            _blockIds[i] = 0;
-        for (int i = 0; i < 6; i++)
-            _fullEdges[i] = false;
-    }
+	_blocks(),
+	_material(nullptr),
+	_adjChunks(),
+	_adjacentFunction()
+    {}
 
     VoxelChunk::VoxelChunk(const VoxelChunk& copy) :
-    _blocksBuffer(0), _blocksArray(0),
-    _shaderProgram(nullptr),
-    _material(copy._material),
-    _adjChunks(),
-    _isEmpty(copy._isEmpty)
-    {
-        for (int i = 0; i < chunkBlockCount; i++)
-            _blockIds[i] = copy._blockIds[i];
-        if (copy.bufferGenerated())
-            generateBuffers();
-        for (int i = 0; i < 6; i++)
-            _fullEdges[i] = copy._fullEdges[i];
-    }
+	_blocks(copy._blocks),
+	_material(copy._material),
+	_adjacentFunction()
+    {}
 
     VoxelChunk::~VoxelChunk() {
-        deleteBuffers();
+
     }
 
     VoxelChunk& VoxelChunk::operator=(const VoxelChunk& copy) {
-        for (int i = 0; i < chunkBlockCount; i++)
-            _blockIds[i] = copy._blockIds[i];
-        deleteBuffers();
-        _material = copy._material;
-        _isEmpty = copy._isEmpty;
-        for (int i = 0; i < 6; i++)
-            _fullEdges[i] = copy._fullEdges[i];
-        if (copy.bufferGenerated())
-            generateBuffers();
-        return (*this);
+		_blocks = copy._blocks;
+		_material = copy._material;
+		_adjChunks = std::array<std::weak_ptr<VoxelChunk>, 6>();
+		return *this;
     }
 
 }

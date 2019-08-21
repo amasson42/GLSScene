@@ -9,7 +9,23 @@ const float DynamicWorld::minRenderDistance = 50.0f;
 const float DynamicWorld::maxRenderDistance = 250.0f;
 
 // world/
-//  info.json -> {"seed": 421337}
+//  info.json ->
+//  {
+//     "settings": {
+//       "seed": int,
+//       "generatorName": string,
+//		 "renderDistance": int,
+//       "meshmerizeEffect": float,
+//       "castShadow": bool
+//	   },
+//     "player": {
+//       "position": [float, float, float],
+//       "rotation": [float, float],
+//       "speed": float,
+//       "fov": float,
+//       "pickedBlockIndex": int
+//	   },
+//  }
 //  C_X_Z.chunk
 //  C_[...]_[...].chunk
 DynamicWorld::DynamicWorld(std::shared_ptr<GLS::Node> worldNode, std::string worldName) :
@@ -67,8 +83,8 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 	glm::ivec2 minPosition = worldToBigChunkPosition(cameraFlatPosition - glm::vec3(_loadingDistance, 0, _loadingDistance) - chunkMid);
 	glm::ivec2 maxPosition = worldToBigChunkPosition(cameraFlatPosition + glm::vec3(_loadingDistance, 0, _loadingDistance) + chunkMid);
 
-	for (int x = minPosition.x; x < maxPosition.x; x++) {
-		for (int y = minPosition.y; y < maxPosition.y; y++) {
+	for (int x = minPosition.x; x <= maxPosition.x; x++) {
+		for (int y = minPosition.y; y <= maxPosition.y; y++) {
 
 			glm::ivec2 pos(x, y);
 			auto it1 = std::find_if(_loadedChunks.begin(), _loadedChunks.end(), [pos](std::pair<glm::ivec2, std::shared_ptr<BigChunk>>& elem) {
@@ -80,7 +96,6 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 			if (it1 != _loadedChunks.end() || it2 != _loadingChunks.end()) {
 				continue;
 			}
-
 			glm::vec3 chunkOffset = bigChunkPositionToWorld(pos) + chunkMid - cameraFlatPosition;
 
 			float chunkOffsetSquaredLength = glm::dot(chunkOffset, chunkOffset);
@@ -99,15 +114,10 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 							chunk->loadFromStream(chunkStream);
 							chunkStream.close();
 						} else {
-							chunk =  _generator->generateBigChunkAt(pos);
+							chunk = _generator->generateBigChunkAt(pos);
 						}
 						chunk->calculAllAdjacences();
-						try {
-							chunk->generateAllMeshes();
-						}
-						catch (const std::exception& e) {
-							std::cout << e.what() << std::endl;
-						}
+						chunk->generateAllMeshes();
 						return chunk;
 					}, glm::ivec2(x, y)))));
 				}
@@ -124,7 +134,6 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 		std::shared_ptr<BigChunk> generatedChunk = it->second.get();
 
 		generatedChunk->getNode()->transform().setPosition(bigChunkPositionToWorld(it->first));
-
 		_loadedChunks.push_back(std::make_pair(it->first, generatedChunk));
 		_worldNode->addChildNode(generatedChunk->getNode());
 
@@ -181,15 +190,13 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 		return;
 	float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * camera->aspect / 2));
 
+	int updatedMeshCount = 0;
 	std::vector < std::pair <glm::ivec2, std::shared_ptr<BigChunk> >>::iterator it = _loadedChunks.begin();
 	it = _loadedChunks.begin();
 	while (it != _loadedChunks.end()) {
 		std::shared_ptr<BigChunk> bigChunk = it->second;
 		for (int i = 0; i < BigChunk::bigChunkCount; i++) {
 			std::shared_ptr<GameVoxelChunk> chunk(bigChunk->chunkAt(i));
-			if (chunk->mustUpdateMesh) {
-				chunk->updateMesh();
-			}
 			glm::vec3 chunkWorldPos = bigChunk->getNode()->transform().position() + chunk->node->transform().position() + glm::vec3(CHUNKSIZE / 2);
 			glm::vec3 cameraPos = cameraNode->transform().position();
 			glm::vec3 chunkDirection = chunkWorldPos - cameraPos;
@@ -205,6 +212,13 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 				}
 			} else {
 				chunk->node->setActive(false);
+			}
+			if (chunk->mustUpdateMesh && chunk->node->isActive()) {
+				if (updatedMeshCount > 300) {
+					continue;
+				}
+				chunk->updateMesh();
+				updatedMeshCount++;
 			}
 		}
 
@@ -259,7 +273,7 @@ std::shared_ptr<ProceduralWorldGenerator> DynamicWorld::getGenerator() {
 	return _generator;
 }
 
-void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, int blockId) {
+void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, GLS::VoxelBlock block) {
 	glm::ivec2 bigChunkTargetPos = worldToBigChunkPosition(worldPosition);
 	if (worldPosition.x < 0)
 		bigChunkTargetPos.x--;
@@ -275,10 +289,12 @@ void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, int blockId) {
 	std::shared_ptr<BigChunk> targetBigChunk = it->second;
 	glm::vec3 inBigChunkPos = worldPosition - targetBigChunk->getNode()->transform().position();
 	std::shared_ptr<GameVoxelChunk> targetVoxel = targetBigChunk->chunkAt(inBigChunkPos);
-	if (targetVoxel == nullptr)
+	if (targetVoxel == nullptr) {
 		return;
+	}
 	glm::vec3 inVoxelPos = inBigChunkPos - targetVoxel->node->transform().position();
-	targetVoxel->setBlockAt(glm::ivec3(inVoxelPos), blockId);
+	targetVoxel->setBlockAt(glm::ivec3(inVoxelPos), block);
+	targetVoxel->updateMesh();
 }
 
 void DynamicWorld::setWorldDirName(std::string worldDirName) {

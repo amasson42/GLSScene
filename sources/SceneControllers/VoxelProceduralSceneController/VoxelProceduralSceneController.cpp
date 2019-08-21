@@ -1,33 +1,32 @@
 
 #include "AppEnv.hpp"
 
-#define BLOCK_AIR 0
-#define BLOCK_BEDROCK 1
-#define BLOCK_STONE 2
-#define BLOCK_DIRT 3
-#define BLOCK_GRASS 4
-#define BLOCK_SAND 5
-#define BLOCK_GRAVEL 6
+#define BLOCK_BEDROCK 0
+#define BLOCK_STONE 1
+#define BLOCK_DIRT 2
+#define BLOCK_GRASS 3
+#define BLOCK_SAND 4
+#define BLOCK_GRAVEL 5
 #define BLOCK_WATER 7
-#define BLOCK_GRASS_BROWN 11
-#define BLOCK_WOOD 12
-#define BLOCK_LEAFS 13
-#define BLOCK_WOOD_PLANKS 14
-#define BLOCK_BRICKS 15
-#define BLOCK_COBBLESTONE 16
-#define BLOCK_ICE 21
-#define BLOCK_ICE_BROKEN 22
-#define BLOCK_OBSIDIAN 25
-#define BLOCK_GRASS_PURPLE 31
-#define BLOCK_GOLD 35
-#define BLOCK_TNT 92
+#define BLOCK_GRASS_BROWN 16
+#define BLOCK_WOOD 17
+#define BLOCK_LEAFS 18
+#define BLOCK_WOOD_PLANKS 19
+#define BLOCK_BRICKS 20
+#define BLOCK_COBBLESTONE 21
+#define BLOCK_ICE 32
+#define BLOCK_ICE_BROKEN 33
+#define BLOCK_OBSIDIAN 36
+#define BLOCK_GRASS_PURPLE 48
+#define BLOCK_GOLD 52
+#define BLOCK_TNT 53
 
 VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window):
 ISceneController(window) {
 	lt = 0;
 	cameraMoveSpeed = 5;
 	_nanoguiScreen = _window.lock()->nanoguiScreen();
-	_pickedBlock = 1;
+	_pickedBlockIndex = 0;
 }
 
 VoxelProceduralSceneController::~VoxelProceduralSceneController() {
@@ -60,8 +59,9 @@ void VoxelProceduralSceneController::update() {
 
 			_nanoguiScreen->performLayout();
 
-			float offsetX = static_cast<float>(3 * (_pickedBlock % 10 - 1) + 1);
-			float offsetY = static_cast<float>(_pickedBlock / 10);
+			int pickedBlockId = _pickableBlocks[_pickedBlockIndex].second.textureId;
+			float offsetX = static_cast<float>(3 * (pickedBlockId % 16));
+			float offsetY = static_cast<float>(2 * (pickedBlockId / 16));
 			float imgViewOffsetX = _pickedBlockTexture->sizeF().x() * offsetX;
 			float imgViewOffsetY = _pickedBlockTexture->sizeF().y() * offsetY;
 			_pickedBlockTexture->setOffset(nanogui::Vector2f(-imgViewOffsetX, -imgViewOffsetY));
@@ -143,29 +143,16 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 }
 
 void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
-	std::map<int, std::string>::const_iterator it;
 
 	if (y > 0.0) {
-		it = VoxelProceduralSceneController::_BlockNames.find(_pickedBlock);
-		if (std::next(it) != VoxelProceduralSceneController::_BlockNames.end()) {
-			it++;
-		} else {
-			it = VoxelProceduralSceneController::_BlockNames.begin();
-		}
+		_pickedBlockIndex = (++_pickedBlockIndex) % _pickableBlocks.size();
 	} else if (y < 0.0) {
-		it = VoxelProceduralSceneController::_BlockNames.find(_pickedBlock);
-		
-		if (it == VoxelProceduralSceneController::_BlockNames.begin()) {
-			it = std::prev(VoxelProceduralSceneController::_BlockNames.end());
-		} else {
-			it--;
-		}
+		_pickedBlockIndex = (--_pickedBlockIndex) < 0 ? _pickableBlocks.size() - 1 : _pickedBlockIndex;
 	}
 	if (y != 0.0) {
-		_pickedBlock = it->first;
-		_pickedBlockLabel->setCaption(it->second);
-		_handBlock->voxel->setBlockIdAt(0, 0, 0, _pickedBlock);
-		_handBlock->voxel->calculBlockAdjacence();
+		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
+		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
+		_handBlock->voxel->calculBlockAdjacence(glm::ivec3(0, 0, 0));
 		_handBlock->updateMesh();
 	}
 }
@@ -174,10 +161,10 @@ void VoxelProceduralSceneController::mouseButtonCallBack(int button, int action,
 	// std::cout << button << " => " << action << std::endl;
 	glm::vec3 targetWorldPos = _placeHolderBlockOfDoom->transform().position();
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		_dynamicWorld->setBlockAt(targetWorldPos, BLOCK_AIR);
+		_dynamicWorld->setBlockAt(targetWorldPos, GLS::VoxelBlock(GLS::VoxelBlockMeshType::Empty, 0));
 	}
 	if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-		_dynamicWorld->setBlockAt(targetWorldPos, _pickedBlock);
+		_dynamicWorld->setBlockAt(targetWorldPos, _pickableBlocks[_pickedBlockIndex].second);
 	}
 }
 
@@ -246,31 +233,37 @@ void VoxelProceduralSceneController::makeScene() {
 
 	_lightNode = std::make_shared<GLS::Node>();
 
+	auto directionLightRotation = std::make_shared<GLS::Node>();
+	directionLightRotation->transform().setEulerAngles(glm::vec3(-M_PI / 5, M_PI / 3, 0));
+	_lightNode->addChildNode(directionLightRotation);
+
 	auto directionLightNode = std::make_shared<GLS::Node>();
-	directionLightNode->transform().setEulerAngles(glm::vec3(-M_PI / 5, M_PI / 3, 0));
-	_lightNode->setActive(false);
-	_lightNode->addChildNode(directionLightNode);
+	directionLightNode->transform().setPosition(glm::vec3(0, 0, 120));
+	directionLightRotation->addChildNode(directionLightNode);
 
-	auto pointlightNode = std::make_shared<GLS::Node>();
-	pointlightNode->transform().setPosition(glm::vec3(0, 0, 120));
-	directionLightNode->addChildNode(pointlightNode);
+	auto directionLight = std::make_shared<GLS::Light>();
+	directionLight->type = GLS::light_directional;
+	directionLight->color = glm::vec3(1, 1, 1);
+	directionLight->cast_shadow = false;
+	directionLight->cast_shadow_clip_far = 300;
+	directionLight->cast_shadow_map_size_width = 4000;
+	directionLight->cast_shadow_map_size_height = 4000;
+	directionLightNode->setLight(directionLight);
+	directionLightNode->transform().scaleBy(glm::vec3(10.0, 10.0, 1.0));
 
-	auto pointlight = std::make_shared<GLS::Light>();
-	pointlight->type = GLS::light_directional;
-	pointlight->color = glm::vec3(1, 1, 1);
-	pointlight->cast_shadow = true;
-	pointlight->cast_shadow_clip_far = 300;
-	pointlight->cast_shadow_map_size_width = 4000;
-	pointlight->cast_shadow_map_size_height = 4000;
-	pointlightNode->setLight(pointlight);
-	pointlightNode->transform().scaleBy(glm::vec3(10.0, 10.0, 1.0));
+	auto pointLightNode = std::make_shared<GLS::Node>();
+	_lightNode->addChildNode(pointLightNode);
+	auto pointLight = std::make_shared<GLS::Light>();
+	pointLight->type = GLS::light_point;
+	pointLight->color = glm::vec3(0.1, 0.1, 0.1);
+	pointLightNode->setLight(pointLight);
 
 	scene.rootNode()->addChildNode(_lightNode);
 
 	_ambiantlightNode = std::make_shared<GLS::Node>();
 	auto ambiantlight = std::make_shared<GLS::Light>();
 	ambiantlight->type = GLS::light_ambiant;
-	ambiantlight->color = glm::vec3(0.8f);
+	ambiantlight->color = glm::vec3(0.1f);
 	_ambiantlightNode->setLight(ambiantlight);
 	scene.rootNode()->addChildNode(_ambiantlightNode);
 
@@ -322,12 +315,15 @@ void VoxelProceduralSceneController::makeScene() {
 	std::shared_ptr<GLS::Mesh> axe_x_mesh = GLS::Mesh::cube(1, 0, 0);
 	axe_x_mesh->setMaterial(axe_x_material);
 	axe_x_mesh->setDrawMode(GL_LINES);
+	axe_x_mesh->setCastShadowFace(GL_NONE);
 	std::shared_ptr<GLS::Mesh> axe_y_mesh = GLS::Mesh::cube(0, 1, 0);
 	axe_y_mesh->setMaterial(axe_y_material);
 	axe_y_mesh->setDrawMode(GL_LINES);
+	axe_y_mesh->setCastShadowFace(GL_NONE);
 	std::shared_ptr<GLS::Mesh> axe_z_mesh = GLS::Mesh::cube(0, 0, 1);
 	axe_z_mesh->setMaterial(axe_z_material);
 	axe_z_mesh->setDrawMode(GL_LINES);
+	axe_z_mesh->setCastShadowFace(GL_NONE);
 
 	std::shared_ptr<GLS::Node> axes_node = std::make_shared<GLS::Node>();
 	axes_node->transform().position().y = 60;
@@ -354,7 +350,7 @@ void VoxelProceduralSceneController::makeScene() {
 
 	_handBlock = std::make_shared<GameVoxelChunk>();
 	_handBlock->voxel->setMaterial(texturedMaterial);
-	_handBlock->voxel->setBlockIdAt(0, 0, 0, _pickedBlock);
+	_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
 	_handBlock->voxel->calculBlockAdjacence();
 	_handBlock->updateMesh();
 	_handBlock->node->transform().scaleBy(glm::vec3(0.5));
@@ -432,10 +428,10 @@ void VoxelProceduralSceneController::makeScene() {
 	const int blockImageSize = 50;
 	_pickedBlockTexture = new nanogui::ImageView(pickedBlockBox, _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->buffer());
 	_pickedBlockTexture->setFixedSize(nanogui::Vector2i(blockImageSize, blockImageSize));
-	_pickedBlockTexture->setScale((float)blockImageSize / texturedMaterial->texture_diffuse->width() * 30.0f); 
+	_pickedBlockTexture->setScale((float)blockImageSize / texturedMaterial->texture_diffuse->width() * 3 * 16.0f); 
 	_pickedBlockTexture->setFixedScale(true);
 	_pickedBlockTexture->setFixedOffset(false);
-	_pickedBlockLabel = new nanogui::Label(pickedBlockBox, VoxelProceduralSceneController::_BlockNames.at(_pickedBlock));
+	_pickedBlockLabel = new nanogui::Label(pickedBlockBox, _pickableBlocks[_pickedBlockIndex].first);
 
 	// Environement GUI
 
@@ -480,12 +476,13 @@ void VoxelProceduralSceneController::makeScene() {
 	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
 
+		// cast shadow button
 	auto directionalLightWidget = new nanogui::Widget(_environementWindow);
 	directionalLightWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	auto directionalLightCheckbox = new nanogui::CheckBox(directionalLightWidget, "Cast shadows");
-	directionalLightCheckbox->setCallback([this](bool active) {
-		_lightNode->setActive(active);
-		_ambiantlightNode->light()->color = active ? glm::vec3(0.3f) : glm::vec3(0.8f);
+	directionalLightCheckbox->setCallback([this, directionLightNode](bool active) {
+		directionLightNode->light()->cast_shadow = active;
+		// _ambiantlightNode->light()->color = active ? glm::vec3(0.3f) : glm::vec3(0.8f);
 	});
 
 		// useless button
@@ -552,24 +549,24 @@ void VoxelProceduralSceneController::_createWorldFolder() {
 	_dynamicWorld->setWorldDirName(worldName);
 }
 
-const std::map<int, std::string> VoxelProceduralSceneController::_BlockNames = {
-	{ BLOCK_BEDROCK, "Bedrock" },
-	{ BLOCK_STONE, "Stone" },
-	{ BLOCK_DIRT, "Dirt" },
-	{ BLOCK_GRASS, "Grass" },
-	{ BLOCK_SAND, "Sand" },
-	{ BLOCK_GRAVEL, "Gravel" },
-	{ BLOCK_WATER, "Water" },
-	{ BLOCK_GRASS_BROWN, "Brown Grass" },
-	{ BLOCK_WOOD, "Wood" },
-	{ BLOCK_LEAFS, "Leaf" },
-	{ BLOCK_WOOD_PLANKS, "Oak Plank" },
-	{ BLOCK_BRICKS, "Brick" },
-	{ BLOCK_COBBLESTONE, "Cobblestone" },
-	{ BLOCK_ICE, "Ice" },
-	{ BLOCK_ICE_BROKEN, "Broken Ice" },
-	{ BLOCK_OBSIDIAN, "Obsidian" },
-	{ BLOCK_GRASS_PURPLE, "Purple Grass" },
-	{ BLOCK_GOLD, "Gold" },
-	{ BLOCK_TNT, "TNT" },
+const std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneController::_pickableBlocks = {
+	std::make_pair("Bedrock", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_BEDROCK)),
+	std::make_pair("Stone", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_STONE)),
+	std::make_pair("Dirt", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_DIRT)),
+	std::make_pair("Grass", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRASS)),
+	std::make_pair("Sand", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_SAND)),
+	std::make_pair("Gravel", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRAVEL)),
+	std::make_pair("Brown Grass", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRASS_BROWN)),
+	std::make_pair("Wood", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD)),
+	std::make_pair("Leaf", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_LEAFS)),
+	std::make_pair("Oak Plank", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD_PLANKS)),
+	std::make_pair("Brick", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_BRICKS)),
+	std::make_pair("Cobblestone", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_COBBLESTONE)),
+	std::make_pair("Ice", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_ICE)),
+	std::make_pair("Broken Ice", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_ICE_BROKEN)),
+	std::make_pair("Obsidian", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_OBSIDIAN)),
+	std::make_pair("Purple Grass", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRASS_PURPLE)),
+	std::make_pair("Gold", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GOLD)),
+	std::make_pair("TNT", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TNT)),
+	std::make_pair("Water", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::ReduceHeight, BLOCK_WATER)),
 };

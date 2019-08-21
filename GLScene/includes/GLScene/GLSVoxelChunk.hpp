@@ -12,34 +12,79 @@
 #include "GLScene.hpp"
 
 namespace GLS {
-    
-    class VoxelChunk : public IRenderable {
+
+	enum VoxelBlockMeshType : uint8_t {
+		Empty,
+		Full,
+		/** Used for water and soulsand */
+		ReduceHeight,
+		/** Down level slab */
+		Slab_low,
+		/** Up level slab */
+		Slab_hight,
+		/** Regular stair */
+		Stair,
+		/** Upside down stair */
+		Reversed_stair,
+		/** Small plate on edge like leafs and ladders */
+		Full_edge,
+		/** Fence */
+		Fence
+	};
+
+	enum VoxelBlockOrientation : uint8_t {
+		BlockOrientation_PositiveX,
+		BlockOrientation_NegativeX,
+		BlockOrientation_PositiveZ,
+		BlockOrientation_NegativeZ,
+	};
+
+	struct VoxelBlock {
+		private:
+		uint8_t _adjacent;
+		friend class VoxelChunk;
+		public:
+		VoxelBlockOrientation orientation;
+		VoxelBlockMeshType meshType;
+		uint8_t textureId;
+
+		VoxelBlock();
+		VoxelBlock(VoxelBlockMeshType type, uint8_t id);
+		VoxelBlock(VoxelBlockOrientation orient, VoxelBlockMeshType type, uint8_t id);
+	};
+
+	enum VoxelChunkEdge : uint8_t {
+		Positive_X = 0,
+		Negative_X = 1,
+		Positive_Y = 2,
+		Negative_Y = 3,
+		Positive_Z = 4,
+		Negative_Z = 5,
+	};
+
+	// class IMeshSource {
+	// 	public:
+	// 	virtual std::shared_ptr<Mesh> bakeMesh() const;
+	// };
+
+    class VoxelChunk /* : public IMeshSource */ {
     
     public:
-        static const int chunkSize = 16; // min = 2
-        static const int chunkBlockCount = chunkSize * chunkSize * chunkSize;
-        static int indexOfBlock(int x, int y, int z);
-        static std::tuple<int, int, int> coordinatesOfBlock(int i);
-        static int opposedFace(int f);
+        static const uint chunkSize = 16; // min = 2
+        static const uint chunkBlockCount = chunkSize * chunkSize * chunkSize;
+        static uint indexOfBlock(glm::ivec3 coord);
+        static glm::ivec3 coordinatesOfBlock(uint index);
+        static VoxelChunkEdge opposedEdge(VoxelChunkEdge edge);
 
     protected:
 
-        // blockId & 0x00FFFF = id;
-        // blockId & 0xFF0000 = adjacence
-        int _blockIds[chunkBlockCount];
-
-        GLuint _blocksBuffer;
-        GLuint _blocksArray;
-
-        std::shared_ptr<ShaderProgram> _shaderProgram;
+		std::array<VoxelBlock, chunkBlockCount> _blocks;
         std::shared_ptr<Material> _material;
 
         std::array<std::weak_ptr<VoxelChunk>, 6> _adjChunks;
+		std::function<bool(VoxelBlock, VoxelBlock, VoxelChunkEdge)> _adjacentFunction;
 
-        bool _isEmpty;
-        bool _fullEdges[6];
-
-        void _calculBlockAdjacence(int x, int y, int z);
+        void _setBlockAdjacence(glm::ivec3 coord);
 
     public:
 
@@ -52,58 +97,32 @@ namespace GLS {
         
         // VoxelChunk utilities
 
-        int blockIdAt(int x, int y, int z) const;
-        int blockIdAt(std::tuple<int, int, int> coord) const;
-        void setBlockIdAt(int x, int y, int z, int id, bool sureInside = true);
+		const std::array<VoxelBlock, chunkBlockCount>& getBlocks() const;
+		std::array<VoxelBlock, chunkBlockCount>& getBlocks();
+		const VoxelBlock& blockAt(uint coord) const;
+		VoxelBlock& blockAt(uint coord);
+		const VoxelBlock& blockAt(glm::ivec3 coord) const;
+		VoxelBlock& blockAt(glm::ivec3 coord);
 
-        int blockAdjAt(int x, int y, int z) const;
-
-        bool isEmpty() const; // only contains air blocks
-        bool isFullOnEdge(int edgeIndex) const; // contains full blocks on the indexed edge
-        bool isSurrounded() const; // all adjacent are full on the edge
-
-        void setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, int adji);
+        void setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, VoxelChunkEdge edge);
         void setAdjacentChunks(std::array<std::weak_ptr<VoxelChunk>, 6> adjChunks);
-        std::shared_ptr<VoxelChunk> adjacentChunk(int edgeIndex);
+
+        std::shared_ptr<VoxelChunk> adjacentChunk(VoxelChunkEdge edgeIndex);
         std::array<std::shared_ptr<VoxelChunk>, 6> adjacentChunks();
 
-        // TODO: add the possibility to update the target part of the buffer with glBufferSubData
-        void calculBlockAdjacence();
-        void calculBlockAdjacence(int x, int y, int z);
-        void calculBlockAdjacenceEdge(int edge);
+		void setAdjacentFunction(std::function<bool(VoxelBlock, VoxelBlock, VoxelChunkEdge)> closure);
 
-        virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
+        void calculBlockAdjacence();
+        void calculBlockAdjacence(glm::ivec3 coord);
+		void calculBlockAdjacenceEdge(VoxelChunkEdge edge);
 
         void setMaterial(std::shared_ptr<Material> mat);
         std::shared_ptr<Material> getMaterial() const;
 
+		// Mesh
 
-        // OpenGL Buffers
-        
-        void generateBuffers();
-        void deleteBuffers();
-        
-        bool bufferGenerated() const;
-        
-        void updateIdsBuffer();
+		virtual std::shared_ptr<Mesh> bakeMesh() const;
 
-
-        // Rendering
-        
-        void setProgram(std::shared_ptr<ShaderProgram> shaderProgram);
-
-        virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms);
-        virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
-
-
-        // Shader Uniforms
-
-        static std::string shaderUniformsVertex();
-        static std::string shaderUniformsGeometry();
-        static std::string shaderUniformsFragment();
-
-		// tgros WiP
-		int* getBlocks();
     };
 
 }

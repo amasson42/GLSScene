@@ -2,7 +2,6 @@
 #pragma once
 
 #include "AppEnv.hpp"
-#define CHUNKSIZE GLS::VoxelChunk::chunkSize
 
 /**
  * a GameVoxelChunk is the packing of a game node, a voxel object and its corresponding mesh in a struct
@@ -20,10 +19,10 @@ struct GameVoxelChunk {
 
 	GameVoxelChunk();
 	void updateMesh();
-	void setBlockAt(glm::ivec3 coord, int blockId);
+	void setBlockAt(glm::ivec3 coord, GLS::VoxelBlock block);
 
-	void setAdjacentChunk(std::shared_ptr<GameVoxelChunk> chunk, int edge);
-	void setAdjacentChunk(std::weak_ptr<GameVoxelChunk> chunk, int edge);
+	void setAdjacentChunk(std::shared_ptr<GameVoxelChunk> chunk, GLS::VoxelChunkEdge edge);
+	void setAdjacentChunk(std::weak_ptr<GameVoxelChunk> chunk, GLS::VoxelChunkEdge edge);
 };
 
 /**

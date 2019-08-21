@@ -2,7 +2,6 @@
 #pragma once
 
 #include "AppEnv.hpp"
-#define CHUNKSIZE GLS::VoxelChunk::chunkSize
 
 class BigChunk;
 

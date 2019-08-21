@@ -10,200 +10,54 @@
 
 namespace GLS {
 
-	// tgros WiP
-	int* VoxelChunk::getBlocks() {
-		return _blockIds;
+    uint VoxelChunk::indexOfBlock(glm::ivec3 coord) {
+        return (coord.z * chunkSize * chunkSize + coord.y * chunkSize + coord.x);
+    }
+
+    glm::ivec3 VoxelChunk::coordinatesOfBlock(uint i) {
+        return glm::ivec3(i % chunkSize,
+                         (i % (chunkSize * chunkSize)) / chunkSize,
+                         i / (chunkSize * chunkSize));
 	}
 
-    int VoxelChunk::indexOfBlock(int x, int y, int z) {
-        return (z * chunkSize * chunkSize + y * chunkSize + x);
+    VoxelChunkEdge VoxelChunk::opposedEdge(VoxelChunkEdge f) {
+        return static_cast<VoxelChunkEdge>(((f / 2) * 2) + (1 - (f % 2)));
     }
 
-    std::tuple<int, int, int> VoxelChunk::coordinatesOfBlock(int i) {
-        return std::make_tuple(i % chunkSize,
-                                (i % (chunkSize * chunkSize)) / chunkSize,
-                                i / (chunkSize * chunkSize));
-    }
+	const std::array<VoxelBlock, VoxelChunk::chunkBlockCount>& VoxelChunk::getBlocks() const {
+		return _blocks;
+	}
 
-    int VoxelChunk::blockIdAt(int x, int y, int z) const {
-        return _blockIds[indexOfBlock(x, y, z)] & 0xFFFF;
-    }
+	std::array<VoxelBlock, VoxelChunk::chunkBlockCount>& VoxelChunk::getBlocks() {
+		return _blocks;
+	}
 
-    int VoxelChunk::blockIdAt(std::tuple<int, int, int> coord) const {
-        return blockIdAt(std::get<0>(coord), std::get<1>(coord), std::get<2>(coord));
-    }
+	const VoxelBlock& VoxelChunk::blockAt(uint coord) const {
+		return _blocks[coord];
+	}
 
-    static bool _checkIsEmpty(int *blockIds) {
-        for (int i = 0; i < VoxelChunk::chunkBlockCount; i++) {
-            if ((blockIds[i] & 0xFFFF) != 0)
-                return false;
-        }
-        return true;
-    }
+	VoxelBlock& VoxelChunk::blockAt(uint coord) {
+		return _blocks[coord];
+	}
 
-    static bool _checkFullEdge_px(int *blockIds) {
-        for (int i = 0; i < VoxelChunk::chunkSize; i++)
-            for (int j = 0; j < VoxelChunk::chunkSize; j++)
-                if ((blockIds[VoxelChunk::indexOfBlock(VoxelChunk::chunkSize - 1, i, j)]) == 0)
-                    return false;
-        return true;
-    }
+	const VoxelBlock& VoxelChunk::blockAt(glm::ivec3 coord) const {
+		return _blocks[indexOfBlock(coord)];
+	}
 
-    static bool _checkFullEdge_nx(int *blockIds) {
-        for (int i = 0; i < VoxelChunk::chunkSize; i++)
-            for (int j = 0; j < VoxelChunk::chunkSize; j++)
-                if ((blockIds[VoxelChunk::indexOfBlock(0, i, j)]) == 0)
-                    return false;
-        return true;
-    }
+	VoxelBlock& VoxelChunk::blockAt(glm::ivec3 coord) {
+		return _blocks[indexOfBlock(coord)];
+	}
 
-    static bool _checkFullEdge_py(int *blockIds) {
-        for (int i = 0; i < VoxelChunk::chunkSize; i++)
-            for (int j = 0; j < VoxelChunk::chunkSize; j++)
-                if ((blockIds[VoxelChunk::indexOfBlock(i, VoxelChunk::chunkSize - 1, j)]) == 0)
-                    return false;
-        return true;
-    }
-
-    static bool _checkFullEdge_ny(int *blockIds) {
-        for (int i = 0; i < VoxelChunk::chunkSize; i++)
-            for (int j = 0; j < VoxelChunk::chunkSize; j++)
-                if ((blockIds[VoxelChunk::indexOfBlock(i, 0, j)]) == 0)
-                    return false;
-        return true;
-    }
-
-    static bool _checkFullEdge_pz(int *blockIds) {
-        for (int i = 0; i < VoxelChunk::chunkSize; i++)
-            for (int j = 0; j < VoxelChunk::chunkSize; j++)
-                if ((blockIds[VoxelChunk::indexOfBlock(i, j, VoxelChunk::chunkSize - 1)]) == 0)
-                    return false;
-        return true;
-    }
-
-    static bool _checkFullEdge_nz(int *blockIds) {
-        for (int i = 0; i < VoxelChunk::chunkSize; i++)
-            for (int j = 0; j < VoxelChunk::chunkSize; j++)
-                if ((blockIds[VoxelChunk::indexOfBlock(i, j, 0)]) == 0)
-                    return false;
-        return true;
-    }
-
-    void VoxelChunk::setBlockIdAt(int x, int y, int z, int id, bool sureInside) {
-        
-        if (!sureInside) {
-            if (x < 0) {
-                if (!_adjChunks[1].expired())
-                    _adjChunks[1].lock()->setBlockIdAt(x + chunkSize, y, z, id, false);
-                return;
-            }
-            if (x >= chunkSize) {
-                if (!_adjChunks[0].expired())
-                    _adjChunks[0].lock()->setBlockIdAt(x - chunkSize, y, z, id, false);
-                return;
-            }
-            if (y < 0) {
-                if (!_adjChunks[3].expired())
-                    _adjChunks[3].lock()->setBlockIdAt(x, y + chunkSize, z, id, false);
-                return;
-            }
-            if (y >= chunkSize) {
-                if (!_adjChunks[2].expired())
-                    _adjChunks[2].lock()->setBlockIdAt(x, y - chunkSize, z, id, false);
-                return;
-            }
-            if (z < 0) {
-                if (!_adjChunks[5].expired())
-                    _adjChunks[5].lock()->setBlockIdAt(x, y, z + chunkSize, id, false);
-                return;
-            }
-            if (z >= chunkSize) {
-                if (!_adjChunks[4].expired())
-                    _adjChunks[4].lock()->setBlockIdAt(x, y, z - chunkSize, id, false);
-                return;
-            }
-        }
-
-        _blockIds[indexOfBlock(x, y, z)] = id;
-
-        if (id == 0 && !_isEmpty)
-            _isEmpty = _checkIsEmpty(_blockIds);
-        else
-            _isEmpty = false;
-
-        if (x == chunkSize - 1) {
-            if (id == 0)
-                _fullEdges[0] = false;
-            else
-                _fullEdges[0] = _checkFullEdge_px(_blockIds);
-        } else if (x == 0) {
-            if (id == 0)
-                _fullEdges[1] = false;
-            else
-                _fullEdges[1] = _checkFullEdge_nx(_blockIds);
-        }
-        if (y == chunkSize - 1) {
-            if (id == 0)
-                _fullEdges[2] = false;
-            else
-                _fullEdges[2] = _checkFullEdge_py(_blockIds);
-        } else if (y == 0) {
-            if (id == 0)
-                _fullEdges[3] = false;
-            else
-                _fullEdges[3] = _checkFullEdge_ny(_blockIds);
-        }
-        if (z == chunkSize - 1) {
-            if (id == 0)
-                _fullEdges[4] = false;
-            else
-                _fullEdges[4] = _checkFullEdge_pz(_blockIds);
-        } else if (z == 0) {
-            if (id == 0)
-                _fullEdges[5] = false;
-            else
-                _fullEdges[5] = _checkFullEdge_nz(_blockIds);
-        }
-
-    }
-
-    int VoxelChunk::blockAdjAt(int x, int y, int z) const {
-        return (_blockIds[indexOfBlock(x, y, z)] & 0xFF0000) >> 16;
-    }
-
-    bool VoxelChunk::isEmpty() const {
-        return _isEmpty;
-    }
-
-    bool VoxelChunk::isFullOnEdge(int edgeIndex) const {
-        return _fullEdges[edgeIndex];
-    }
-
-    int VoxelChunk::opposedFace(int f) {
-        return ((f / 2) * 2) + (1 - (f % 2));
-    }
-
-    bool VoxelChunk::isSurrounded() const {
-        for (int i = 0; i < 6; i++) {
-            if (_adjChunks[i].expired())
-                return false;
-            std::shared_ptr<VoxelChunk> adj = _adjChunks[i].lock();
-            if (adj->isFullOnEdge(opposedFace(i)) == false)
-                return false;
-        }
-        return true;
-    }
-
-    void VoxelChunk::setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, int adji) {
-        _adjChunks[adji] = adjChunk;
+    void VoxelChunk::setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, VoxelChunkEdge edge) {
+        _adjChunks[edge] = adjChunk;
     }
 
     void VoxelChunk::setAdjacentChunks(std::array<std::weak_ptr<VoxelChunk>, 6> adjChunks) {
         _adjChunks = adjChunks;
     }
 
-    std::shared_ptr<VoxelChunk> VoxelChunk::adjacentChunk(int edgeIndex) {
-        return _adjChunks[edgeIndex].expired() ? nullptr : _adjChunks[edgeIndex].lock();
+    std::shared_ptr<VoxelChunk> VoxelChunk::adjacentChunk(VoxelChunkEdge edge) {
+        return _adjChunks[edge].expired() ? nullptr : _adjChunks[edge].lock();
     }
 
     std::array<std::shared_ptr<VoxelChunk>, 6> VoxelChunk::adjacentChunks() {
@@ -213,132 +67,101 @@ namespace GLS {
         return adj;
     }
 
-    void VoxelChunk::_calculBlockAdjacence(int x, int y, int z) {
-        if (blockIdAt(x, y, z) == 0)
-            _blockIds[indexOfBlock(x, y, z)] = blockIdAt(x, y, z);
-        
-        int adj = 0;
-        if (x >= VoxelChunk::chunkSize - 1) {
-            if (_adjChunks[0].expired() || _adjChunks[0].lock()->blockIdAt(0, y, z) == 0)
-                adj |= (1 << 0);
-        } else if (blockIdAt(x + 1, y, z) == 0)
-            adj |= (1 << 0);
-        
-        if (x <= 0) {
-            if (_adjChunks[1].expired() || _adjChunks[1].lock()->blockIdAt(VoxelChunk::chunkSize - 1, y, z) == 0)
-                adj |= (1 << 1);
-        } else if (blockIdAt(x - 1, y, z) == 0)
-            adj |= (1 << 1);
+	void VoxelChunk::setAdjacentFunction(std::function<bool(VoxelBlock, VoxelBlock, VoxelChunkEdge)> f) {
+		_adjacentFunction = f;
+	}
 
-        if (y >= VoxelChunk::chunkSize - 1) {
-            if (_adjChunks[2].expired() || _adjChunks[2].lock()->blockIdAt(x, 0, z) == 0)
-                adj |= (1 << 2);
-        } else if (blockIdAt(x, y + 1, z) == 0)
-            adj |= (1 << 2);
-        
-        if (y <= 0) {
-            if (_adjChunks[3].expired() || _adjChunks[3].lock()->blockIdAt(x, VoxelChunk::chunkSize - 1, z) == 0)
-                adj |= (1 << 3);
-        } else if (blockIdAt(x, y - 1, z) == 0)
-            adj |= (1 << 3);
+	static bool _blockMustShowEdge(VoxelBlock block, VoxelBlock neighbor, VoxelChunkEdge edge, std::function<bool(VoxelBlock, VoxelBlock, VoxelChunkEdge)> delegate) {
+		if (block.meshType == VoxelBlockMeshType::Full
+			&& neighbor.meshType == VoxelBlockMeshType::Full) {
+			if (delegate)
+				return delegate(block, neighbor, edge);
+			return false;
+		}
+		return true;
+	}
 
-        if (z >= VoxelChunk::chunkSize - 1) {
-            if (_adjChunks[4].expired() || _adjChunks[4].lock()->blockIdAt(x, y, 0) == 0)
-                adj |= (1 << 4);
-        } else if (blockIdAt(x, y, z + 1) == 0)
-            adj |= (1 << 4);
+    void VoxelChunk::_setBlockAdjacence(glm::ivec3 coord) {
+		
+		VoxelBlock& block(blockAt(coord));
+		block._adjacent = 0;
+		if (block.meshType != VoxelBlockMeshType::Full) { // TODO: clean that
+			block._adjacent = 0b00111111;
+			return;
+		}
         
-        if (z <= 0) {
-            if (_adjChunks[5].expired() || _adjChunks[5].lock()->blockIdAt(x, y, VoxelChunk::chunkSize - 1) == 0)
-                adj |= (1 << 5);
-        } else if (blockIdAt(x, y, z - 1) == 0)
-            adj |= (1 << 5);
+		auto checkEdge = [this, coord, &block](VoxelChunkEdge edge, bool onEdge, glm::ivec3 offset, glm::ivec3 neighborPlace) {
+			if (onEdge) {
+				if (_adjChunks[edge].expired()
+					|| _blockMustShowEdge(block, _adjChunks[edge].lock()->blockAt(neighborPlace), edge, _adjacentFunction))
+					block._adjacent |= (1 << (edge));
+			} else if (_blockMustShowEdge(block, blockAt(coord + offset), edge, _adjacentFunction))
+				block._adjacent |= (1 << (edge));
+		};
 
-        _blockIds[indexOfBlock(x, y, z)] = blockIdAt(x, y, z) | (adj << 16);
+		checkEdge(VoxelChunkEdge::Positive_X, coord.x == VoxelChunk::chunkSize - 1, glm::ivec3(1, 0, 0), glm::ivec3(0, coord.y, coord.z));
+		checkEdge(VoxelChunkEdge::Negative_X, coord.x == 0, glm::ivec3(-1, 0, 0), glm::ivec3(VoxelChunk::chunkSize - 1, coord.y, coord.z));
+
+		checkEdge(VoxelChunkEdge::Positive_Y, coord.y == VoxelChunk::chunkSize - 1, glm::ivec3(0, 1, 0), glm::ivec3(coord.x, 0, coord.z));
+		checkEdge(VoxelChunkEdge::Negative_Y, coord.y == 0, glm::ivec3(0, -1, 0), glm::ivec3(coord.x, VoxelChunk::chunkSize - 1, coord.z));
+
+		checkEdge(VoxelChunkEdge::Positive_Z, coord.z == VoxelChunk::chunkSize - 1, glm::ivec3(0, 0, 1), glm::ivec3(coord.x, coord.y, 0));
+		checkEdge(VoxelChunkEdge::Negative_Z, coord.z == 0, glm::ivec3(0, 0, -1), glm::ivec3(coord.x, coord.y, VoxelChunk::chunkSize - 1));
+        
     }
 
     void VoxelChunk::calculBlockAdjacence() {
-        std::array<std::shared_ptr<VoxelChunk>, 6> adjChunks = adjacentChunks();
-
-        for (int x = 0; x < chunkSize; x++)
-            for (int y = 0; y < chunkSize; y++)
-                for (int z = 0; z < chunkSize; z++) {
-                    _calculBlockAdjacence(x, y, z);
+		glm::ivec3 coord;
+        for (coord.x = 0; coord.x < chunkSize; coord.x++)
+            for (coord.y = 0; coord.y < chunkSize; coord.y++)
+                for (coord.z = 0; coord.z < chunkSize; coord.z++) {
+                    _setBlockAdjacence(coord);
                 }
     }
 
-    void VoxelChunk::calculBlockAdjacence(int x, int y, int z) {
+    void VoxelChunk::calculBlockAdjacence(glm::ivec3 coord) {
         std::array<std::shared_ptr<VoxelChunk>, 6> adjChunks = adjacentChunks();
 
-        _calculBlockAdjacence(x, y, z);
-        if (x == 0) {
-            if (adjChunks[1] != nullptr)
-                adjChunks[1]->_calculBlockAdjacence(chunkSize - 1, y, z);
-        } else {
-            _calculBlockAdjacence(x - 1, y, z);
-        }
+        _setBlockAdjacence(coord);
+		auto setAdjacentBlock = [this, adjChunks, coord](VoxelChunkEdge edge, bool onEdge, glm::ivec3 offset, glm::ivec3 neighborPlace) {
+			if (onEdge) {
+				if (adjChunks[edge] != nullptr)
+					adjChunks[edge]->_setBlockAdjacence(neighborPlace);
+			} else {
+				_setBlockAdjacence(coord + offset);
+			}
+		};
 
-        if (x == chunkSize - 1) {
-            if (adjChunks[0] != nullptr)
-                adjChunks[0]->_calculBlockAdjacence(0, y, z);
-        } else {
-            _calculBlockAdjacence(x + 1, y, z);
-        }
+		setAdjacentBlock(VoxelChunkEdge::Positive_X, coord.x == chunkSize - 1, glm::ivec3(1, 0, 0), glm::ivec3(0, coord.y, coord.z));
+		setAdjacentBlock(VoxelChunkEdge::Negative_X, coord.x == 0, glm::ivec3(-1, 0, 0), glm::ivec3(VoxelChunk::chunkSize - 1, coord.y, coord.z));
 
-        if (y == 0) {
-            if (adjChunks[3] != nullptr)
-                adjChunks[3]->_calculBlockAdjacence(x, chunkSize - 1, z);
-        } else {
-            _calculBlockAdjacence(x, y - 1, z);
-        }
+		setAdjacentBlock(VoxelChunkEdge::Positive_Y, coord.y == chunkSize - 1, glm::ivec3(0, 1, 0), glm::ivec3(coord.x, 0, coord.z));
+		setAdjacentBlock(VoxelChunkEdge::Negative_Y, coord.y == 0, glm::ivec3(0, -1, 0), glm::ivec3(coord.x, VoxelChunk::chunkSize - 1, coord.z));
 
-        if (y == chunkSize - 1) {
-            if (adjChunks[2] != nullptr)
-                adjChunks[2]->_calculBlockAdjacence(x, 0, z);
-        } else {
-            _calculBlockAdjacence(x, y + 1, z);
-        }
-
-        if (z == 0) {
-            if (adjChunks[5] != nullptr)
-                adjChunks[5]->_calculBlockAdjacence(x, y, chunkSize - 1);
-        } else {
-            _calculBlockAdjacence(x, y, z - 1);
-        }
-
-        if (z == chunkSize - 1) {
-            if (adjChunks[4] != nullptr)
-                adjChunks[4]->_calculBlockAdjacence(x, y, 0);
-        } else {
-            _calculBlockAdjacence(x, y, z + 1);
-        }
+		setAdjacentBlock(VoxelChunkEdge::Positive_Z, coord.z == chunkSize - 1, glm::ivec3(0, 0, 1), glm::ivec3(coord.x, coord.y, 0));
+		setAdjacentBlock(VoxelChunkEdge::Negative_Z, coord.z == 0, glm::ivec3(0, 0, -1), glm::ivec3(coord.x, coord.y, VoxelChunk::chunkSize - 1));
 
     }
 
-    void VoxelChunk::calculBlockAdjacenceEdge(int edge) {
+	void VoxelChunk::calculBlockAdjacenceEdge(VoxelChunkEdge edge) {
         int xs, xe, ys, ye, zs, ze;
         const int cs = chunkSize - 1;
         switch (edge) {
-            case 0: xs = cs;        xe = chunkSize; ys = 0;         ye = chunkSize; zs = 0;         ze = chunkSize; break; // +X
-            case 1: xs = 0;         xe = 1;         ys = 0;         ye = chunkSize; zs = 0;         ze = chunkSize; break; // -X
-            case 2: xs = 0;         xe = chunkSize; ys = cs;        ye = chunkSize; zs = 0;         ze = chunkSize; break; // +Y
-            case 3: xs = 0;         xe = chunkSize; ys = 0;         ye = 1;         zs = 0;         ze = chunkSize; break; // -Y
-            case 4: xs = 0;         xe = chunkSize; ys = 0;         ye = chunkSize; zs = cs;        ze = chunkSize; break; // +Z
-            case 5: xs = 0;         xe = chunkSize; ys = 0;         ye = chunkSize; zs = 0;         ze = 1;         break; // -Z
+            case Positive_X: xs = cs;        xe = chunkSize; ys = 0;         ye = chunkSize; zs = 0;         ze = chunkSize; break;
+            case Negative_X: xs = 0;         xe = 1;         ys = 0;         ye = chunkSize; zs = 0;         ze = chunkSize; break;
+            case Positive_Y: xs = 0;         xe = chunkSize; ys = cs;        ye = chunkSize; zs = 0;         ze = chunkSize; break;
+            case Negative_Y: xs = 0;         xe = chunkSize; ys = 0;         ye = 1;         zs = 0;         ze = chunkSize; break;
+            case Positive_Z: xs = 0;         xe = chunkSize; ys = 0;         ye = chunkSize; zs = cs;        ze = chunkSize; break;
+            case Negative_Z: xs = 0;         xe = chunkSize; ys = 0;         ye = chunkSize; zs = 0;         ze = 1;         break;
             default: xs = xe = ys = ye = zs = ze = 0; break;
         }
         std::array<std::shared_ptr<VoxelChunk>, 6> adjChunks = adjacentChunks();
-        for (int x = xs; x < xe; x++)
-            for (int y = ys; y < ye; y++)
-                for (int z = zs; z < ze; z++) {
-                    _calculBlockAdjacence(x, y, z);
-                }
-    }
-
-    std::pair<glm::vec3, glm::vec3> VoxelChunk::getBounds(glm::mat4 transform) const {
-        (void)transform;
-        return std::pair<glm::vec3, glm::vec3>(0.0f, 0.0f);
-    }
+		glm::ivec3 coord;
+        for (coord.x = xs; coord.x < xe; coord.x++)
+            for (coord.y = ys; coord.y < ye; coord.y++)
+                for (coord.z = zs; coord.z < ze; coord.z++)
+                    _setBlockAdjacence(coord);
+	}
 
     void VoxelChunk::setMaterial(std::shared_ptr<Material> mat) {
         _material = mat;

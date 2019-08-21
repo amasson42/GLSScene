@@ -7,6 +7,8 @@
 #include "DynamicWorld.hpp"
 #include "ProceduralWorldGenerator.hpp"
 
+#define CHUNKSIZE (static_cast<int>(GLS::VoxelChunk::chunkSize))
+
 int* initNoise(unsigned int seed);
 double smoothNoise(double x, double y, double z);
 double linearNoise(double x, double y, double z);
@@ -57,10 +59,10 @@ private:
 
 	bool _displayInterface;
 
-    int _pickedBlock;
+    int _pickedBlockIndex;
 
 	void _createWorldFolder();
 
-    static const std::map<int, std::string> _BlockNames;
+	static const std::vector<std::pair<std::string, GLS::VoxelBlock> > _pickableBlocks;
 
 };

@@ -2,7 +2,6 @@
 #pragma once
 
 #include "AppEnv.hpp"
-#define CHUNKSIZE GLS::VoxelChunk::chunkSize
 
 class ProceduralWorldGenerator;
 class BigChunk;
@@ -34,7 +33,7 @@ public:
 
 	std::shared_ptr<ProceduralWorldGenerator> getGenerator();
 
-	void setBlockAt(const glm::vec3& worldPosition, int blockId);
+	void setBlockAt(const glm::vec3& worldPosition, GLS::VoxelBlock blockId);
 	void setWorldDirName(std::string worldDirName);
 
 	static const float minRenderDistance;

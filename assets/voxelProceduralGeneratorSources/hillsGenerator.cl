@@ -1,26 +1,26 @@
 
 // hillsGenerator.cl
 
-#define BLOCK_AIR 0
-#define BLOCK_BEDROCK 1
-#define BLOCK_STONE 2
-#define BLOCK_DIRT 3
-#define BLOCK_GRASS 4
-#define BLOCK_SAND 5
-#define BLOCK_GRAVEL 6
-#define BLOCK_WATER 7
-#define BLOCK_GRASS_BROWN 11
-#define BLOCK_WOOD 12
-#define BLOCK_LEAFS 13
-#define BLOCK_WOOD_PLANKS 14
-#define BLOCK_BRICKS 15
-#define BLOCK_COBBLESTONE 16
-#define BLOCK_ICE 21
-#define BLOCK_ICE_BROKEN 22
-#define BLOCK_OBSIDIAN 25
-#define BLOCK_GRASS_PURPLE 31
-#define BLOCK_GOLD 35
-#define BLOCK_TNT 92
+#define BLOCK_AIR 0x00000000
+#define BLOCK_BEDROCK 0x00010000
+#define BLOCK_STONE 0x01010000
+#define BLOCK_DIRT 0x02010000
+#define BLOCK_GRASS 0x03010000
+#define BLOCK_SAND 0x04010000
+#define BLOCK_GRAVEL 0x05010000
+#define BLOCK_WATER 0x07010000
+#define BLOCK_GRASS_BROWN 0x10010000
+#define BLOCK_WOOD 0x11010000
+#define BLOCK_LEAFS 0x12010000
+#define BLOCK_WOOD_PLANKS 0x13010000
+#define BLOCK_BRICKS 0x14010000
+#define BLOCK_COBBLESTONE 0x15010000
+#define BLOCK_ICE 0x20010000
+#define BLOCK_ICE_BROKEN 0x21010000
+#define BLOCK_OBSIDIAN 0x24010000
+#define BLOCK_GRASS_PURPLE 0x30010000
+#define BLOCK_GOLD 0x34010000
+#define BLOCK_TNT 0x35010000
 
 double grad(int hash, double x, double y, double z);
 double noise(__global int* p, double x, double y, double z);
@@ -96,14 +96,13 @@ float biomesIntensity_grass(__global int* ppm, float3 wpos) {
 #define BIOMES_COUNT 6
 
 int calculBlockAt(__global int* ppm, float3 wpos) {
-	if (wpos.y > 1)
+	if (wpos.y > 100 + 80 * noise(ppm, wpos.x * 0.01 + 351.517, 0.81, wpos.z * 0.01 + 9743.15))
 		return BLOCK_AIR;
 	if (biomesIntensity_grass(ppm, wpos) > 0)
 		return BLOCK_GRASS;
 	else
 		return BLOCK_DIRT;
 	float biomesIntensity[6];
-
 }
 
 kernel void generateBigChunk(__global int* ppm, __global int* blocks, const int2 bigChunkPos, const int chunkSize, const int bigChunkWidth) {

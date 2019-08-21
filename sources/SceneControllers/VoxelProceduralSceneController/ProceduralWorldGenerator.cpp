@@ -27,19 +27,18 @@ ProceduralWorldGenerator::~ProceduralWorldGenerator() {
 }
 
 std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec2 bigChunkPos) {
-
 	if (_kernelIndex < 0)
 		throw std::runtime_error("world generator was used before reading a kernel");
 	if (_perlinPermutationBufferIndex < 0)
 		throw std::runtime_error("world generator was used before setting a seed");
 	std::shared_ptr<BigChunk> bc = std::make_shared<BigChunk>(usedMaterial);
 
-	std::vector<int> blocks = std::vector<int>(BigChunk::bigChunkCount * GLS::VoxelChunk::chunkBlockCount);
+	std::vector<GLS::VoxelBlock> blocks(GLS::VoxelChunk::chunkBlockCount * BigChunk::bigChunkCount);
 
 	CLD::Kernel *k = _device->kernel(_kernelIndex);
 	int blocksBufferIndex;
 
-	CLD::Buffer blocksArrayPointersBuffer = _device->createFlagBuffer(BigChunk::bigChunkCount * sizeof(int) * GLS::VoxelChunk::chunkBlockCount, CL_MEM_USE_HOST_PTR, &blocks[0], &blocksBufferIndex);
+	CLD::Buffer blocksArrayPointersBuffer = _device->createFlagBuffer(blocks.size() * sizeof(GLS::VoxelBlock), CL_MEM_USE_HOST_PTR, &(blocks.front()), &blocksBufferIndex);
 
 	cl_int2 bcPos;
 	bcPos.s[0] = bigChunkPos.x;
@@ -55,16 +54,17 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 	_device->commandQueue(_commandQueueIndex)->runNDRangeKernel(*k, blocks.size());
 	_generationMutex.unlock();
 	
-	_device->commandQueue(_commandQueueIndex)->readBuffer(blocksArrayPointersBuffer, &blocks[0], blocks.size() * sizeof(int));
+	_device->commandQueue(_commandQueueIndex)->readBuffer(blocksArrayPointersBuffer, &(blocks.front()), blocks.size() * sizeof(GLS::VoxelBlock));
 	_device->commandQueue(_commandQueueIndex)->finish();
 
 	for (int arrayPointerIndex = 0; arrayPointerIndex < BigChunk::bigChunkCount; arrayPointerIndex++) {
-		std::memcpy(bc->chunkAt(arrayPointerIndex)->voxel->getBlocks(),
-			&blocks[arrayPointerIndex * GLS::VoxelChunk::chunkBlockCount],
-			sizeof(int) * GLS::VoxelChunk::chunkBlockCount);
+		std::memcpy(&(bc->chunkAt(arrayPointerIndex)->voxel->getBlocks().front()),
+			&(blocks[arrayPointerIndex * GLS::VoxelChunk::chunkBlockCount]),
+			sizeof(GLS::VoxelBlock) * GLS::VoxelChunk::chunkBlockCount);
 	}
 
 	_device->destroyBuffer(blocksBufferIndex);
+
 	return bc;
 }
 

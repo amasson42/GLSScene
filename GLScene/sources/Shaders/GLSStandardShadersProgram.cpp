@@ -99,30 +99,6 @@ namespace GLS {
         return _standardShaderProgramSkybox;
     }
 
-    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramVoxelChunk = nullptr;
-
-    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramVoxelChunk() {
-        if (_standardShaderProgramVoxelChunk == nullptr) {
-            std::shared_ptr<Shader> vertex = Shader::standardVertexVoxelChunk();
-            std::shared_ptr<Shader> geometry = Shader::standardGeometryVoxelChunk();
-            std::shared_ptr<Shader> fragment = Shader::standardFragmentMesh();
-            _standardShaderProgramVoxelChunk = std::make_shared<ShaderProgram>(*vertex, *geometry, *fragment);
-        }
-        return _standardShaderProgramVoxelChunk;
-    }
-
-    std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramVoxelChunkSimpleColor = nullptr;
-
-    std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramVoxelChunkSimpleColor() {
-        if (_standardShaderProgramVoxelChunkSimpleColor == nullptr) {
-            std::shared_ptr<Shader> vertex = Shader::standardVertexVoxelChunk();
-            std::shared_ptr<Shader> geometry = Shader::standardGeometryVoxelChunk();
-            std::shared_ptr<Shader> fragment = Shader::standardFragmentMeshSimpleColor();
-            _standardShaderProgramVoxelChunkSimpleColor = std::make_shared<ShaderProgram>(*vertex, *geometry, *fragment);
-        }
-        return _standardShaderProgramVoxelChunkSimpleColor;
-    }
-
     std::shared_ptr<ShaderProgram> ShaderProgram::_standardShaderProgramDotParticleSystem = nullptr;
 
     std::shared_ptr<ShaderProgram> ShaderProgram::standardShaderProgramDotParticleSystem() {

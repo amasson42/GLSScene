@@ -151,7 +151,6 @@ namespace GLS {
         static std::shared_ptr<Mesh> thinLine(glm::vec3 start, glm::vec3 end, bool generateBuffers = true);
         static std::shared_ptr<Mesh> objModel(std::string path, bool generateBuffers = true);
         static std::shared_ptr<Mesh> loadFromAiMesh(aiMesh *mesh, bool generateBuffers = true);
-        static std::shared_ptr<Mesh> voxelChunk(std::shared_ptr<VoxelChunk> chunk, std::function<void(glm::vec3&)> meshmerizer = nullptr, bool generateBuffers = true);
 
 
         // Shader uniforms

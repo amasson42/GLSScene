@@ -44,10 +44,8 @@ namespace GLS {
         static std::shared_ptr<Shader> standardVertexSkinnedMesh();
         static std::shared_ptr<Shader> standardVertexScreenTexture();
         static std::shared_ptr<Shader> standardVertexSkybox();
-        static std::shared_ptr<Shader> standardVertexVoxelChunk();
         static std::shared_ptr<Shader> standardVertexParticleSystem();
 
-        static std::shared_ptr<Shader> standardGeometryVoxelChunk();
         static std::shared_ptr<Shader> standardGeometryTexturedParticleSystem();
 
         static std::shared_ptr<Shader> standardFragmentMesh();
@@ -75,8 +73,6 @@ namespace GLS {
         static std::shared_ptr<ShaderProgram> _standardShaderProgramSkinnedMeshSimpleColor;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramScreenTexture;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramSkybox;
-        static std::shared_ptr<ShaderProgram> _standardShaderProgramVoxelChunk;
-        static std::shared_ptr<ShaderProgram> _standardShaderProgramVoxelChunkSimpleColor;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramDotParticleSystem;
         static std::shared_ptr<ShaderProgram> _standardShaderProgramTexturedParticleSystem;
         friend void glsInit(void* addr);
@@ -101,8 +97,6 @@ namespace GLS {
         static std::shared_ptr<ShaderProgram> standardShaderProgramInstancedMeshSimpleColor();
         static std::shared_ptr<ShaderProgram> standardShaderProgramScreenTexture();
         static std::shared_ptr<ShaderProgram> standardShaderProgramSkybox();
-        static std::shared_ptr<ShaderProgram> standardShaderProgramVoxelChunk();
-        static std::shared_ptr<ShaderProgram> standardShaderProgramVoxelChunkSimpleColor();
         static std::shared_ptr<ShaderProgram> standardShaderProgramDotParticleSystem();
         static std::shared_ptr<ShaderProgram> standardShaderProgramTexturedParticleSystem();
 
