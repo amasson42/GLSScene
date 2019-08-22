@@ -91,8 +91,8 @@ _framebuffer(nullptr) {
 
     glfwSetWindowCloseCallback(_glfwWindow, [](GLFWwindow* win) {
         GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
-        if (window != NULL)
-            window->close();
+		window->closeCallback();
+		window->close();
     });
 
     glfwSetWindowSizeCallback(_glfwWindow, [](GLFWwindow* win, int width, int height) {
@@ -105,8 +105,10 @@ _framebuffer(nullptr) {
     glfwSetScrollCallback(_glfwWindow, [](GLFWwindow* win, double x, double y) {
         GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
 
+        if (window->nanoguiScreen()->scrollCallbackEvent(x, y)) {
+			return;
+		}
         window->scrollCallBack(x, y);
-        window->nanoguiScreen()->scrollCallbackEvent(x, y);
     });
 
     glfwSwapInterval(1);

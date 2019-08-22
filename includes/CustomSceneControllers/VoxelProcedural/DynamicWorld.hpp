@@ -30,6 +30,8 @@ public:
 	float getRenderDistance() const;
 
 	void reloadChunks();
+	void saveLoadedChunks();
+	void unloadWorld();
 
 	std::shared_ptr<ProceduralWorldGenerator> getGenerator();
 

@@ -71,6 +71,7 @@ class GLSWindow {
     void keyCallBack(int key, int scan, int action, int mods);
     void scrollCallBack(double x, double y);
     void mouseButtonCallBack(int button, int action, int modifiers);
+	void closeCallback();
 
     glm::vec2 mousePosition() const;
     glm::vec2 mouseContextPosition() const;

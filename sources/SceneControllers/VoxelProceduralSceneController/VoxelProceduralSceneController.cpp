@@ -1,5 +1,6 @@
 
 #include "AppEnv.hpp"
+#include <nlohmann/json.hpp>
 
 #define BLOCK_BEDROCK 0
 #define BLOCK_STONE 1
@@ -26,7 +27,9 @@ ISceneController(window) {
 	lt = 0;
 	cameraMoveSpeed = 5;
 	_nanoguiScreen = _window.lock()->nanoguiScreen();
+	_startupWindow = true;
 	_pickedBlockIndex = 0;
+	_createWorldsFolder();
 }
 
 VoxelProceduralSceneController::~VoxelProceduralSceneController() {
@@ -34,6 +37,10 @@ VoxelProceduralSceneController::~VoxelProceduralSceneController() {
 }
 
 void VoxelProceduralSceneController::update() {
+	if (_startupWindow) {
+		return;
+	}
+
 	ISceneController::update();
 	if (!mustUpdate)
 		return;
@@ -116,7 +123,9 @@ void VoxelProceduralSceneController::updateUI() {
 
 void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int action, int mods) {
 	ISceneController::keyCallBack(key, scancode, action, mods);
-
+	if (_startupWindow) {
+		return;
+	}
 	if (action == GLFW_PRESS) {
 		if (key == GLFW_KEY_EQUAL)
 			cameraMoveSpeed *= 2.0;
@@ -143,7 +152,9 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 }
 
 void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
-
+	if (_startupWindow) {
+		return;
+	}
 	if (y > 0.0) {
 		_pickedBlockIndex = (++_pickedBlockIndex) % _pickableBlocks.size();
 	} else if (y < 0.0) {
@@ -158,7 +169,9 @@ void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
 }
 
 void VoxelProceduralSceneController::mouseButtonCallBack(int button, int action, int modifiers) {
-	// std::cout << button << " => " << action << std::endl;
+	if (_startupWindow) {
+		return;
+	}
 	glm::vec3 targetWorldPos = _placeHolderBlockOfDoom->transform().position();
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
 		_dynamicWorld->setBlockAt(targetWorldPos, GLS::VoxelBlock(GLS::VoxelBlockMeshType::Empty, 0));
@@ -168,30 +181,84 @@ void VoxelProceduralSceneController::mouseButtonCallBack(int button, int action,
 	}
 }
 
+void VoxelProceduralSceneController::closeCallback() {
+	ISceneController::closeCallback();
+	if (_startupWindow) {
+		return;
+	}
+	_saveJsonFileInfo();
+	_dynamicWorld->saveLoadedChunks();
+
+}
+
 void VoxelProceduralSceneController::resizeWindowCallBack(glm::vec2 newSize) {
+	if (_startupWindow) {
+		return;
+	}
 	ISceneController::resizeWindowCallBack(newSize);
 	updateUI();
 }
 
 void VoxelProceduralSceneController::makeScene() {
+	if (_startupWindow) {
+		// Saved worlds scrolling list
+		nanogui::Window* scrollWindow = new nanogui::Window(_nanoguiScreen, "Saved worlds");
+		scrollWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 0));
 
-	GLS::Scene& scene(*_scene);
+		nanogui::VScrollPanel* scrollPanel = new nanogui::VScrollPanel(scrollWindow);
+		scrollPanel->setFixedSize(nanogui::Vector2i(200, 300));
+
+		nanogui::Widget* worldsWidget = new nanogui::Widget(scrollPanel);
+		worldsWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Minimum, 10, 0));
+		for (auto const& entry : std::filesystem::directory_iterator("worlds")) {
+			std::string worldName = entry.path().generic_string();
+			int beginIdx = worldName.rfind('/');
+			worldName = worldName.substr(beginIdx + 1);
+			nanogui::Button* l = new nanogui::Button(worldsWidget, worldName);
+			l->setCallback([worldName, this, scrollWindow]() {
+				_startupWindow = false;
+				_setupWorld(false);
+				_setupGUI();
+				_loadJsonFileInfo("worlds/" + worldName + "/info.json");
+				scrollWindow->setVisible(false);
+			});
+		}
+
+		// New world Button
+		nanogui::Widget* newWorldWidget = new nanogui::Widget(scrollWindow);
+		newWorldWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Maximum, 10, 0));
+		nanogui::Button* newWorldButton = new nanogui::Button(newWorldWidget, "New World");
+		newWorldButton->setCallback([this, scrollWindow]() {
+			_startupWindow = false;
+			scrollWindow->setVisible(false);
+			_setupWorld(true);
+			_setupGUI();
+		});
+
+		_nanoguiScreen->performLayout();
+		scrollWindow->center();
+		return ;
+	}
+}
+
+void VoxelProceduralSceneController::_setupWorld(bool newWorld) {
+
 	if (_window.expired())
 		return;
 
 	std::shared_ptr<GLSWindow> window = _window.lock();
-	AppEnv *env = window->getAppEnvPtr();
+	AppEnv* env = window->getAppEnvPtr();
+
 
 	std::string voxelTextureFilePath;
 	{
 		std::shared_ptr<std::string> textureName = env->getArgument("-texture");
 		voxelTextureFilePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures_2.png";
 	}
-	std::string generatorFilePath;
+	std::string generatorFileName;
 	{
 		std::shared_ptr<std::string> argName = env->getArgument("-generator");
-		generatorFilePath = argName != nullptr ? *argName : "assets/voxelProceduralGeneratorSources/hillsGenerator.cl";
-		// generatorFilePath = argName != nullptr ? *argName : "../assets/voxelProceduralGeneratorSources/canyon.cl";
+		generatorFileName = argName != nullptr ? *argName : "hillsGenerator.cl";
 	}
 	std::string worldName;
 	{
@@ -222,64 +289,17 @@ void VoxelProceduralSceneController::makeScene() {
 
 	// World
 	worldNode = std::make_shared<GLS::Node>();
-	scene.rootNode()->addChildNode(worldNode);
+	_scene->rootNode()->addChildNode(worldNode);
 	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode, worldName);
 	_dynamicWorld->getGenerator()->usedMaterial = texturedMaterial;
-	_dynamicWorld->getGenerator()->setSeed(static_cast<unsigned>(time(NULL)));
-	_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath);
-	_createWorldFolder();
+	if (newWorld) {
+		_dynamicWorld->getGenerator()->setSeed(static_cast<unsigned>(time(NULL)));
+		_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + generatorFileName);
+		_updateWorldFolder();
+	}
 
-	// Lights
-
-	_lightNode = std::make_shared<GLS::Node>();
-
-	auto directionLightRotation = std::make_shared<GLS::Node>();
-	directionLightRotation->transform().setEulerAngles(glm::vec3(-M_PI / 5, M_PI / 3, 0));
-	_lightNode->addChildNode(directionLightRotation);
-
-	auto directionLightNode = std::make_shared<GLS::Node>();
-	directionLightNode->transform().setPosition(glm::vec3(0, 0, 120));
-	directionLightRotation->addChildNode(directionLightNode);
-
-	auto directionLight = std::make_shared<GLS::Light>();
-	directionLight->type = GLS::light_directional;
-	directionLight->color = glm::vec3(1, 1, 1);
-	directionLight->cast_shadow = false;
-	directionLight->cast_shadow_clip_far = 300;
-	directionLight->cast_shadow_map_size_width = 4000;
-	directionLight->cast_shadow_map_size_height = 4000;
-	directionLightNode->setLight(directionLight);
-	directionLightNode->transform().scaleBy(glm::vec3(10.0, 10.0, 1.0));
-
-	auto pointLightNode = std::make_shared<GLS::Node>();
-	_lightNode->addChildNode(pointLightNode);
-	auto pointLight = std::make_shared<GLS::Light>();
-	pointLight->type = GLS::light_point;
-	pointLight->color = glm::vec3(0.1, 0.1, 0.1);
-	pointLightNode->setLight(pointLight);
-
-	scene.rootNode()->addChildNode(_lightNode);
-
-	_ambiantlightNode = std::make_shared<GLS::Node>();
-	auto ambiantlight = std::make_shared<GLS::Light>();
-	ambiantlight->type = GLS::light_ambiant;
-	ambiantlight->color = glm::vec3(0.1f);
-	_ambiantlightNode->setLight(ambiantlight);
-	scene.rootNode()->addChildNode(_ambiantlightNode);
-
-	// Camera
-	cameraNode = std::make_shared<GLS::Node>();
-	cameraNode->transform().moveBy(0, 100, 16);
-	std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-	camera->farZ = 200.0f;
-	camera->fogFar = 200.0f;
-	camera->fogNear = 200.0f * 0.9f;
-	camera->fov = static_cast<float>((80.0f) * M_PI / 180.0f);
-	scene.setBackgroundColor(glm::vec4(115 / 255.0f, 195 / 255.0f, 1, 1));
-	camera->aspect = (scene.getAspect());
-	cameraNode->setCamera(camera);
-	scene.setCameraNode(cameraNode);
-	scene.rootNode()->addChildNode(cameraNode);
+	_setupLights();
+	_setupCamera();
 
 	// Skybox
 	std::vector<std::string> skyboxFaces;
@@ -289,15 +309,9 @@ void VoxelProceduralSceneController::makeScene() {
 	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_dn.jpg");
 	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_rt.jpg");
 	skyboxFaces.push_back("assets/textures/skybox/minecraft/minecraft_lf.jpg");
-	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_ft.jpg");
-	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_bk.jpg");
-	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_up.jpg");
-	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_dn.jpg");
-	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_rt.jpg");
-	// skyboxFaces.push_back("assets/textures/skybox/elbrus/elbrus_lf.jpg");
 	try {
 		std::shared_ptr<GLS::Skybox> skybox = std::make_shared<GLS::Skybox>(skyboxFaces);
-		scene.setSkybox(skybox);
+		_scene->setSkybox(skybox);
 	} catch (std::exception& e) {
 		std::cout << "can't load skybox textures with exception: " << e.what() << std::endl;
 	}
@@ -327,7 +341,7 @@ void VoxelProceduralSceneController::makeScene() {
 
 	std::shared_ptr<GLS::Node> axes_node = std::make_shared<GLS::Node>();
 	axes_node->transform().position().y = 60;
-	scene.rootNode()->addChildNode(axes_node);
+	_scene->rootNode()->addChildNode(axes_node);
 
 	std::shared_ptr<GLS::Node> axe_x_node = std::make_shared<GLS::Node>();
 	axe_x_node->addRenderable(axe_x_mesh);
@@ -363,8 +377,63 @@ void VoxelProceduralSceneController::makeScene() {
 	placeHolderMesh->setDrawMode(GL_LINES);
 	placeHolderMesh->setCastShadowFace(GL_NONE);
 	_placeHolderBlockOfDoom->addRenderable(placeHolderMesh);
-	scene.rootNode()->addChildNode(_placeHolderBlockOfDoom);
+	_scene->rootNode()->addChildNode(_placeHolderBlockOfDoom);
+}
 
+void VoxelProceduralSceneController::_setupLights() {
+	_lightNode = std::make_shared<GLS::Node>();
+
+	auto directionLightRotation = std::make_shared<GLS::Node>();
+	directionLightRotation->transform().setEulerAngles(glm::vec3(-M_PI / 5, M_PI / 3, 0));
+	_lightNode->addChildNode(directionLightRotation);
+
+	_directionLightNode = std::make_shared<GLS::Node>();
+	_directionLightNode->transform().setPosition(glm::vec3(0, 0, 120));
+	directionLightRotation->addChildNode(_directionLightNode);
+
+	auto directionLight = std::make_shared<GLS::Light>();
+	directionLight->type = GLS::light_directional;
+	directionLight->color = glm::vec3(1, 1, 1);
+	directionLight->cast_shadow = false;
+	directionLight->cast_shadow_clip_far = 300;
+	directionLight->cast_shadow_map_size_width = 4000;
+	directionLight->cast_shadow_map_size_height = 4000;
+	_directionLightNode->setLight(directionLight);
+	_directionLightNode->transform().scaleBy(glm::vec3(10.0, 10.0, 1.0));
+
+	auto pointLightNode = std::make_shared<GLS::Node>();
+	_lightNode->addChildNode(pointLightNode);
+	auto pointLight = std::make_shared<GLS::Light>();
+	pointLight->type = GLS::light_point;
+	pointLight->color = glm::vec3(0.1, 0.1, 0.1);
+	pointLightNode->setLight(pointLight);
+
+	_scene->rootNode()->addChildNode(_lightNode);
+
+	_ambiantlightNode = std::make_shared<GLS::Node>();
+	auto ambiantlight = std::make_shared<GLS::Light>();
+	ambiantlight->type = GLS::light_ambiant;
+	ambiantlight->color = glm::vec3(0.1f);
+	_ambiantlightNode->setLight(ambiantlight);
+	_scene->rootNode()->addChildNode(_ambiantlightNode);
+}
+
+void VoxelProceduralSceneController::_setupCamera() {
+	cameraNode = std::make_shared<GLS::Node>();
+	cameraNode->transform().moveBy(0, 100, 16);
+	std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
+	camera->farZ = 200.0f;
+	camera->fogFar = 200.0f;
+	camera->fogNear = 200.0f * 0.9f;
+	camera->fov = static_cast<float>((80.0f) * M_PI / 180.0f);
+	_scene->setBackgroundColor(glm::vec4(115 / 255.0f, 195 / 255.0f, 1, 1));
+	camera->aspect = (_scene->getAspect());
+	cameraNode->setCamera(camera);
+	_scene->setCameraNode(cameraNode);
+	_scene->rootNode()->addChildNode(cameraNode);
+}
+
+void VoxelProceduralSceneController::_setupGUI() {
 	// Player Window
 	_playerWindow = new nanogui::Window(_nanoguiScreen, "Player");
 	_playerWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 3));
@@ -413,12 +482,12 @@ void VoxelProceduralSceneController::makeScene() {
 	auto fovBox = new nanogui::Widget(_playerWindow);
 	fovBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(fovBox, "Fov: ");
-	auto fovSlider = new nanogui::Slider(fovBox);
-	fovSlider->setValue((camera->fov - minFov) / (maxFov - minFov));
-	auto fovValue = new nanogui::FloatBox<float>(fovBox, static_cast<float>((camera->fov * 180.0f) / M_PI));
-	fovSlider->setCallback([this, camera, fovValue, minFov, maxFov](float value) {
-		camera->fov = value * (maxFov - minFov) + minFov;
-		fovValue->setValue(static_cast<float>((camera->fov * 180.0f) / M_PI));
+	_fovSlider = new nanogui::Slider(fovBox);
+	_fovSlider->setValue((cameraNode->camera()->fov - minFov) / (maxFov - minFov));
+	_fovValue = new nanogui::FloatBox<float>(fovBox, static_cast<float>((cameraNode->camera()->fov * 180.0f) / M_PI));
+	_fovSlider->setCallback([this, minFov, maxFov](float value) {
+		cameraNode->camera()->fov = value * (maxFov - minFov) + minFov;
+		_fovValue->setValue(static_cast<float>((cameraNode->camera()->fov * 180.0f) / M_PI));
 	});
 
 	// Picked Block
@@ -428,7 +497,7 @@ void VoxelProceduralSceneController::makeScene() {
 	const int blockImageSize = 50;
 	_pickedBlockTexture = new nanogui::ImageView(pickedBlockBox, _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->buffer());
 	_pickedBlockTexture->setFixedSize(nanogui::Vector2i(blockImageSize, blockImageSize));
-	_pickedBlockTexture->setScale((float)blockImageSize / texturedMaterial->texture_diffuse->width() * 3 * 16.0f); 
+	_pickedBlockTexture->setScale((float)blockImageSize / _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->width() * 3 * 16.0f); 
 	_pickedBlockTexture->setFixedScale(true);
 	_pickedBlockTexture->setFixedOffset(false);
 	_pickedBlockLabel = new nanogui::Label(pickedBlockBox, _pickableBlocks[_pickedBlockIndex].first);
@@ -442,21 +511,21 @@ void VoxelProceduralSceneController::makeScene() {
 	auto renderDistanceWidget = new nanogui::Widget(_environementWindow);
 	renderDistanceWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	auto renderDistanceLabel = new nanogui::Label(renderDistanceWidget, "Render distance: ");
-	auto renderDistanceSlider = new nanogui::Slider(renderDistanceWidget);
-	auto renderDistanceValue = new nanogui::FloatBox<float>(renderDistanceWidget, _dynamicWorld->getRenderDistance());
-	renderDistanceValue->numberFormat("%3.0f");
-	renderDistanceValue->setFixedWidth(75);
+	_renderDistanceSlider = new nanogui::Slider(renderDistanceWidget);
+	_renderDistanceValue = new nanogui::FloatBox<float>(renderDistanceWidget, _dynamicWorld->getRenderDistance());
+	_renderDistanceValue->numberFormat("%3.0f");
+	_renderDistanceValue->setFixedWidth(75);
 	renderDistanceLabel->setFixedWidth(125);
-	renderDistanceSlider->setCallback([this, renderDistanceValue, camera](float value) {
+	_renderDistanceSlider->setCallback([this](float value) {
 		float renderDistance = value * (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance)
 								+ DynamicWorld::minRenderDistance;
-		renderDistanceValue->setValue(renderDistance);
+		_renderDistanceValue->setValue(renderDistance);
 		_dynamicWorld->setRenderDistance(renderDistance);
-		camera->farZ = renderDistance;
-		camera->fogFar = renderDistance;
-		camera->fogNear = renderDistance * 0.9f;
+		cameraNode->camera()->farZ = renderDistance;
+		cameraNode->camera()->fogFar = renderDistance;
+		cameraNode->camera()->fogNear = renderDistance * 0.9f;
 	});
-	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
+	_renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
 
 		// meshmerize effect
@@ -464,25 +533,24 @@ void VoxelProceduralSceneController::makeScene() {
 	meshmerizerWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	auto meshmerizerLabel = new nanogui::Label(meshmerizerWidget, "Meshmerize effect: ");
 	meshmerizerLabel->setFixedWidth(125);
-	auto meshmerizerSlider = new nanogui::Slider(meshmerizerWidget);
-	auto meshmerizerValue = new nanogui::FloatBox<float>(meshmerizerWidget, GameVoxelChunk::meshmerizerIntensity);
-	meshmerizerValue->numberFormat("%.4f");
-	meshmerizerValue->setFixedWidth(75);
-	meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
-	meshmerizerSlider->setCallback([this, meshmerizerValue](float value) {
+	_meshmerizerSlider = new nanogui::Slider(meshmerizerWidget);
+	_meshmerizerValue = new nanogui::FloatBox<float>(meshmerizerWidget, GameVoxelChunk::meshmerizerIntensity);
+	_meshmerizerValue->numberFormat("%.4f");
+	_meshmerizerValue->setFixedWidth(75);
+	_meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
+	_meshmerizerSlider->setCallback([this](float value) {
 		GameVoxelChunk::meshmerizerIntensity = value;
-		meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
+		_meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
 	});
-	renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
+	_renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
 
 		// cast shadow button
 	auto directionalLightWidget = new nanogui::Widget(_environementWindow);
 	directionalLightWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
-	auto directionalLightCheckbox = new nanogui::CheckBox(directionalLightWidget, "Cast shadows");
-	directionalLightCheckbox->setCallback([this, directionLightNode](bool active) {
-		directionLightNode->light()->cast_shadow = active;
-		// _ambiantlightNode->light()->color = active ? glm::vec3(0.3f) : glm::vec3(0.8f);
+	_directionalLightCheckbox = new nanogui::CheckBox(directionalLightWidget, "Cast shadows");
+	_directionalLightCheckbox->setCallback([this](bool active) {
+		_directionLightNode->light()->cast_shadow = active;
 	});
 
 		// useless button
@@ -497,19 +565,18 @@ void VoxelProceduralSceneController::makeScene() {
 	auto seedWidget = new nanogui::Widget(_environementWindow);
 	seedWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(seedWidget, "seed: ");
-	auto seedField = new nanogui::IntBox<unsigned int>(seedWidget, _dynamicWorld->getGenerator()->getSeed());
-	seedField->setFixedWidth(125);
-	seedField->setEditable(true);
-	seedField->setCallback([this](unsigned int value) {
-		_dynamicWorld->getGenerator()->setSeed(value);
-		_createWorldFolder();
+	_seedField = new nanogui::IntBox<unsigned int>(seedWidget, _dynamicWorld->getGenerator()->getSeed());
+	_seedField->setFixedWidth(125);
+	_seedField->setEditable(true);
+	_seedField->setCallback([this](unsigned int value) {
 	});
 
 		// generator kernel choosing
 	auto generatorKernelWidget = new nanogui::Widget(_environementWindow);
 	generatorKernelWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
-	_generatorKernelField = new nanogui::TextBox(generatorKernelWidget, generatorFilePath);
+	_generatorKernelField = new nanogui::TextBox(generatorKernelWidget, defaultGeneratorFileName);
 	_generatorKernelField->setEditable(true);
+	_generatorKernelField->setFixedWidth(200);
 
 		// reload button
 	auto reloadWidget = new nanogui::Widget(_environementWindow);
@@ -517,10 +584,21 @@ void VoxelProceduralSceneController::makeScene() {
 	(new nanogui::Button(reloadWidget, "Reload"))
 		->setCallback([this]() {
 		try {
-			_dynamicWorld->getGenerator()->setGenerationKernel(_generatorKernelField->value());
+			_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + _generatorKernelField->value());
 		} catch (std::exception &e) {
 			std::cerr << e.what() << std::endl;
 		}
+
+		if (_dynamicWorld->getGenerator()->getSeed() != _seedField->value()) {
+			_dynamicWorld->saveLoadedChunks();
+			_saveJsonFileInfo();
+			
+			_dynamicWorld->unloadWorld();
+			_dynamicWorld->getGenerator()->setSeed(_seedField->value());
+			_loadJsonFileInfo("worlds/world_" + std::to_string(_seedField->value()));
+			_updateWorldFolder();
+		}
+
 		_dynamicWorld->reloadChunks();
 	});
 
@@ -529,24 +607,124 @@ void VoxelProceduralSceneController::makeScene() {
 	// Compute the layout (width, height)
 	_nanoguiScreen->performLayout();
 
-	_environementWindow->setPosition(nanogui::Vector2i(window->size().x - _environementWindow->width() - 10, 10));
-
+	_environementWindow->setPosition(nanogui::Vector2i(_window.lock()->size().x - _environementWindow->width() - 10, 10));
 }
 
-void VoxelProceduralSceneController::_createWorldFolder() {
+void VoxelProceduralSceneController::_createWorldsFolder() {
 #ifdef WIN32
-	std::wstring folderName = (L"world_" + std::to_wstring(_dynamicWorld->getGenerator()->getSeed())).c_str();
+	std::wstring folderName = (L"worlds/");
 	std::string worldName = std::string(folderName.begin(), folderName.end());
-	if (_wmkdir(folderName.c_str()) == -1) {
-		std::cerr << "Can't create the folder" << std::endl;
+	if (_wmkdir(folderName.c_str()) == EEXIST) {
+		std::cerr << "Worlds folder already exists" << std::endl;
 	}
 #else
-	std::string worldName = "world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed());
+	std::string worldName = "worlds/";
+	if (mkdir(worldName.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == EEXIST) {
+		std::cerr << "Worlds folder already exists" << std::endl;
+	}
+#endif
+}
+
+void VoxelProceduralSceneController::_updateWorldFolder() {
+#ifdef WIN32
+	std::wstring folderName = (L"worlds/world_" + std::to_wstring(_dynamicWorld->getGenerator()->getSeed())).c_str();
+	std::string worldName = std::string(folderName.begin(), folderName.end());
+	if (_wmkdir(folderName.c_str()) == -1) {
+		std::cerr << "Loading existing world" << std::endl;
+	}
+#else
+	std::string worldName = "worlds/world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed());
 	if (mkdir(worldName.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1) {
-		std::cerr << "Can't create the folder" << std::endl;
+		std::cerr << "Loading existing world" << std::endl;
 	}
 #endif
 	_dynamicWorld->setWorldDirName(worldName);
+}
+
+void VoxelProceduralSceneController::_saveJsonFileInfo() {
+	nlohmann::json data = {
+		{
+			"settings", {
+				{ "seed", _dynamicWorld->getGenerator()->getSeed()},
+				{ "generator", _generatorKernelField->value()},
+				{ "renderDistance", _dynamicWorld->getRenderDistance()},
+				{ "meshmerizeEffect", GameVoxelChunk::meshmerizerIntensity},
+				{ "castShadow", _directionLightNode->light()->cast_shadow},
+			},
+		},
+		{
+			"player", {
+				{ "position", { cameraNode->transform().position().x, cameraNode->transform().position().y, cameraNode->transform().position().z } },
+				{ "rotation", { cameraNode->transform().eulerAngles().x, cameraNode->transform().eulerAngles().y } },
+				{ "speed", cameraMoveSpeed },
+				{ "fov", static_cast<int>((cameraNode->camera()->fov * 180.0f) / M_PI) + 1 },
+				{ "pickedBlock", _pickedBlockIndex },
+			}
+		}
+	};
+	
+	std::ofstream infoFile("worlds/world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed()) + "/info.json");
+	if (!infoFile.is_open()) {
+		return;
+	}
+	infoFile << std::setw(4) << data << std::endl;
+	infoFile.close();
+}
+
+// TODO: should returns bool and prevent the exception if in the main menu 
+void VoxelProceduralSceneController::_loadJsonFileInfo(std::string fileName) {
+
+	std::ifstream infoFile(fileName);
+	if (!infoFile.is_open()) {
+		return;
+	}
+
+	nlohmann::json data;
+	infoFile >> data;
+
+
+	try {
+		const float minFov = static_cast<float>(M_PI * 0.16666f);
+		const float maxFov = static_cast<float>(M_PI * 0.83333f);
+
+		cameraNode->camera()->fov = std::clamp(static_cast<float>(data.at("player").at("fov").get<float>() * M_PI / 180.0f), minFov, maxFov);
+		_pickedBlockIndex = std::clamp(static_cast<int>(data.at("player").at("pickedBlock").get<int>()), 0, static_cast<int>(_pickableBlocks.size() - 1));
+		cameraMoveSpeed = std::clamp(static_cast<float>(data.at("player").at("speed").get<float>()), 0.01f, 1000.0f);	
+		cameraNode->transform().setPosition(glm::vec3(data.at("player").at("position")[0].get<int>(), data.at("player").at("position")[1].get<int>(), data.at("player").at("position")[2].get<int>()));
+		cameraNode->transform().setEulerAngles(glm::vec3(data.at("player").at("rotation")[0].get<float>(), data.at("player").at("rotation")[1].get<float>(), cameraNode->transform().eulerAngles().z));
+
+		_speedValueField->setValue(cameraMoveSpeed);
+		_playerPositionLabel[0]->setValue(cameraNode->transform().position().x);
+		_playerPositionLabel[1]->setValue(cameraNode->transform().position().x);
+		_playerPositionLabel[2]->setValue(cameraNode->transform().position().x);
+		_fovSlider->setValue((cameraNode->camera()->fov - minFov) / (maxFov - minFov));
+		_fovValue->setValue(cameraNode->camera()->fov * 180.0f / M_PI);
+		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
+		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
+		_handBlock->voxel->calculBlockAdjacence(glm::ivec3(0, 0, 0));
+		_handBlock->updateMesh();
+
+
+		_dynamicWorld->getGenerator()->setSeed(data.at("settings").at("seed").get<int>());
+		_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + data.at("settings").at("generator").get<std::string>());
+		_dynamicWorld->setRenderDistance(data.at("settings").at("renderDistance").get<float>());
+		GameVoxelChunk::meshmerizerIntensity = data.at("settings").at("meshmerizeEffect").get<float>();
+		_directionLightNode->light()->cast_shadow = data.at("settings").at("castShadow").get<bool>();
+
+		_renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance) / (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
+		_renderDistanceValue->setValue(_dynamicWorld->getRenderDistance());
+		_meshmerizerSlider->setValue(GameVoxelChunk::meshmerizerIntensity);
+		_meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
+		_directionalLightCheckbox->setChecked(_directionLightNode->light()->cast_shadow);
+		_seedField->setValue(_dynamicWorld->getGenerator()->getSeed());
+		_generatorKernelField->setValue(data.at("settings").at("generator").get<std::string>());
+
+		_dynamicWorld->setWorldDirName("worlds/world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed()));
+
+	}
+	catch (const nlohmann::json::exception& e) {
+		std::cerr << "Configuration file corrupted: " << e.what() << std::endl;
+	}
 }
 
 const std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneController::_pickableBlocks = {

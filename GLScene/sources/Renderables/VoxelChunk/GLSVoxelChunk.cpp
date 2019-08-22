@@ -31,6 +31,14 @@ namespace GLS {
 	textureId(id)
 	{}
 
+	bool VoxelBlock::operator==(VoxelBlock const& other) {
+		return meshType == other.meshType && orientation == other.orientation && textureId == other.textureId;
+	}
+
+	bool VoxelBlock::operator!=(VoxelBlock const& other) {
+		return !(*this == other);
+	}
+
     VoxelChunk::VoxelChunk() :
 	_blocks(),
 	_material(nullptr),

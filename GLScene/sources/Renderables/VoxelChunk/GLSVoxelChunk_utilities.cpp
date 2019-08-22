@@ -10,11 +10,11 @@
 
 namespace GLS {
 
-    uint VoxelChunk::indexOfBlock(glm::ivec3 coord) {
+    uint32_t VoxelChunk::indexOfBlock(glm::ivec3 coord) {
         return (coord.z * chunkSize * chunkSize + coord.y * chunkSize + coord.x);
     }
 
-    glm::ivec3 VoxelChunk::coordinatesOfBlock(uint i) {
+    glm::ivec3 VoxelChunk::coordinatesOfBlock(uint32_t i) {
         return glm::ivec3(i % chunkSize,
                          (i % (chunkSize * chunkSize)) / chunkSize,
                          i / (chunkSize * chunkSize));
@@ -32,11 +32,11 @@ namespace GLS {
 		return _blocks;
 	}
 
-	const VoxelBlock& VoxelChunk::blockAt(uint coord) const {
+	const VoxelBlock& VoxelChunk::blockAt(uint32_t coord) const {
 		return _blocks[coord];
 	}
 
-	VoxelBlock& VoxelChunk::blockAt(uint coord) {
+	VoxelBlock& VoxelChunk::blockAt(uint32_t coord) {
 		return _blocks[coord];
 	}
 
