@@ -45,8 +45,11 @@ PRINT = printf "\r \033[31;1m%3s%%\033[0m\t -->>\t\033[31;1m%-65s\033[0m\r" "$(s
 PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" "$(shell echo $(ACTUAL)\*100\/$(TOTAL) | bc)" "$@"
 
 all:
-	mkdir -p $(O_DIRS) $(OBJS)
-	make $(NAME)
+	mkdir build && cd build && cmake .. || echo
+	cd build && make -j4
+	./build/$(NAME)
+	# mkdir -p $(O_DIRS) $(OBJS)
+	# make $(NAME)
 
 install:
 	brew update
@@ -90,5 +93,5 @@ app:
 
 -include $(DEPS)
 
-.PHONY: all GLScene $(NAME) install clean fclean re app
+.PHONY: all GLScene install clean fclean re app
 .SILENT:

@@ -19,7 +19,7 @@ std::shared_ptr<GLS::Scene> ISceneController::scene() {
 
 void ISceneController::update() {
     if (_window.expired()) {
-        std::cout << "windos out" << std::endl;
+        std::cout << "windows out" << std::endl;
         return;
     }
     std::shared_ptr<GLSWindow> win = _window.lock();

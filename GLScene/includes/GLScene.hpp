@@ -10,7 +10,7 @@
 #define GLScene_h
 
 // TODO: why do we have to do this shit
-#define SCHOOL_DUMPS
+// #define SCHOOL_DUMPS
 
 #define _USE_MATH_DEFINES
 #include <cmath>

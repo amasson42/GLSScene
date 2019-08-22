@@ -8,16 +8,6 @@
 
 #include "AppEnv.hpp"
 
-void AppEnv::printAvailableScenes() {
-    std::cout << "available scenes:" << std::endl;
-    std::cout << "  trash" << std::endl;
-    std::cout << "  human" << std::endl;
-    std::cout << "  shadow" << std::endl;
-    std::cout << "  voxel" << std::endl;
-    std::cout << "  voxelWorld" << std::endl;
-    std::cout << "  particles" << std::endl;
-}
-
 AppEnv::AppEnv(const std::vector<std::string>& as) :
     args(as)
 {
@@ -26,44 +16,16 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
         throw std::exception();
     }
 
-    glfwWindowHint(GLFW_SAMPLES, 1);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_DEPTH_BITS, 32);
-
-    std::shared_ptr<GLSWindow> mainWindow;
     try {
         int win_w = 1200, win_h = 800;
-        mainWindow = std::make_shared<GLSWindow>(this, glm::vec2(win_w, win_h), as[0]);
+        mainWindow = std::make_shared<GLSWindow>(this, glm::vec2(win_w, win_h), "Presque minecraft");
     } catch (std::exception& e) {
         std::cerr << "Error during main window creation" << std::endl;
         glfwTerminate();
         throw e;
     }
-    windows.push_back(mainWindow);
 
-    if (as.size() > 0) {
-        if (as[0] == "trash") {
-            sceneController = std::make_shared<TrashSceneController>(mainWindow);
-        } else if (as[0] == "human") {
-            sceneController = std::make_shared<HumanSceneController>(mainWindow);
-        } else if (as[0] == "shadow") {
-            sceneController = std::make_shared<ShadowSceneController>(mainWindow);
-        } else if (as[0] == "voxel") {
-            sceneController = std::make_shared<VoxelSceneController>(mainWindow);
-        } else if (as[0] == "voxelWorld") {
-            sceneController = std::make_shared<VoxelProceduralSceneController>(mainWindow);
-        } else if (as[0] == "particles") {
-            sceneController = std::make_shared<ParticuleSystemSceneController>(mainWindow);
-        } else if (as[0] == "gros") {
-            sceneController = std::make_shared<GrosSceneController>(mainWindow);
-        } else {
-            throw std::exception();
-        }
-    }
-
+    sceneController = std::make_shared<VoxelProceduralSceneController>(mainWindow);
     mainWindow->setController(sceneController);
 
     std::shared_ptr<std::string> effectFilename = getArgument("-effect");
@@ -92,9 +54,8 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 }
 
 AppEnv::~AppEnv() {
-    std::cout << "Ending..." << std::endl;
     sceneController = nullptr;
-    GLS::glsDeinit();
+    mainWindow = nullptr;
     glfwTerminate();
 }
 
@@ -109,15 +70,13 @@ std::shared_ptr<std::string> AppEnv::getArgument(std::string key) const {
 
 void AppEnv::loop() {
 
-    while (!windows.empty()) {
+    while (mainWindow != nullptr) {
         glfwPollEvents();
-        std::vector<std::shared_ptr<GLSWindow> >::iterator it = windows.begin();
-        while (it != windows.end()) {
-            if ((*it)->isActive()) {
-                (*it++)->loopOnce();
-            } else {
-                it = windows.erase(it);
-            }
+        if (mainWindow->isActive())
+            mainWindow->loopOnce();
+        else {
+            sceneController = nullptr;
+            mainWindow = nullptr;
         }
     }
 

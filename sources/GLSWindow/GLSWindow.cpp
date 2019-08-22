@@ -14,7 +14,7 @@ void GLSWindow::_incrementWindowCount() {
 
 void GLSWindow::_decrementWindowCount() {
     if (--_windowCount == 0) {
-        // GLS::glsDeinit();
+        GLS::glsDeinit();
     }
 }
 
@@ -22,6 +22,13 @@ GLSWindow::GLSWindow(AppEnv *env, glm::vec2 size, std::string title, bool fullSc
 _env(env),
 _postProcessShaderProgram(nullptr),
 _framebuffer(nullptr) {
+
+    glfwWindowHint(GLFW_SAMPLES, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_DEPTH_BITS, 32);
 
     _width = size.x;
     _height = size.y;
@@ -44,11 +51,11 @@ _framebuffer(nullptr) {
     } catch (GLS::ShaderBuildingException& e) {
         std::cerr << e.what() << std::endl;
         std::cerr << e.infoLog << std::endl;
-        throw std::exception();
+        throw e;
     } catch (std::exception& e) {
         std::cerr << "Exception during GLS initialisation" << std::endl;
         std::cerr << e.what();
-        throw std::exception();
+        throw e;
     }
 
 
