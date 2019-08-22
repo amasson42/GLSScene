@@ -210,19 +210,19 @@ void VoxelProceduralSceneController::makeScene() {
 
 		nanogui::Widget* worldsWidget = new nanogui::Widget(scrollPanel);
 		worldsWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Minimum, 10, 0));
-		for (auto const& entry : std::filesystem::directory_iterator("worlds")) {
-			std::string worldName = entry.path().generic_string();
-			int beginIdx = worldName.rfind('/');
-			worldName = worldName.substr(beginIdx + 1);
-			nanogui::Button* l = new nanogui::Button(worldsWidget, worldName);
-			l->setCallback([worldName, this, scrollWindow]() {
-				_startupWindow = false;
-				_setupWorld(false);
-				_setupGUI();
-				_loadJsonFileInfo("worlds/" + worldName + "/info.json");
-				scrollWindow->setVisible(false);
-			});
-		}
+		// for (auto const& entry : std::filesystem::directory_iterator("worlds")) {
+		// 	std::string worldName = entry.path().generic_string();
+		// 	int beginIdx = worldName.rfind('/');
+		// 	worldName = worldName.substr(beginIdx + 1);
+		// 	nanogui::Button* l = new nanogui::Button(worldsWidget, worldName);
+		// 	l->setCallback([worldName, this, scrollWindow]() {
+		// 		_startupWindow = false;
+		// 		_setupWorld(false);
+		// 		_setupGUI();
+		// 		_loadJsonFileInfo("worlds/" + worldName + "/info.json");
+		// 		scrollWindow->setVisible(false);
+		// 	});
+		// }
 
 		// New world Button
 		nanogui::Widget* newWorldWidget = new nanogui::Widget(scrollWindow);
