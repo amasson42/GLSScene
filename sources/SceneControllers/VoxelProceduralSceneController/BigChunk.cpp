@@ -4,7 +4,8 @@
 BigChunk::BigChunk(std::shared_ptr<GLS::Material> material) :
 	_node(std::make_shared<GLS::Node>()),
 	_chunks(),
-	_adjacents() {
+	_adjacents(),
+	_untouched(true) {
 
 	for (int i = 0; i < bigChunkCount; i++)
 		_chunks[i] = std::make_shared<GameVoxelChunk>();
@@ -78,6 +79,13 @@ void BigChunk::loadFromStream(std::istream& stream) {
 	}
 }
 
+bool BigChunk::isUntouched() const {
+	return _untouched;
+}
+
+void BigChunk::setUntouched(bool untouched) {
+	_untouched = untouched;
+}
 
 std::shared_ptr<GameVoxelChunk> BigChunk::chunkAt(int i) {
 	if (i < 0 || i >= bigChunkCount)

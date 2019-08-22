@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(game)
 
 if (UNIX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O3")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /O2")
 endif()
@@ -14,6 +14,14 @@ endif()
 
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
 	execute_process(COMMAND git clone https://github.com/wjakob/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
+endif()
+
+if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson)
+	message(STATUS "Downloading nlohmann/json...")
+	file(DOWNLOAD https://github.com/nlohmann/json/releases/download/v3.7.0/include.zip ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson.zip)
+	execute_process(COMMAND unzip -q ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson.zip -d ${CMAKE_CURRENT_BINARY_DIR}/libs/)
+	execute_process(COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/libs/include ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson)
+	execute_process(COMMAND rm ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson.zip)
 endif()
 
 include_directories(includes/)
@@ -47,6 +55,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/libs/assimp/includ
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/build/libs/assimp/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/GLScene/build/libs/glm)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui/include)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson/)
 
 # add_subdirectory(GLScene/libs/assimp)
 

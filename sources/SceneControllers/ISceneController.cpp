@@ -119,6 +119,8 @@ void ISceneController::mouseButtonCallBack(int button, int action, int modifiers
     (void)modifiers;
 }
 
+void ISceneController::closeCallback() {}
+
 void ISceneController::setCameraMouseControl(bool enabled) {
 	_cameraMouseControlEnabled = enabled;
 

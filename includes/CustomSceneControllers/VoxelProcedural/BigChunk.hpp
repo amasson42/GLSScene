@@ -41,6 +41,7 @@ class BigChunk {
 	std::shared_ptr<GLS::Node> _node;
 	std::array<std::shared_ptr<GameVoxelChunk>, bigChunkCount> _chunks;
 	std::array<std::weak_ptr<BigChunk>, 4> _adjacents; // 0: +X | 1: -X | 2: +Z | 3: -Z
+	bool _untouched;
 
 	public:
 
@@ -51,6 +52,8 @@ class BigChunk {
 	void save(const std::string& fileName);
 	void loadFromFile(const std::string& fileName);
 	void loadFromStream(std::istream& stream);
+	bool isUntouched() const;
+	void setUntouched(bool untouched);
 
 
 	std::shared_ptr<GameVoxelChunk> chunkAt(int i);

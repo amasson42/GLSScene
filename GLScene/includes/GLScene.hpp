@@ -27,6 +27,8 @@
 #include <algorithm>
 #include <future>
 #include <sys/stat.h>
+#include <iomanip>
+#include <filesystem>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

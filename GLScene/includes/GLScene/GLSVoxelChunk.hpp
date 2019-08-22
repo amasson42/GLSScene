@@ -51,6 +51,8 @@ namespace GLS {
 		VoxelBlock();
 		VoxelBlock(VoxelBlockMeshType type, uint8_t id);
 		VoxelBlock(VoxelBlockOrientation orient, VoxelBlockMeshType type, uint8_t id);
+		bool operator==(const VoxelBlock& other);
+		bool operator!=(const VoxelBlock& other);
 	};
 
 	enum VoxelChunkEdge : uint8_t {
@@ -70,10 +72,10 @@ namespace GLS {
     class VoxelChunk /* : public IMeshSource */ {
     
     public:
-        static const uint chunkSize = 16; // min = 2
-        static const uint chunkBlockCount = chunkSize * chunkSize * chunkSize;
-        static uint indexOfBlock(glm::ivec3 coord);
-        static glm::ivec3 coordinatesOfBlock(uint index);
+        static const uint32_t chunkSize = 16; // min = 2
+        static const uint32_t chunkBlockCount = chunkSize * chunkSize * chunkSize;
+        static uint32_t indexOfBlock(glm::ivec3 coord);
+        static glm::ivec3 coordinatesOfBlock(uint32_t index);
         static VoxelChunkEdge opposedEdge(VoxelChunkEdge edge);
 
     protected:
@@ -99,8 +101,8 @@ namespace GLS {
 
 		const std::array<VoxelBlock, chunkBlockCount>& getBlocks() const;
 		std::array<VoxelBlock, chunkBlockCount>& getBlocks();
-		const VoxelBlock& blockAt(uint coord) const;
-		VoxelBlock& blockAt(uint coord);
+		const VoxelBlock& blockAt(uint32_t coord) const;
+		VoxelBlock& blockAt(uint32_t coord);
 		const VoxelBlock& blockAt(glm::ivec3 coord) const;
 		VoxelBlock& blockAt(glm::ivec3 coord);
 

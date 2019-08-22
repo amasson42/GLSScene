@@ -62,7 +62,9 @@ void DynamicWorld::_cleanChunks(const glm::vec3& cameraFlatPosition) {
 		glm::vec3 chunkPosition = it->second->getNode()->transform().position();
 		glm::vec3 chunkOffset = (chunkPosition + chunkMid) - cameraFlatPosition;
 		if (glm::dot(chunkOffset, chunkOffset) > _loadingDistance * _loadingDistance) {
-			// std::async(std::launch::async, &BigChunk::save, it->second, getBigChunkFileNameAt(it->first));
+			if (!it->second->isUntouched()) {
+				std::async(std::launch::async, &BigChunk::save, it->second, getBigChunkFileNameAt(it->first));
+			}
 			it = _loadedChunks.erase(it);
 		} else {
 			++it;
@@ -109,7 +111,7 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 					_loadingChunks.push_back(std::make_pair(pos, (std::async(std::launch::async, [this](glm::ivec2 pos) {
 						std::ifstream chunkStream(getBigChunkFileNameAt(pos), std::ios::binary);
 						std::shared_ptr<BigChunk> chunk;
-						if (false && chunkStream.good()) {
+						if (chunkStream.good()) {
 							chunk = std::make_shared<BigChunk>(_generator->usedMaterial);
 							chunk->loadFromStream(chunkStream);
 							chunkStream.close();
@@ -184,7 +186,6 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 }
 
 void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
-
 	std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
 	if (camera == nullptr)
 		return;
@@ -235,20 +236,23 @@ void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
 	auto start = std::chrono::system_clock::now();
 	_cleanChunks(cameraFlatPosition);
 	auto end = std::chrono::system_clock::now();
-	// std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
-
+	//if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	//	std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	//}
 
 	start = std::chrono::system_clock::now();	   
 	_generateChunks(cameraFlatPosition, cameraNode);
 	end = std::chrono::system_clock::now();
-	// std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
-
+	//if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	//	std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	//}
 
 	start = std::chrono::system_clock::now();
 	_generateMeshes(cameraNode);
 	end = std::chrono::system_clock::now();
-	// std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl; 
-
+	//if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	//	std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	//}
 	// std::cout << "We have " << _loadedChunks.size() << " chunks" << std::endl;
 }
 
@@ -267,6 +271,22 @@ void DynamicWorld::reloadChunks() {
 	_cleanChunks(glm::vec3(0));
 	_loadingDistance = loadingDistance;
 	_loadedChunks.clear();
+}
+
+void DynamicWorld::saveLoadedChunks() {
+
+	std::vector < std::pair<glm::ivec2, std::shared_ptr<BigChunk>>>::iterator it = _loadedChunks.begin();
+
+	for (auto it = _loadedChunks.begin(); it != _loadedChunks.end(); it++) {
+		if (!it->second->isUntouched()) {
+			std::async(std::launch::async, &BigChunk::save, it->second, getBigChunkFileNameAt(it->first));
+		}
+	}
+}
+
+void DynamicWorld::unloadWorld() {
+	_loadedChunks.clear();
+	_loadingChunks.clear();
 }
 
 std::shared_ptr<ProceduralWorldGenerator> DynamicWorld::getGenerator() {
@@ -293,8 +313,11 @@ void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, GLS::VoxelBlock bl
 		return;
 	}
 	glm::vec3 inVoxelPos = inBigChunkPos - targetVoxel->node->transform().position();
-	targetVoxel->setBlockAt(glm::ivec3(inVoxelPos), block);
-	targetVoxel->updateMesh();
+	if (block != targetVoxel->voxel->blockAt(inVoxelPos)) {
+		targetBigChunk->setUntouched(false);
+		targetVoxel->setBlockAt(glm::ivec3(inVoxelPos), block);
+		targetVoxel->updateMesh();
+	}
 }
 
 void DynamicWorld::setWorldDirName(std::string worldDirName) {

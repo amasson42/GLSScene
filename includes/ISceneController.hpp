@@ -25,6 +25,7 @@ class ISceneController {
     virtual void keyCallBack(int key, int scancode, int action, int mods);
     virtual void scrollCallBack(double x, double y);
     virtual void mouseButtonCallBack(int button, int action, int modifiers);
+	virtual void closeCallback();
 
 	void setCameraMouseControl(bool enabled);
 

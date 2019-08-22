@@ -42,8 +42,10 @@ void GLSWindow::updateEvents() {
 }
 
 void GLSWindow::keyCallBack(int key, int scan, int action, int mods) {
-    if (key == GLFW_KEY_ESCAPE)
-        close();
+    if (key == GLFW_KEY_ESCAPE) {
+        closeCallback();
+	}
+		
     if (!_controller.expired())
         _controller.lock()->keyCallBack(key, scan, action, mods);
 }
@@ -56,6 +58,12 @@ void GLSWindow::scrollCallBack(double x, double y) {
 void GLSWindow::mouseButtonCallBack(int button, int action, int modifier) {
     if (!_controller.expired())
         _controller.lock()->mouseButtonCallBack(button, action, modifier);
+}
+
+void GLSWindow::closeCallback() {
+    if (!_controller.expired())
+        _controller.lock()->closeCallback();
+	close();
 }
 
 glm::vec2 GLSWindow::mousePosition() const {
