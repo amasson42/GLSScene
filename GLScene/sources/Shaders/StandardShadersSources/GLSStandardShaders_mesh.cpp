@@ -7,6 +7,8 @@
 //
 
 #include "GLSShader.hpp"
+#include "GLSMesh.hpp"
+#include "GLSSkinnedMesh.hpp"
 
 namespace GLS {
 

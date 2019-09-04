@@ -7,6 +7,7 @@
 //
 
 #include "GLSShader.hpp"
+#include "GLSParticleSystem.hpp"
 
 namespace GLS {
 

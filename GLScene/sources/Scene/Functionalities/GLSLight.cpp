@@ -7,6 +7,7 @@
 //
 
 #include "GLSLight.hpp"
+#include "GLSCamera.hpp"
 
 namespace GLS {
     

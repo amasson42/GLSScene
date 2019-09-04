@@ -6,6 +6,7 @@
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
+#include "GLSScene.hpp"
 #include "GLSFramebuffer.hpp"
 
 namespace GLS {

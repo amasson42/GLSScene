@@ -9,7 +9,8 @@
 #ifndef GLSTexture_h
 #define GLSTexture_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSShader.hpp"
 
 namespace GLS {
     

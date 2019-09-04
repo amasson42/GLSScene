@@ -10,7 +10,9 @@
 
 namespace GLS {
 
-    Mesh::Mesh() : _vertices(), _indices(), _drawMode(GL_TRIANGLES),
+    Mesh::Mesh() :
+    IRenderable(),
+    _vertices(), _indices(), _drawMode(GL_TRIANGLES),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _shaderProgram(nullptr),
     _material(nullptr),
@@ -21,6 +23,7 @@ namespace GLS {
     }
 
     Mesh::Mesh(const Mesh& copy) :
+    IRenderable(copy),
     _vertices(copy._vertices), _indices(copy._indices), _drawMode(copy._drawMode),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
     _shaderProgram(copy._shaderProgram),
@@ -36,6 +39,7 @@ namespace GLS {
     }
 
     Mesh& Mesh::operator=(const Mesh& copy) {
+        IRenderable::operator=(copy);
         _vertices = copy._vertices;
         _indices = copy._indices;
         _drawMode = copy._drawMode;

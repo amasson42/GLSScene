@@ -7,6 +7,7 @@
 //
 
 #include "GLSMesh.hpp"
+#include "GLSScene.hpp"
 
 namespace GLS {
 

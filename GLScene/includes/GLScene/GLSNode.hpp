@@ -9,7 +9,10 @@
 #ifndef GLSNode_h
 #define GLSNode_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSIRenderable.hpp"
+#include "GLSCamera.hpp"
+#include "GLSLight.hpp"
 
 namespace GLS {
     

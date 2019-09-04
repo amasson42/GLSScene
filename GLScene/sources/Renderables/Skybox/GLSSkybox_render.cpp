@@ -7,6 +7,7 @@
 //
 
 #include "GLSSkybox.hpp"
+#include "GLSScene.hpp"
 
 namespace GLS {
 

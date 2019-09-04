@@ -7,6 +7,7 @@
 //
 
 #include "GLSParticleSystem.hpp"
+#include "GLSScene.hpp"
 
 namespace GLS {
 

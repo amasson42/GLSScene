@@ -7,6 +7,7 @@
 //
 
 #include "GLSSkinnedMesh.hpp"
+#include "GLSScene.hpp"
 
 namespace GLS {
 

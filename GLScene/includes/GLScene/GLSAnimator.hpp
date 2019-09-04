@@ -9,7 +9,7 @@
 #ifndef GLSAnimator_h
 #define GLSAnimator_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
 
 static inline std::vector<std::string> _splitWithSpaces(const std::string& str) {
     std::vector<std::string> words;

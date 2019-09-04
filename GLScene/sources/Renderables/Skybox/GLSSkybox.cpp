@@ -60,7 +60,9 @@ namespace GLS {
         glDeleteVertexArrays(1, &_cubebuffer);
     }
 
-    Skybox::Skybox(std::vector<std::string> faces) {
+    Skybox::Skybox(std::vector<std::string> faces) :
+    IRenderable()
+    {
         if (faces.size() != 6)
             throw InvalidDataException("skybox needs exactly 6 textures");
         glGenTextures(1, &_textureid);

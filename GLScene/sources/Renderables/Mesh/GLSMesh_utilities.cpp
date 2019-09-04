@@ -24,6 +24,7 @@ namespace GLS {
 
     void Mesh::setCastShadowFace(GLuint face) {
         _castShadowFace = face;
+        setCastShadow(face != GL_NONE);
     }
 
     static void calculNormal_normeWith(Vertex& v, glm::vec3 n, int& c) {

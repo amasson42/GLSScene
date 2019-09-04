@@ -6,7 +6,8 @@
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSShader.hpp"
 
 namespace GLS {
 

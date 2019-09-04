@@ -9,7 +9,9 @@
 #ifndef GLSLight_h
 #define GLSLight_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSShader.hpp"
+#include "GLSFramebuffer.hpp"
 
 namespace GLS {
 
@@ -21,7 +23,6 @@ namespace GLS {
         light_ambiant = 4
 
     };
-
 
     struct Light {
 

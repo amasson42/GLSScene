@@ -9,7 +9,9 @@
 #ifndef GLSFramebuffer_h
 #define GLSFramebuffer_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSTexture.hpp"
+#include "GLSIRenderable.hpp"
 
 namespace GLS {
     
@@ -55,7 +57,6 @@ namespace GLS {
         void unbind() const;
 
         void setProgram(std::shared_ptr<ShaderProgram> program);
-
         void renderInContext(Scene& scene, const RenderUniforms& uniforms);
 
 

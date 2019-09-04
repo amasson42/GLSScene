@@ -9,7 +9,8 @@
 #ifndef GLSSkybox_h
 #define GLSSkybox_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSIRenderable.hpp"
 
 namespace GLS {
 

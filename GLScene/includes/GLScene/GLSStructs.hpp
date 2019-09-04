@@ -9,7 +9,31 @@
 #ifndef GLSStructs_h
 #define GLSStructs_h
 
-#include "GLScene/GLSTransform.hpp"
+// TODO: why do we have to do this shit
+// #define SCHOOL_DUMPS
+
+#define _USE_MATH_DEFINES
+#include <cmath>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <exception>
+#include <string>
+#include <vector>
+#include <array>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <future>
+#include <sys/stat.h>
+#include <iomanip>
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+#include "GLSTransform.hpp"
+
 #include "CLDevice.hpp"
 
 namespace GLS {
@@ -26,27 +50,8 @@ namespace GLS {
     void glsInit(void* addr);
     void glsDeinit();
 
-    class Transform;
-    class Scene;
-    class Node;
-
-    struct Camera;
-    struct Light;
-    struct LightCaster;
-    
-    class Material;
-    class Mesh;
-    class InstancedMesh;
-    class SkinnedMesh;
-    class Skybox;
-    class VoxelChunk;
-    class ParticleSystem;
-
-    class Texture;
-    class Framebuffer;
-    class Shader;
     class ShaderProgram;
-    
+
     struct RenderUniforms {
         glm::mat4 projection;
         glm::mat4 view;

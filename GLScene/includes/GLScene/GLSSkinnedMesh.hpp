@@ -9,7 +9,11 @@
 #ifndef GLSSkinnedMesh_h
 #define GLSSkinnedMesh_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSNode.hpp"
+#include "GLSIRenderable.hpp"
+#include "GLSIAnimatable.hpp"
+#include "GLSMaterial.hpp"
 
 // TODO: make it work lol
 

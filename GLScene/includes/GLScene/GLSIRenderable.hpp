@@ -6,37 +6,51 @@
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#ifndef GLSRenderable_h
-#define GLSRenderable_h
+#ifndef GLSIRenderable_h
+#define GLSIRenderable_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSShader.hpp"
 
 namespace GLS {
     
+    class Scene;
+
     class IRenderable {
+    
+    protected:
+        bool _castShadow;
         
     public:
 
-        // Must implement
+        IRenderable();
+        IRenderable(const IRenderable& copy);
+        virtual ~IRenderable();
 
-        virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const = 0;
+        IRenderable& operator=(const IRenderable& copy);
+
+        // Must implement
 
         virtual void renderInContext(Scene& scene, const RenderUniforms& uniforms) = 0;
 
-
         // Optional features
 
-        virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {(void)scene;(void)uniforms;}
-        virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {(void)scene;(void)uniforms;(void)priority;}
+        void setCastShadow(bool v);
+        bool castShadow() const;
 
-        virtual void sendToFlux(std::ostream& flux, std::string linePrefix) const {flux << linePrefix << "[IRenderable]" << std::endl;}
+        virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
 
-        static std::string shaderUniformsVertex() {return "";}
-        static std::string shaderUniformsGeometry() {return "";}
-        static std::string shaderUniformsFragment() {return "";}
+        virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
+        virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
+
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix) const;
+
+        static std::string shaderUniformsVertex();
+        static std::string shaderUniformsGeometry();
+        static std::string shaderUniformsFragment();
 
     };
-    
+
 }
 
-#endif /* GLSNode_h */
+#endif /* GLSIRenderable_h */

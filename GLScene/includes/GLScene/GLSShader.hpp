@@ -9,7 +9,7 @@
 #ifndef GLSShader_h
 #define GLSShader_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
 
 namespace GLS {
     

@@ -32,7 +32,8 @@ namespace GLS {
             _childs[i]->renderInDepthContext(scene, uniforms);
         }
         for (size_t i = 0; i < _renderables.size(); i++) {
-            _renderables[i]->renderInDepthContext(scene, uniforms);
+            if (_renderables[i]->castShadow())
+                _renderables[i]->renderInDepthContext(scene, uniforms);
         }
     }
 

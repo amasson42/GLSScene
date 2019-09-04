@@ -9,8 +9,6 @@
 #ifndef GLSAnimatable_h
 #define GLSAnimatable_h
 
-#include "GLScene.hpp"
-
 namespace GLS {
 
     class IAnimatable {

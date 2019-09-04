@@ -9,7 +9,8 @@
 #ifndef GLSVoxelChunk_h
 #define GLSVoxelChunk_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSIMeshSource.hpp"
 
 namespace GLS {
 
@@ -64,12 +65,7 @@ namespace GLS {
 		Negative_Z = 5,
 	};
 
-	// class IMeshSource {
-	// 	public:
-	// 	virtual std::shared_ptr<Mesh> bakeMesh() const;
-	// };
-
-    class VoxelChunk /* : public IMeshSource */ {
+    class VoxelChunk : public IMeshSource {
     
     public:
         static const uint32_t chunkSize = 16; // min = 2

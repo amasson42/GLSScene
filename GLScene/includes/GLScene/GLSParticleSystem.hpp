@@ -9,7 +9,10 @@
 #ifndef GLSParticleSystem_h
 #define GLSParticleSystem_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSIRenderable.hpp"
+#include "GLSIAnimatable.hpp"
+#include "GLSTexture.hpp"
 
 namespace GLS {
 

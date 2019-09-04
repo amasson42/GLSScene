@@ -9,7 +9,13 @@
 #ifndef GLSScene_h
 #define GLSScene_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
+#include "GLSNode.hpp"
+#include "GLSIAnimatable.hpp"
+#include "GLSShader.hpp"
+#include "GLSSkybox.hpp"
+#include "GLSFramebuffer.hpp"
+#include "GLSLight.hpp"
 
 namespace GLS {
     

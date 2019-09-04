@@ -43,6 +43,7 @@ namespace GLS {
     }
 
     Framebuffer::Framebuffer(GLsizei width, GLsizei height, bool createRenderbuffer, GLint format, GLenum type, GLenum attachment) :
+        IRenderable(),
         _framebuffer(0), _renderbuffer(0),
         _colorTexture(nullptr),
         _program(nullptr)

@@ -38,6 +38,7 @@ namespace GLS {
     }
 
     ParticleSystem::ParticleSystem(ParticleSystemProperties properties) :
+    IRenderable(),
     _properties(properties),
     _texture(nullptr),
     _glBuffer(0), _glVertexArray(0),
@@ -79,6 +80,7 @@ namespace GLS {
     ParticleSystem::ParticleSystem(const ParticleSystem& copy) :
     ParticleSystem(copy._properties)
     {
+        setCastShadow(copy.castShadow());
         _texture = copy._texture;
         if (copy.bufferGenerated())
             generateBuffers();
@@ -90,6 +92,7 @@ namespace GLS {
     }
 
     ParticleSystem& ParticleSystem::operator=(const ParticleSystem& copy) {
+        IRenderable::operator=(copy);
         deleteBuffers();
         _destroyKernels();
         _properties = copy._properties;

@@ -7,6 +7,7 @@
 //
 
 #include "GLSShader.hpp"
+#include "GLSFramebuffer.hpp"
 
 namespace GLS {
 

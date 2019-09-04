@@ -9,7 +9,7 @@
 #ifndef GLSCamera_h
 #define GLSCamera_h
 
-#include "GLScene.hpp"
+#include "GLSStructs.hpp"
 
 namespace GLS {
     
