@@ -26,6 +26,13 @@ ProceduralWorldGenerator::~ProceduralWorldGenerator() {
 	_device->destroyCommandQueue(_commandQueueIndex);
 }
 
+bool transparancyAdjacence(GLS::VoxelBlock block, GLS::VoxelBlock neighbor, GLS::VoxelChunkEdge edge) {
+	(void)edge;
+	if (block.textureId != 18 && neighbor.textureId == 18)
+		return true;
+	return false;
+}
+
 std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec2 bigChunkPos) {
 	if (_kernelIndex < 0)
 		throw std::runtime_error("world generator was used before reading a kernel");
@@ -61,6 +68,7 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 		std::memcpy(&(bc->chunkAt(arrayPointerIndex)->voxel->getBlocks().front()),
 			&(blocks[arrayPointerIndex * GLS::VoxelChunk::chunkBlockCount]),
 			sizeof(GLS::VoxelBlock) * GLS::VoxelChunk::chunkBlockCount);
+		bc->chunkAt(arrayPointerIndex)->voxel->setAdjacentFunction(transparancyAdjacence);
 	}
 
 	_device->destroyBuffer(blocksBufferIndex);

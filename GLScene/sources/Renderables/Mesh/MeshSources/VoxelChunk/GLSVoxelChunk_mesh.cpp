@@ -132,7 +132,7 @@ namespace GLS {
                 case Full: return edge != Positive_Y;
                 case ReduceHeight: return true;
                 case SlabLow: return edge == Positive_Y || edge == Negative_Y;
-                case SlabHigh: return edge != Negative_Y;
+                case SlabHigh: return edge != Positive_Y;
                 default: return true;
             }
         case SlabHigh:
