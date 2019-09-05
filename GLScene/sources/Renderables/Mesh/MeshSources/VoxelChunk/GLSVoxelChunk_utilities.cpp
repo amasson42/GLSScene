@@ -48,6 +48,53 @@ namespace GLS {
 		return _blocks[indexOfBlock(coord)];
 	}
 
+	VoxelBlock VoxelChunk::adjacentBlockOf(glm::ivec3 coord, VoxelChunkEdge edge) const {
+		switch (edge) {
+		case Positive_X:
+			if (coord.x == VoxelChunk::chunkSize - 1) {
+				return _adjChunks[edge].expired() ? VoxelBlock() : _adjChunks[edge].lock()->blockAt(glm::ivec3(0, coord.y, coord.z));
+			} else {
+				return blockAt(coord + glm::ivec3(1, 0, 0));
+			}
+			break;
+		case Negative_X:
+			if (coord.x == 0) {
+				return _adjChunks[edge].expired() ? VoxelBlock() : _adjChunks[edge].lock()->blockAt(glm::ivec3(VoxelChunk::chunkSize - 1, coord.y, coord.z));
+			} else {
+				return blockAt(coord + glm::ivec3(-1, 0, 0));
+			}
+			break;
+		case Positive_Y:
+			if (coord.y == VoxelChunk::chunkSize - 1) {
+				return _adjChunks[edge].expired() ? VoxelBlock() : _adjChunks[edge].lock()->blockAt(glm::ivec3(coord.x, 0, coord.z));
+			} else {
+				return blockAt(coord + glm::ivec3(0, 1, 0));
+			}
+			break;
+		case Negative_Y:
+			if (coord.y == 0) {
+				return _adjChunks[edge].expired() ? VoxelBlock() : _adjChunks[edge].lock()->blockAt(glm::ivec3(coord.x, VoxelChunk::chunkSize - 1, coord.z));
+			} else {
+				return blockAt(coord + glm::ivec3(0, -1, 0));
+			}
+			break;
+		case Positive_Z:
+			if (coord.z == VoxelChunk::chunkSize - 1) {
+				return _adjChunks[edge].expired() ? VoxelBlock() : _adjChunks[edge].lock()->blockAt(glm::ivec3(coord.x, coord.y, 0));
+			} else {
+				return blockAt(coord + glm::ivec3(0, 0, 1));
+			}
+			break;
+		case Negative_Z:
+			if (coord.z == 0) {
+				return _adjChunks[edge].expired() ? VoxelBlock() : _adjChunks[edge].lock()->blockAt(glm::ivec3(coord.x, coord.y, VoxelChunk::chunkSize - 1));
+			} else {
+				return blockAt(coord + glm::ivec3(0, 0, -1));
+			}
+			break;
+		}
+	}
+
     void VoxelChunk::setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, VoxelChunkEdge edge) {
         _adjChunks[edge] = adjChunk;
     }
@@ -99,14 +146,12 @@ namespace GLS {
 				block._adjacent |= (1 << (edge));
 		};
 
-		checkEdge(VoxelChunkEdge::Positive_X, coord.x == VoxelChunk::chunkSize - 1, glm::ivec3(1, 0, 0), glm::ivec3(0, coord.y, coord.z));
-		checkEdge(VoxelChunkEdge::Negative_X, coord.x == 0, glm::ivec3(-1, 0, 0), glm::ivec3(VoxelChunk::chunkSize - 1, coord.y, coord.z));
-
-		checkEdge(VoxelChunkEdge::Positive_Y, coord.y == VoxelChunk::chunkSize - 1, glm::ivec3(0, 1, 0), glm::ivec3(coord.x, 0, coord.z));
-		checkEdge(VoxelChunkEdge::Negative_Y, coord.y == 0, glm::ivec3(0, -1, 0), glm::ivec3(coord.x, VoxelChunk::chunkSize - 1, coord.z));
-
-		checkEdge(VoxelChunkEdge::Positive_Z, coord.z == VoxelChunk::chunkSize - 1, glm::ivec3(0, 0, 1), glm::ivec3(coord.x, coord.y, 0));
-		checkEdge(VoxelChunkEdge::Negative_Z, coord.z == 0, glm::ivec3(0, 0, -1), glm::ivec3(coord.x, coord.y, VoxelChunk::chunkSize - 1));
+		checkEdge(VoxelChunkEdge::Positive_X, coord.x == VoxelChunk::chunkSize - 1, glm::ivec3(1, 0, 0), 	glm::ivec3(0, coord.y, coord.z));
+		checkEdge(VoxelChunkEdge::Negative_X, coord.x == 0, 						glm::ivec3(-1, 0, 0), 	glm::ivec3(VoxelChunk::chunkSize - 1, coord.y, coord.z));
+		checkEdge(VoxelChunkEdge::Positive_Y, coord.y == VoxelChunk::chunkSize - 1, glm::ivec3(0, 1, 0), 	glm::ivec3(coord.x, 0, coord.z));
+		checkEdge(VoxelChunkEdge::Negative_Y, coord.y == 0, 						glm::ivec3(0, -1, 0), 	glm::ivec3(coord.x, VoxelChunk::chunkSize - 1, coord.z));
+		checkEdge(VoxelChunkEdge::Positive_Z, coord.z == VoxelChunk::chunkSize - 1, glm::ivec3(0, 0, 1), 	glm::ivec3(coord.x, coord.y, 0));
+		checkEdge(VoxelChunkEdge::Negative_Z, coord.z == 0, 						glm::ivec3(0, 0, -1), 	glm::ivec3(coord.x, coord.y, VoxelChunk::chunkSize - 1));
         
     }
 

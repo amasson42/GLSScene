@@ -127,6 +127,12 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 		return;
 	}
 	if (action == GLFW_PRESS) {
+		if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9) {
+			_pickableBlocks[_pickedBlockIndex].second.meshType = GLS::VoxelBlockMeshType(key - GLFW_KEY_0);
+			_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
+			_handBlock->voxel->calculBlockAdjacence(glm::ivec3(0, 0, 0));
+			_handBlock->updateMesh();
+		}
 		if (key == GLFW_KEY_EQUAL)
 			cameraMoveSpeed *= 2.0;
 		if (key == GLFW_KEY_MINUS)
@@ -727,7 +733,7 @@ void VoxelProceduralSceneController::_loadJsonFileInfo(std::string fileName) {
 	}
 }
 
-const std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneController::_pickableBlocks = {
+std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneController::_pickableBlocks = {
 	std::make_pair("Bedrock", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_BEDROCK)),
 	std::make_pair("Stone", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_STONE)),
 	std::make_pair("Dirt", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_DIRT)),

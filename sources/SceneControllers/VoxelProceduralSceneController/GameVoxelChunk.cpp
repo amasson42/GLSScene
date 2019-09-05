@@ -23,6 +23,7 @@ void GameVoxelChunk::updateMesh() {
 		v.y += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
 		v.z += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
 	}
+    mesh->calculNormals();
     node->addRenderable(mesh);
     mesh->setCastShadowFace(GL_BACK);
     mustUpdateMesh = false;

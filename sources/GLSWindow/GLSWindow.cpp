@@ -35,7 +35,7 @@ _framebuffer(nullptr) {
     _glfwWindow = glfwCreateWindow(_width, _height, title.c_str(), fullScreen ? glfwGetPrimaryMonitor() : NULL, shareContext != nullptr ? shareContext->_glfwWindow : NULL);
     if (_glfwWindow == NULL) {
         std::cerr << "Failed to create GLFW window" << std::endl;
-        throw std::exception();
+        throw std::runtime_error("Can't initiliaze GLFW");
     }
     glfwSetWindowSizeLimits(_glfwWindow, 300, 200, GLFW_DONT_CARE, GLFW_DONT_CARE);
     glfwMakeContextCurrent(_glfwWindow);

@@ -83,7 +83,7 @@ private:
 	void _loadJsonFileInfo(std::string fileName);
 
 
-	static const std::vector<std::pair<std::string, GLS::VoxelBlock> > _pickableBlocks;
+	static std::vector<std::pair<std::string, GLS::VoxelBlock> > _pickableBlocks;
 	static constexpr char generatorFilePath[] = "assets/voxelProceduralGeneratorSources/";
 	static constexpr char defaultGeneratorFileName[] = "hillsGenerator.cl";
 };

@@ -13,7 +13,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 {
     if (!glfwInit()) {
         std::cerr << "Can't init GLFW" << std::endl;
-        throw std::exception();
+        throw std::runtime_error("Can't initialize GLFW");
     }
 
     try {

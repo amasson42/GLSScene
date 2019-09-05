@@ -15,20 +15,22 @@
 namespace GLS {
 
 	enum VoxelBlockMeshType : uint8_t {
+		/** air */
 		Empty,
+		/** Full block */
 		Full,
 		/** Used for water and soulsand */
 		ReduceHeight,
 		/** Down level slab */
-		Slab_low,
+		SlabLow,
 		/** Up level slab */
-		Slab_hight,
+		SlabHigh,
 		/** Regular stair */
 		Stair,
 		/** Upside down stair */
-		Reversed_stair,
+		StairReversed,
 		/** Small plate on edge like leafs and ladders */
-		Full_edge,
+		FullEdge,
 		/** Fence */
 		Fence
 	};
@@ -101,6 +103,7 @@ namespace GLS {
 		VoxelBlock& blockAt(uint32_t coord);
 		const VoxelBlock& blockAt(glm::ivec3 coord) const;
 		VoxelBlock& blockAt(glm::ivec3 coord);
+		VoxelBlock adjacentBlockOf(glm::ivec3 coord, VoxelChunkEdge edge) const;
 
         void setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, VoxelChunkEdge edge);
         void setAdjacentChunks(std::array<std::weak_ptr<VoxelChunk>, 6> adjChunks);
