@@ -11,21 +11,18 @@
 namespace GLS {
 
 	VoxelBlock::VoxelBlock() :
-	_adjacent(0),
 	orientation(VoxelBlockOrientation::BlockOrientation_PositiveZ),
 	meshType(VoxelBlockMeshType::Empty),
 	textureId(0)
 	{}
 
 	VoxelBlock::VoxelBlock(VoxelBlockMeshType type, uint8_t id) :
-	_adjacent(0),
 	orientation(VoxelBlockOrientation::BlockOrientation_PositiveX),
 	meshType(type),
 	textureId(id)
 	{}
 
 	VoxelBlock::VoxelBlock(VoxelBlockOrientation orient, VoxelBlockMeshType type, uint8_t id) :
-	_adjacent(0),
 	orientation(orient),
 	meshType(type),
 	textureId(id)

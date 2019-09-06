@@ -31,7 +31,6 @@ void GameVoxelChunk::updateMesh() {
 
 void GameVoxelChunk::setBlockAt(glm::ivec3 coord, GLS::VoxelBlock block) {
 	voxel->blockAt(coord) = block;
-	voxel->calculBlockAdjacence(coord);
 	mustUpdateMesh = true;
 
     if (!adjacents[0].expired() && coord.x == CHUNKSIZE - 1)
@@ -51,12 +50,10 @@ void GameVoxelChunk::setBlockAt(glm::ivec3 coord, GLS::VoxelBlock block) {
 void GameVoxelChunk::setAdjacentChunk(std::shared_ptr<GameVoxelChunk> gameChunk, GLS::VoxelChunkEdge edge) {
     adjacents[edge] = gameChunk;
     voxel->setAdjacentChunk(gameChunk->voxel, edge);
-	voxel->calculBlockAdjacence();
 }
 
 void GameVoxelChunk::setAdjacentChunk(std::weak_ptr<GameVoxelChunk> gameChunk, GLS::VoxelChunkEdge edge) {
     adjacents[edge] = gameChunk;
     if (!gameChunk.expired())
         voxel->setAdjacentChunk(gameChunk.lock()->voxel, edge);
-	voxel->calculBlockAdjacence();
 }

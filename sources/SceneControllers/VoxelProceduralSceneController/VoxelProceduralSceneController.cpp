@@ -130,7 +130,6 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 		if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9) {
 			_pickableBlocks[_pickedBlockIndex].second.meshType = GLS::VoxelBlockMeshType(key - GLFW_KEY_0);
 			_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-			_handBlock->voxel->calculBlockAdjacence(glm::ivec3(0, 0, 0));
 			_handBlock->updateMesh();
 		}
 		if (key == GLFW_KEY_EQUAL)
@@ -169,7 +168,6 @@ void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
 	if (y != 0.0) {
 		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
 		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-		_handBlock->voxel->calculBlockAdjacence(glm::ivec3(0, 0, 0));
 		_handBlock->updateMesh();
 	}
 }
@@ -371,7 +369,6 @@ void VoxelProceduralSceneController::_setupWorld(bool newWorld) {
 	_handBlock = std::make_shared<GameVoxelChunk>();
 	_handBlock->voxel->setMaterial(texturedMaterial);
 	_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-	_handBlock->voxel->calculBlockAdjacence();
 	_handBlock->updateMesh();
 	_handBlock->node->transform().scaleBy(glm::vec3(0.5));
 	_handBlock->node->transform().setPosition(glm::vec3(0.65, -0.8, -1.5));
@@ -707,7 +704,6 @@ void VoxelProceduralSceneController::_loadJsonFileInfo(std::string fileName) {
 		_fovValue->setValue(cameraNode->camera()->fov * 180.0f / M_PI);
 		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
 		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-		_handBlock->voxel->calculBlockAdjacence(glm::ivec3(0, 0, 0));
 		_handBlock->updateMesh();
 
 

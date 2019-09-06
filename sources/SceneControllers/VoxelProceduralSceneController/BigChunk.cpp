@@ -113,7 +113,6 @@ void BigChunk::setAdjacentBigChunk_positiveX(std::shared_ptr<BigChunk> adj) {
 		for (int z = 0; z < bigChunkWidth; z++) {
 			std::shared_ptr<GameVoxelChunk> chunk = chunkAt(x, y, z);
 			chunk->voxel->setAdjacentChunk(adj->chunkAt(0, y, z)->voxel, GLS::VoxelChunkEdge::Positive_X);
-			chunk->voxel->calculBlockAdjacenceEdge(GLS::VoxelChunkEdge::Positive_X);
 			chunk->mustUpdateMesh = true;
 		}
 	}
@@ -127,7 +126,6 @@ void BigChunk::setAdjacentBigChunk_negativeX(std::shared_ptr<BigChunk> adj) {
 		for (int z = 0; z < bigChunkWidth; z++) {
 			std::shared_ptr<GameVoxelChunk> chunk = chunkAt(x, y, z);
 			chunk->voxel->setAdjacentChunk(adj->chunkAt(bcs, y, z)->voxel, GLS::VoxelChunkEdge::Negative_X);
-			chunk->voxel->calculBlockAdjacenceEdge(GLS::VoxelChunkEdge::Negative_X);
 			chunk->mustUpdateMesh = true;
 		}
 	}
@@ -141,7 +139,6 @@ void BigChunk::setAdjacentBigChunk_positiveZ(std::shared_ptr<BigChunk> adj) {
 			int z = bcs;
 			std::shared_ptr<GameVoxelChunk> chunk = chunkAt(x, y, z);
 			chunk->voxel->setAdjacentChunk(adj->chunkAt(x, y, 0)->voxel, GLS::VoxelChunkEdge::Positive_Z);
-			chunk->voxel->calculBlockAdjacenceEdge(GLS::VoxelChunkEdge::Positive_Z);
 			chunk->mustUpdateMesh = true;
 		}
 	}
@@ -155,15 +152,8 @@ void BigChunk::setAdjacentBigChunk_negativeZ(std::shared_ptr<BigChunk> adj) {
 			int z = 0;
 			std::shared_ptr<GameVoxelChunk> chunk = chunkAt(x, y, z);
 			chunk->voxel->setAdjacentChunk(adj->chunkAt(x, y, bcs)->voxel, GLS::VoxelChunkEdge::Negative_Z);
-			chunk->voxel->calculBlockAdjacenceEdge(GLS::VoxelChunkEdge::Negative_Z);
 			chunk->mustUpdateMesh = true;
 		}
-	}
-}
-
-void BigChunk::calculAllAdjacences() {
-	for (int i = 0; i < BigChunk::bigChunkCount; i++) {
-		chunkAt(i)->voxel->calculBlockAdjacence();
 	}
 }
 

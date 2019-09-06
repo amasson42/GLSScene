@@ -68,7 +68,6 @@ class BigChunk {
 	void setAdjacentBigChunk_positiveZ(std::shared_ptr<BigChunk> adj);
 	void setAdjacentBigChunk_negativeZ(std::shared_ptr<BigChunk> adj);
 
-	void calculAllAdjacences();
 	void generateAllMeshes();
 
 	/**

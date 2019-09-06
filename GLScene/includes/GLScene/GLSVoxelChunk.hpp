@@ -43,10 +43,7 @@ namespace GLS {
 	};
 
 	struct VoxelBlock {
-		private:
-		uint8_t _adjacent;
-		friend class VoxelChunk;
-		public:
+		uint8_t customData;
 		VoxelBlockOrientation orientation;
 		VoxelBlockMeshType meshType;
 		uint8_t textureId;
@@ -112,10 +109,6 @@ namespace GLS {
         std::array<std::shared_ptr<VoxelChunk>, 6> adjacentChunks();
 
 		void setAdjacentFunction(std::function<bool(VoxelBlock, VoxelBlock, VoxelChunkEdge)> closure);
-
-        void calculBlockAdjacence();
-        void calculBlockAdjacence(glm::ivec3 coord);
-		void calculBlockAdjacenceEdge(VoxelChunkEdge edge);
 
         void setMaterial(std::shared_ptr<Material> mat);
         std::shared_ptr<Material> getMaterial() const;
