@@ -32,7 +32,11 @@ namespace GLS {
 		/** Small plate on edge like leafs and ladders */
 		FullEdge,
 		/** Fence */
-		Fence
+		Fence,
+		/** Cactus */
+		Curved,
+		/** Grass and flowers */
+		Cross
 	};
 
 	enum VoxelBlockOrientation : uint8_t {

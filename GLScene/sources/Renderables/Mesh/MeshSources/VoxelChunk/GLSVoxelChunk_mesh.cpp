@@ -175,8 +175,13 @@ namespace GLS {
         const std::array<FaceDescriptor, 6> reduceHeightFaceDescriptors = {{
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, reduceHeightValue)), glm::vec3(0)},
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, reduceHeightValue)), glm::vec3(0)},
+#if false
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0, reduceHeightValue - 1, 0)},
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0)},
+#else
+            {std::make_pair<vec2, vec2>(vec2(0.1, 0.1), vec2(0.9, 0.9)), glm::vec3(0, reduceHeightValue - 1, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0.1, 0.1), vec2(0.9, 0.9)), glm::vec3(0)},
+#endif
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, reduceHeightValue)), glm::vec3(0)},
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, reduceHeightValue)), glm::vec3(0)}
         }};

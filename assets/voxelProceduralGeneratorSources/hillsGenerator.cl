@@ -5,6 +5,9 @@
 #define BLOCK_BEDROCK 0x00010000
 #define BLOCK_STONE 0x01010000
 #define BLOCK_DIRT 0x02010000
+#define BLOCK_TERRACOTA_YELLOW 0x01010000 // FIXME
+#define BLOCK_TERRACOTA_ORANGE 0x02010000 // FIXME
+#define BLOCK_TERRACOTA_BROWN 0x34010000 // FIXME
 #define BLOCK_GRASS 0x03010000
 #define BLOCK_SAND 0x04010000
 #define BLOCK_GRAVEL 0x05010000
@@ -13,16 +16,21 @@
 #define BLOCK_GRASS_BROWN 0x10010000
 #define BLOCK_WOOD 0x11010000
 #define BLOCK_LEAFS 0x12010000
+#define BLOCK_CACTUS 0x12080000 // FIXME
+#define BLOCK_FLOWER_YELLOW 0x12080000 // FIXME
 #define BLOCK_WOOD_PLANKS 0x13010000
 #define BLOCK_BRICKS 0x14010000
 #define BLOCK_COBBLESTONE 0x15010000
 #define BLOCK_ICE 0x20010000
 #define BLOCK_ICE_BROKEN 0x21010000
+#define BLOCK_SNOW 0x21010000 // FIXME
 #define BLOCK_OBSIDIAN 0x24010000
 #define BLOCK_GRASS_PURPLE 0x30010000
 #define BLOCK_GOLD 0x34010000
 #define BLOCK_TNT 0x35010000
-#define BLOCK_WOOD_FENCE 0x11080000
+#define BLOCK_WOOD_FENCE 0x13080000
+#define BLOCK_TREE_SAPLING 0x11080000
+
 #define WATER_LEVEL 64
 
 double grad(int hash, double x, double y, double z);
@@ -201,8 +209,87 @@ float biomeHeigh_ocean(__global int* ppm, float3 wpos) {
 
 /* MARK: Biome create block */
 
-int biomeBlockAt_grass(__global int* ppm, float3 wpos, int groundHeight) {
+int biomeBlockAt_grass(__global int* ppm, float3 wpos, int groundHeight, float intensity);
+int biomeBlockAt_forest(__global int* ppm, float3 wpos, int groundHeight, float intensity);
+int biomeBlockAt_mountains(__global int* ppm, float3 wpos, int groundHeight, float intensity);
+int biomeBlockAt_canyons(__global int* ppm, float3 wpos, int groundHeight, float intensity);
+int biomeBlockAt_desert(__global int* ppm, float3 wpos, int groundHeight, float intensity);
+int biomeBlockAt_ocean(__global int* ppm, float3 wpos, int groundHeight, float intensity);
 
+int biomeBlockAt_grass(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
+	if (wpos.y < (float)groundHeight - 2)
+		return BLOCK_STONE;
+	if (wpos.y < groundHeight)
+		return BLOCK_DIRT;
+	if (wpos.y == groundHeight)
+		return BLOCK_GRASS;
+	return BLOCK_AIR;
+}
+
+int biomeBlockAt_forest(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
+	if (wpos.y < (float)groundHeight - 2)
+		return BLOCK_STONE;
+	if (wpos.y < groundHeight)
+		return BLOCK_DIRT;
+	float attenued = -log(1 - intensity);
+	if (wpos.y == groundHeight) {
+		if ((noise(ppm, wpos.x * 0.6, wpos.y * 0.6, wpos.z * 0.6) + 0.0) + attenued / 3 > 0.3)
+			return BLOCK_GRASS_BROWN;
+		else
+			return BLOCK_GRASS;
+	}
+	if (wpos.y == groundHeight + 1) {
+		float clamped = clamp(attenued / 8.0f, 0.1f, 1.0f);
+		if (pow(noise(ppm, wpos.x * 1.85, wpos.y * 1.85, wpos.z * 1.85) + 0.7, 5.0) + clamped > 2)
+			return BLOCK_TREE_SAPLING;
+	}
+	return BLOCK_AIR;
+}
+
+int biomeBlockAt_mountains(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
+	if (wpos.y < (float)groundHeight - 2)
+		return BLOCK_STONE;
+	if (wpos.y < groundHeight)
+		return BLOCK_STONE;
+	if (wpos.y == groundHeight)
+		return BLOCK_STONE;
+	return BLOCK_AIR;
+}
+
+int biomeBlockAt_canyons(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
+	if (wpos.y < (float)min(groundHeight - 6, WATER_LEVEL + 10))
+		return BLOCK_STONE;
+	if (wpos.y <= groundHeight) {
+		if ((int)wpos.y % 6 < 2)
+			return BLOCK_TERRACOTA_YELLOW;
+		else if ((int)wpos.y % 6 < 4)
+			return BLOCK_TERRACOTA_ORANGE;
+		else
+			return BLOCK_TERRACOTA_BROWN;
+	}
+	if (wpos.y == groundHeight)
+		return BLOCK_GRASS;
+	return BLOCK_AIR;
+}
+
+int biomeBlockAt_desert(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
+	if (wpos.y < (float)groundHeight - 2)
+		return BLOCK_STONE;
+	if (wpos.y < groundHeight)
+		return BLOCK_DIRT;
+	if (wpos.y == groundHeight)
+		return BLOCK_GRASS;
+	return BLOCK_AIR;
+}
+
+int biomeBlockAt_ocean(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
+	if (wpos.y < (float)groundHeight - 2)
+		return BLOCK_STONE;
+	if (wpos.y < groundHeight)
+		return BLOCK_DIRT;
+	if (wpos.y == groundHeight)
+		return BLOCK_WATER;
+	return BLOCK_AIR;
 }
 
 #define BIOMES_COUNT 6
@@ -235,7 +322,7 @@ int calculBlockAt(__global int* ppm, int3 wposi) {
 	}
 
 	for (int i = 0; i < BIOMES_COUNT; i++) {
-		biomesIntensity[i] = pow(biomesIntensity[i], 40);
+		biomesIntensity[i] = pow(biomesIntensity[i], 18);
 	}
 	normalizeBiomes(biomesIntensity);
 
@@ -248,23 +335,31 @@ int calculBlockAt(__global int* ppm, int3 wposi) {
 		+ biomeHeigh_ocean(ppm, wpos) * biomesIntensity[5]
 	);
 
+	if (biomeIndex == 5 && groundHeight >= WATER_LEVEL) {
+		biomeIndex = 0;
+		for (int i = 1; i < BIOMES_COUNT; i++) {
+			if (i == 5)
+				continue;
+			if (biomesIntensity[i] > biomesIntensity[biomeIndex])
+				biomeIndex = i;
+		}
+	}
+
 	int block;
 	switch (biomeIndex) {
-		case 0: block = BLOCK_GRASS; break;
-		case 1: block = BLOCK_GRASS_BROWN; break;
-		case 2: block = BLOCK_STONE; break;
-		case 3: block = BLOCK_DIRT; break;
-		case 4: block = BLOCK_SAND; break;
-		case 5: block = BLOCK_WATER; break;
-		default: break;
+		case 0: block = biomeBlockAt_grass(ppm, wpos, groundHeight, biomesIntensity[biomeIndex]); break;
+		case 1: block = biomeBlockAt_forest(ppm, wpos, groundHeight, biomesIntensity[biomeIndex]); break;
+		case 2: block = biomeBlockAt_mountains(ppm, wpos, groundHeight, biomesIntensity[biomeIndex]); break;
+		case 3: block = biomeBlockAt_canyons(ppm, wpos, groundHeight, biomesIntensity[biomeIndex]); break;
+		case 4: block = biomeBlockAt_desert(ppm, wpos, groundHeight, biomesIntensity[biomeIndex]); break;
+		case 5: block = biomeBlockAt_ocean(ppm, wpos, groundHeight, biomesIntensity[biomeIndex]); break;
+		default: block = BLOCK_AIR; break;
 	}
-	// return wpos.y < biomeHeigh_grass(ppm, wpos) ? BLOCK_GRASS : BLOCK_AIR;
-	// return wpos.y < biomeHeigh_forest(ppm, wpos) ? BLOCK_GRASS_BROWN : BLOCK_AIR;
-	// return wpos.y < biomeHeigh_mountains(ppm, wpos) ? BLOCK_STONE : BLOCK_AIR;
-	// return wpos.y < biomeHeigh_canyons(ppm, wpos) ? BLOCK_DIRT : BLOCK_AIR;
-	// return wpos.y < biomeHeigh_desert(ppm, wpos) ? BLOCK_SAND : BLOCK_AIR;
-	// return wpos.y < biomeHeigh_ocean(ppm, wpos) ? BLOCK_GRAVEL : BLOCK_AIR;
-	return wpos.y <= groundHeight ? block : BLOCK_AIR;
+
+	if (wposi.y == WATER_LEVEL && block == BLOCK_AIR)
+		block = BLOCK_WATER_SURFACE;
+
+	return block;
 }
 
 kernel void generateBigChunk(__global int* ppm, __global int* blocks, const int2 bigChunkPos, const int chunkSize, const int bigChunkWidth) {

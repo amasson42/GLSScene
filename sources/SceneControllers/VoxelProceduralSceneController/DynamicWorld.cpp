@@ -235,23 +235,23 @@ void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
 	auto start = std::chrono::system_clock::now();
 	_cleanChunks(cameraFlatPosition);
 	auto end = std::chrono::system_clock::now();
-	//if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-	//	std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	//}
+	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	// 	std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	// }
 
 	start = std::chrono::system_clock::now();	   
 	_generateChunks(cameraFlatPosition, cameraNode);
 	end = std::chrono::system_clock::now();
-	//if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-	//	std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	//}
+	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	// 	std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	// }
 
 	start = std::chrono::system_clock::now();
 	_generateMeshes(cameraNode);
 	end = std::chrono::system_clock::now();
-	//if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-	//	std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	//}
+	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	// 	std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	// }
 	// std::cout << "We have " << _loadedChunks.size() << " chunks" << std::endl;
 }
 
