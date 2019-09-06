@@ -62,7 +62,7 @@ void DynamicWorld::_cleanChunks(const glm::vec3& cameraFlatPosition) {
 		glm::vec3 chunkPosition = it->second->getNode()->transform().position();
 		glm::vec3 chunkOffset = (chunkPosition + chunkMid) - cameraFlatPosition;
 		if (glm::dot(chunkOffset, chunkOffset) > _loadingDistance * _loadingDistance) {
-			if (!it->second->isUntouched()) {
+			if (!it->second->isUntouched() && false) {
 				std::async(std::launch::async, &BigChunk::save, it->second, getBigChunkFileNameAt(it->first));
 			}
 			it = _loadedChunks.erase(it);
@@ -106,7 +106,7 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 				glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
 				cameraDirection = glm::normalize(glm::vec3(1, 0, 1) * cameraDirection);
 
-				if (chunkOffsetSquaredLength < glm::dot(chunkMid, chunkMid)
+				if (true || chunkOffsetSquaredLength < glm::dot(chunkMid, chunkMid)
 					|| glm::dot(glm::normalize(chunkOffset), cameraDirection) > minCosCameraVision) {
 					_loadingChunks.push_back(std::make_pair(pos, (std::async(std::launch::async, [this](glm::ivec2 pos) {
 						std::ifstream chunkStream(getBigChunkFileNameAt(pos), std::ios::binary);
@@ -188,7 +188,7 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 	std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
 	if (camera == nullptr)
 		return;
-	float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * camera->aspect / 2));
+	float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * (camera->aspect > 1.0 ? camera->aspect : 1.0 / camera->aspect) / 2));
 
 	int updatedMeshCount = 0;
 	std::vector < std::pair <glm::ivec2, std::shared_ptr<BigChunk> >>::iterator it = _loadedChunks.begin();
@@ -274,6 +274,7 @@ void DynamicWorld::reloadChunks() {
 
 void DynamicWorld::saveLoadedChunks() {
 
+	return;
 	std::vector < std::pair<glm::ivec2, std::shared_ptr<BigChunk>>>::iterator it = _loadedChunks.begin();
 
 	for (auto it = _loadedChunks.begin(); it != _loadedChunks.end(); it++) {
