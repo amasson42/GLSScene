@@ -1,6 +1,7 @@
 
 #include "AppEnv.hpp"
 #include <nlohmann/json.hpp>
+#include <dirent.h>
 
 #define BLOCK_BEDROCK 0
 #define BLOCK_STONE 1
@@ -9,16 +10,22 @@
 #define BLOCK_SAND 4
 #define BLOCK_GRAVEL 5
 #define BLOCK_WATER 7
+#define BLOCK_CLAY 8
 #define BLOCK_GRASS_BROWN 16
 #define BLOCK_WOOD 17
 #define BLOCK_LEAFS 18
 #define BLOCK_WOOD_PLANKS 19
 #define BLOCK_BRICKS 20
 #define BLOCK_COBBLESTONE 21
+#define BLOCK_TERRACOTTA_BROWN 22
+#define BLOCK_TERRACOTTA_YELLOW 23
+#define BLOCK_TERRACOTTA_ORANGE 24
 #define BLOCK_ICE 32
 #define BLOCK_ICE_BROKEN 33
+#define BLOCK_SNOW 34
 #define BLOCK_OBSIDIAN 36
 #define BLOCK_GRASS_PURPLE 48
+#define BLOCK_CACTUS 49
 #define BLOCK_GOLD 52
 #define BLOCK_TNT 53
 
@@ -214,19 +221,28 @@ void VoxelProceduralSceneController::makeScene() {
 
 		nanogui::Widget* worldsWidget = new nanogui::Widget(scrollPanel);
 		worldsWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Minimum, 10, 0));
-		// for (auto const& entry : std::filesystem::directory_iterator("worlds")) {
-		// 	std::string worldName = entry.path().generic_string();
-		// 	int beginIdx = worldName.rfind('/');
-		// 	worldName = worldName.substr(beginIdx + 1);
-		// 	nanogui::Button* l = new nanogui::Button(worldsWidget, worldName);
-		// 	l->setCallback([worldName, this, scrollWindow]() {
-		// 		_startupWindow = false;
-		// 		_setupWorld(false);
-		// 		_setupGUI();
-		// 		_loadJsonFileInfo("worlds/" + worldName + "/info.json");
-		// 		scrollWindow->setVisible(false);
-		// 	});
-		// }
+
+		DIR* dir;
+		struct dirent* ent;
+		if ((dir = opendir("worlds")) != nullptr) {
+			while ((ent = readdir(dir)) != nullptr) {
+				if (ent->d_type == DT_DIR) {
+					// TODO: read and check if json file is correct
+					std::string worldName = ent->d_name;
+				 	int beginIdx = worldName.rfind('/');
+		 			worldName = worldName.substr(beginIdx + 1);
+		 			nanogui::Button* l = new nanogui::Button(worldsWidget, worldName);
+		 			l->setCallback([worldName, this, scrollWindow]() {
+		 				_startupWindow = false;
+		 				_setupWorld(false);
+		 				_setupGUI();
+		 				_loadJsonFileInfo("worlds/" + worldName + "/info.json");
+		 				scrollWindow->setVisible(false);
+		 			});
+				}
+			}
+			closedir(dir);
+		}
 
 		// New world Button
 		nanogui::Widget* newWorldWidget = new nanogui::Widget(scrollWindow);
@@ -736,16 +752,22 @@ std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneContro
 	std::make_pair("Grass", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRASS)),
 	std::make_pair("Sand", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_SAND)),
 	std::make_pair("Gravel", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRAVEL)),
+	std::make_pair("Clay",	 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_CLAY)),
 	std::make_pair("Brown Grass", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRASS_BROWN)),
 	std::make_pair("Wood", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD)),
 	std::make_pair("Leaf", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_LEAFS)),
 	std::make_pair("Oak Plank", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD_PLANKS)),
 	std::make_pair("Brick", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_BRICKS)),
 	std::make_pair("Cobblestone", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_COBBLESTONE)),
+	std::make_pair("Terracotta", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TERRACOTTA_BROWN)),
+	std::make_pair("Terracotta", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TERRACOTTA_YELLOW)),
+	std::make_pair("Terracotta", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TERRACOTTA_ORANGE)),
 	std::make_pair("Ice", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_ICE)),
 	std::make_pair("Broken Ice", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_ICE_BROKEN)),
+	std::make_pair("Snow",	 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_SNOW)),
 	std::make_pair("Obsidian", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_OBSIDIAN)),
 	std::make_pair("Purple Grass", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRASS_PURPLE)),
+	std::make_pair("Cactus",	 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_CACTUS)),
 	std::make_pair("Gold", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GOLD)),
 	std::make_pair("TNT", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TNT)),
 	std::make_pair("Water", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::ReduceHeight, BLOCK_WATER)),

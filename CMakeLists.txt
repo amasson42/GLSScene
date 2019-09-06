@@ -24,6 +24,19 @@ if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson)
 	execute_process(COMMAND rm ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson.zip)
 endif()
 
+if (WIN32)
+	if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/dirent)
+		message(STATUS "Downloading nlohmann/dirent...")
+		file(DOWNLOAD https://github.com/tronkko/dirent/archive/1.23.2.zip ${CMAKE_CURRENT_BINARY_DIR}/libs/dirent.zip)
+		execute_process(COMMAND unzip -q ${CMAKE_CURRENT_BINARY_DIR}/libs/dirent.zip -d ${CMAKE_CURRENT_BINARY_DIR}/libs/)
+		execute_process(COMMAND mv ${CMAKE_CURRENT_BINARY_DIR}/libs/dirent-1.23.2 ${CMAKE_CURRENT_BINARY_DIR}/libs/dirent)
+		execute_process(COMMAND rm ${CMAKE_CURRENT_BINARY_DIR}/libs/dirent.zip)
+	endif()
+
+	include_directories(${CMAKE_CURRENT_BINARY_DIR}/libs/dirent/include)
+endif()
+
+
 include_directories(includes/)
 include_directories(includes/CustomSceneControllers/VoxelProcedural/)
 include_directories(GLScene/includes/)
