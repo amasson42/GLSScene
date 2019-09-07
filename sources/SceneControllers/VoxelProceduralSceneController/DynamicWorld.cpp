@@ -41,7 +41,7 @@ void DynamicWorld::_cleanChunks(const glm::vec3& cameraFlatPosition) {
 		glm::vec3 chunkPosition = it->second->getNode()->transform().position();
 		glm::vec3 chunkOffset = (chunkPosition + chunkMid) - cameraFlatPosition;
 		if (glm::dot(chunkOffset, chunkOffset) > _loadingDistance * _loadingDistance) {
-			if (!it->second->isUntouched() && false) {
+			if (!it->second->isUntouched()) {
 				std::async(std::launch::async, &BigChunk::save, it->second, getBigChunkFileNameAt(it->first));
 			}
 			it = _loadedChunks.erase(it);
@@ -253,7 +253,6 @@ void DynamicWorld::reloadChunks() {
 
 void DynamicWorld::saveLoadedChunks() {
 
-	return;
 	std::vector < std::pair<glm::ivec2, std::shared_ptr<BigChunk>>>::iterator it = _loadedChunks.begin();
 
 	for (auto it = _loadedChunks.begin(); it != _loadedChunks.end(); it++) {

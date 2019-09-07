@@ -11,6 +11,7 @@ ISceneController(window) {
 	_pickedBlockIndex = 0;
 	_selectWorldWindow = nullptr;
 	_newWorldWindow = nullptr;
+	_cinematicMode = false;
 
 	_createWorldsFolder();
 }
@@ -119,6 +120,9 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 			cameraMoveSpeed *= 2.0;
 		if (key == GLFW_KEY_MINUS)
 			cameraMoveSpeed /= 2.0;
+		if (key == GLFW_KEY_C) {
+			_toggleCinematicMode();
+		}
 	}
 
 	// Open the nanogui interface and display information
@@ -299,12 +303,30 @@ void VoxelProceduralSceneController::makeScene() {
 			if (worldGeneratorField->value().empty() || worldNameField->value().empty()) {
 				return;
 			}
+			std::string worldName = worldNameField->value();
+			DIR* dir;
+			struct dirent* ent;
+			if ((dir = opendir("worlds")) != nullptr) {
+				bool canContinue = false;
+				while (!canContinue) {
+					bool found = false;
+					while ((ent = readdir(dir)) != nullptr) {
+						if (("world_" + worldName).compare(ent->d_name) == 0) {
+							worldName += "_bis";
+							found = true;
+						}
+					}
+					if (!found) {
+						canContinue = true;
+					}
+				}
+			}
 			_startupWindow = DisplayedWindow::Game;
 			_newWorldWindow->setVisible(false);
 			_setupWorld();
 			_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + worldGeneratorField->value());
 			_dynamicWorld->getGenerator()->setSeed(worldSeedField->value());
-			_dynamicWorld->setWorldName(worldNameField->value());
+			_dynamicWorld->setWorldName(worldName);
 			_setupGUI();
 
 			_updateWorldFolder();
@@ -805,6 +827,15 @@ void VoxelProceduralSceneController::_loadJsonFileInfo(nlohmann::json data) {
 	}
 }
 
+void VoxelProceduralSceneController::_toggleCinematicMode() {
+	_axesNode->setActive(_cinematicMode);
+	_handBlock->node->setActive(_cinematicMode);
+	_placeHolderBlockOfDoom->setActive(_cinematicMode);
+	_displayInterface = _cinematicMode;
+	updateUI();
+	_cinematicMode = !_cinematicMode;
+}
+
 std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneController::_pickableBlocks = {
 	std::make_pair("Bedrock", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_BEDROCK)),
 	std::make_pair("Stone", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_STONE)),
@@ -820,6 +851,7 @@ std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneContro
 	std::make_pair("Oak Plank", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD_PLANKS)),
 	std::make_pair("Brick", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_BRICKS)),
 	std::make_pair("Cobblestone", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_COBBLESTONE)),
+	std::make_pair("Sandstone", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_SANDSTONE)),
 	std::make_pair("Terracotta", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TERRACOTTA_BROWN)),
 	std::make_pair("Terracotta", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TERRACOTTA_YELLOW)),
 	std::make_pair("Terracotta", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TERRACOTTA_ORANGE)),
@@ -831,7 +863,10 @@ std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneContro
 	std::make_pair("Gold", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GOLD)),
 	std::make_pair("TNT", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TNT)),
 	std::make_pair("Bush",			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Cross, BLOCK_BUSH)),
+	std::make_pair("Dead bush",	 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Cross, BLOCK_BUSH_DEAD)),
 	std::make_pair("Flower",	 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Cross, BLOCK_FLOWER)),
+	std::make_pair("Red Mushroom", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Cross, BLOCK_MUSHROOM_RED)),
+	std::make_pair("Brown Mushroom",GLS::VoxelBlock(GLS::VoxelBlockMeshType::Cross, BLOCK_MUSHROOM_BROWN)),
 	std::make_pair("Cactus",		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Curved, BLOCK_CACTUS)),
 	std::make_pair("Water", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::ReduceHeight, BLOCK_WATER)),
 };

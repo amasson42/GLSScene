@@ -7,7 +7,6 @@
 #define	BLOCK_DIRT				0x02010000
 #define	BLOCK_GRASS				0x03010000
 #define	BLOCK_SAND				0x04010000
-#define	BLOCK_SANDSTONE			0x04010000 // FIXME
 #define	BLOCK_GRAVEL			0x05010000
 #define	BLOCK_WATER				0x07010000
 #define	BLOCK_WATER_SURFACE		0x07020000
@@ -21,9 +20,13 @@
 #define	BLOCK_FLOWER_YELLOW		0x33080000
 #define	BLOCK_LEAFS_TREE		0x34010000
 #define	BLOCK_LEAFS_MOUNTAIN	0x35010000
+#define	BLOCK_BUSH_DEAD			0x36080000
+#define	BLOCK_MUSHROOM_RED		0x37080000
+#define	BLOCK_MUSHROOM_BROWN	0x38080000
 #define	BLOCK_WOOD_PLANKS		0x13010000
 #define	BLOCK_BRICKS			0x14010000
 #define	BLOCK_COBBLESTONE		0x15010000
+#define	BLOCK_SANDSTONE			0x16010000
 #define	BLOCK_ICE				0x20010000
 #define	BLOCK_ICE_BROKEN		0x21010000
 #define	BLOCK_SNOW				0x22010000
@@ -33,7 +36,6 @@
 #define	BLOCK_WOOD_FENCE		0x13060000
 #define	BLOCK_SAPLING_TREE		0x11060000
 #define	BLOCK_SAPLING_MOUNTAIN	0x11080000
-#define	BLOCK_FADED_SAPLING		0x32080000
 #define	BLOCK_TERRACOTA_ORANGE	0x40010000
 #define	BLOCK_TERRACOTA_BROWN	0x41010000
 #define	BLOCK_TERRACOTA_YELLOW	0x42010000
@@ -320,7 +322,7 @@ int biomeBlockAt_canyons(__global int* ppm, float3 wpos, int groundHeight, float
 		float attenued = -log(1 - intensity);
 		float clamped = clamp(attenued / 8.0f, 0.1f, 1.0f);
 		if (pow(noise(ppm, wpos.x * 1.767, wpos.y * 1.767, wpos.z * 1.767) + 0.7, 9) + clamped > 12)
-			return BLOCK_FADED_SAPLING;
+			return BLOCK_BUSH_DEAD;
 	}
 	return BLOCK_AIR;
 }
