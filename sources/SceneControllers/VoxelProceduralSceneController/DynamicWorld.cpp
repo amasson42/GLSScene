@@ -193,7 +193,7 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 				chunk->node->setActive(false);
 			}
 			if (chunk->mustUpdateMesh && chunk->node->isActive()) {
-				if (updatedMeshCount > 300) {
+				if (updatedMeshCount > 200) {
 					continue;
 				}
 				chunk->updateMesh();

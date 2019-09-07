@@ -247,15 +247,31 @@ namespace GLS {
         std::string src =
         "#version 400 core\n\n"
 
+        "in VS_OUT {\n"
+        "    vec4 position;\n"
+        "    vec3 wposition;\n"
+        "    vec2 uv;\n"
+        "    vec3 wnormal;\n"
+        "    vec3 wtangent;\n"
+        "    vec3 wbitangent;\n"
+        "} fs_in;\n"
+
         "struct Material {\n"
         "    vec3 diffuse;\n"
         "};\n"
+
+		"uniform int has_texturemask;\n"
+		"uniform sampler2D texture_mask;\n"
 
         "uniform Material material;\n"
 
         "out vec4 FragColor;\n"
 
         "void main() {\n"
+        "    if (has_texturemask != 0) {\n"
+        "       if (texture(texture_mask, fs_in.uv).a == 0.0)\n"
+        "           discard;\n"
+        "    }\n"
         "    FragColor = vec4(material.diffuse, 1.0);\n"
         "}\n"
         "\n";

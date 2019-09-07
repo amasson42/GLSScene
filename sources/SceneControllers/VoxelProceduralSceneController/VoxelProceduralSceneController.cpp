@@ -9,24 +9,27 @@
 #define BLOCK_SAND 4
 #define BLOCK_GRAVEL 5
 #define BLOCK_WATER 7
-#define BLOCK_CLAY 8
 #define BLOCK_GRASS_BROWN 16
 #define BLOCK_WOOD 17
-#define BLOCK_LEAFS 18
+#define BLOCK_GOLD 18
 #define BLOCK_WOOD_PLANKS 19
 #define BLOCK_BRICKS 20
 #define BLOCK_COBBLESTONE 21
-#define BLOCK_TERRACOTTA_BROWN 22
-#define BLOCK_TERRACOTTA_YELLOW 23
-#define BLOCK_TERRACOTTA_ORANGE 24
 #define BLOCK_ICE 32
 #define BLOCK_ICE_BROKEN 33
 #define BLOCK_SNOW 34
 #define BLOCK_OBSIDIAN 36
 #define BLOCK_GRASS_PURPLE 48
 #define BLOCK_CACTUS 49
-#define BLOCK_GOLD 52
-#define BLOCK_TNT 53
+#define BLOCK_BUSH 50
+#define BLOCK_FLOWER 51
+#define BLOCK_LEAFS_TREE 52
+#define BLOCK_LEAFS_MOUNTAIN 53
+#define BLOCK_TERRACOTTA_ORANGE 64
+#define BLOCK_TERRACOTTA_BROWN 65
+#define BLOCK_TERRACOTTA_YELLOW 66
+#define BLOCK_CLAY 67
+#define BLOCK_TNT 68
 
 VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window):
 ISceneController(window) {
@@ -838,7 +841,8 @@ std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneContro
 	std::make_pair("Clay",	 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_CLAY)),
 	std::make_pair("Brown Grass", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRASS_BROWN)),
 	std::make_pair("Wood", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD)),
-	std::make_pair("Leaf", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_LEAFS)),
+	std::make_pair("Leaf", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_LEAFS_TREE)),
+	std::make_pair("Mountain Leaf", GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_LEAFS_MOUNTAIN)),
 	std::make_pair("Oak Plank", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD_PLANKS)),
 	std::make_pair("Brick", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_BRICKS)),
 	std::make_pair("Cobblestone", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_COBBLESTONE)),
@@ -850,8 +854,10 @@ std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneContro
 	std::make_pair("Snow",	 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_SNOW)),
 	std::make_pair("Obsidian", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_OBSIDIAN)),
 	std::make_pair("Purple Grass", 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GRASS_PURPLE)),
-	std::make_pair("Cactus",	 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_CACTUS)),
 	std::make_pair("Gold", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_GOLD)),
 	std::make_pair("TNT", 			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_TNT)),
+	std::make_pair("Bush",			GLS::VoxelBlock(GLS::VoxelBlockMeshType::Cross, BLOCK_BUSH)),
+	std::make_pair("Flower",	 	GLS::VoxelBlock(GLS::VoxelBlockMeshType::Cross, BLOCK_FLOWER)),
+	std::make_pair("Cactus",		GLS::VoxelBlock(GLS::VoxelBlockMeshType::Curved, BLOCK_CACTUS)),
 	std::make_pair("Water", 		GLS::VoxelBlock(GLS::VoxelBlockMeshType::ReduceHeight, BLOCK_WATER)),
 };

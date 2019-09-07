@@ -25,7 +25,8 @@ class ProceduralWorldGenerator {
 
 	private:
 
-	int _commandQueueIndex;
+	std::array<int, 4> _commandQueueIndices;
+	int _currentQueue;
 	int _kernelIndex;
 	int _perlinPermutationBufferIndex;
 	unsigned int _seed;

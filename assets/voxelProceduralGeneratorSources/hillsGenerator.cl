@@ -1,37 +1,42 @@
 
 // hillsGenerator.cl
 
-#define BLOCK_AIR 0x00000000
-#define BLOCK_BEDROCK 0x00010000
-#define BLOCK_STONE 0x01010000
-#define BLOCK_DIRT 0x02010000
-#define BLOCK_GRASS 0x03010000
-#define BLOCK_SAND 0x04010000
-#define BLOCK_GRAVEL 0x05010000
-#define BLOCK_CLAY 0x08010000
-#define BLOCK_WATER 0x07010000
-#define BLOCK_WATER_SURFACE 0x07020000
-#define BLOCK_GRASS_BROWN 0x10010000
-#define BLOCK_WOOD 0x11010000
-#define BLOCK_LEAFS 0x12010000
-#define BLOCK_CACTUS 0x12080000 // FIXME
-#define BLOCK_FLOWER_YELLOW 0x12080000 // FIXME
-#define BLOCK_WOOD_PLANKS 0x13010000
-#define BLOCK_BRICKS 0x14010000
-#define BLOCK_COBBLESTONE 0x15010000
-#define BLOCK_TERRACOTA_ORANGE 0x16010000 // FIXME
-#define BLOCK_TERRACOTA_YELLOW 0x17010000 // FIXME
-#define BLOCK_TERRACOTA_BROWN 0x18010000 // FIXME
-#define BLOCK_ICE 0x20010000
-#define BLOCK_ICE_BROKEN 0x21010000
-#define BLOCK_SNOW 0x22010000 // FIXME
-#define BLOCK_OBSIDIAN 0x24010000
-#define BLOCK_GRASS_PURPLE 0x30010000
-#define BLOCK_CACTUS 0x31010000
-#define BLOCK_GOLD 0x34010000
-#define BLOCK_TNT 0x35010000
-#define BLOCK_WOOD_FENCE 0x13080000
-#define BLOCK_TREE_SAPLING 0x11080000
+#define	BLOCK_AIR				0x00000000
+#define	BLOCK_BEDROCK			0x00010000
+#define	BLOCK_STONE				0x01010000
+#define	BLOCK_DIRT				0x02010000
+#define	BLOCK_GRASS				0x03010000
+#define	BLOCK_SAND				0x04010000
+#define	BLOCK_SANDSTONE			0x04010000 // FIXME
+#define	BLOCK_GRAVEL			0x05010000
+#define	BLOCK_WATER				0x07010000
+#define	BLOCK_WATER_SURFACE		0x07020000
+#define	BLOCK_GRASS_BROWN		0x10010000
+#define	BLOCK_WOOD				0x11010000
+#define	BLOCK_GOLD				0x12010000
+#define	BLOCK_CACTUS			0x31070000
+#define	BLOCK_CACTUS_THIN		0x31060000
+#define	BLOCK_BUSH				0x32080000
+#define	BLOCK_FLOWER_YELLOW		0x33080000
+#define	BLOCK_LEAFS_TREE		0x34010000
+#define	BLOCK_LEAFS_MOUNTAIN	0x35010000
+#define	BLOCK_WOOD_PLANKS		0x13010000
+#define	BLOCK_BRICKS			0x14010000
+#define	BLOCK_COBBLESTONE		0x15010000
+#define	BLOCK_ICE				0x20010000
+#define	BLOCK_ICE_BROKEN		0x21010000
+#define	BLOCK_SNOW				0x22010000
+#define	BLOCK_OBSIDIAN			0x24010000
+#define	BLOCK_GRASS_PURPLE		0x30010000
+#define	BLOCK_WOOD_FENCE		0x13060000
+#define	BLOCK_SAPLING_TREE		0x11060000
+#define	BLOCK_SAPLING_MOUNTAIN	0x11080000
+#define	BLOCK_FADED_SAPLING		0x32080000
+#define	BLOCK_TERRACOTA_ORANGE	0x40010000
+#define	BLOCK_TERRACOTA_BROWN	0x41010000
+#define	BLOCK_TERRACOTA_YELLOW	0x42010000
+#define	BLOCK_CLAY				0x43010000
+#define	BLOCK_TNT				0x44010000
 
 #define WATER_LEVEL 64
 
@@ -185,8 +190,8 @@ float biomeHeigh_forest(__global int* ppm, float3 wpos) {
 }
 
 float biomeHeigh_mountains(__global int* ppm, float3 wpos) {
-	return WATER_LEVEL + 12
-		+ 45 * ridgedMF(ppm, wpos, 0.01);
+	return WATER_LEVEL + 15
+		+ 90 * ridgedMF(ppm, wpos, 0.01);
 }
 
 float biomeHeigh_canyons(__global int* ppm, float3 wpos) {
@@ -243,7 +248,7 @@ int biomeBlockAt_forest(__global int* ppm, float3 wpos, int groundHeight, float 
 	if (wpos.y == groundHeight + 1) {
 		float clamped = clamp(attenued / 8.0f, 0.1f, 1.0f);
 		if (pow(noise(ppm, wpos.x * 1.85, wpos.y * 1.85, wpos.z * 1.85) + 0.7, 5.0) + clamped > 2)
-			return BLOCK_TREE_SAPLING;
+			return BLOCK_SAPLING_TREE;
 	}
 	return BLOCK_AIR;
 }
@@ -251,10 +256,37 @@ int biomeBlockAt_forest(__global int* ppm, float3 wpos, int groundHeight, float 
 int biomeBlockAt_mountains(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
 	if (wpos.y < (float)groundHeight - 2)
 		return BLOCK_STONE;
-	if (wpos.y < groundHeight)
-		return BLOCK_STONE;
-	if (wpos.y == groundHeight)
-		return BLOCK_STONE;
+	int snowLevel = WATER_LEVEL + 100 + 10 * noise(ppm, wpos.x * 0.2, wpos.y * 0.2, wpos.z * 0.2);
+	int stoneLevel = WATER_LEVEL + 72 + 20 * noise(ppm, wpos.x * 0.03, wpos.y * 0.03, wpos.z * 0.03);
+	int forestLevel = WATER_LEVEL + 60;
+	if (wpos.y < groundHeight) {
+		if (wpos.y >= snowLevel)
+			return BLOCK_SNOW;
+		else
+			return wpos.y >= stoneLevel ? BLOCK_STONE : BLOCK_DIRT;
+	}
+	if (wpos.y == groundHeight) {
+		if (wpos.y >= snowLevel)
+			return BLOCK_SNOW;
+		else if (wpos.y >= stoneLevel)
+			return BLOCK_STONE;
+		else
+			return BLOCK_GRASS;
+	}
+	if (wpos.y <= groundHeight + 4 && groundHeight < snowLevel && groundHeight >= stoneLevel) {
+		if (noise(ppm, wpos.x * 0.08, 0.52, wpos.z * 0.08) + noise(ppm, wpos.x * 0.1 + 0.5, 0.35, wpos.z * 0.1 + 0.5) > 0.4)
+			return BLOCK_GRAVEL;
+	}
+	if (wpos.y == groundHeight + 1) {
+		if (wpos.y < stoneLevel) {
+			if (wpos.y >= forestLevel) {
+				if (pow(noise(ppm, wpos.x * 1.85, wpos.y * 1.85, wpos.z * 1.85) + 0.7, 5.0) > 2)
+					return BLOCK_SAPLING_MOUNTAIN;
+			}
+			if (noise(ppm, wpos.x * 2.74, 1.42, wpos.z * 2.74) > 0.2)
+				return ((int)wpos.x + (int)wpos.z) % 2 == 0 ? BLOCK_FLOWER_YELLOW : BLOCK_BUSH;
+		}
+	}
 	return BLOCK_AIR;
 }
 
@@ -268,29 +300,38 @@ int biomeBlockAt_canyons(__global int* ppm, float3 wpos, int groundHeight, float
 			return BLOCK_TERRACOTA_ORANGE;
 		else
 			return BLOCK_TERRACOTA_BROWN;
+	} else if (wpos.y == groundHeight + 1
+		&& ((groundHeight >= WATER_LEVEL && groundHeight <= WATER_LEVEL + 2)
+			|| groundHeight >= WATER_LEVEL + 27)) {
+		float attenued = -log(1 - intensity);
+		float clamped = clamp(attenued / 8.0f, 0.1f, 1.0f);
+		if (pow(noise(ppm, wpos.x * 1.767, wpos.y * 1.767, wpos.z * 1.767) + 0.7, 9) + clamped > 12)
+			return BLOCK_FADED_SAPLING;
 	}
-	if (wpos.y == groundHeight)
-		return BLOCK_GRASS;
 	return BLOCK_AIR;
 }
 
 int biomeBlockAt_desert(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
 	if (wpos.y < (float)groundHeight - 2)
 		return BLOCK_STONE;
-	if (wpos.y < groundHeight)
-		return BLOCK_DIRT;
-	if (wpos.y == groundHeight)
-		return BLOCK_GRASS;
+	else if (wpos.y < groundHeight)
+		return BLOCK_SANDSTONE;
+	else if (wpos.y == groundHeight)
+		return BLOCK_SAND;
+	else if (wpos.y <= groundHeight + 3) {
+		float attenued = -log(1 - intensity);
+		float clamped = clamp(attenued / 8.0f, 0.1f, 1.0f);
+		if (pow(noise(ppm, wpos.x * 1.26, 1.42, wpos.z * 1.26) + 0.7, 9) + clamped > 12)
+			return ((int)wpos.x + (int)wpos.z) % 2 == 0 ? BLOCK_CACTUS : BLOCK_CACTUS_THIN;
+	}
 	return BLOCK_AIR;
 }
 
 int biomeBlockAt_ocean(__global int* ppm, float3 wpos, int groundHeight, float intensity) {
-	if (wpos.y < (float)groundHeight - 2)
-		return BLOCK_STONE;
 	if (wpos.y < groundHeight)
-		return BLOCK_DIRT;
+		return BLOCK_STONE;
 	if (wpos.y == groundHeight)
-		return BLOCK_WATER;
+		return BLOCK_CLAY;
 	return BLOCK_AIR;
 }
 
@@ -346,6 +387,8 @@ int calculBlockAt(__global int* ppm, int3 wposi) {
 				biomeIndex = i;
 		}
 	}
+	if (groundHeight < WATER_LEVEL && biomeIndex != 5)
+		biomeIndex = 5;
 
 	int block;
 	switch (biomeIndex) {

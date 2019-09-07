@@ -110,6 +110,8 @@ namespace GLS {
     }
 
     static bool _adjacentFace(VoxelBlock block, VoxelBlock neighbor, VoxelChunkEdge edge) {
+		if (block.meshType == Cross && (edge == Positive_Y || edge == Negative_Y))
+			return false;
         switch (neighbor.meshType) {
         case Empty:
             return true;
@@ -118,6 +120,7 @@ namespace GLS {
                 case Full: return false;
                 case ReduceHeight: case SlabLow: return edge == Positive_Y;
                 case SlabHigh: return edge == Negative_Y;
+				case Curved: return edge != Positive_Y && edge != Negative_Y;
                 default: return true;
             }
         case ReduceHeight:
@@ -132,15 +135,20 @@ namespace GLS {
                 case Full: return edge != Positive_Y;
                 case ReduceHeight: return true;
                 case SlabLow: return edge == Positive_Y || edge == Negative_Y;
-                case SlabHigh: return edge != Positive_Y;
+                case SlabHigh: case Curved: return edge != Positive_Y;
                 default: return true;
             }
         case SlabHigh:
             switch (block.meshType) {
-                case Full: case ReduceHeight: case SlabLow: return edge != Negative_Y;
+                case Full: case ReduceHeight: case SlabLow: case Curved: return edge != Negative_Y;
                 case SlabHigh: return edge == Positive_Y || edge == Negative_Y;
                 default: return true;
             }
+		case Curved:
+			switch (block.meshType) {
+				case Curved: return edge != Positive_Y && edge != Negative_Y;
+				default: return true;
+			}
         default:
             return true;
         }
@@ -211,6 +219,24 @@ namespace GLS {
             {std::make_pair<vec2, vec2>(vec2(0.5 - fenceWidth, 0), vec2(0.5 + fenceWidth, 1)), glm::vec3(0, 0, -_fenceOffset)},
             {std::make_pair<vec2, vec2>(vec2(0.5 - fenceWidth, 0), vec2(0.5 + fenceWidth, 1)), glm::vec3(0, 0, _fenceOffset)}
         }};
+		const float curvedOffset = 1.0 / 16.0;
+        const std::array<FaceDescriptor, 6> curvedFaceDescriptors = {{
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(-curvedOffset, 0, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(curvedOffset, 0, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0, 0, -curvedOffset)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0, 0, curvedOffset)}
+        }};
+		const float crossOffset = 0.5;
+        const std::array<FaceDescriptor, 6> crossFaceDescriptors = {{
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(-crossOffset, 0, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(crossOffset, 0, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0, 0, -crossOffset)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0, 0, crossOffset)}
+        }};
 
 		glm::ivec3 coord;
         for (coord.x = 0; coord.x < VoxelChunk::chunkSize; coord.x++) {
@@ -242,14 +268,20 @@ namespace GLS {
                         case SlabHigh:
                             drawCubeMesh(slabHighFaceDescriptors);
                             break;
-                        case Stair:
-                            break;
-                        case StairReversed:
-                            break;
                         case FullEdge:
                             break;
                         case Fence:
                             drawCubeMesh(fenceFaceDescriptors);
+                            break;
+						case Curved:
+							drawCubeMesh(curvedFaceDescriptors);
+							break;
+						case Cross:
+							drawCubeMesh(crossFaceDescriptors);
+							break;
+                        case Stair:
+                            break;
+                        case StairReversed:
                             break;
 						default:
 							break;

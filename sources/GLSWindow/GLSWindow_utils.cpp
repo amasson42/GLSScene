@@ -66,6 +66,8 @@ void GLSWindow::loopOnce() {
 
     _scene->updateAnimations(_deltaTime);
 
+	// auto start = std::chrono::system_clock::now();
+
     if (_framebuffer != nullptr) {
         _scene->renderInContext(_framebuffer);
         _framebuffer->unbind();
@@ -77,8 +79,16 @@ void GLSWindow::loopOnce() {
         _scene->renderInContext();
     }
 
+	// auto end = std::chrono::system_clock::now();
+	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10)
+	// 	std::cout << "Rendering: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+
+	// start = std::chrono::system_clock::now();
     if (!_controller.expired())
         _controller.lock()->update();
+	// end = std::chrono::system_clock::now();
+	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10)
+	// 	std::cout << "Updating: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
 
     glEnable(GL_DEPTH_TEST);
     _nanoguiScreen->drawWidgets();

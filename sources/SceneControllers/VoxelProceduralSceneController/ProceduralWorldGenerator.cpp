@@ -2,7 +2,8 @@
 #include "ProceduralWorldGenerator.hpp"
 
 ProceduralWorldGenerator::ProceduralWorldGenerator() :
-	_commandQueueIndex(-1),
+	_commandQueueIndices({ -1 }),
+	_currentQueue(0),
 	_kernelIndex(-1),
 	_perlinPermutationBufferIndex(-1),
 	_seed(0) {
@@ -13,9 +14,15 @@ ProceduralWorldGenerator::ProceduralWorldGenerator() :
 		throw std::runtime_error("GLS was not initialized");
 
 	// With one queue, kernel will be executed one after each other
-	_device->createCommandQueue(&_commandQueueIndex);
-	if (_commandQueueIndex < 0)
-		throw std::runtime_error("Could not initilize a new cl command queue");
+	for (int i = 0; i < _commandQueueIndices.size(); i++) {
+		_device->createCommandQueue(&_commandQueueIndices[i]);
+		if (_commandQueueIndices[i] < 0) {
+			while (i-- > 0) {
+				_device->destroyCommandQueue(_commandQueueIndices[i]);
+			}
+			throw std::runtime_error("Could not initilize a new cl command queue");
+		}
+	}
 }
 
 ProceduralWorldGenerator::~ProceduralWorldGenerator() {
@@ -23,7 +30,9 @@ ProceduralWorldGenerator::~ProceduralWorldGenerator() {
 		_device->destroyBuffer(_perlinPermutationBuffer);
 	if (_kernelIndex >= 0)
 		_device->destroyKernel(_kernelIndex);
-	_device->destroyCommandQueue(_commandQueueIndex);
+	for (auto commandQueueIndex : _commandQueueIndices) {
+		_device->destroyCommandQueue(commandQueueIndex);
+	}
 }
 
 bool transparancyAdjacence(GLS::VoxelBlock block, GLS::VoxelBlock neighbor, GLS::VoxelChunkEdge edge) {
@@ -58,11 +67,12 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 	k->setArgument(3, CHUNKSIZE);
 	k->setArgument(4, BigChunk::bigChunkWidth);
 	
-	_device->commandQueue(_commandQueueIndex)->runNDRangeKernel(*k, blocks.size());
+	_device->commandQueue(_commandQueueIndices[_currentQueue])->runNDRangeKernel(*k, blocks.size());
 	_generationMutex.unlock();
 	
-	_device->commandQueue(_commandQueueIndex)->readBuffer(blocksArrayPointersBuffer, &(blocks.front()), blocks.size() * sizeof(GLS::VoxelBlock));
-	_device->commandQueue(_commandQueueIndex)->finish();
+	_device->commandQueue(_commandQueueIndices[_currentQueue])->readBuffer(blocksArrayPointersBuffer, &(blocks.front()), blocks.size() * sizeof(GLS::VoxelBlock));
+	_device->commandQueue(_commandQueueIndices[_currentQueue])->finish();
+	_currentQueue = (_currentQueue + 1) % _commandQueueIndices.size();
 
 	for (int arrayPointerIndex = 0; arrayPointerIndex < BigChunk::bigChunkCount; arrayPointerIndex++) {
 		std::memcpy(&(bc->chunkAt(arrayPointerIndex)->voxel->getBlocks().front()),

@@ -138,6 +138,12 @@ namespace GLS {
         glCullFace(GL_FRONT);
 
         uniforms.sendUniformsToShaderProgram(program);
+		if (_material != nullptr && _material->texture_mask != nullptr) {
+			_material->texture_mask->sendUniformsToShaderProgram(program, "texture_mask", 1);
+			glUniform1i(program->getLocation("has_texturemask"), 1);
+		} else {
+			glUniform1i(program->getLocation("has_texturemask"), 0);
+		}
 
         _sendBonesToShaderProgram(program);
 

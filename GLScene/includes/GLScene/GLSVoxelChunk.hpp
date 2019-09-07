@@ -16,27 +16,27 @@ namespace GLS {
 
 	enum VoxelBlockMeshType : uint8_t {
 		/** air */
-		Empty,
+		Empty, 			// 00
 		/** Full block */
-		Full,
+		Full,			// 01
 		/** Used for water and soulsand */
-		ReduceHeight,
+		ReduceHeight,	// 02
 		/** Down level slab */
-		SlabLow,
+		SlabLow,		// 03
 		/** Up level slab */
-		SlabHigh,
-		/** Regular stair */
-		Stair,
-		/** Upside down stair */
-		StairReversed,
+		SlabHigh,		// 04
 		/** Small plate on edge like leafs and ladders */
-		FullEdge,
+		FullEdge,		// 05
 		/** Fence */
-		Fence,
+		Fence,			// 06
 		/** Cactus */
-		Curved,
+		Curved,			// 07
 		/** Grass and flowers */
-		Cross
+		Cross,			// 08
+		/** Regular stair */
+		Stair,			// 09
+		/** Upside down stair */
+		StairReversed	// 0A
 	};
 
 	enum VoxelBlockOrientation : uint8_t {
