@@ -3,6 +3,35 @@
 
 #include "AppEnv.hpp"
 
+#define BLOCK_BEDROCK 0
+#define BLOCK_STONE 1
+#define BLOCK_DIRT 2
+#define BLOCK_GRASS 3
+#define BLOCK_SAND 4
+#define BLOCK_GRAVEL 5
+#define BLOCK_WATER 7
+#define BLOCK_GRASS_BROWN 16
+#define BLOCK_WOOD 17
+#define BLOCK_GOLD 18
+#define BLOCK_WOOD_PLANKS 19
+#define BLOCK_BRICKS 20
+#define BLOCK_COBBLESTONE 21
+#define BLOCK_ICE 32
+#define BLOCK_ICE_BROKEN 33
+#define BLOCK_SNOW 34
+#define BLOCK_OBSIDIAN 36
+#define BLOCK_GRASS_PURPLE 48
+#define BLOCK_CACTUS 49
+#define BLOCK_BUSH 50
+#define BLOCK_FLOWER 51
+#define BLOCK_LEAFS_TREE 52
+#define BLOCK_LEAFS_MOUNTAIN 53
+#define BLOCK_TERRACOTTA_ORANGE 64
+#define BLOCK_TERRACOTTA_BROWN 65
+#define BLOCK_TERRACOTTA_YELLOW 66
+#define BLOCK_CLAY 67
+#define BLOCK_TNT 68
+
 /**
  * a GameVoxelChunk is the packing of a game node, a voxel object and its corresponding mesh in a struct
  * the voxel is only used for utilities purposes and always transformed into mesh for the render
@@ -59,6 +88,8 @@ class BigChunk {
 	std::shared_ptr<GameVoxelChunk> chunkAt(int i);
 	std::shared_ptr<GameVoxelChunk> chunkAt(int x, int y, int z);
 	std::shared_ptr<GameVoxelChunk> chunkAt(const glm::vec3& pos);
+
+	GLS::VoxelBlock& blockAt(glm::ivec3 coord);
 
 	/**
 	 * update all the voxel adjacent chunks on the edge
