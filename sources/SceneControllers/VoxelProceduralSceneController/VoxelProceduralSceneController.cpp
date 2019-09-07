@@ -1,6 +1,5 @@
 
 #include "AppEnv.hpp"
-#include <nlohmann/json.hpp>
 #include <dirent.h>
 
 #define BLOCK_BEDROCK 0
@@ -34,8 +33,11 @@ ISceneController(window) {
 	lt = 0;
 	cameraMoveSpeed = 5;
 	_nanoguiScreen = _window.lock()->nanoguiScreen();
-	_startupWindow = true;
+	_startupWindow = DisplayedWindow::StartMenu;
 	_pickedBlockIndex = 0;
+	_selectWorldWindow = nullptr;
+	_newWorldWindow = nullptr;
+
 	_createWorldsFolder();
 }
 
@@ -44,7 +46,7 @@ VoxelProceduralSceneController::~VoxelProceduralSceneController() {
 }
 
 void VoxelProceduralSceneController::update() {
-	if (_startupWindow) {
+	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
 
@@ -130,7 +132,7 @@ void VoxelProceduralSceneController::updateUI() {
 
 void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int action, int mods) {
 	ISceneController::keyCallBack(key, scancode, action, mods);
-	if (_startupWindow) {
+	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
 	if (action == GLFW_PRESS) {
@@ -164,7 +166,7 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 }
 
 void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
-	if (_startupWindow) {
+	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
 	if (y > 0.0) {
@@ -180,7 +182,7 @@ void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
 }
 
 void VoxelProceduralSceneController::mouseButtonCallBack(int button, int action, int modifiers) {
-	if (_startupWindow) {
+	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
 	glm::vec3 targetWorldPos = _placeHolderBlockOfDoom->transform().position();
@@ -194,7 +196,7 @@ void VoxelProceduralSceneController::mouseButtonCallBack(int button, int action,
 
 void VoxelProceduralSceneController::closeCallback() {
 	ISceneController::closeCallback();
-	if (_startupWindow) {
+	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
 	_saveJsonFileInfo();
@@ -203,7 +205,7 @@ void VoxelProceduralSceneController::closeCallback() {
 }
 
 void VoxelProceduralSceneController::resizeWindowCallBack(glm::vec2 newSize) {
-	if (_startupWindow) {
+	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
 	ISceneController::resizeWindowCallBack(newSize);
@@ -211,12 +213,16 @@ void VoxelProceduralSceneController::resizeWindowCallBack(glm::vec2 newSize) {
 }
 
 void VoxelProceduralSceneController::makeScene() {
-	if (_startupWindow) {
+	if (_startupWindow == DisplayedWindow::StartMenu) {
 		// Saved worlds scrolling list
-		nanogui::Window* scrollWindow = new nanogui::Window(_nanoguiScreen, "Saved worlds");
-		scrollWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 0));
+		if (_selectWorldWindow) {
+			_selectWorldWindow->setVisible(true);
+			return ;
+		}
+		_selectWorldWindow = new nanogui::Window(_nanoguiScreen, "Saved worlds");
+		_selectWorldWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 0));
 
-		nanogui::VScrollPanel* scrollPanel = new nanogui::VScrollPanel(scrollWindow);
+		nanogui::VScrollPanel* scrollPanel = new nanogui::VScrollPanel(_selectWorldWindow);
 		scrollPanel->setFixedSize(nanogui::Vector2i(200, 300));
 
 		nanogui::Widget* worldsWidget = new nanogui::Widget(scrollPanel);
@@ -227,17 +233,20 @@ void VoxelProceduralSceneController::makeScene() {
 		if ((dir = opendir("worlds")) != nullptr) {
 			while ((ent = readdir(dir)) != nullptr) {
 				if (ent->d_type == DT_DIR) {
-					// TODO: read and check if json file is correct
-					std::string worldName = ent->d_name;
-				 	int beginIdx = worldName.rfind('/');
-		 			worldName = worldName.substr(beginIdx + 1);
+					std::string worldName;
+					nlohmann::json jsonData = _readJsonFileInfo((std::string("worlds/" + std::string(ent->d_name) + "/info.json")).c_str());
+					try {
+						worldName = jsonData.at("worldName").get<std::string>();
+					} catch (const nlohmann::json::exception& e) {
+						continue ;
+					}
 		 			nanogui::Button* l = new nanogui::Button(worldsWidget, worldName);
-		 			l->setCallback([worldName, this, scrollWindow]() {
-		 				_startupWindow = false;
-		 				_setupWorld(false);
+		 			l->setCallback([worldName, this]() {
+		 				_startupWindow = DisplayedWindow::Game;
+		 				_setupWorld();
 		 				_setupGUI();
-		 				_loadJsonFileInfo("worlds/" + worldName + "/info.json");
-		 				scrollWindow->setVisible(false);
+		 				_loadJsonFileInfo(_readJsonFileInfo(VoxelProceduralSceneController::worldDirPrefix + worldName + "/info.json"));
+		 				_selectWorldWindow->setVisible(false);
 		 			});
 				}
 			}
@@ -245,23 +254,93 @@ void VoxelProceduralSceneController::makeScene() {
 		}
 
 		// New world Button
-		nanogui::Widget* newWorldWidget = new nanogui::Widget(scrollWindow);
+		nanogui::Widget* newWorldWidget = new nanogui::Widget(_selectWorldWindow);
 		newWorldWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Maximum, 10, 0));
 		nanogui::Button* newWorldButton = new nanogui::Button(newWorldWidget, "New World");
-		newWorldButton->setCallback([this, scrollWindow]() {
-			_startupWindow = false;
-			scrollWindow->setVisible(false);
-			_setupWorld(true);
-			_setupGUI();
+		
+		newWorldButton->setCallback([this]() {
+			_startupWindow = DisplayedWindow::NewWorld;
+			_selectWorldWindow->setVisible(false);
+			makeScene();
 		});
 
 		_nanoguiScreen->performLayout();
-		scrollWindow->center();
+		_selectWorldWindow->center();
 		return ;
+	} else if (_startupWindow == DisplayedWindow::NewWorld) {
+		// New World window
+		if (_newWorldWindow) {
+			_newWorldWindow->setVisible(true);
+			return;
+		}
+		_newWorldWindow = new nanogui::Window(_nanoguiScreen, "New World");
+		_newWorldWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 10));
+
+		// World Name
+		auto worldNameWidget = new nanogui::Widget(_newWorldWindow);
+		worldNameWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+		
+		auto worldNameLabel = new nanogui::Label(worldNameWidget, "World Name");
+
+		auto worldNameField = new nanogui::TextBox(worldNameWidget, "");
+		worldNameField->setEditable(true);
+		worldNameField->setFixedWidth(200);
+
+		// World Seed
+		auto worldSeedWidget = new nanogui::Widget(_newWorldWindow);
+		worldSeedWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+
+		auto worldSeedLabel = new nanogui::Label(worldNameWidget, "Seed");
+
+		auto worldSeedField = new nanogui::IntBox<int>(worldNameWidget);
+		std::srand(std::time(nullptr));
+		worldSeedField->setValue(std::rand());
+		worldSeedField->setEditable(true);
+		worldSeedField->setFixedWidth(200);
+
+		// World Kernel Generator
+		auto worldGeneratorWidget = new nanogui::Widget(_newWorldWindow);
+		worldGeneratorWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+
+		auto worldGeneratorLabel = new nanogui::Label(worldNameWidget, "Generator");
+
+		auto worldGeneratorField = new nanogui::TextBox(worldNameWidget, defaultGeneratorFileName);
+		worldGeneratorField->setEditable(true);
+		worldGeneratorField->setFixedWidth(200);
+
+		// Apply Buttons
+		nanogui::Widget* newWorldWidget = new nanogui::Widget(_newWorldWindow);
+		newWorldWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Maximum, 0, 10));
+		//		Back Button
+		nanogui::Button* backButton = new nanogui::Button(newWorldWidget, "Back");
+		backButton->setCallback([this]() {
+			_startupWindow = DisplayedWindow::StartMenu;
+			_newWorldWindow->setVisible(false);
+			makeScene();
+		});
+
+		//		New World Button
+		nanogui::Button* newWorldButton = new nanogui::Button(newWorldWidget, "New World");
+		newWorldButton->setCallback([this, worldNameField, worldSeedField, worldGeneratorField]() {
+			if (worldGeneratorField->value().empty() || worldNameField->value().empty()) {
+				return;
+			}
+			_startupWindow = DisplayedWindow::Game;
+			_newWorldWindow->setVisible(false);
+			_setupWorld();
+			_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + worldGeneratorField->value());
+			_dynamicWorld->getGenerator()->setSeed(worldSeedField->value());
+			_dynamicWorld->setWorldName(worldNameField->value());
+			_setupGUI();
+
+			_updateWorldFolder();
+		});
+		_nanoguiScreen->performLayout();
+		_newWorldWindow->center();
 	}
 }
 
-void VoxelProceduralSceneController::_setupWorld(bool newWorld) {
+void VoxelProceduralSceneController::_setupWorld() {
 
 	if (_window.expired())
 		return;
@@ -310,13 +389,8 @@ void VoxelProceduralSceneController::_setupWorld(bool newWorld) {
 	// World
 	worldNode = std::make_shared<GLS::Node>();
 	_scene->rootNode()->addChildNode(worldNode);
-	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode, worldName);
+	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode);
 	_dynamicWorld->getGenerator()->usedMaterial = texturedMaterial;
-	if (newWorld) {
-		_dynamicWorld->getGenerator()->setSeed(static_cast<unsigned>(time(NULL)));
-		_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + generatorFileName);
-		_updateWorldFolder();
-	}
 
 	_setupLights();
 	_setupCamera();
@@ -614,7 +688,7 @@ void VoxelProceduralSceneController::_setupGUI() {
 			
 			_dynamicWorld->unloadWorld();
 			_dynamicWorld->getGenerator()->setSeed(_seedField->value());
-			_loadJsonFileInfo("worlds/world_" + std::to_string(_seedField->value()));
+			_loadJsonFileInfo(VoxelProceduralSceneController::worldDirPrefix + std::to_string(_seedField->value()));
 			_updateWorldFolder();
 		}
 
@@ -646,22 +720,24 @@ void VoxelProceduralSceneController::_createWorldsFolder() {
 
 void VoxelProceduralSceneController::_updateWorldFolder() {
 #ifdef WIN32
-	std::wstring folderName = (L"worlds/world_" + std::to_wstring(_dynamicWorld->getGenerator()->getSeed())).c_str();
+	std::wstring folderName = (LVoxelProceduralSceneController::worldDirPrefix + std::to_wstring(_dynamicWorld->getWorldName()).c_str();
 	std::string worldName = std::string(folderName.begin(), folderName.end());
 	if (_wmkdir(folderName.c_str()) == -1) {
 		std::cerr << "Loading existing world" << std::endl;
 	}
 #else
-	std::string worldName = "worlds/world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed());
+	std::string worldName = VoxelProceduralSceneController::worldDirPrefix + _dynamicWorld->getWorldName();
 	if (mkdir(worldName.c_str(), S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH) == -1) {
 		std::cerr << "Loading existing world" << std::endl;
 	}
 #endif
-	_dynamicWorld->setWorldDirName(worldName);
 }
 
 void VoxelProceduralSceneController::_saveJsonFileInfo() {
 	nlohmann::json data = {
+		{
+			"worldName", _dynamicWorld->getWorldName(),
+		},
 		{
 			"settings", {
 				{ "seed", _dynamicWorld->getGenerator()->getSeed()},
@@ -681,8 +757,8 @@ void VoxelProceduralSceneController::_saveJsonFileInfo() {
 			}
 		}
 	};
-	
-	std::ofstream infoFile("worlds/world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed()) + "/info.json");
+
+	std::ofstream infoFile(VoxelProceduralSceneController::worldDirPrefix + _dynamicWorld->getWorldName() + "/info.json");
 	if (!infoFile.is_open()) {
 		return;
 	}
@@ -690,17 +766,24 @@ void VoxelProceduralSceneController::_saveJsonFileInfo() {
 	infoFile.close();
 }
 
-// TODO: should returns bool and prevent the exception if in the main menu 
-void VoxelProceduralSceneController::_loadJsonFileInfo(std::string fileName) {
+nlohmann::json VoxelProceduralSceneController::_readJsonFileInfo(std::string fileName) {
+	std::ifstream jsonFile(fileName);
+	nlohmann::json data;
 
-	std::ifstream infoFile(fileName);
-	if (!infoFile.is_open()) {
-		return;
+	if (!jsonFile.is_open()) {
+		return data;
 	}
 
-	nlohmann::json data;
-	infoFile >> data;
+	try {
+		jsonFile >> data;
+	} catch (const nlohmann::json::exception& e) {
+		return data;
+	}
 
+	return data;
+}
+
+void VoxelProceduralSceneController::_loadJsonFileInfo(nlohmann::json data) {
 
 	try {
 		const float minFov = static_cast<float>(M_PI * 0.16666f);
@@ -737,7 +820,7 @@ void VoxelProceduralSceneController::_loadJsonFileInfo(std::string fileName) {
 		_seedField->setValue(_dynamicWorld->getGenerator()->getSeed());
 		_generatorKernelField->setValue(data.at("settings").at("generator").get<std::string>());
 
-		_dynamicWorld->setWorldDirName("worlds/world_" + std::to_string(_dynamicWorld->getGenerator()->getSeed()));
+		_dynamicWorld->setWorldName(data.at("worldName").get<std::string>());
 
 	}
 	catch (const nlohmann::json::exception& e) {

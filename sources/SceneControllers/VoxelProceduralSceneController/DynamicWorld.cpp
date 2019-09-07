@@ -8,30 +8,9 @@ namespace glm {
 const float DynamicWorld::minRenderDistance = 50.0f;
 const float DynamicWorld::maxRenderDistance = 250.0f;
 
-// world/
-//  info.json ->
-//  {
-//     "settings": {
-//       "seed": int,
-//       "generatorName": string,
-//		 "renderDistance": int,
-//       "meshmerizeEffect": float,
-//       "castShadow": bool
-//	   },
-//     "player": {
-//       "position": [float, float, float],
-//       "rotation": [float, float],
-//       "speed": float,
-//       "fov": float,
-//       "pickedBlockIndex": int
-//	   },
-//  }
-//  C_X_Z.chunk
-//  C_[...]_[...].chunk
-DynamicWorld::DynamicWorld(std::shared_ptr<GLS::Node> worldNode, std::string worldName) :
+DynamicWorld::DynamicWorld(std::shared_ptr<GLS::Node> worldNode) :
 	_loadedChunks(), _loadingDistance(200.0f), _visibleDistance(200.0f) {
 		_worldNode = worldNode;
-		_worldDirName = worldName;
 		_generator = std::make_shared<ProceduralWorldGenerator>();
 }
 
@@ -47,7 +26,7 @@ glm::vec3 DynamicWorld::bigChunkPositionToWorld(glm::ivec2 position) {
 }
 
 const std::string DynamicWorld::getBigChunkFileNameAt(glm::ivec2 position) {
-	return _worldDirName + "/C_" + std::to_string(position.x) + "_" + std::to_string(position.y) + ".chunk";
+	return VoxelProceduralSceneController::worldDirPrefix + _worldName + "/C_" + std::to_string(position.x) + "_" + std::to_string(position.y) + ".chunk";
 }
 
 void DynamicWorld::_cleanChunks(const glm::vec3& cameraFlatPosition) {
@@ -320,6 +299,10 @@ void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, GLS::VoxelBlock bl
 	}
 }
 
-void DynamicWorld::setWorldDirName(std::string worldDirName) {
-	_worldDirName = worldDirName;
+const std::string& DynamicWorld::getWorldName() const {
+	return _worldName;
+}
+
+void DynamicWorld::setWorldName(const std::string& worldName) {
+	_worldName = worldName;
 }

@@ -13,7 +13,7 @@ class DynamicWorld {
 
 public:
 
-	DynamicWorld(std::shared_ptr<GLS::Node> worldNode, std::string worldName);
+	DynamicWorld(std::shared_ptr<GLS::Node> worldNode);
 	glm::ivec2 worldToBigChunkPosition(glm::vec3 position);
 	glm::vec3 bigChunkPositionToWorld(glm::ivec2 position);
 	const std::string getBigChunkFileNameAt(glm::ivec2 position);
@@ -36,14 +36,15 @@ public:
 	std::shared_ptr<ProceduralWorldGenerator> getGenerator();
 
 	void setBlockAt(const glm::vec3& worldPosition, GLS::VoxelBlock blockId);
-	void setWorldDirName(std::string worldDirName);
+
+	const std::string& getWorldName() const;
+	void setWorldName(const std::string& worldName);
 
 	static const float minRenderDistance;
 	static const float maxRenderDistance;
 
 private:
 
-	std::string _worldDirName;
 	std::shared_ptr<GLS::Node> _worldNode;
 	std::shared_ptr<ProceduralWorldGenerator> _generator;
 
@@ -52,6 +53,7 @@ private:
 
 	float _loadingDistance;
 	float _visibleDistance;
+	std::string _worldName;
 
 	void _cleanChunks(const glm::vec3& cameraFlatPosition);
 	void _generateChunks(const glm::vec3& cameraFlatPosition, std::shared_ptr<GLS::Node> cameraNode);

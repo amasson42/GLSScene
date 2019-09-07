@@ -7,6 +7,8 @@
 #include "DynamicWorld.hpp"
 #include "ProceduralWorldGenerator.hpp"
 
+#include <nlohmann/json.hpp>
+
 #define CHUNKSIZE (static_cast<int>(GLS::VoxelChunk::chunkSize))
 
 int* initNoise(unsigned int seed);
@@ -31,8 +33,15 @@ public:
 	virtual void closeCallback();
 
     void updateUI();
+	static constexpr char worldDirPrefix[] = "worlds/world_";
 
 private:
+
+	enum DisplayedWindow {
+		StartMenu,
+		NewWorld,
+		Game
+	};
 
     std::shared_ptr<GLS::Node> worldNode;
     std::shared_ptr<GLS::Node> cameraNode;
@@ -44,6 +53,10 @@ private:
 	std::shared_ptr<DynamicWorld> _dynamicWorld;
 
 	nanogui::Screen* _nanoguiScreen;
+
+	// Menus GUI
+	nanogui::Window* _selectWorldWindow;
+	nanogui::Window* _newWorldWindow;
 
     // Player GUI
     nanogui::Window* _playerWindow;
@@ -68,11 +81,11 @@ private:
     nanogui::TextBox* _generatorKernelField;
 
 	bool _displayInterface;
-	bool _startupWindow;
+	DisplayedWindow _startupWindow;
 
     int _pickedBlockIndex;
 
-	void _setupWorld(bool newWorld);
+	void _setupWorld();
 	void _setupLights();
 	void _setupCamera();
 	void _setupGUI();
@@ -80,7 +93,8 @@ private:
 	void _createWorldsFolder();
 	void _updateWorldFolder();
 	void _saveJsonFileInfo();
-	void _loadJsonFileInfo(std::string fileName);
+	nlohmann::json _readJsonFileInfo(std::string fileName);
+	void _loadJsonFileInfo(nlohmann::json);
 
 
 	static std::vector<std::pair<std::string, GLS::VoxelBlock> > _pickableBlocks;
