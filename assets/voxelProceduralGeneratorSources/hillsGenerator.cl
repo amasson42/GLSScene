@@ -17,6 +17,7 @@
 #define	BLOCK_CACTUS			0x31070000
 #define	BLOCK_CACTUS_THIN		0x31060000
 #define	BLOCK_BUSH				0x32080000
+#define	BLOCK_BUSH_LEAFS		0x34030000
 #define	BLOCK_FLOWER_YELLOW		0x33080000
 #define	BLOCK_LEAFS_TREE		0x34010000
 #define	BLOCK_LEAFS_MOUNTAIN	0x35010000
@@ -26,6 +27,7 @@
 #define	BLOCK_ICE				0x20010000
 #define	BLOCK_ICE_BROKEN		0x21010000
 #define	BLOCK_SNOW				0x22010000
+#define	BLOCK_SNOW_SLAB			0x22030000
 #define	BLOCK_OBSIDIAN			0x24010000
 #define	BLOCK_GRASS_PURPLE		0x30010000
 #define	BLOCK_WOOD_FENCE		0x13060000
@@ -230,6 +232,10 @@ int biomeBlockAt_grass(__global int* ppm, float3 wpos, int groundHeight, float i
 		return BLOCK_DIRT;
 	if (wpos.y == groundHeight)
 		return BLOCK_GRASS;
+	if (wpos.y == groundHeight + 1) {
+		if (noise(ppm, wpos.x * 4.8451, 3.84, wpos.z * 8.1675) > 0.4)
+			return ((int)wpos.x + (int)wpos.z) % 2 == 0 ? BLOCK_FLOWER_YELLOW : BLOCK_BUSH;
+	}
 	return BLOCK_AIR;
 }
 
@@ -249,6 +255,14 @@ int biomeBlockAt_forest(__global int* ppm, float3 wpos, int groundHeight, float 
 		float clamped = clamp(attenued / 8.0f, 0.1f, 1.0f);
 		if (pow(noise(ppm, wpos.x * 1.85, wpos.y * 1.85, wpos.z * 1.85) + 0.7, 5.0) + clamped > 2)
 			return BLOCK_SAPLING_TREE;
+		if (noise(ppm, wpos.x * 2.74, 1.42, wpos.z * 2.74) > 0.2) {
+			switch ((int)(2.5 * (noise(ppm, wpos.x * 2.758, wpos.y * 61.7, wpos.z * 84.16) + 0.8))) {
+				case 1: return BLOCK_BUSH;
+				case 2: return BLOCK_FLOWER_YELLOW;
+				case 3: return BLOCK_BUSH_LEAFS;
+				default: return BLOCK_COBBLESTONE;
+			}
+		}
 	}
 	return BLOCK_AIR;
 }
@@ -332,6 +346,26 @@ int biomeBlockAt_ocean(__global int* ppm, float3 wpos, int groundHeight, float i
 		return BLOCK_STONE;
 	if (wpos.y == groundHeight)
 		return BLOCK_CLAY;
+	if (wpos.y >= WATER_LEVEL) {
+		float attenued = -log(1 - intensity);
+		if (attenued > 6.5) {
+			if (wpos.y == WATER_LEVEL)
+				return BLOCK_ICE;
+			float iceDist =
+				noise(ppm, wpos.x * 0.1613 + 0.512, wpos.y * 0.0263 + 0.512, wpos.z * 0.1613 + 0.512)
+				+ (wpos.y - WATER_LEVEL) / (256 - WATER_LEVEL) * 5;
+			float attenuator = 1.0 - 1.0 / (exp(-attenued + 8.0) + 1.0);
+			iceDist += attenuator;
+			if (iceDist <= 0.1)
+				return BLOCK_ICE;
+			else if (iceDist <= 0.13)
+				return BLOCK_ICE_BROKEN;
+			if (wpos.y == WATER_LEVEL + 1) {
+				if (iceDist < 0.5)
+					return BLOCK_SNOW_SLAB;
+			}
+		}
+	}
 	return BLOCK_AIR;
 }
 
@@ -400,7 +434,6 @@ int calculBlockAt(__global int* ppm, int3 wposi) {
 		case 5: block = biomeBlockAt_ocean(ppm, wpos, groundHeight, biomesIntensity[biomeIndex]); break;
 		default: block = BLOCK_AIR; break;
 	}
-
 	if (wposi.y == WATER_LEVEL && block == BLOCK_AIR)
 		block = BLOCK_WATER_SURFACE;
 
