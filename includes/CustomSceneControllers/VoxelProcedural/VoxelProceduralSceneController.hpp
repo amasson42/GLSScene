@@ -81,6 +81,7 @@ private:
     nanogui::TextBox* _generatorKernelField;
 
 	bool _displayInterface;
+	bool _cinematicMode;
 	DisplayedWindow _startupWindow;
 
     int _pickedBlockIndex;
@@ -95,6 +96,7 @@ private:
 	void _saveJsonFileInfo();
 	nlohmann::json _readJsonFileInfo(std::string fileName);
 	void _loadJsonFileInfo(nlohmann::json);
+	void _toggleCinematicMode();
 
 
 	static std::vector<std::pair<std::string, GLS::VoxelBlock> > _pickableBlocks;
