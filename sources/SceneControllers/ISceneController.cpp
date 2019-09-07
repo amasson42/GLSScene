@@ -4,9 +4,11 @@
 ISceneController::ISceneController(std::shared_ptr<GLSWindow> window) :
     _window(window),
     _scene(window->scene()), 
-	_cameraMouseControlEnabled(false) {
-	cameraMoveSpeed = 1;
+	_cameraMouseControlEnabled(false),
+	_lastMousePosition(0),
+	_cameraEulerAngles(0, 0) {
     mustUpdate = true;
+	cameraMoveSpeed = 1;
 }
 
 ISceneController::~ISceneController() {
@@ -26,8 +28,6 @@ void ISceneController::update() {
 
     if (!_scene->cameraNode().expired()) {
         GLS::Node& cam(*_scene->cameraNode().lock());
-        static float cameraAngleX = cam.transform().eulerAngles().x;
-        static float cameraAngleY = cam.transform().eulerAngles().y;
 
         float cameraSpeed = cameraMoveSpeed * win->deltaTime();
         glm::mat4 cameraMat = cam.getWorldTransformMatrix();
@@ -52,13 +52,13 @@ void ISceneController::update() {
         float cameraMouseRotateSpeed = 20.0 * win->deltaTime();
         bool changeCamera = true;
         if (win->keyPressed(GLFW_KEY_LEFT))
-            cameraAngleY += cameraRotateSpeed;
+            _cameraEulerAngles.y += cameraRotateSpeed;
         else if (win->keyPressed(GLFW_KEY_RIGHT))
-            cameraAngleY -= cameraRotateSpeed;
+            _cameraEulerAngles.y -= cameraRotateSpeed;
         else if (win->keyPressed(GLFW_KEY_UP))
-            cameraAngleX -= cameraRotateSpeed;
+            _cameraEulerAngles.x -= cameraRotateSpeed;
         else if (win->keyPressed(GLFW_KEY_DOWN))
-            cameraAngleX += cameraRotateSpeed;
+            _cameraEulerAngles.x += cameraRotateSpeed;
 		else
 			changeCamera = true;
 
@@ -72,13 +72,13 @@ void ISceneController::update() {
 			xOffset *= cameraMouseRotateSpeed;
 			yOffset *= cameraMouseRotateSpeed;
 
-			cameraAngleY -= xOffset;
-			cameraAngleX += yOffset;
+			_cameraEulerAngles.y -= xOffset;
+			_cameraEulerAngles.x += yOffset;
 
-			cameraAngleX = glm::clamp(cameraAngleX, -1.60f, 1.6f);
+			_cameraEulerAngles.x = glm::clamp(_cameraEulerAngles.x, -1.60f, 1.6f);
 		}
 
-		cam.transform().setEulerAngles(cameraAngleX, cameraAngleY, 0);
+		cam.transform().setEulerAngles(_cameraEulerAngles.x, _cameraEulerAngles.y, 0);
     }
 
     if (win->keyPressed(GLFW_KEY_P)) {

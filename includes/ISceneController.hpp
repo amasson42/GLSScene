@@ -8,6 +8,9 @@ class ISceneController {
     protected:
     std::weak_ptr<GLSWindow> _window;
     std::shared_ptr<GLS::Scene> _scene;
+	bool _cameraMouseControlEnabled;
+	glm::vec2 _lastMousePosition;
+	glm::vec2 _cameraEulerAngles;
 
     public:
 
@@ -28,10 +31,6 @@ class ISceneController {
 	virtual void closeCallback();
 
 	void setCameraMouseControl(bool enabled);
-
-	private:
-		glm::vec2 _lastMousePosition;
-		bool _cameraMouseControlEnabled;
 
 };
 

@@ -753,7 +753,7 @@ void VoxelProceduralSceneController::_saveJsonFileInfo() {
 		{
 			"player", {
 				{ "position", { cameraNode->transform().position().x, cameraNode->transform().position().y, cameraNode->transform().position().z } },
-				{ "rotation", { cameraNode->transform().eulerAngles().x, cameraNode->transform().eulerAngles().y } },
+				{ "rotation", { _cameraEulerAngles.x, _cameraEulerAngles.y } },
 				{ "speed", cameraMoveSpeed },
 				{ "fov", static_cast<int>((cameraNode->camera()->fov * 180.0f) / M_PI) + 1 },
 				{ "pickedBlock", _pickedBlockIndex },
@@ -796,7 +796,10 @@ void VoxelProceduralSceneController::_loadJsonFileInfo(nlohmann::json data) {
 		_pickedBlockIndex = std::clamp(static_cast<int>(data.at("player").at("pickedBlock").get<int>()), 0, static_cast<int>(_pickableBlocks.size() - 1));
 		cameraMoveSpeed = std::clamp(static_cast<float>(data.at("player").at("speed").get<float>()), 0.01f, 1000.0f);	
 		cameraNode->transform().setPosition(glm::vec3(data.at("player").at("position")[0].get<int>(), data.at("player").at("position")[1].get<int>(), data.at("player").at("position")[2].get<int>()));
-		cameraNode->transform().setEulerAngles(glm::vec3(data.at("player").at("rotation")[0].get<float>(), data.at("player").at("rotation")[1].get<float>(), cameraNode->transform().eulerAngles().z));
+		_cameraEulerAngles = glm::vec2(
+			data.at("player").at("rotation")[0].get<float>(),
+			data.at("player").at("rotation")[1].get<float>()
+		);
 
 		_speedValueField->setValue(cameraMoveSpeed);
 		_playerPositionLabel[0]->setValue(cameraNode->transform().position().x);
