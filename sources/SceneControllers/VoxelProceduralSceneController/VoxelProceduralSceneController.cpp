@@ -2,35 +2,6 @@
 #include "AppEnv.hpp"
 #include <dirent.h>
 
-#define BLOCK_BEDROCK 0
-#define BLOCK_STONE 1
-#define BLOCK_DIRT 2
-#define BLOCK_GRASS 3
-#define BLOCK_SAND 4
-#define BLOCK_GRAVEL 5
-#define BLOCK_WATER 7
-#define BLOCK_GRASS_BROWN 16
-#define BLOCK_WOOD 17
-#define BLOCK_GOLD 18
-#define BLOCK_WOOD_PLANKS 19
-#define BLOCK_BRICKS 20
-#define BLOCK_COBBLESTONE 21
-#define BLOCK_ICE 32
-#define BLOCK_ICE_BROKEN 33
-#define BLOCK_SNOW 34
-#define BLOCK_OBSIDIAN 36
-#define BLOCK_GRASS_PURPLE 48
-#define BLOCK_CACTUS 49
-#define BLOCK_BUSH 50
-#define BLOCK_FLOWER 51
-#define BLOCK_LEAFS_TREE 52
-#define BLOCK_LEAFS_MOUNTAIN 53
-#define BLOCK_TERRACOTTA_ORANGE 64
-#define BLOCK_TERRACOTTA_BROWN 65
-#define BLOCK_TERRACOTTA_YELLOW 66
-#define BLOCK_CLAY 67
-#define BLOCK_TNT 68
-
 VoxelProceduralSceneController::VoxelProceduralSceneController(std::shared_ptr<GLSWindow> window):
 ISceneController(window) {
 	lt = 0;

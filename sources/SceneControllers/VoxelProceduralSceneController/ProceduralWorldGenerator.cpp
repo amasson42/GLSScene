@@ -37,9 +37,64 @@ ProceduralWorldGenerator::~ProceduralWorldGenerator() {
 
 bool transparancyAdjacence(GLS::VoxelBlock block, GLS::VoxelBlock neighbor, GLS::VoxelChunkEdge edge) {
 	(void)edge;
-	if (block.textureId != 18 && neighbor.textureId == 18)
+	if (block.textureId != BLOCK_LEAFS_MOUNTAIN && neighbor.textureId == BLOCK_LEAFS_MOUNTAIN)
+		return true;
+	if (block.textureId != BLOCK_LEAFS_TREE && neighbor.textureId == BLOCK_LEAFS_TREE)
+		return true;
+	if (block.textureId != BLOCK_WATER && neighbor.textureId == BLOCK_WATER)
 		return true;
 	return false;
+}
+
+static void _proceduralGenerateTreeAt(std::shared_ptr<BigChunk> bc, glm::ivec3 coord) {
+	const float treeSize = 13 * (fabs(linearNoise(coord.x * 0.312 + 0.6237, coord.y * 0.931 + 0.912, coord.z * 0.125 + 0.2944)) + 0.8);
+	glm::ivec3 offset = glm::ivec3(0);
+	for (offset.y = 0; offset.y < 4; offset.y++) {
+		bc->blockAt(coord + offset) = GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD);
+	}
+	for (offset.x = -2; offset.x <= 2; offset.x++) {
+		for (offset.y = 2; offset.y <= 5; offset.y++) {
+			for (offset.z = -2; offset.z <= 2; offset.z++) {
+				if (bc->blockAt(coord + offset).meshType == GLS::VoxelBlockMeshType::Empty) {
+					glm::ivec3 bo = offset - glm::ivec3(0, 1, 0);
+					if (bo.x * bo.x + bo.y * bo.y + bo.z * bo.z < treeSize)
+						bc->blockAt(coord + offset) = GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_LEAFS_TREE);
+				}
+			}
+		}
+	}
+}
+
+static void _proceduralGenerateTreeMountainAt(std::shared_ptr<BigChunk> bc, glm::ivec3 coord) {
+	const float treeSize = 9 * (fabs(linearNoise(coord.x * 0.312 + 0.6237, coord.y * 0.931 + 0.912, coord.z * 0.125 + 0.2944)) + 1.2);
+	glm::ivec3 offset = glm::ivec3(0);
+	for (offset.y = 0; offset.y < 0.7 * treeSize; offset.y++) {
+		bc->blockAt(coord + offset) = GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_WOOD);
+	}
+	for (offset.y = 3; offset.y <= treeSize; offset.y++) {
+		const float width = std::max(-(offset.y - treeSize) * (cos(M_PI * offset.y) + 1) / 5, 2.5 - offset.y * 2.5 / treeSize);
+		for (offset.x = -width; offset.x <= width; offset.x++) {
+			for (offset.z = -width; offset.z <= width; offset.z++) {
+				if (bc->blockAt(coord + offset).meshType == GLS::VoxelBlockMeshType::Empty) {
+					bc->blockAt(coord + offset) = GLS::VoxelBlock(GLS::VoxelBlockMeshType::Full, BLOCK_LEAFS_MOUNTAIN);
+				}
+			}
+		}
+	}
+}
+
+static void _proceduralGenerateStructures(std::shared_ptr<BigChunk> bc) {
+	glm::ivec3 coord;
+	for (coord.x = 0; coord.x < BigChunk::bigChunkWidth * CHUNKSIZE; coord.x++) {
+		for (coord.y = 0; coord.y < BigChunk::bigChunkHeight * CHUNKSIZE; coord.y++) {
+			for (coord.z = 0; coord.z < BigChunk::bigChunkWidth * CHUNKSIZE; coord.z++) {
+				if (bc->blockAt(coord) == GLS::VoxelBlock(GLS::VoxelBlockMeshType::Fence, BLOCK_WOOD))
+					_proceduralGenerateTreeAt(bc, coord);
+				if (bc->blockAt(coord) == GLS::VoxelBlock(GLS::VoxelBlockMeshType::Cross, BLOCK_WOOD))
+					_proceduralGenerateTreeMountainAt(bc, coord);
+			}
+		}
+	}
 }
 
 std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec2 bigChunkPos) {
@@ -82,6 +137,8 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 	}
 
 	_device->destroyBuffer(blocksBufferIndex);
+
+	_proceduralGenerateStructures(bc);
 
 	return bc;
 }

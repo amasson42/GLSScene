@@ -105,6 +105,18 @@ std::shared_ptr<GameVoxelChunk> BigChunk::chunkAt(const glm::vec3& pos) {
 	return chunkAt(x, y, z);
 }
 
+GLS::VoxelBlock& BigChunk::blockAt(glm::ivec3 coord) {
+	static GLS::VoxelBlock voidBlock;
+	const glm::ivec3 bigChunkLimit = glm::ivec3(bigChunkWidth * CHUNKSIZE, bigChunkHeight * CHUNKSIZE, bigChunkWidth * CHUNKSIZE);
+	if (coord.x < 0 || coord.y < 0 || coord.z < 0 || coord.x >= bigChunkLimit.x || coord.y >= bigChunkLimit.y || coord.z >= bigChunkLimit.z)
+		return voidBlock;
+	std::shared_ptr<GameVoxelChunk> chunk = chunkAt(coord.x / CHUNKSIZE, coord.y / CHUNKSIZE, coord.z / CHUNKSIZE);
+	if (chunk == nullptr) {
+		return voidBlock;
+	}
+	return chunk->voxel->blockAt(glm::ivec3(coord.x % 16, coord.y % 16, coord.z % 16));
+}
+
 void BigChunk::setAdjacentBigChunk_positiveX(std::shared_ptr<BigChunk> adj) {
 	_adjacents[0] = adj;
 	const int bcs = bigChunkWidth - 1;
