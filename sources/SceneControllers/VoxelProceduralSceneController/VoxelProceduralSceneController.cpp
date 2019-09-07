@@ -299,12 +299,30 @@ void VoxelProceduralSceneController::makeScene() {
 			if (worldGeneratorField->value().empty() || worldNameField->value().empty()) {
 				return;
 			}
+			std::string worldName = worldNameField->value();
+			DIR* dir;
+			struct dirent* ent;
+			if ((dir = opendir("worlds")) != nullptr) {
+				bool canContinue = false;
+				while (!canContinue) {
+					bool found = false;
+					while ((ent = readdir(dir)) != nullptr) {
+						if (("world_" + worldName).compare(ent->d_name) == 0) {
+							worldName += "_bis";
+							found = true;
+						}
+					}
+					if (!found) {
+						canContinue = true;
+					}
+				}
+			}
 			_startupWindow = DisplayedWindow::Game;
 			_newWorldWindow->setVisible(false);
 			_setupWorld();
 			_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + worldGeneratorField->value());
 			_dynamicWorld->getGenerator()->setSeed(worldSeedField->value());
-			_dynamicWorld->setWorldName(worldNameField->value());
+			_dynamicWorld->setWorldName(worldName);
 			_setupGUI();
 
 			_updateWorldFolder();
