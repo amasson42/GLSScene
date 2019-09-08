@@ -110,6 +110,9 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
+	if (_playerWindow->focused() || _environementWindow->focused()) {
+		return ;
+	}
 	if (action == GLFW_PRESS) {
 		if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9) {
 			_pickableBlocks[_pickedBlockIndex].second.meshType = GLS::VoxelBlockMeshType(key - GLFW_KEY_0);
@@ -273,7 +276,7 @@ void VoxelProceduralSceneController::makeScene() {
 		auto worldSeedField = new nanogui::IntBox<int>(worldNameWidget);
 		std::srand(std::time(nullptr));
 		worldSeedField->setValue(std::rand());
-		worldSeedField->setEditable(true);
+		worldSeedField->setEditable(false);
 		worldSeedField->setFixedWidth(200);
 
 		// World Kernel Generator
