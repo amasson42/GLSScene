@@ -326,15 +326,22 @@ void VoxelProceduralSceneController::makeScene() {
 					}
 				}
 			}
-			_startupWindow = DisplayedWindow::Game;
-			_newWorldWindow->setVisible(false);
-			_setupWorld();
-			_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + worldGeneratorField->value());
-			_dynamicWorld->getGenerator()->setSeed(worldSeedField->value());
-			_dynamicWorld->setWorldName(worldName);
-			_setupGUI();
+			if (!_dynamicWorld) {
+				_setupWorld();
+			}
+			try {
+				_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + worldGeneratorField->value());
+				_startupWindow = DisplayedWindow::Game;
+				_newWorldWindow->setVisible(false);
+				_dynamicWorld->getGenerator()->setSeed(worldSeedField->value());
+				_dynamicWorld->setWorldName(worldName);
+				_setupGUI();
 
-			_updateWorldFolder();
+				_updateWorldFolder();
+			} catch (const std::runtime_error& e) {
+				std::cerr << e.what() << std::endl;
+				return ;
+			}
 		});
 		_nanoguiScreen->performLayout();
 		_newWorldWindow->center();
