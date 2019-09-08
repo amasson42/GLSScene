@@ -26,6 +26,8 @@
 #define	BLOCK_WOOD_PLANKS		0x13010000
 #define	BLOCK_BRICKS			0x14010000
 #define	BLOCK_COBBLESTONE		0x15010000
+#define	BLOCK_COBBLESTONE_FENCE	0x15060000
+#define	BLOCK_COBBLESTONE_TOP	0x15040000
 #define	BLOCK_SANDSTONE			0x16010000
 #define	BLOCK_ICE				0x20010000
 #define	BLOCK_ICE_BROKEN		0x21010000
@@ -42,7 +44,7 @@
 #define	BLOCK_CLAY				0x43010000
 #define	BLOCK_TNT				0x44010000
 
-#define WATER_LEVEL 64
+#define WATER_LEVEL 90
 
 double grad(int hash, double x, double y, double z);
 double noise(__global int* p, double x, double y, double z);
@@ -138,6 +140,9 @@ int3 getWorldPosition(const int3 localPosition, const int2 bigChunkPos, const in
 				localPosition.y,
 				localPosition.z + bigChunkPos.y * bigChunkFullWidth);
 }
+
+
+#define BIOMES_COUNT 6
 
 int calculBlockAt(__global int* ppm, int3 wpos);
 
@@ -371,8 +376,51 @@ int biomeBlockAt_ocean(__global int* ppm, float3 wpos, int groundHeight, float i
 	return BLOCK_AIR;
 }
 
-#define BIOMES_COUNT 6
+int caveBlockAt_raw(__global int* ppm, float3 wpos, int block, int biomeIndex, float intensity, int groundHeight);
+int caveBlockAt_raw(__global int* ppm, float3 wpos, int block, int biomeIndex, float intensity, int groundHeight) {
+	if (wpos.y >= groundHeight - 4)
+		return block;
+	float nValue =
+		noise(ppm, wpos.x * 0.0847, wpos.y * 0.2247, wpos.z * 0.0847)
+		- (1 - pow(1 - fabs(noise(ppm, wpos.x * 0.00741, wpos.y * 0.0251, wpos.z * 0.00654)), 3))
+		- (1 / (1 + exp(wpos.y - 10)));
+	nValue = pow(nValue, 1.2f);
+	if (nValue > 0.05)
+		return BLOCK_AIR;
+	if (nValue > 0.025)
+		return BLOCK_GRAVEL;
+	if (nValue > 0)
+		return BLOCK_COBBLESTONE;
+	return block;
+}
 
+int caveBlockAt(__global int* ppm, float3 wpos, int block, int biomeIndex, float intensity, int groundHeight);
+int caveBlockAt(__global int* ppm, float3 wpos, int block, int biomeIndex, float intensity, int groundHeight) {
+	block = caveBlockAt_raw(ppm, wpos, block, biomeIndex, intensity, groundHeight);
+	if (block == BLOCK_AIR) {
+		if (caveBlockAt_raw(ppm, wpos + (float3)(0, 1, 0), block, biomeIndex, intensity, groundHeight) != BLOCK_AIR) {
+			if (noise(ppm, wpos.x * 5.3127, wpos.y * 5.3127, wpos.z * 5.3127) > 0.5)
+				return BLOCK_COBBLESTONE_FENCE;
+		}
+		if (caveBlockAt_raw(ppm, wpos + (float3)(0, -1, 0), block, biomeIndex, intensity, groundHeight) == BLOCK_COBBLESTONE) {
+			if (noise(ppm, wpos.x * 5.3127, wpos.y * 5.3127, wpos.z * 5.3127) > 0.5)
+				return ((int)wpos.x + (int)wpos.z) % 2 == 0 ? BLOCK_MUSHROOM_BROWN : BLOCK_MUSHROOM_RED;
+		}
+	}
+	if (block == BLOCK_COBBLESTONE) {
+		if (caveBlockAt_raw(ppm, wpos + (float3)(0, 1, 0), block, biomeIndex, intensity, groundHeight) == BLOCK_AIR) {
+			return BLOCK_DIRT;
+		}
+	}
+	if (block == BLOCK_GRAVEL) {
+		if (caveBlockAt_raw(ppm, wpos + (float3)(0, -1, 0), block, biomeIndex, intensity, groundHeight) == BLOCK_AIR) {
+			return BLOCK_COBBLESTONE_TOP;
+		}
+	}
+	return block;
+}
+
+void normalizeBiomes(float biomes[BIOMES_COUNT]);
 void normalizeBiomes(float biomes[BIOMES_COUNT]) {
 	float total = 0;
 	for (int i = 0; i < BIOMES_COUNT; i++)
@@ -383,6 +431,13 @@ void normalizeBiomes(float biomes[BIOMES_COUNT]) {
 
 int calculBlockAt(__global int* ppm, int3 wposi) {
 	float3 wpos = (float3)(wposi.x, wposi.y, wposi.z);
+	if (wposi.y < 5) {
+		if (wposi.y == 0)
+			return BLOCK_BEDROCK;
+		if (noise(ppm, wpos.x * 1.427, wpos.y * 1.283, wpos.z * 1.427) + wpos.y * 0.15 - 0.5 < 0)
+			return BLOCK_BEDROCK;
+	}
+
 	float biomesIntensity[BIOMES_COUNT];
 	// Calcul all biomes intensities
 	biomesIntensity[0] = biomesIntensity_grass(ppm, wpos);
@@ -436,8 +491,13 @@ int calculBlockAt(__global int* ppm, int3 wposi) {
 		case 5: block = biomeBlockAt_ocean(ppm, wpos, groundHeight, biomesIntensity[biomeIndex]); break;
 		default: block = BLOCK_AIR; break;
 	}
+
 	if (wposi.y == WATER_LEVEL && block == BLOCK_AIR)
 		block = BLOCK_WATER_SURFACE;
+
+	if (wposi.y <= groundHeight) {
+		block = caveBlockAt(ppm, wpos, block, biomeIndex, biomesIntensity[biomeIndex], groundHeight);
+	}
 
 	return block;
 }
