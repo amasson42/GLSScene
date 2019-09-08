@@ -194,6 +194,7 @@ void VoxelProceduralSceneController::resizeWindowCallBack(glm::vec2 newSize) {
 }
 
 void VoxelProceduralSceneController::makeScene() {
+
 	if (_startupWindow == DisplayedWindow::StartMenu) {
 		// Saved worlds scrolling list
 		if (_selectWorldWindow) {
@@ -221,7 +222,8 @@ void VoxelProceduralSceneController::makeScene() {
 					} catch (const nlohmann::json::exception& e) {
 						continue ;
 					}
-		 			nanogui::Button* l = new nanogui::Button(worldsWidget, worldName);
+		 			nanogui::Button* l = new nanogui::Button(worldsWidget, (worldName.length() < 24 ? worldName : worldName.substr(0, 22) + "..."));
+					l->setFixedWidth(180);
 		 			l->setCallback([worldName, this]() {
 		 				_startupWindow = DisplayedWindow::Game;
 		 				_setupWorld();
@@ -719,8 +721,9 @@ void VoxelProceduralSceneController::_createWorldsFolder() {
 
 void VoxelProceduralSceneController::_updateWorldFolder() {
 #ifdef WIN32
-	std::wstring folderName = (LVoxelProceduralSceneController::worldDirPrefix + std::to_wstring(_dynamicWorld->getWorldName()).c_str();
-	std::string worldName = std::string(folderName.begin(), folderName.end());
+	std::string worldName = VoxelProceduralSceneController::worldDirPrefix + _dynamicWorld->getWorldName();
+	std::wstring folderName;
+	folderName.assign(worldName.begin(), worldName.end());
 	if (_wmkdir(folderName.c_str()) == -1) {
 		std::cerr << "Loading existing world" << std::endl;
 	}
