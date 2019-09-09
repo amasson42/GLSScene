@@ -117,7 +117,7 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 		if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9) {
 			_pickableBlocks[_pickedBlockIndex].second.meshType = GLS::VoxelBlockMeshType(key - GLFW_KEY_0);
 			_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-			_handBlock->updateMesh();
+			_updateHandBlock();
 		}
 		if (key == GLFW_KEY_EQUAL)
 			cameraMoveSpeed *= 2.0;
@@ -158,7 +158,7 @@ void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
 	if (y != 0.0) {
 		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
 		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-		_handBlock->updateMesh();
+		_updateHandBlock();
 		_handBlock->mesh->generateBuffers();
 	}
 }
@@ -468,7 +468,7 @@ void VoxelProceduralSceneController::_setupWorld() {
 	_handBlock = std::make_shared<GameVoxelChunk>();
 	_handBlock->voxel->setMaterial(texturedMaterial);
 	_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-	_handBlock->updateMesh();
+	_updateHandBlock();
 	_handBlock->node->transform().scaleBy(glm::vec3(0.5));
 	_handBlock->node->transform().setPosition(glm::vec3(0.65, -0.8, -1.5));
 
@@ -816,8 +816,7 @@ void VoxelProceduralSceneController::_loadJsonFileInfo(nlohmann::json data) {
 		_fovValue->setValue(cameraNode->camera()->fov * 180.0f / M_PI);
 		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
 		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-		_handBlock->updateMesh();
-
+		_updateHandBlock();
 
 		_dynamicWorld->getGenerator()->setSeed(data.at("settings").at("seed").get<int>());
 		_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + data.at("settings").at("generator").get<std::string>());
@@ -848,6 +847,11 @@ void VoxelProceduralSceneController::_toggleCinematicMode() {
 	_displayInterface = _cinematicMode;
 	updateUI();
 	_cinematicMode = !_cinematicMode;
+}
+
+void VoxelProceduralSceneController::_updateHandBlock() {
+	_handBlock->updateMesh();
+	_handBlock->mesh->generateBuffers();
 }
 
 std::vector<std::pair<std::string, GLS::VoxelBlock> > VoxelProceduralSceneController::_pickableBlocks = {

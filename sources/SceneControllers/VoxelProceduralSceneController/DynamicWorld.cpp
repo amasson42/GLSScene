@@ -82,25 +82,23 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 			float chunkOffsetSquaredLength = glm::dot(chunkOffset, chunkOffset);
 			if (chunkOffsetSquaredLength < _loadingDistance * _loadingDistance) {
 
-				glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
-				cameraDirection = glm::normalize(glm::vec3(1, 0, 1) * cameraDirection);
-
-				if (chunkOffsetSquaredLength < glm::dot(chunkMid, chunkMid)
-					|| glm::dot(glm::normalize(chunkOffset), cameraDirection) > minCosCameraVision) {
-					_loadingChunks.push_back(std::make_pair(pos, (std::async([this](glm::ivec2 pos) {
-						std::ifstream chunkStream(getBigChunkFileNameAt(pos), std::ios::binary);
-						std::shared_ptr<BigChunk> chunk;
-						if (chunkStream.good()) {
-							chunk = std::make_shared<BigChunk>(_generator->usedMaterial);
-							chunk->loadFromStream(chunkStream);
-							chunkStream.close();
-						} else {
-							chunk = _generator->generateBigChunkAt(pos);
-						}
-						// chunk->generateAllMeshes();
-						return chunk;
-					}, glm::ivec2(x, y)))));
-				}
+				/* async -- */
+				_loadingChunks.push_back(std::make_pair(pos, (std::async([this](glm::ivec2 pos) {
+					std::ifstream chunkStream(getBigChunkFileNameAt(pos), std::ios::binary);
+					std::shared_ptr<BigChunk> chunk;
+					if (chunkStream.good()) {
+						chunk = std::make_shared<BigChunk>(_generator->usedMaterial);
+						chunk->loadFromStream(chunkStream);
+						chunkStream.close();
+					} else {
+						chunk = _generator->generateBigChunkAt(pos);
+					}
+					chunk->generateAllMeshes();
+					return chunk;
+				},
+				/* -- end async */
+				
+				glm::ivec2(x, y)))));
 			}
 		}
 	}
@@ -168,50 +166,73 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 	std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
 	if (camera == nullptr)
 		return;
-	float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * (camera->aspect > 1.0 ? camera->aspect : 1.0 / camera->aspect) / 2));
 
-	int updatedMeshCount = 0;
-	std::vector < std::pair <glm::ivec2, std::shared_ptr<BigChunk> >>::iterator it = _loadedChunks.begin();
-	it = _loadedChunks.begin();
-	
-	double totalTime = 0.0;
+	const float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * (camera->aspect > 1.0 ? camera->aspect : 1.0 / camera->aspect) / 2));
+	const glm::vec3 cameraPos = cameraNode->transform().position();
+	const glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
 
-	while (it != _loadedChunks.end()) {
+	auto chunkPriority = [cameraPos, cameraDirection](std::shared_ptr<GameVoxelChunk> chunk) {
+
+		glm::vec3 chunkWorldPosition = glm::vec3(chunk->node->getWorldTransformMatrix() * glm::vec4(0, 0, 0, 1)) + glm::vec3(CHUNKSIZE / 2);
+		glm::vec3 chunkDirection = chunkWorldPosition - cameraPos;
+		float distance = glm::length(chunkDirection);
+		chunkDirection /= distance;
+		float cosangle = glm::dot(chunkDirection, cameraDirection);
+
+		float distancePriority = 64 - distance * 0.3;
+		float anglePriority = 32 * cosangle;
+
+		return distancePriority + anglePriority + (distance < 32 ? 100 : 0);
+	};
+	auto priorityVoxelComparator = [chunkPriority](std::shared_ptr<GameVoxelChunk> lhs, std::shared_ptr<GameVoxelChunk> rhs) {
+		return chunkPriority(lhs) > chunkPriority(rhs);
+	};
+
+	std::set<std::shared_ptr<GameVoxelChunk>, decltype(priorityVoxelComparator)> meshAskers(priorityVoxelComparator);
+
+	for (auto it = _loadedChunks.begin(); it != _loadedChunks.end(); ++it) {
 		std::shared_ptr<BigChunk> bigChunk = it->second;
 		for (int i = 0; i < BigChunk::bigChunkCount; i++) {
 			std::shared_ptr<GameVoxelChunk> chunk(bigChunk->chunkAt(i));
 			glm::vec3 chunkWorldPos = bigChunk->getNode()->transform().position() + chunk->node->transform().position() + glm::vec3(CHUNKSIZE / 2);
-			glm::vec3 cameraPos = cameraNode->transform().position();
 			glm::vec3 chunkDirection = chunkWorldPos - cameraPos;
 			float squaredLength = glm::dot(chunkDirection, chunkDirection);
+			
 			if (squaredLength < _visibleDistance * _visibleDistance) {
 				if (squaredLength < 3 * CHUNKSIZE * CHUNKSIZE) {
 					chunk->node->setActive(true);
 				} else {
 					chunkDirection = glm::normalize(chunkDirection);
-					glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
 					float cosangle = glm::dot(chunkDirection, cameraDirection);
 					chunk->node->setActive(cosangle > minCosCameraVision);
 				}
 			} else {
 				chunk->node->setActive(false);
 			}
-			if (chunk->mustUpdateMesh && chunk->node->isActive()) {
-				// if (updatedMeshCount > 200) {
-				// 	continue;
-				// }
-				chunk->updateMesh();
+
+			if (!chunk->mesh->bufferGenerated()) {
 				chunk->mesh->generateBuffers();
-				totalTime = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count();
-				if (totalTime > 1.0 / 20.0) {
-					return;
-				}
-				updatedMeshCount++;
+			}
+			if (chunk->mustUpdateMesh) {
+				meshAskers.insert(chunk);
+			}
+			double totalTime = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count();
+			if (totalTime > 1.0 / 30.0) {
+				return;
 			}
 		}
 
-		++it;
 	}
+
+	for (auto it = meshAskers.begin(); it != meshAskers.end(); ++it) {
+		(*it)->updateMesh();
+		(*it)->mesh->generateBuffers();
+		double totalTime = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count();
+		if (totalTime > 1.0 / 30.0) {
+			return;
+		}
+	}
+
 }
 
 void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
@@ -307,6 +328,7 @@ void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, GLS::VoxelBlock bl
 		targetBigChunk->setUntouched(false);
 		targetVoxel->setBlockAt(glm::ivec3(inVoxelPos), block);
 		targetVoxel->updateMesh();
+		targetVoxel->mesh->generateBuffers();
 	}
 }
 

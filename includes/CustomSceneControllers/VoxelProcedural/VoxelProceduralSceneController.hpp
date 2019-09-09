@@ -98,6 +98,7 @@ private:
 	void _loadJsonFileInfo(nlohmann::json);
 	void _toggleCinematicMode();
 
+	void _updateHandBlock();
 
 	static std::vector<std::pair<std::string, GLS::VoxelBlock> > _pickableBlocks;
 	static constexpr char generatorFilePath[] = "assets/voxelProceduralGeneratorSources/";

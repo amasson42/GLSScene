@@ -25,7 +25,6 @@ void GameVoxelChunk::updateMesh() {
 			v.z += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
 		}
 	}
-	// mesh->setDrawMode(GL_LINES);
     mesh->calculNormals();
     node->addRenderable(mesh);
     mesh->setCastShadowFace(GL_BACK);
@@ -34,7 +33,7 @@ void GameVoxelChunk::updateMesh() {
 
 void GameVoxelChunk::setBlockAt(glm::ivec3 coord, GLS::VoxelBlock block) {
 	voxel->blockAt(coord) = block;
-	mustUpdateMesh = true;
+    mustUpdateMesh = true;
 
     if (!adjacents[0].expired() && coord.x == CHUNKSIZE - 1)
         adjacents[0].lock()->mustUpdateMesh = true;

@@ -46,7 +46,7 @@ struct GameVoxelChunk {
 	std::shared_ptr<GLS::VoxelChunk> voxel;
 	std::shared_ptr<GLS::Mesh> mesh;
 	bool mustUpdateMesh;
-	std::array<std::weak_ptr<GameVoxelChunk>, 6> adjacents; // TODO: this
+	std::array<std::weak_ptr<GameVoxelChunk>, 6> adjacents;
 
 	static float meshmerizerIntensity;
 
