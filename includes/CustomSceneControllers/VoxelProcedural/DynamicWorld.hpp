@@ -13,7 +13,7 @@ class DynamicWorld {
 
 public:
 
-	DynamicWorld(std::shared_ptr<GLS::Node> worldNode);
+	DynamicWorld(std::shared_ptr<GLS::Node> worldNode, std::shared_ptr<GLS::Scene> scene);
 	glm::ivec2 worldToBigChunkPosition(glm::vec3 position);
 	glm::vec3 bigChunkPositionToWorld(glm::ivec2 position);
 	const std::string getBigChunkFileNameAt(glm::ivec2 position);
@@ -45,6 +45,7 @@ public:
 
 private:
 
+	std::shared_ptr<GLS::Scene> _worldScene;
 	std::shared_ptr<GLS::Node> _worldNode;
 	std::shared_ptr<ProceduralWorldGenerator> _generator;
 

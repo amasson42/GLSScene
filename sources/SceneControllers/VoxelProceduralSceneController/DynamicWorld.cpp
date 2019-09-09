@@ -8,9 +8,10 @@ namespace glm {
 const float DynamicWorld::minRenderDistance = 50.0f;
 const float DynamicWorld::maxRenderDistance = 250.0f;
 
-DynamicWorld::DynamicWorld(std::shared_ptr<GLS::Node> worldNode) :
+DynamicWorld::DynamicWorld(std::shared_ptr<GLS::Node> worldNode, std::shared_ptr<GLS::Scene> scene) :
 	_loadedChunks(), _loadingDistance(200.0f), _visibleDistance(200.0f) {
 		_worldNode = worldNode;
+		_worldScene = scene;
 		_generator = std::make_shared<ProceduralWorldGenerator>();
 }
 
@@ -325,10 +326,23 @@ void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, GLS::VoxelBlock bl
 	}
 	glm::vec3 inVoxelPos = inBigChunkPos - targetVoxel->node->transform().position();
 	if (block != targetVoxel->voxel->blockAt(inVoxelPos)) {
+		if (block.meshType == GLS::VoxelBlockMeshType::Empty) {
+			GLS::VoxelChunk explode_voxel;
+			explode_voxel.setMaterial(targetVoxel->voxel->getMaterial());
+			explode_voxel.blockAt(glm::ivec3(0)) = targetVoxel->voxel->blockAt(inVoxelPos);
+			std::shared_ptr<GLS::Mesh> explode_mesh = explode_voxel.bakeMesh();
+			std::shared_ptr<ExplodingMesh> exploder = std::make_shared<ExplodingMesh>(explode_mesh);
+
+			exploder->node()->transform().setPosition(worldPosition);
+			_worldScene->rootNode()->addChildNode(exploder->node());
+			_worldScene->addAnimatable(exploder);
+		}
+
 		targetBigChunk->setUntouched(false);
 		targetVoxel->setBlockAt(glm::ivec3(inVoxelPos), block);
 		targetVoxel->updateMesh();
 		targetVoxel->mesh->generateBuffers();
+
 	}
 }
 

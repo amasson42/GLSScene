@@ -398,7 +398,7 @@ void VoxelProceduralSceneController::_setupWorld() {
 	// World
 	worldNode = std::make_shared<GLS::Node>();
 	_scene->rootNode()->addChildNode(worldNode);
-	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode);
+	_dynamicWorld = std::make_shared<DynamicWorld>(worldNode, _scene);
 	_dynamicWorld->getGenerator()->usedMaterial = texturedMaterial;
 
 	_setupLights();

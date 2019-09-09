@@ -21,10 +21,16 @@ ExplodingMesh::ExplodingMesh(const std::shared_ptr<GLS::Mesh>& mesh) {
 
     std::shared_ptr<GLS::Material> mat = mesh->getMaterial();
 
-    for (int i = 0; i <= mesh->indicesRef().size() - 3; i += 3) {
-        GLS::Vertex v1 = mesh->verticesRef()[mesh->indicesRef()[i + 0]];
-        GLS::Vertex v2 = mesh->verticesRef()[mesh->indicesRef()[i + 1]];
-        GLS::Vertex v3 = mesh->verticesRef()[mesh->indicesRef()[i + 2]];
+    for (int i = 0; i <= static_cast<int>(mesh->indicesRef().size()) - 3; i += 3) {
+        int id_0 = mesh->indicesRef()[i + 0];
+        int id_1 = mesh->indicesRef()[i + 1];
+        int id_2 = mesh->indicesRef()[i + 2];
+        GLS::Vertex v1 = mesh->verticesRef()[id_0];
+        v1.position -= glm::vec3(0.5);
+        GLS::Vertex v2 = mesh->verticesRef()[id_1];
+        v2.position -= glm::vec3(0.5);
+        GLS::Vertex v3 = mesh->verticesRef()[id_2];
+        v3.position -= glm::vec3(0.5);
         GLS::Vertex v1_2 = _midVertex(v1, v2);
         GLS::Vertex v2_3 = _midVertex(v2, v3);
         GLS::Vertex v3_1 = _midVertex(v3, v1);
@@ -94,7 +100,6 @@ ExplodingMesh::ExplodingMesh(const std::shared_ptr<GLS::Mesh>& mesh) {
             _node->addChildNode(fragNode);
         }
 
-
     }
 }
 
@@ -110,19 +115,25 @@ void ExplodingMesh::initAnimation() {
     _lifeTime = 0;
 }
 
-#define EXPLODING_TIME 12
+#define EXPLODING_TIME 0.25
 void ExplodingMesh::animate(float deltaTime) {
     _lifeTime += deltaTime;
     glm::vec3 pos = glm::vec3(_node->getWorldTransformMatrix() * glm::vec4(0, 0, 0, 1));
     for (int i = 0; i < _node->childNodes().size(); i++) {
-        _node->childNodeAt(i)->transform().rotateEulerAnglesBy(
-            linearNoise(pos.x * 0.1342 + 15.482 + (i % 4 - 3) * 2.417, 0.12, 0.52) * 0.2 * deltaTime,
-            linearNoise(pos.y * 0.1342 + 15.482 + (i % 7 - 2) * 2.417, 0.17, 0.92) * 0.2 * deltaTime,
-            linearNoise(pos.z * 0.1342 + 15.482 + (i % 3 - 1) * 2.417, 0.52, 0.57) * 0.2 * deltaTime
-        );
         GLS::Transform& transform(_node->childNodeAt(i)->transform());
+        GLS::Mesh* triangleMesh = dynamic_cast<GLS::Mesh*>(_node->childNodeAt(i)->renderables()[0].get());
+        glm::vec3 cen =
+            (triangleMesh->verticesRef()[0].position
+            + triangleMesh->verticesRef()[1].position
+            + triangleMesh->verticesRef()[2].position) / 3.0f;
+        transform.rotateEulerAnglesBy(
+            linearNoise(cen.x * 9.1242, pos.y * 0.2498, pos.z * 0.3851) * deltaTime * 3.2,
+            linearNoise(pos.x * 0.8426, cen.y * 4.7643, pos.z * 0.5874) * deltaTime * 4.1 + ((i % 4 - 2) * 4.5 * deltaTime),
+            linearNoise(pos.x * 0.9731, pos.y * 0.4981, cen.z * 8.6415) * deltaTime * 7.2
+        );
     }
-    float powed = pow((EXPLODING_TIME - _lifeTime) / EXPLODING_TIME, 0.7);
+    float t = _lifeTime / EXPLODING_TIME;
+    float powed = -1.3 * t * t + 0.3 * t + 1;
     _node->transform().setScale(glm::vec3(powed));
 }
 

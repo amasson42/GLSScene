@@ -39,9 +39,9 @@ ProceduralWorldGenerator::~ProceduralWorldGenerator() {
 
 bool transparancyAdjacence(GLS::VoxelBlock block, GLS::VoxelBlock neighbor, GLS::VoxelChunkEdge edge) {
 	(void)edge;
-	if (block.textureId != BLOCK_LEAFS_MOUNTAIN && neighbor.textureId == BLOCK_LEAFS_MOUNTAIN)
+	if (neighbor.textureId == BLOCK_LEAFS_MOUNTAIN)
 		return true;
-	if (block.textureId != BLOCK_LEAFS_TREE && neighbor.textureId == BLOCK_LEAFS_TREE)
+	if (neighbor.textureId == BLOCK_LEAFS_TREE)
 		return true;
 	if (block.textureId != BLOCK_WATER && neighbor.textureId == BLOCK_WATER)
 		return true;
@@ -125,7 +125,6 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 	k->setArgument(4, BigChunk::bigChunkWidth);
 	
 	_device->commandQueue(_commandQueueIndices[_currentQueue])->runNDRangeKernel(*k, blocks.size());
-	_generationMutex.unlock();
 	
 	_device->commandQueue(_commandQueueIndices[_currentQueue])->readBuffer(blocksArrayPointersBuffer, &(blocks.front()), blocks.size() * sizeof(GLS::VoxelBlock));
 	_device->commandQueue(_commandQueueIndices[_currentQueue])->finish();
@@ -141,6 +140,8 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 	_device->destroyBuffer(blocksBufferIndex);
 
 	_proceduralGenerateStructures(bc);
+
+	_generationMutex.unlock();
 
 	return bc;
 }

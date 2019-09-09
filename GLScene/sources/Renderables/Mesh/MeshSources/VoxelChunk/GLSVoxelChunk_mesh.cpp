@@ -181,8 +181,8 @@ namespace GLS {
         }};
         const float reduceHeightValue = 0.8;
         const std::array<FaceDescriptor, 6> reduceHeightFaceDescriptors = {{
-            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, reduceHeightValue)), glm::vec3(0)},
-            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, reduceHeightValue)), glm::vec3(0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 1 - reduceHeightValue), vec2(1, 1)), glm::vec3(0, reduceHeightValue - 1, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 1 - reduceHeightValue), vec2(1, 1)), glm::vec3(0, reduceHeightValue - 1, 0)},
 #if true
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0, reduceHeightValue - 1, 0)},
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0)},
@@ -190,16 +190,16 @@ namespace GLS {
             {std::make_pair<vec2, vec2>(vec2(0.1, 0.1), vec2(0.9, 0.9)), glm::vec3(0, reduceHeightValue - 1, 0)},
             {std::make_pair<vec2, vec2>(vec2(0.1, 0.1), vec2(0.9, 0.9)), glm::vec3(0)},
 #endif
-            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, reduceHeightValue)), glm::vec3(0)},
-            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, reduceHeightValue)), glm::vec3(0)}
+            {std::make_pair<vec2, vec2>(vec2(0, 1 - reduceHeightValue), vec2(1, 1)), glm::vec3(0, reduceHeightValue - 1, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 1 - reduceHeightValue), vec2(1, 1)), glm::vec3(0, reduceHeightValue - 1, 0)}
         }};
         const std::array<FaceDescriptor, 6> slabLowFaceDescriptors = {{
-            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 0.5)), glm::vec3(0)},
-            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 0.5)), glm::vec3(0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0.5), vec2(1, 1)), glm::vec3(0, -0.5, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0.5), vec2(1, 1)), glm::vec3(0, -0.5, 0)},
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0, -0.5, 0)},
             {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 1)), glm::vec3(0)},
-            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 0.5)), glm::vec3(0)},
-            {std::make_pair<vec2, vec2>(vec2(0, 0), vec2(1, 0.5)), glm::vec3(0)}
+            {std::make_pair<vec2, vec2>(vec2(0, 0.5), vec2(1, 1)), glm::vec3(0, -0.5, 0)},
+            {std::make_pair<vec2, vec2>(vec2(0, 0.5), vec2(1, 1)), glm::vec3(0, -0.5, 0)}
         }};
         const std::array<FaceDescriptor, 6> slabHighFaceDescriptors = {{
             {std::make_pair<vec2, vec2>(vec2(0, 0.5), vec2(1, 1)), glm::vec3(0)},

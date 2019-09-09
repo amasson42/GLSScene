@@ -12,6 +12,7 @@ namespace GLS {
 
     void Scene::addAnimatable(std::shared_ptr<IAnimatable> animatable) {
         _animatables.insert(animatable);
+        animatable->initAnimation();
     }
 
     void Scene::removeAnimatable(std::shared_ptr<IAnimatable> animatable) {

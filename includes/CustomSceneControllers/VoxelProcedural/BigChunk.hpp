@@ -64,9 +64,8 @@ struct GameVoxelChunk {
  * it can be save and loaded from a file.
  */
 class BigChunk {
-	// TODO: load and save into files
 	public:
-	static const int bigChunkWidth = 4;
+	static const int bigChunkWidth = 8;
 	static const int bigChunkHeight = 16;
 	static const int bigChunkCount = bigChunkWidth * bigChunkWidth * bigChunkHeight;
 
