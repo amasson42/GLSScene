@@ -8,7 +8,9 @@ ProceduralWorldGenerator::ProceduralWorldGenerator() :
 	_perlinPermutationBufferIndex(-1),
 	_seed(0) {
 
-	_device = GLS::getSharedDevice();
+	// _device = GLS::getSharedDevice();
+	_device = std::make_shared<CLD::GPUDevice>();
+	_device->createContext(false);
 
 	if (_device == nullptr)
 		throw std::runtime_error("GLS was not initialized");

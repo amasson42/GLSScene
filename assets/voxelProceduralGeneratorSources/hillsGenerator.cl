@@ -46,24 +46,24 @@
 
 #define WATER_LEVEL 90
 
-double grad(int hash, double x, double y, double z);
-double noise(__global int* p, double x, double y, double z);
-double lerp(double t, double a, double b);
+float grad(int hash, float x, float y, float z);
+float noise(__global int* p, float x, float y, float z);
+float lerp(float t, float a, float b);
 float ridge(float h, float offset);
 float ridgedMF(__global int* ppm, float3 p, float freq);
 
-double grad(int hash, double x, double y, double z) {
+float grad(int hash, float x, float y, float z) {
     int h = hash & 15;
-    double u = h < 8 ? x : y;
-    double v = h < 4 ? y : h == 12 || h == 14 ? x : z;
+    float u = h < 8 ? x : y;
+    float v = h < 4 ? y : h == 12 || h == 14 ? x : z;
     return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
 }
 
-double lerp(double t, double a, double b) {
+float lerp(float t, float a, float b) {
     return a + t * (b - a);
 }
 
-double noise(__global int* p, double x, double y, double z) {
+float noise(__global int* p, float x, float y, float z) {
     int X = (int)floor(x) & 255;
     int Y = (int)floor(y) & 255;
     int Z = (int)floor(z) & 255;
@@ -72,9 +72,9 @@ double noise(__global int* p, double x, double y, double z) {
     y -= floor(y);
     z -= floor(z);
 
-    double u = x;
-    double v = y;
-    double w = z;
+    float u = x;
+    float v = y;
+    float w = z;
 
     int A = p[X] + Y;
     int AA = p[A] + Z;
@@ -110,7 +110,7 @@ float ridgedMF(__global int* ppm, float3 p, float freq) {
     float amp = 0.5;
     float prev = 1.0;
     for (int i = 0; i < 4; i++) {
-        float n = ridge(noise(ppm, p.x * freq, 0.42, p.z * freq), offset);
+        float n = ridge(noise(ppm, p.x * freq, 0.42f, p.z * freq), offset);
         sum += n * amp;
         sum += n * amp * prev;
         prev = n;
@@ -205,16 +205,16 @@ float biomeHeigh_mountains(__global int* ppm, float3 wpos) {
 
 float biomeHeigh_canyons(__global int* ppm, float3 wpos) {
 	return WATER_LEVEL + 10
-		+ clamp(90 * (noise(ppm, wpos.x * 0.05 + 2654.456, 0.24, wpos.z * 0.015 + 1713.1) + noise(ppm, wpos.x * 0.005 + 843.2, 0.167, wpos.z * 0.0015)),
-			-10.0 + 5 * noise(ppm, wpos.x * 0.05, 0.84, wpos.z * 0.05),
-			20.0 + 3 * noise(ppm, wpos.x * 0.03, 0.94, wpos.z * 0.03));
+		+ clamp(90.0f * (noise(ppm, wpos.x * 0.05 + 2654.456, 0.24, wpos.z * 0.015 + 1713.1) + noise(ppm, wpos.x * 0.005 + 843.2, 0.167, wpos.z * 0.0015)),
+			-10.0f + 5.0f * noise(ppm, wpos.x * 0.05, 0.84, wpos.z * 0.05),
+			20.0f + 3.0f * noise(ppm, wpos.x * 0.03, 0.94, wpos.z * 0.03));
 }
 
 float biomeHeigh_desert(__global int* ppm, float3 wpos) {
 	return WATER_LEVEL + 6
-		+ clamp(40 * (noise(ppm, wpos.x * 0.05 + 6841.456, 0.67, wpos.z * 0.015 + 134.47) + noise(ppm, wpos.x * 0.005 + 346.1, 0.944, wpos.z * 0.0015) * 3),
-			-5.0 + 5 * noise(ppm, wpos.x * 0.02, 0.84, wpos.z * 0.02),
-			5.0 + 3 * noise(ppm, wpos.x * 0.03, 0.94, wpos.z * 0.03));
+		+ clamp(40.0f * (noise(ppm, wpos.x * 0.05f + 6841.456f, 0.67f, wpos.z * 0.015f + 134.47f) + noise(ppm, wpos.x * 0.005 + 346.1f, 0.944f, wpos.z * 0.0015) * 3.0f),
+			-5.0f + 5.0f * noise(ppm, wpos.x * 0.02, 0.84, wpos.z * 0.02),
+			5.0f + 3.0f * noise(ppm, wpos.x * 0.03, 0.94, wpos.z * 0.03));
 }
 
 float biomeHeigh_ocean(__global int* ppm, float3 wpos) {

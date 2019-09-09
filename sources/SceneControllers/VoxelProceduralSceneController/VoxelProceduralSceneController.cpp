@@ -26,15 +26,15 @@ void VoxelProceduralSceneController::update() {
 	}
 
 	ISceneController::update();
-	if (!mustUpdate)
-		return;
 	if (_window.expired())
 		return;
 	float et = _window.lock()->elapsedTime();
 
 	if (et - lt >= 0.05) {
 		lt = et;
-		_dynamicWorld->loadPosition(cameraNode);
+
+		if (mustUpdate)
+			_dynamicWorld->loadPosition(cameraNode);
 
 		_lightNode->transform().setPosition(cameraNode->transform().position());
 
@@ -159,6 +159,7 @@ void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
 		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
 		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
 		_handBlock->updateMesh();
+		_handBlock->mesh->generateBuffers();
 	}
 }
 

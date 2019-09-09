@@ -16,8 +16,8 @@ namespace GLS {
     }
 
     void Mesh::renderInContext(Scene& scene, const RenderUniforms& uniforms) {
-        if (!bufferGenerated())
-            generateBuffers();
+        // if (!bufferGenerated())
+        //     generateBuffers();
         if (!bufferGenerated())
             return;
         
@@ -86,8 +86,8 @@ namespace GLS {
         (void)scene;
         if (_castShadowFace == GL_NONE)
             return;
-        if (!bufferGenerated())
-            generateBuffers();
+        // if (!bufferGenerated())
+        //     generateBuffers();
         if (!bufferGenerated())
             return;
 

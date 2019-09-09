@@ -13,16 +13,19 @@ GameVoxelChunk::GameVoxelChunk() {
 void GameVoxelChunk::updateMesh() {
     node->renderables().clear();
     mesh = voxel->bakeMesh();
-	for (GLS::Vertex& ver : mesh->verticesRef()) {
-		glm::vec3& v(ver.position);
-		glm::vec3 vmod = glm::vec3(
-			fmod(v.x, GLS::VoxelChunk::chunkSize),
-			fmod(v.y, GLS::VoxelChunk::chunkSize),
-			fmod(v.z, GLS::VoxelChunk::chunkSize));
-		v.x += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
-		v.y += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
-		v.z += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
+	if (meshmerizerIntensity > 0.0f) {
+		for (GLS::Vertex& ver : mesh->verticesRef()) {
+			glm::vec3& v(ver.position);
+			glm::vec3 vmod = glm::vec3(
+				fmod(v.x, GLS::VoxelChunk::chunkSize),
+				fmod(v.y, GLS::VoxelChunk::chunkSize),
+				fmod(v.z, GLS::VoxelChunk::chunkSize));
+			v.x += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
+			v.y += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
+			v.z += linearNoise(vmod.x + 0.0834, vmod.y + 0.001342, vmod.z + 0.1931) * meshmerizerIntensity;
+		}
 	}
+	// mesh->setDrawMode(GL_LINES);
     mesh->calculNormals();
     node->addRenderable(mesh);
     mesh->setCastShadowFace(GL_BACK);

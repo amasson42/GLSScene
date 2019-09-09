@@ -85,9 +85,9 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 				glm::vec3 cameraDirection = glm::vec3(cameraNode->transform().matrix() * glm::vec4(0, 0, -1, 0));
 				cameraDirection = glm::normalize(glm::vec3(1, 0, 1) * cameraDirection);
 
-				if (true || chunkOffsetSquaredLength < glm::dot(chunkMid, chunkMid)
+				if (chunkOffsetSquaredLength < glm::dot(chunkMid, chunkMid)
 					|| glm::dot(glm::normalize(chunkOffset), cameraDirection) > minCosCameraVision) {
-					_loadingChunks.push_back(std::make_pair(pos, (std::async(std::launch::async, [this](glm::ivec2 pos) {
+					_loadingChunks.push_back(std::make_pair(pos, (std::async([this](glm::ivec2 pos) {
 						std::ifstream chunkStream(getBigChunkFileNameAt(pos), std::ios::binary);
 						std::shared_ptr<BigChunk> chunk;
 						if (chunkStream.good()) {
@@ -97,7 +97,7 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 						} else {
 							chunk = _generator->generateBigChunkAt(pos);
 						}
-						chunk->generateAllMeshes();
+						// chunk->generateAllMeshes();
 						return chunk;
 					}, glm::ivec2(x, y)))));
 				}
@@ -164,6 +164,7 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 }
 
 void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
+	auto startTime = std::chrono::high_resolution_clock::now();
 	std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
 	if (camera == nullptr)
 		return;
@@ -172,6 +173,9 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 	int updatedMeshCount = 0;
 	std::vector < std::pair <glm::ivec2, std::shared_ptr<BigChunk> >>::iterator it = _loadedChunks.begin();
 	it = _loadedChunks.begin();
+	
+	double totalTime = 0.0;
+
 	while (it != _loadedChunks.end()) {
 		std::shared_ptr<BigChunk> bigChunk = it->second;
 		for (int i = 0; i < BigChunk::bigChunkCount; i++) {
@@ -193,10 +197,15 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 				chunk->node->setActive(false);
 			}
 			if (chunk->mustUpdateMesh && chunk->node->isActive()) {
-				if (updatedMeshCount > 200) {
-					continue;
-				}
+				// if (updatedMeshCount > 200) {
+				// 	continue;
+				// }
 				chunk->updateMesh();
+				chunk->mesh->generateBuffers();
+				totalTime = std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::high_resolution_clock::now() - startTime).count();
+				if (totalTime > 1.0 / 20.0) {
+					return;
+				}
 				updatedMeshCount++;
 			}
 		}
@@ -206,6 +215,7 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 }
 
 void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
+	auto startFunction = std::chrono::system_clock::now();
 
 	glm::vec3 cameraFlatPosition = cameraNode->transform().position();
 	cameraFlatPosition.y = 0;
@@ -214,24 +224,26 @@ void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
 	auto start = std::chrono::system_clock::now();
 	_cleanChunks(cameraFlatPosition);
 	auto end = std::chrono::system_clock::now();
-	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-	// 	std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	// }
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+		std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	}
 
 	start = std::chrono::system_clock::now();	   
 	_generateChunks(cameraFlatPosition, cameraNode);
 	end = std::chrono::system_clock::now();
-	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-	// 	std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	// }
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+		std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	}
 
 	start = std::chrono::system_clock::now();
 	_generateMeshes(cameraNode);
 	end = std::chrono::system_clock::now();
-	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-	// 	std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	// }
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+		std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	}
 	// std::cout << "We have " << _loadedChunks.size() << " chunks" << std::endl;
+	auto endFunction = std::chrono::system_clock::now();
+	// std::cout << "Load position: " << std::chrono::duration_cast<std::chrono::milliseconds>(endFunction - startFunction).count() << std::endl;
 }
 
 void DynamicWorld::setRenderDistance(float distance) {
