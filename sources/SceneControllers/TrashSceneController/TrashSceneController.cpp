@@ -1,9 +1,138 @@
 
 #include "AppEnv.hpp"
 
+// class ExplodingMesh:: public GLS::IAnimatable {
+// 	private:
+// 	float _lifeTime;
+// 	std::shared_ptr<GLS::Node> _node; // contains multiples children node containing meshes
+
+// 	public:
+
+static GLS::Vertex _midVertex(GLS::Vertex v1, GLS::Vertex v2) {
+    return GLS::Vertex((v1.position + v2.position) / glm::vec3(2),
+                        (v1.normal + v2.normal) / glm::vec3(2),
+                        (v1.tangent + v2.tangent) / glm::vec3(2),
+                        (v1.bitangent + v2.bitangent) / glm::vec3(2),
+                        (v1.uv + v2.uv) / glm::vec2(2));
+}
+
+ExplodingMesh::ExplodingMesh(const std::shared_ptr<GLS::Mesh>& mesh) {
+    _node = std::make_shared<GLS::Node>();
+
+    std::shared_ptr<GLS::Material> mat = mesh->getMaterial();
+
+    for (int i = 0; i <= mesh->indicesRef().size() - 3; i += 3) {
+        GLS::Vertex v1 = mesh->verticesRef()[mesh->indicesRef()[i + 0]];
+        GLS::Vertex v2 = mesh->verticesRef()[mesh->indicesRef()[i + 1]];
+        GLS::Vertex v3 = mesh->verticesRef()[mesh->indicesRef()[i + 2]];
+        GLS::Vertex v1_2 = _midVertex(v1, v2);
+        GLS::Vertex v2_3 = _midVertex(v2, v3);
+        GLS::Vertex v3_1 = _midVertex(v3, v1);
+
+        {
+            std::shared_ptr<GLS::Node> fragNode = std::make_shared<GLS::Node>();
+            std::shared_ptr<GLS::Mesh> fragMesh = std::make_shared<GLS::Mesh>();
+            fragMesh->setMaterial(mat);
+
+            fragMesh->verticesRef().push_back(v1);
+            fragMesh->verticesRef().push_back(v1_2);
+            fragMesh->verticesRef().push_back(v3_1);
+            fragMesh->indicesRef().push_back(0);
+            fragMesh->indicesRef().push_back(1);
+            fragMesh->indicesRef().push_back(2);
+
+            fragMesh->generateBuffers();
+            fragNode->addRenderable(fragMesh);
+            _node->addChildNode(fragNode);
+        }
+        {
+            std::shared_ptr<GLS::Node> fragNode = std::make_shared<GLS::Node>();
+            std::shared_ptr<GLS::Mesh> fragMesh = std::make_shared<GLS::Mesh>();
+            fragMesh->setMaterial(mat);
+
+            fragMesh->verticesRef().push_back(v1_2);
+            fragMesh->verticesRef().push_back(v2);
+            fragMesh->verticesRef().push_back(v2_3);
+            fragMesh->indicesRef().push_back(0);
+            fragMesh->indicesRef().push_back(1);
+            fragMesh->indicesRef().push_back(2);
+
+            fragMesh->generateBuffers();
+            fragNode->addRenderable(fragMesh);
+            _node->addChildNode(fragNode);
+        }
+        {
+            std::shared_ptr<GLS::Node> fragNode = std::make_shared<GLS::Node>();
+            std::shared_ptr<GLS::Mesh> fragMesh = std::make_shared<GLS::Mesh>();
+            fragMesh->setMaterial(mat);
+
+            fragMesh->verticesRef().push_back(v3_1);
+            fragMesh->verticesRef().push_back(v2_3);
+            fragMesh->verticesRef().push_back(v3);
+            fragMesh->indicesRef().push_back(0);
+            fragMesh->indicesRef().push_back(1);
+            fragMesh->indicesRef().push_back(2);
+
+            fragMesh->generateBuffers();
+            fragNode->addRenderable(fragMesh);
+            _node->addChildNode(fragNode);
+        }
+        {
+            std::shared_ptr<GLS::Node> fragNode = std::make_shared<GLS::Node>();
+            std::shared_ptr<GLS::Mesh> fragMesh = std::make_shared<GLS::Mesh>();
+            fragMesh->setMaterial(mat);
+
+            fragMesh->verticesRef().push_back(v1_2);
+            fragMesh->verticesRef().push_back(v2_3);
+            fragMesh->verticesRef().push_back(v3_1);
+            fragMesh->indicesRef().push_back(0);
+            fragMesh->indicesRef().push_back(1);
+            fragMesh->indicesRef().push_back(2);
+
+            fragMesh->generateBuffers();
+            fragNode->addRenderable(fragMesh);
+            _node->addChildNode(fragNode);
+        }
+
+
+    }
+}
+
+ExplodingMesh::~ExplodingMesh() {
+    _node->removeFromParent();
+}
+
+std::shared_ptr<GLS::Node> ExplodingMesh::node() const {
+	return _node;
+}
+
+void ExplodingMesh::initAnimation() {
+    _lifeTime = 0;
+}
+
+#define EXPLODING_TIME 12
+void ExplodingMesh::animate(float deltaTime) {
+    _lifeTime += deltaTime;
+    glm::vec3 pos = glm::vec3(_node->getWorldTransformMatrix() * glm::vec4(0, 0, 0, 1));
+    for (int i = 0; i < _node->childNodes().size(); i++) {
+        _node->childNodeAt(i)->transform().rotateEulerAnglesBy(
+            linearNoise(pos.x * 0.1342 + 15.482 + (i % 4 - 3) * 2.417, 0.12, 0.52) * 0.2 * deltaTime,
+            linearNoise(pos.y * 0.1342 + 15.482 + (i % 7 - 2) * 2.417, 0.17, 0.92) * 0.2 * deltaTime,
+            linearNoise(pos.z * 0.1342 + 15.482 + (i % 3 - 1) * 2.417, 0.52, 0.57) * 0.2 * deltaTime
+        );
+        GLS::Transform& transform(_node->childNodeAt(i)->transform());
+    }
+    float powed = pow((EXPLODING_TIME - _lifeTime) / EXPLODING_TIME, 0.7);
+    _node->transform().setScale(glm::vec3(powed));
+}
+
+bool ExplodingMesh::alive() const {
+    return _lifeTime < EXPLODING_TIME;
+}
+
 TrashSceneController::TrashSceneController(std::shared_ptr<GLSWindow> window) :
 ISceneController(window) {
-
+    cameraMoveSpeed *= 4;
 }
 
 TrashSceneController::~TrashSceneController() {
@@ -13,6 +142,7 @@ TrashSceneController::~TrashSceneController() {
 void TrashSceneController::makeScene() {
     if (_window.expired())
         return;
+    initNoise(12);
     GLS::Scene& scene(*_scene);
     AppEnv *env = _window.lock()->getAppEnvPtr();
 
@@ -59,9 +189,9 @@ void TrashSceneController::makeScene() {
     // planeNode->addChildNode(planesNode);
     // planesNode->setName("planes");
 
+    std::shared_ptr<GLS::Mesh> sphereMesh = GLS::Mesh::sphere(1.0);
     std::shared_ptr<GLS::Node> sphereNode = std::make_shared<GLS::Node>();
     {
-        std::shared_ptr<GLS::Mesh> sphereMesh = GLS::Mesh::sphere(1.0);
         auto sphereMat = std::make_shared<GLS::Material>();
         sphereMat->diffuse = glm::vec3(0.5, 0.1, 0.2);
         sphereMesh->setMaterial(sphereMat);
@@ -163,6 +293,10 @@ void TrashSceneController::makeScene() {
     } catch (std::exception& e) {
         std::cout << "can't load skybox textures with exception: " << e.what() << std::endl;
     }
+
+    std::shared_ptr<ExplodingMesh> expl = std::make_shared<ExplodingMesh>(cubeMesh);
+    scene.rootNode()->addChildNode(expl->node());
+    scene.addAnimatable(expl);
 
 }
 

@@ -21,8 +21,11 @@ namespace GLS {
     void Scene::updateAnimations(float deltaTime) {
         std::set<std::shared_ptr<IAnimatable> >::iterator it = _animatables.begin();
         while (it != _animatables.end()) {
-            (*it)->animate(deltaTime);
-            ++it;
+            if ((*it)->alive()) {
+                (*it)->animate(deltaTime);
+                ++it;
+            } else
+                it = _animatables.erase(it);
         }
     }
 

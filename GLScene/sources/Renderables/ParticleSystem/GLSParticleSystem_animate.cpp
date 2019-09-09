@@ -31,6 +31,10 @@ namespace GLS {
         }
     }
 
+    bool ParticleSystem::alive() const {
+        return true;
+    }
+
     CLD::Kernel *ParticleSystem::getInitKernel() {
         if (_initKernelIndex < 0)
             return NULL;

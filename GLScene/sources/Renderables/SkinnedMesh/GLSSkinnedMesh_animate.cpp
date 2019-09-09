@@ -18,4 +18,8 @@ namespace GLS {
         (void)deltaTime;
     }
 
+    bool SkinnedMesh::alive() const {
+        return true;
+    }
+
 }
