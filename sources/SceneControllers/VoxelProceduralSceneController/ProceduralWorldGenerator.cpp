@@ -109,15 +109,15 @@ std::shared_ptr<BigChunk> ProceduralWorldGenerator::generateBigChunkAt(glm::ivec
 	std::vector<GLS::VoxelBlock> blocks(GLS::VoxelChunk::chunkBlockCount * BigChunk::bigChunkCount);
 
 	CLD::Kernel *k = _device->kernel(_kernelIndex);
-	int blocksBufferIndex;
+	int blocksBufferIndex = 0;
 
+	_generationMutex.lock();
 	CLD::Buffer blocksArrayPointersBuffer = _device->createFlagBuffer(blocks.size() * sizeof(GLS::VoxelBlock), CL_MEM_USE_HOST_PTR, &(blocks.front()), &blocksBufferIndex);
 
 	cl_int2 bcPos;
 	bcPos.s[0] = bigChunkPos.x;
 	bcPos.s[1] = bigChunkPos.y;
 
-	_generationMutex.lock();
 	k->setArgument(0, _perlinPermutationBuffer);
 	k->setArgument(1, blocksArrayPointersBuffer);
 	k->setArgument(2, bcPos);
