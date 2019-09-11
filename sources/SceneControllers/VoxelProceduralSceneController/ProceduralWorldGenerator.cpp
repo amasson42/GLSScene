@@ -163,28 +163,38 @@ unsigned int ProceduralWorldGenerator::getSeed() const {
 }
 
 void ProceduralWorldGenerator::setGenerationKernel(std::string kernelName) {
+	const std::string voidWorldSource = "kernel void generateBigChunk(__global int* ppm, __global int* blocks, const int2 bigChunkPos, const int chunkSize, const int bigChunkWidth) {}";
 	std::string sourceCode;
-	std::string line;
-	std::ifstream kernelCodeFile;
-	kernelCodeFile.open(kernelName.c_str());
-	if (!kernelCodeFile.is_open())
-		throw std::runtime_error(("could not open file " + kernelName).c_str());
-	while(!kernelCodeFile.eof()) {
-		getline(kernelCodeFile, line);
-		sourceCode += line + '\n';
+	std::ifstream kernelCodeFile(kernelName.c_str());
+	if (kernelCodeFile.is_open()) {
+		std::string line;
+		while(!kernelCodeFile.eof()) {
+			getline(kernelCodeFile, line);
+			sourceCode += line + '\n';
+		}
+		kernelCodeFile.close();
+	} else {
+		std::cerr << "could not open file " << kernelName << std::endl;
+		sourceCode = voidWorldSource;
 	}
-	kernelCodeFile.close();
-	const char *programs[1];
-	programs[0] = sourceCode.c_str();
-	int programIndex;
-	try {
-		_device->createProgram(programs, &programIndex);
-	} catch (const CLD::GPUDevice::BuildProgramException& e) {
-		std::cout << e.what() << std::endl;
-		return;
+	auto createKernel = [this](const std::string& sourceCode) {
+		const char *programs[1];
+		programs[0] = sourceCode.c_str();
+		int programIndex;
+		try {
+			_device->createProgram(programs, &programIndex);
+		} catch (const CLD::GPUDevice::BuildProgramException& e) {
+			std::cout << e.what() << std::endl;
+			return;
+		}
+		if (_kernelIndex >= 0)
+			_device->destroyKernel(_kernelIndex);
+		_device->createKernel(programIndex, "generateBigChunk", &_kernelIndex);
+		_device->destroyProgram(programIndex);
+	};
+	createKernel(sourceCode);
+	if (_kernelIndex < 0) {
+		std::cerr << "no function generateBigChunk found in kernel " << kernelName << std::endl;
+		createKernel(voidWorldSource);
 	}
-	if (_kernelIndex >= 0)
-		_device->destroyKernel(_kernelIndex);
-	_device->createKernel(programIndex, "generateBigChunk", &_kernelIndex);
-	_device->destroyProgram(programIndex);
 }

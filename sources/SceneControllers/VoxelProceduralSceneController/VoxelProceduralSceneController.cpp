@@ -123,6 +123,7 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 			cameraMoveSpeed *= 2.0;
 		if (key == GLFW_KEY_MINUS)
 			cameraMoveSpeed /= 2.0;
+		cameraMoveSpeed = std::clamp(cameraMoveSpeed, 0.0f, 1000.0f);
 		if (key == GLFW_KEY_C) {
 			_toggleCinematicMode();
 		}
@@ -229,7 +230,11 @@ void VoxelProceduralSceneController::makeScene() {
 		 				_startupWindow = DisplayedWindow::Game;
 		 				_setupWorld();
 		 				_setupGUI();
-		 				_loadJsonFileInfo(_readJsonFileInfo(VoxelProceduralSceneController::worldDirPrefix + worldName + "/info.json"));
+						try {
+							_loadJsonFileInfo(_readJsonFileInfo(VoxelProceduralSceneController::worldDirPrefix + worldName + "/info.json"));
+						} catch (const std::exception& e) {
+							throw std::runtime_error("world was deleted while being use by a dumbfuck corrector... seriously fuck that guy");
+						}
 		 				_selectWorldWindow->setVisible(false);
 		 			});
 				}
@@ -288,7 +293,7 @@ void VoxelProceduralSceneController::makeScene() {
 
 		auto worldGeneratorLabel = new nanogui::Label(worldNameWidget, "Generator");
 
-		auto worldGeneratorField = new nanogui::TextBox(worldNameWidget, defaultGeneratorFileName);
+		auto worldGeneratorField = new nanogui::TextBox(worldNameWidget, _generatorFileName);
 		worldGeneratorField->setEditable(true);
 		worldGeneratorField->setFixedWidth(200);
 
@@ -331,6 +336,7 @@ void VoxelProceduralSceneController::makeScene() {
 				_setupWorld();
 			}
 			try {
+				_generatorFileName = worldGeneratorField->value();
 				_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + worldGeneratorField->value());
 				_startupWindow = DisplayedWindow::Game;
 				_newWorldWindow->setVisible(false);
@@ -362,16 +368,6 @@ void VoxelProceduralSceneController::_setupWorld() {
 	{
 		std::shared_ptr<std::string> textureName = env->getArgument("-texture");
 		voxelTextureFilePath = textureName != nullptr ? *textureName : "assets/textures/ft_vox_textures_2.png";
-	}
-	std::string generatorFileName;
-	{
-		std::shared_ptr<std::string> argName = env->getArgument("-generator");
-		generatorFileName = argName != nullptr ? *argName : "hillsGenerator.cl";
-	}
-	std::string worldName;
-	{
-		std::shared_ptr<std::string> argName = env->getArgument("-world");
-		worldName = argName != nullptr ? *argName : "world";
 	}
 
 	// Material initialisation
@@ -575,6 +571,7 @@ void VoxelProceduralSceneController::_setupGUI() {
 	_speedValueField = new nanogui::FloatBox<float>(speedBox, cameraMoveSpeed);
 	_speedValueField->setEditable(true);
 	_speedValueField->setCallback([this](float speed) {
+		speed = std::clamp(speed, 0.0f, 1000.0f);
 		this->cameraMoveSpeed = speed;
 	});
 
@@ -676,7 +673,7 @@ void VoxelProceduralSceneController::_setupGUI() {
 		// generator kernel choosing
 	auto generatorKernelWidget = new nanogui::Widget(_environementWindow);
 	generatorKernelWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
-	_generatorKernelField = new nanogui::TextBox(generatorKernelWidget, defaultGeneratorFileName);
+	_generatorKernelField = new nanogui::TextBox(generatorKernelWidget, _generatorFileName);
 	_generatorKernelField->setEditable(true);
 	_generatorKernelField->setFixedWidth(200);
 
@@ -690,17 +687,6 @@ void VoxelProceduralSceneController::_setupGUI() {
 		} catch (std::exception &e) {
 			std::cerr << e.what() << std::endl;
 		}
-
-		if (_dynamicWorld->getGenerator()->getSeed() != _seedField->value()) {
-			_dynamicWorld->saveLoadedChunks();
-			_saveJsonFileInfo();
-			
-			_dynamicWorld->unloadWorld();
-			_dynamicWorld->getGenerator()->setSeed(_seedField->value());
-			_loadJsonFileInfo(VoxelProceduralSceneController::worldDirPrefix + std::to_string(_seedField->value()));
-			_updateWorldFolder();
-		}
-
 		_dynamicWorld->reloadChunks();
 	});
 
@@ -795,49 +781,43 @@ nlohmann::json VoxelProceduralSceneController::_readJsonFileInfo(std::string fil
 
 void VoxelProceduralSceneController::_loadJsonFileInfo(nlohmann::json data) {
 
-	try {
-		const float minFov = static_cast<float>(M_PI * 0.16666f);
-		const float maxFov = static_cast<float>(M_PI * 0.83333f);
+	const float minFov = static_cast<float>(M_PI * 0.16666f);
+	const float maxFov = static_cast<float>(M_PI * 0.83333f);
 
-		cameraNode->camera()->fov = std::clamp(static_cast<float>(data.at("player").at("fov").get<float>() * M_PI / 180.0f), minFov, maxFov);
-		_pickedBlockIndex = std::clamp(static_cast<int>(data.at("player").at("pickedBlock").get<int>()), 0, static_cast<int>(_pickableBlocks.size() - 1));
-		cameraMoveSpeed = std::clamp(static_cast<float>(data.at("player").at("speed").get<float>()), 0.01f, 1000.0f);	
-		cameraNode->transform().setPosition(glm::vec3(data.at("player").at("position")[0].get<int>(), data.at("player").at("position")[1].get<int>(), data.at("player").at("position")[2].get<int>()));
-		_cameraEulerAngles = glm::vec2(
-			data.at("player").at("rotation")[0].get<float>(),
-			data.at("player").at("rotation")[1].get<float>()
-		);
+	cameraNode->camera()->fov = std::clamp(static_cast<float>(data.at("player").at("fov").get<float>() * M_PI / 180.0f), minFov, maxFov);
+	_pickedBlockIndex = std::clamp(static_cast<int>(data.at("player").at("pickedBlock").get<int>()), 0, static_cast<int>(_pickableBlocks.size() - 1));
+	cameraMoveSpeed = std::clamp(static_cast<float>(data.at("player").at("speed").get<float>()), 0.01f, 1000.0f);	
+	cameraNode->transform().setPosition(glm::vec3(data.at("player").at("position")[0].get<int>(), data.at("player").at("position")[1].get<int>(), data.at("player").at("position")[2].get<int>()));
+	_cameraEulerAngles = glm::vec2(
+		data.at("player").at("rotation")[0].get<float>(),
+		data.at("player").at("rotation")[1].get<float>()
+	);
 
-		_speedValueField->setValue(cameraMoveSpeed);
-		_playerPositionLabel[0]->setValue(cameraNode->transform().position().x);
-		_playerPositionLabel[1]->setValue(cameraNode->transform().position().x);
-		_playerPositionLabel[2]->setValue(cameraNode->transform().position().x);
-		_fovSlider->setValue((cameraNode->camera()->fov - minFov) / (maxFov - minFov));
-		_fovValue->setValue(cameraNode->camera()->fov * 180.0f / M_PI);
-		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
-		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
-		_updateHandBlock();
+	_speedValueField->setValue(cameraMoveSpeed);
+	_playerPositionLabel[0]->setValue(cameraNode->transform().position().x);
+	_playerPositionLabel[1]->setValue(cameraNode->transform().position().x);
+	_playerPositionLabel[2]->setValue(cameraNode->transform().position().x);
+	_fovSlider->setValue((cameraNode->camera()->fov - minFov) / (maxFov - minFov));
+	_fovValue->setValue(cameraNode->camera()->fov * 180.0f / M_PI);
+	_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
+	_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
+	_updateHandBlock();
 
-		_dynamicWorld->getGenerator()->setSeed(data.at("settings").at("seed").get<int>());
-		_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + data.at("settings").at("generator").get<std::string>());
-		_dynamicWorld->setRenderDistance(data.at("settings").at("renderDistance").get<float>());
-		GameVoxelChunk::meshmerizerIntensity = data.at("settings").at("meshmerizeEffect").get<float>();
-		_directionLightNode->light()->cast_shadow = data.at("settings").at("castShadow").get<bool>();
+	_dynamicWorld->getGenerator()->setSeed(data.at("settings").at("seed").get<int>());
+	_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + data.at("settings").at("generator").get<std::string>());
+	_dynamicWorld->setRenderDistance(data.at("settings").at("renderDistance").get<float>());
+	GameVoxelChunk::meshmerizerIntensity = data.at("settings").at("meshmerizeEffect").get<float>();
+	_directionLightNode->light()->cast_shadow = data.at("settings").at("castShadow").get<bool>();
 
-		_renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance) / (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
-		_renderDistanceValue->setValue(_dynamicWorld->getRenderDistance());
-		_meshmerizerSlider->setValue(GameVoxelChunk::meshmerizerIntensity);
-		_meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
-		_directionalLightCheckbox->setChecked(_directionLightNode->light()->cast_shadow);
-		_seedField->setValue(_dynamicWorld->getGenerator()->getSeed());
-		_generatorKernelField->setValue(data.at("settings").at("generator").get<std::string>());
+	_renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance) / (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
+	_renderDistanceValue->setValue(_dynamicWorld->getRenderDistance());
+	_meshmerizerSlider->setValue(GameVoxelChunk::meshmerizerIntensity);
+	_meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
+	_directionalLightCheckbox->setChecked(_directionLightNode->light()->cast_shadow);
+	_seedField->setValue(_dynamicWorld->getGenerator()->getSeed());
+	_generatorKernelField->setValue(data.at("settings").at("generator").get<std::string>());
 
-		_dynamicWorld->setWorldName(data.at("worldName").get<std::string>());
-
-	}
-	catch (const nlohmann::json::exception& e) {
-		std::cerr << "Configuration file corrupted: " << e.what() << std::endl;
-	}
+	_dynamicWorld->setWorldName(data.at("worldName").get<std::string>());
 }
 
 void VoxelProceduralSceneController::_toggleCinematicMode() {

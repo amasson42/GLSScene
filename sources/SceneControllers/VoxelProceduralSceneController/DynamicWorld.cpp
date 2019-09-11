@@ -2,7 +2,6 @@
 
 namespace glm {
 	bool operator<(const glm::ivec2& lhs, const glm::ivec2& rhs);
-	// std::ostream& operator<<(std::ostream& out, const glm::ivec2& iv);
 }
 
 const float DynamicWorld::minRenderDistance = 50.0f;
@@ -237,34 +236,34 @@ void DynamicWorld::_generateMeshes(std::shared_ptr<GLS::Node> cameraNode) {
 }
 
 void DynamicWorld::loadPosition(std::shared_ptr<GLS::Node> cameraNode) {
-	auto startFunction = std::chrono::system_clock::now();
+	// auto startFunction = std::chrono::system_clock::now();
 
 	glm::vec3 cameraFlatPosition = cameraNode->transform().position();
 	cameraFlatPosition.y = 0;
 
 
-	auto start = std::chrono::system_clock::now();
+	// auto start = std::chrono::system_clock::now();
 	_cleanChunks(cameraFlatPosition);
-	auto end = std::chrono::system_clock::now();
-	if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-		std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	}
+	// auto end = std::chrono::system_clock::now();
+	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	// 	std::cout << "removeFromParent: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	// }
 
-	start = std::chrono::system_clock::now();	   
+	// start = std::chrono::system_clock::now();	   
 	_generateChunks(cameraFlatPosition, cameraNode);
-	end = std::chrono::system_clock::now();
-	if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-		std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	}
+	// end = std::chrono::system_clock::now();
+	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	// 	std::cout << "generateBigChunkLoop: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	// }
 
-	start = std::chrono::system_clock::now();
+	// start = std::chrono::system_clock::now();
 	_generateMeshes(cameraNode);
-	end = std::chrono::system_clock::now();
-	if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
-		std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
-	}
+	// end = std::chrono::system_clock::now();
+	// if (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() > 10) {
+	// 	std::cout << "setActiveChunks && updateMesh: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+	// }
 	// std::cout << "We have " << _loadedChunks.size() << " chunks" << std::endl;
-	auto endFunction = std::chrono::system_clock::now();
+	// auto endFunction = std::chrono::system_clock::now();
 	// std::cout << "Load position: " << std::chrono::duration_cast<std::chrono::milliseconds>(endFunction - startFunction).count() << std::endl;
 }
 

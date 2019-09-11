@@ -102,5 +102,5 @@ private:
 
 	static std::vector<std::pair<std::string, GLS::VoxelBlock> > _pickableBlocks;
 	static constexpr char generatorFilePath[] = "assets/voxelProceduralGeneratorSources/";
-	static constexpr char defaultGeneratorFileName[] = "hillsGenerator.cl";
+	std::string _generatorFileName = "default.cl";
 };
