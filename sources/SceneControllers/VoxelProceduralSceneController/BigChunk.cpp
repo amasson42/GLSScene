@@ -1,5 +1,5 @@
 
-#include "BigChunk.hpp"
+#include "CustomSceneControllers/VoxelProcedural/BigChunk.hpp"
 
 BigChunk::BigChunk(std::shared_ptr<GLS::Material> material) :
 	_node(std::make_shared<GLS::Node>()),

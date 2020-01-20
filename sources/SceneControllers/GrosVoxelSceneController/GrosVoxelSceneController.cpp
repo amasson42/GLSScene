@@ -18,4 +18,3 @@ void GrosSceneController::update() {
 void GrosSceneController::makeScene() {
 
 }
-

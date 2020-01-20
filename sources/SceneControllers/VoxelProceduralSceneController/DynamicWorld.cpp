@@ -1,8 +1,5 @@
-#include "DynamicWorld.hpp"
 
-namespace glm {
-	bool operator<(const glm::ivec2& lhs, const glm::ivec2& rhs);
-}
+#include "CustomSceneControllers/VoxelProcedural/DynamicWorld.hpp"
 
 const float DynamicWorld::minRenderDistance = 50.0f;
 const float DynamicWorld::maxRenderDistance = 250.0f;

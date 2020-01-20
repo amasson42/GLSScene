@@ -1,5 +1,5 @@
 
-#include "BigChunk.hpp"
+#include "CustomSceneControllers/VoxelProcedural/BigChunk.hpp"
 
 float GameVoxelChunk::meshmerizerIntensity = 0.0;
 

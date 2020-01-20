@@ -25,7 +25,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
         throw e;
     }
 
-    sceneController = std::make_shared<VoxelProceduralSceneController>(mainWindow);
+    sceneController = std::make_shared<HumanSceneController>(mainWindow);
     mainWindow->setController(sceneController);
 
     std::shared_ptr<std::string> effectFilename = getArgument("-effect");

@@ -41,3 +41,4 @@ class ISceneController {
 # include "CustomSceneControllers/Voxel.hpp"
 # include "CustomSceneControllers/VoxelProcedural/VoxelProceduralSceneController.hpp"
 # include "CustomSceneControllers/Gros.hpp"
+# include "CustomSceneControllers/CaveRunning/CaveRunningSceneController.hpp"

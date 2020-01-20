@@ -1,5 +1,5 @@
 
-#include "ProceduralWorldGenerator.hpp"
+#include "CustomSceneControllers/VoxelProcedural/ProceduralWorldGenerator.hpp"
 
 ProceduralWorldGenerator::ProceduralWorldGenerator() :
 	_commandQueueIndices({ -1 }),

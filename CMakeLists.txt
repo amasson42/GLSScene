@@ -38,7 +38,6 @@ endif()
 
 
 include_directories(includes/)
-include_directories(includes/CustomSceneControllers/VoxelProcedural/)
 include_directories(GLScene/includes/)
 include_directories(GLScene/includes/GLScene)
 include_directories(GLScene/CLDevice/includes/)
