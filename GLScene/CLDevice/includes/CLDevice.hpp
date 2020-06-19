@@ -6,7 +6,7 @@
 #  define GL_SILENCE_DEPRECATION
 #  include <OpenGL/gl3.h>
 #  define CL_SILENCE_DEPRECATION
-#  include <OpenCL/OpenCL.h>
+#  include <OpenCL/opencl.h>
 #  include <OpenGL/CGLDevice.h>
 #  include <OpenGL/CGLCurrent.h>
 #  include <OpenCL/cl_gl.h>

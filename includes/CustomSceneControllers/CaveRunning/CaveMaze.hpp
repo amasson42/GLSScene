@@ -22,6 +22,9 @@ class CaveMaze {
         int themeandshits;
 
         Room(int paths = CAVEMAZE_NONE);
+
+        static int opposedPath(int path);
+        static glm::ivec2 moveVector(int path);
     };
 
     struct GenerationParameters {
