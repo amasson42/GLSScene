@@ -38,10 +38,9 @@ glm::ivec2 CaveMaze::Room::moveVector(int path) {
 }
 
 CaveMaze::CaveMaze() :
-    _rooms(),
-    _exit(0, 0)
+    _rooms()
 {
-    _rooms[glm::ivec2(0, 0)] = Room();
+    reset();
 }
 
 CaveMaze::CaveMaze(const CaveMaze& copy) :
@@ -60,6 +59,12 @@ CaveMaze& CaveMaze::operator=(const CaveMaze& copy) {
     return *this;
 }
 
+void CaveMaze::reset() {
+    _rooms.clear();
+    _rooms[glm::ivec2(0, 0)] = Room();
+    _exit = glm::ivec2(0, 0);
+}
+
 static glm::ivec2 _addRoom(std::map<glm::ivec2, CaveMaze::Room>& rooms, glm::ivec2 pos, int path) {
     rooms[pos].paths |= path;
     glm::ivec2 targetPos = pos + CaveMaze::Room::moveVector(path);
@@ -73,10 +78,12 @@ static glm::ivec2 _addRoom(std::map<glm::ivec2, CaveMaze::Room>& rooms, glm::ive
 }
 
 void CaveMaze::generate(GenerationParameters params) {
+    reset();
     glm::ivec2 diggerPos(0, 0);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_DOWN);
@@ -85,6 +92,7 @@ void CaveMaze::generate(GenerationParameters params) {
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
     diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "AppEnv.hpp"
+#include "GLScene.hpp"
 
 #define CAVEMAZE_NONE 0
 #define CAVEMAZE_UP 1
@@ -37,6 +37,7 @@ class CaveMaze {
 
     CaveMaze& operator=(const CaveMaze& copy);
 
+    void reset();
     void generate(GenerationParameters params);
 
     public: // private

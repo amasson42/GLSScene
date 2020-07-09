@@ -2,10 +2,11 @@
 #pragma once
 
 #include "AppEnv.hpp"
-
-#include "CaveMaze.hpp"
+#include "CaveRunningGame.hpp"
 
 class CaveRunningSceneController : public ISceneController {
+
+    std::shared_ptr<CaveRunningGame> _game;
 
     public:
     CaveRunningSceneController(std::shared_ptr<GLSWindow> window);
