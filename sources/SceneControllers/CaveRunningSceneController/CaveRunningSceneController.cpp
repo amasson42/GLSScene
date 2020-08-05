@@ -39,11 +39,14 @@ void CaveRunningSceneController::update() {
 void CaveRunningSceneController::keyCallBack(int key, int scancode, int action, int mods) {
     std::cout << "key-" << key << " scancode-" << scancode << " action-" << action << " mods-" << mods << std::endl;
     switch (key) {
-    case 'Q':
+    case '1':
         _game->createNewGame();
         break;
-    case 'W':
+    case '2':
         _game->displayCaveScheme();
+        break;
+    case '3':
+        _game->createRoomNodes(glm::ivec2(0, 0));
         break;
     }
     

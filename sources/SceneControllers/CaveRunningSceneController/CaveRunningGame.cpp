@@ -2,25 +2,31 @@
 #include "CustomSceneControllers/CaveRunning/CaveRunningGame.hpp"
 
 CaveRunningGame::CaveRunningGame(GLS::Scene& scene) :
-_scene(&scene)
+_scene(&scene),
+_generator(nullptr)
 {
     _currentMaze = std::make_shared<CaveMaze>();
+    _device = std::make_shared<CLD::GPUDevice>();
+    _device->createContext(false);
 }
 
 CaveRunningGame::~CaveRunningGame() {
-    if (!_mazeDisplayedNode.expired())
-        _mazeDisplayedNode.lock()->removeFromParent();
+    if (_mazeDisplayedNode != nullptr)
+        _mazeDisplayedNode->removeFromParent();
+    if (_roomNode != nullptr)
+        _roomNode->removeFromParent();
     _scene = nullptr;
 }
 
 void CaveRunningGame::createNewGame() {
+    _generator = std::make_shared<CaveRunningWorldGenerator>((unsigned int)time(0), _device);
+    _generator->initRoomGenerator("assets/caveRunningGeneratorSources/default.cl");
     _currentMaze->generate(CaveMaze::GenerationParameters());
 }
 
 void CaveRunningGame::displayCaveScheme() {
-    if (!_mazeDisplayedNode.expired()) {
-        _mazeDisplayedNode.lock()->removeFromParent();
-    }
+    if (_mazeDisplayedNode != nullptr)
+        _mazeDisplayedNode->removeFromParent();
     GLS::Scene& scene(*_scene);
     CaveMaze& maze(*_currentMaze);
 
@@ -32,13 +38,12 @@ void CaveRunningGame::displayCaveScheme() {
     pathMesh->setMaterial(std::make_shared<GLS::Material>());
     pathMesh->getMaterial()->diffuse = glm::vec3(0.3, 0.3, 0.75);
 
-    std::shared_ptr<GLS::Node> mazeDisplayedNode = std::make_shared<GLS::Node>();
-    _mazeDisplayedNode = mazeDisplayedNode;
+    _mazeDisplayedNode = std::make_shared<GLS::Node>();
     for (auto it = maze._rooms.begin(); it != maze._rooms.end(); ++it) {
         std::shared_ptr<GLS::Node> roomNode = std::make_shared<GLS::Node>();
         roomNode->addRenderable(roomMesh);
         roomNode->transform().setPosition(glm::vec3(it->first.x, it->first.y, 0));
-        mazeDisplayedNode->addChildNode(roomNode);
+        _mazeDisplayedNode->addChildNode(roomNode);
 
         if (it->second.paths & CAVEMAZE_UP) {
             std::shared_ptr<GLS::Node> pathNode = std::make_shared<GLS::Node>();
@@ -76,7 +81,7 @@ void CaveRunningGame::displayCaveScheme() {
         exitMesh->getMaterial()->diffuse = glm::vec3(0.8, 0.2, 0.3);
         exitNode->addRenderable(exitMesh);
         exitNode->transform().setPosition(glm::vec3(maze._exit.x, maze._exit.y, 0));
-        mazeDisplayedNode->addChildNode(exitNode);
+        _mazeDisplayedNode->addChildNode(exitNode);
     }
     {
         std::shared_ptr<GLS::Node> enterNode = std::make_shared<GLS::Node>();
@@ -85,7 +90,30 @@ void CaveRunningGame::displayCaveScheme() {
         enterMesh->getMaterial()->diffuse = glm::vec3(0.2, 0.8, 0.3);
         enterNode->addRenderable(enterMesh);
         enterNode->transform().setPosition(glm::vec3(0, 0, 0));
-        mazeDisplayedNode->addChildNode(enterNode);
+        _mazeDisplayedNode->addChildNode(enterNode);
     }
-    scene.rootNode()->addChildNode(mazeDisplayedNode);
+    scene.rootNode()->addChildNode(_mazeDisplayedNode);
+}
+
+void CaveRunningGame::createRoomNodes(glm::ivec2 position) {
+    if (_roomNode != nullptr)
+        _roomNode->removeFromParent();
+
+    _roomNode = std::make_shared<GLS::Node>();
+    _scene->rootNode()->addChildNode(_roomNode);
+
+    { // floor geometry init
+        std::shared_ptr<GLS::Node> floorNode = std::make_shared<GLS::Node>();
+        std::shared_ptr<GLS::Mesh> floorPlaneGeometry = GLS::Mesh::plane(10, 10);
+        std::shared_ptr<GLS::Node> floorPlaneNode = std::make_shared<GLS::Node>();
+        floorPlaneNode->addRenderable(floorPlaneGeometry);
+        floorPlaneNode->transform().setEulerAngles(-M_PI / 2, 0, 0);
+        floorNode->addChildNode(floorPlaneNode);
+        _roomNode->addChildNode(floorNode);
+    }
+
+    _generator->initRoomGenerator("assets/caveRunningGeneratorSources/default.cl");
+    std::shared_ptr<CaveRunningRoom> roomDatas = _generator->generateRoom(position, _currentMaze->_rooms[position]);
+    _roomNode->addChildNode(roomDatas->environementNode);
+
 }

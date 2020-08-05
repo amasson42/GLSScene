@@ -86,6 +86,10 @@ namespace CLD {
             return nullptr;
     }
 
+    int GPUDevice::currentContextIndex() const {
+        return _currentContext;
+    }
+
     int GPUDevice::contextCount() const {
         return (int)_contexes.size();
     }

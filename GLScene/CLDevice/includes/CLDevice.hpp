@@ -125,27 +125,27 @@ namespace CLD {
 
     public:
 
-        class LoadPlateformException: std::exception {
+        class LoadPlateformException: public std::exception {
             public: const char* what() const throw();
         };
 
-        class LoadDeviceException: std::exception {
+        class LoadDeviceException: public std::exception {
             public: const char* what() const throw();
         };
 
-        class BuildProgramException: std::exception {
+        class BuildProgramException: public std::exception {
             std::string _buildInfo;
             public:
             BuildProgramException(cl_program p, cl_device_id id);
             const char* what() const throw();
         };
 
-        class InvalidContextException: std::exception {
+        class InvalidContextException: public std::exception {
             public: const char* what() const throw();
         };
 
         GPUDevice(); // init the platform and device
-        ~GPUDevice(); // destroy all contexes and release device and platform
+        virtual ~GPUDevice(); // destroy all contexes and release device and platform
 
         cl_platform_id platform_id() const;
         cl_device_id device_id() const;
@@ -170,6 +170,7 @@ namespace CLD {
         int createContext(bool shareGL = true); // create a context with the device and platform then return it current index
         void useContextIndex(int i); // change the index of the current context
         Context* getContext(); // return a pointer to the indexed context
+        int currentContextIndex() const; // return the current used context index
         int contextCount() const; // return the index of the highest context
         void destroyContext(); // delete the current context, set the pointer to null and pop every last null pointer of the vector
         void destroyContext(int i);
