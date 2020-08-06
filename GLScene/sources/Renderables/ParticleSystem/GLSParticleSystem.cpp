@@ -120,6 +120,7 @@ namespace GLS {
     count(1000000)
     {
         kernelSource = "\n"
+        "#define M_PI 3.14159265\n"
         "#define position(k) buffer[p_i + 0 + k]\n"
         "#define velocity(k) buffer[p_i + 3 + k]\n"
         "#define color(k)    buffer[p_i + 6 + k]\n"

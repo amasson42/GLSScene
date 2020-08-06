@@ -1,11 +1,7 @@
 
 #pragma once
 
-#include "GLScene.hpp"
-
-#include "CaveMaze.hpp"
-
-class CaveRunningWorldGenerator;
+#include "CaveRunningWorldGenerator.hpp"
 
 /**
  * A cave running scene is the object managing the game system into a previously created scene.
@@ -50,43 +46,4 @@ class CaveRunningGame {
      */
     void createRoomNodes(glm::ivec2 position);
     
-};
-
-struct CaveRunningRoom {
-    static const int voxelWidth = 4;
-    static const int voxelHeight = 2;
-    static const int voxelCount = voxelWidth * voxelHeight;
-
-    std::shared_ptr<GLS::Node> environementNode;
-};
-
-class CaveRunningWorldGenerator {
-
-    /// The overall game seed;
-    unsigned int _seed;
-
-    /// The permanent device to use
-    const std::shared_ptr<CLD::GPUDevice> _device;
-    /// The command queue for async creation of voxels
-    int _chunkCreationCommandQueueIndex;
-    CLD::CommandQueue _chunkCreationCommandQueue;
-    /// The buffer used to store the perlin noise permutations for different uses
-    int _perlinPermutationBufferIndex;
-    CLD::Buffer _perlinPermutationBuffer;
-
-    /// The kernel that can create chunks in a cave world
-    int _chunkCreationKernelIndex;
-    CLD::Kernel _chunkCreationKernel;
-    std::shared_ptr<GLS::Material> _worldMaterial;
-
-    public:
-    CaveRunningWorldGenerator(unsigned int seed,
-        std::shared_ptr<CLD::GPUDevice> device = nullptr);
-    virtual ~CaveRunningWorldGenerator();
-
-    void initRoomGenerator(const std::string& filename);
-    void deleteRoomGenerator();
-
-    std::shared_ptr<CaveRunningRoom> generateRoom(glm::ivec2 roomPosition, CaveMaze::Room caveRoom);
-
 };

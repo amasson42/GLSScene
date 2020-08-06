@@ -36,15 +36,15 @@
 
 #include "CLDevice.hpp"
 
-namespace GLS {
+std::ostream& operator<<(std::ostream& stream, const glm::mat4& m);
+std::ostream& operator<<(std::ostream& stream, const glm::mat3& m);
+std::ostream& operator<<(std::ostream& stream, const glm::vec3& v);
+std::ostream& operator<<(std::ostream& stream, const glm::vec2& v);
+std::ostream& operator<<(std::ostream& stream, const glm::ivec3& v);
+std::ostream& operator<<(std::ostream& stream, const glm::ivec2& v);
+std::ostream& operator<<(std::ostream& stream, const glm::quat& q);
 
-    std::ostream& operator<<(std::ostream& stream, const glm::mat4& m);
-    std::ostream& operator<<(std::ostream& stream, const glm::mat3& m);
-    std::ostream& operator<<(std::ostream& stream, const glm::vec3& v);
-    std::ostream& operator<<(std::ostream& stream, const glm::vec2& v);
-    std::ostream& operator<<(std::ostream& stream, const glm::ivec3& v);
-    std::ostream& operator<<(std::ostream& stream, const glm::ivec2& v);
-    std::ostream& operator<<(std::ostream& stream, const glm::quat& q);
+namespace GLS {
 
     std::shared_ptr<CLD::GPUDevice> getSharedDevice();
     void glsInit(void* addr);

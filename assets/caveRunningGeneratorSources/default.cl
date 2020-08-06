@@ -44,6 +44,12 @@
 #define	BLOCK_CLAY				0x43010000
 #define	BLOCK_TNT				0x44010000
 
+#define CAVEMAZE_NONE 0
+#define CAVEMAZE_UP 1
+#define CAVEMAZE_DOWN 2
+#define CAVEMAZE_LEFT 4
+#define CAVEMAZE_RIGHT 8
+
 float grad(int hash, float x, float y, float z);
 float noise(__global int* p, float x, float y, float z);
 float lerp(float t, float a, float b);
@@ -140,27 +146,36 @@ int3 getWorldPosition(const int3 localPosition, const int2 bigChunkPos, const in
 				localPosition.z + bigChunkPos.y * bigChunkFullWidth);
 }
 
-int calculBlockAt(__global int* ppm, int3 wpos);
+int calculBlockAt(__global int* ppm, int3 wpos, int3 lpos, int paths);
 
 kernel void generateRoom(
     __global int* ppm,
     __global int* blocks,
     const int2 bigChunkPos,
     const int chunkSize,
-    const int bigChunkWidth
+    const int bigChunkWidth,
+    const int paths
     ) {
 	size_t i = get_global_id(0);
 	int3 localPosition = getLocalPosition(i, chunkSize, bigChunkWidth);
+    localPosition.x -= chunkSize * bigChunkWidth / 2;
+    localPosition.z -= chunkSize * bigChunkWidth / 2;
 	int3 wpos = getWorldPosition(localPosition, bigChunkPos, chunkSize * bigChunkWidth);
-    int block = BLOCK_AIR;
-
-	block = calculBlockAt(ppm, wpos);
-
-	blocks[i] = block;
+	blocks[i] = calculBlockAt(ppm, wpos, localPosition, paths);
 }
 
-int calculBlockAt(__global int* ppm, int3 wpos) {
-    if (wpos.y == 0)
-        return BLOCK_STONE;
-    return BLOCK_WOOD_FENCE;
+int calculBlockAt(__global int* ppm, int3 wpos, int3 lpos, int paths) {
+    if (wpos.y == 15) {
+        if (abs(lpos.x) < 3) {
+            if (lpos.z > 0) {
+                return paths & CAVEMAZE_UP ? BLOCK_STONE : BLOCK_WOOD_PLANKS;
+            } else {
+
+            }
+        }
+        if (abs(lpos.z) < 2)
+            return BLOCK_AIR;
+        return BLOCK_WOOD_PLANKS;
+    } else
+        return BLOCK_AIR;
 }

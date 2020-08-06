@@ -1,7 +1,5 @@
 
-#include "CustomSceneControllers/CaveRunning/CaveRunningGame.hpp"
-
-int *initNoise(unsigned int seed);
+#include "CustomSceneControllers/CaveRunning/CaveRunningWorldGenerator.hpp"
 
 CaveRunningWorldGenerator::CaveRunningWorldGenerator(unsigned int seed,
     std::shared_ptr<CLD::GPUDevice> device) :
@@ -90,6 +88,7 @@ std::shared_ptr<CaveRunningRoom> CaveRunningWorldGenerator::generateRoom(glm::iv
     _chunkCreationKernel.setArgument(2, bcPos);
     _chunkCreationKernel.setArgument(3, GLS::VoxelChunk::chunkSize);
     _chunkCreationKernel.setArgument(4, CaveRunningRoom::voxelWidth);
+    _chunkCreationKernel.setArgument(5, caveRoom.paths);
 
     _chunkCreationCommandQueue.runNDRangeKernel(_chunkCreationKernel, blocks.size());
     _chunkCreationCommandQueue.readBuffer(blocksArrayPointersBuffer, &(blocks.front()), blocks.size() * sizeof(GLS::VoxelBlock));
@@ -115,15 +114,19 @@ std::shared_ptr<CaveRunningRoom> CaveRunningWorldGenerator::generateRoom(glm::iv
             GLS::VoxelChunk::chunkSize * currentPos.x,
             GLS::VoxelChunk::chunkSize * currentPos.y,
             GLS::VoxelChunk::chunkSize * currentPos.z));
+        std::cout << i << " - Position chunk: " << voxelOffsetNode->transform().position() << std::endl;
+        
+        voxelOffsetNode->transform().moveBy(
+            -CHUNKSIZE * CaveRunningRoom::voxelWidth / 2,
+            -CHUNKSIZE * CaveRunningRoom::voxelHeight / 2,
+            -CHUNKSIZE * CaveRunningRoom::voxelWidth / 2
+        );
+        std::cout << i << " --> " << voxelOffsetNode->transform().position() << std::endl;
         room->environementNode->addChildNode(voxelOffsetNode);
     }
     _device->destroyBuffer(blocksBufferIndex);
 
     // UNLOCK MUTEX
-
-    // auto theCube = std::make_shared<GLS::Node>();
-    // theCube->addRenderable(GLS::Mesh::cube(1, 1, 1, 1));
-    // room->environementNode->addChildNode(theCube);
 
     return room;
 }

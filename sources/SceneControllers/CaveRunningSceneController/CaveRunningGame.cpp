@@ -102,18 +102,15 @@ void CaveRunningGame::createRoomNodes(glm::ivec2 position) {
     _roomNode = std::make_shared<GLS::Node>();
     _scene->rootNode()->addChildNode(_roomNode);
 
-    { // floor geometry init
-        std::shared_ptr<GLS::Node> floorNode = std::make_shared<GLS::Node>();
-        std::shared_ptr<GLS::Mesh> floorPlaneGeometry = GLS::Mesh::plane(10, 10);
-        std::shared_ptr<GLS::Node> floorPlaneNode = std::make_shared<GLS::Node>();
-        floorPlaneNode->addRenderable(floorPlaneGeometry);
-        floorPlaneNode->transform().setEulerAngles(-M_PI / 2, 0, 0);
-        floorNode->addChildNode(floorPlaneNode);
-        _roomNode->addChildNode(floorNode);
-    }
+    if (_generator == nullptr)
+        return;
 
-    _generator->initRoomGenerator("assets/caveRunningGeneratorSources/default.cl");
-    std::shared_ptr<CaveRunningRoom> roomDatas = _generator->generateRoom(position, _currentMaze->_rooms[position]);
-    _roomNode->addChildNode(roomDatas->environementNode);
+    try {
+        _generator->initRoomGenerator("assets/caveRunningGeneratorSources/default.cl");
+        std::shared_ptr<CaveRunningRoom> roomDatas = _generator->generateRoom(position, _currentMaze->_rooms[position]);
+        _roomNode->addChildNode(roomDatas->environementNode);
+    } catch (std::exception& e){
+
+    }
 
 }

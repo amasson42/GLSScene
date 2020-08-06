@@ -32,8 +32,36 @@ void CaveRunningSceneController::makeScene() {
     _game = std::make_shared<CaveRunningGame>(scene);
 }
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#ifndef WIN32
+#include <unistd.h>
+#endif
+
+#ifdef WIN32
+#define stat _stat
+#endif
+
+static time_t getLastmodifiedTimeOfFile(char const *filename) {
+    struct stat result;
+    if (stat(filename, &result) == 0) {
+        auto mod_time = result.st_mtime;
+        return mod_time;
+    } else
+        throw std::runtime_error("File does not exist");
+}
+
 void CaveRunningSceneController::update() {
     ISceneController::update();
+
+    const char *kernelName = "assets/caveRunningGeneratorSources/default.cl";
+    auto modifiedTime = getLastmodifiedTimeOfFile(kernelName);
+    static time_t lastModifiedTime = modifiedTime;
+
+    if (modifiedTime != lastModifiedTime) {
+        lastModifiedTime = modifiedTime;
+        _game->createRoomNodes(glm::ivec2(0, 0));
+    }
 }
 
 void CaveRunningSceneController::keyCallBack(int key, int scancode, int action, int mods) {
