@@ -161,21 +161,42 @@ kernel void generateRoom(
     localPosition.x -= chunkSize * bigChunkWidth / 2;
     localPosition.z -= chunkSize * bigChunkWidth / 2;
 	int3 wpos = getWorldPosition(localPosition, bigChunkPos, chunkSize * bigChunkWidth);
-	blocks[i] = calculBlockAt(ppm, wpos, localPosition, paths);
+	blocks[i] = calculBlockAt(ppm, wpos, localPosition, CAVEMAZE_NONE
+    // | CAVEMAZE_DOWN
+    // | CAVEMAZE_UP
+    // | CAVEMAZE_LEFT
+    // | CAVEMAZE_RIGHT
+    );
 }
 
-int calculBlockAt(__global int* ppm, int3 wpos, int3 lpos, int paths) {
+int calculBlockAt(__global int* ppm, int3 wpos, int3 ilpos, int paths) {
+    float3 lpos;
+    lpos.x = ilpos.x + 0.5;
+    lpos.y = ilpos.y + 0.5;
+    lpos.z = ilpos.z + 0.5;
     if (wpos.y == 15) {
-        if (abs(lpos.x) < 3) {
+        int sqdist = (lpos.x) * (lpos.x) + (lpos.z) * (lpos.z);
+        if (sqdist < 23)
+                return BLOCK_STONE;
+        if (fabs(lpos.x) < 3) {
             if (lpos.z > 0) {
-                return paths & CAVEMAZE_UP ? BLOCK_STONE : BLOCK_WOOD_PLANKS;
+                return paths & CAVEMAZE_DOWN ? BLOCK_STONE : BLOCK_GRASS;
             } else {
-
+                return paths & CAVEMAZE_UP ? BLOCK_STONE : BLOCK_GRASS;
             }
         }
-        if (abs(lpos.z) < 2)
-            return BLOCK_AIR;
-        return BLOCK_WOOD_PLANKS;
-    } else
-        return BLOCK_AIR;
+        if (fabs(lpos.z) < 3) {
+            if (lpos.x > 0) {
+                return paths & CAVEMAZE_RIGHT ? BLOCK_STONE : BLOCK_GRASS;
+            } else {
+                return paths & CAVEMAZE_LEFT ? BLOCK_STONE : BLOCK_GRASS;
+            }
+        }
+        if (sqdist < 100)
+            return BLOCK_GRASS;
+        if (sqdist < 150)
+            return BLOCK_BRICKS;
+        return BLOCK_SNOW;
+    }
+    return BLOCK_AIR;
 }
