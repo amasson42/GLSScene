@@ -161,7 +161,7 @@ kernel void generateRoom(
     localPosition.x -= chunkSize * bigChunkWidth / 2;
     localPosition.z -= chunkSize * bigChunkWidth / 2;
 	int3 wpos = getWorldPosition(localPosition, bigChunkPos, chunkSize * bigChunkWidth);
-	blocks[i] = calculBlockAt(ppm, wpos, localPosition, CAVEMAZE_NONE
+	blocks[i] = calculBlockAt(ppm, wpos, localPosition, paths
     // | CAVEMAZE_DOWN
     // | CAVEMAZE_UP
     // | CAVEMAZE_LEFT

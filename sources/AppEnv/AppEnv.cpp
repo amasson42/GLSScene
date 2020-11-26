@@ -25,7 +25,13 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
         throw e;
     }
 
-    sceneController = std::make_shared<CaveRunningSceneController>(mainWindow);
+    // #define ZeSceneController GrosSceneController
+    // #define ZeSceneController HumanSceneController
+    // #define ZeSceneController ParticuleSystemSceneController
+    // #define ZeSceneController ShadowSceneController
+    #define ZeSceneController TrashSceneController
+    // #define ZeSceneController VoxelSceneController
+    sceneController = std::make_shared<ZeSceneController>(mainWindow);
     mainWindow->setController(sceneController);
 
     std::shared_ptr<std::string> effectFilename = getArgument("-effect");

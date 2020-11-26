@@ -80,23 +80,31 @@ static glm::ivec2 _addRoom(std::map<glm::ivec2, CaveMaze::Room>& rooms, glm::ive
 void CaveMaze::generate(GenerationParameters params) {
     reset();
     glm::ivec2 diggerPos(0, 0);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
-    _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_DOWN);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
-    _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
-    diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
+    if (rand() % 3)
+        _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
+    if (rand() % 3)
+        _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
+    if (rand() % 3)
+        _addRoom(_rooms, diggerPos, CAVEMAZE_DOWN);
+    if (rand() % 3)
+        _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    // _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_DOWN);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_UP);
+    // _addRoom(_rooms, diggerPos, CAVEMAZE_RIGHT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
+    // diggerPos = _addRoom(_rooms, diggerPos, CAVEMAZE_LEFT);
     _rooms[diggerPos].paths |= CAVEMAZE_UP;
     _exit = diggerPos + glm::ivec2(0, 1);
 }

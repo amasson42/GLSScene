@@ -61,7 +61,7 @@ namespace GLS {
         glEnableVertexAttribArray(5);
 
         glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE,
-                              sizeof(SkinnedVertex), (void*)(14 * sizeof(GLfloat) + 4 + sizeof(GLint)));
+                              sizeof(SkinnedVertex), (void*)(14 * sizeof(GLfloat) + 4 * sizeof(GLint)));
         glEnableVertexAttribArray(6);
     }
 
