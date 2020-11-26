@@ -11,61 +11,39 @@
 
 #include "GLSStructs.hpp"
 
-static inline std::vector<std::string> _splitWithSpaces(const std::string& str) {
-    std::vector<std::string> words;
-    std::stringstream ss(str);
-    std::string tok;
-    while (std::getline(ss, tok, ' ')) {
-        words.push_back(tok);
-    }
-    return words;
-}
-
 namespace GLS {
 
-    template <typename Aframe>
-    class Animator {
+    template <typename FrameValue>
+    class KeyFrames {
 
-        std::map<double, Aframe> _keyframes;
+        struct Frame {
+            FrameValue value;
+            int function;
+
+            Frame() {}
+            Frame(FrameValue newValue, int newFunction) :
+            value(newValue),
+            function(newFunction)
+            {}
+        };
+
+        std::map<double, Frame> _keyframes;
 
         public:
 
-        Animator() : _keyframes() {
+        KeyFrames() : _keyframes() {
 
         }
 
-        Animator(const Animator<Aframe>& copy) : _keyframes(copy._keyframes) {
+        KeyFrames(const KeyFrames<FrameValue>& copy) : _keyframes(copy._keyframes) {
 
         }
 
-        bool readValueFromWords(const std::vector<std::string>& words, Aframe& frame) {
-            if (words.size() < 2)
-                return false;
-            if (words[0] == "time") {
-                addKeyframeAt(std::atof(words[1].c_str()), frame);
-                frame = Aframe();
-                return true;
-            }
-            return false;
-        }
-
-        Animator(std::ifstream& input) : _keyframes() {
-            if (input.is_open()) {
-                Aframe frame = Aframe();
-                std::string line;
-                while (std::getline(input, line)) {
-                    std::vector<std::string> words = _splitWithSpaces(line);
-                    if (readValueFromWords(words, frame) == 0)
-                        frame.readValuesFromWords(words);
-                }
-            }
-        }
-
-        virtual ~Animator() {
+        virtual ~KeyFrames() {
 
         }
 
-        double time() const {
+        double duration() const {
             if (_keyframes.empty()) {
                 return 0;
             } else {
@@ -73,61 +51,54 @@ namespace GLS {
             }
         }
 
-        void addKeyframeAt(double time, const Aframe& aframe) {
-            _keyframes[time] = aframe;
+        void addKeyframeAt(double time, const FrameValue& value, int function = 0) {
+            _keyframes[time] = Frame(value, function);
         }
 
-        void removeKeyframeAt(double time) {
-            auto it = _keyframes.find(time);
+        void removeKeyframeAt(int index) {
+            auto it = _keyframes.begin();
+            std::advance(it, index);
             if (it != _keyframes.end()) {
                 _keyframes.erase(it);
             }
         }
 
-        Aframe frameAt(double time) const {
-            if (_keyframes.empty())
-                return Aframe();
-            auto it = _keyframes.begin();
-            if (it->first > time) {
-                return it->second;
+        void removeKeyframeAt(double time) {
+            auto it = _keyframes.lower_bound(time);
+            if (it != _keyframes.end()) {
+                _keyframes.erase(it);
             }
-            auto previous = it;
-            ++it;
-            while (it != _keyframes.end()) {
-                if (it->first > time) {
-                    double t = it->first - previous->first;
-                    t = (time - previous->first) / t;
-                    return Aframe::linearValue(previous->second, it->second, t);
-                }
-                previous = it;
-                ++it;
-            }
-            return previous->second;
         }
 
-        Aframe& firstFrameAfter(double time) {
+        FrameValue frameAt(double time) const {
             if (_keyframes.empty())
-                throw std::exception();
-            for (auto it = _keyframes.begin(); it != _keyframes.end(); ++it) {
-                if (it->first > time)
-                    return it->second;
-            }
-            return _keyframes.rbegin()->second;
+                throw std::runtime_error("access frame from empty keyframes");
+
+            auto next = _keyframes.lower_bound(time);
+            if (next == _keyframes.begin())
+                return next->second.value;
+
+            auto prev = std::prev(next);
+            if (next == _keyframes.end())
+                return prev->second.value;
+            
+            double t = (time - prev->first) / (next->first - prev->first);
+            return FrameValue::linearValue(prev->second.value, next->second.value, t);
         }
 
         void send_to_flux(std::ostream& flux) const {
-            flux << "animator" << std::endl;
-            flux << "time = " << time() << std::endl;
+            flux << "keyframes" << std::endl;
+            flux << "duration = " << duration() << std::endl;
             for (auto it = _keyframes.begin(); it != _keyframes.end(); ++it) {
-                flux << "time:" << it->first << " - " << it->second << std::endl;
+                flux << "  time:" << it->first << " - " << it->second.value << std::endl;
             }
         }
 
     };
 
-    template <typename Aframe>
-    std::ostream& operator<<(std::ostream& out, const GLS::Animator<Aframe>& animator) {
-        animator.send_to_flux(out);
+    template <typename FrameValue>
+    std::ostream& operator<<(std::ostream& out, const KeyFrames<FrameValue>& keyframes) {
+        keyframes.send_to_flux(out);
         return out;
     }
     

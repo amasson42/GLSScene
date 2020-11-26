@@ -89,3 +89,7 @@ void GLSWindow::loopOnce() {
 nanogui::Screen *GLSWindow::nanoguiScreen() {
     return _nanoguiScreen;
 }
+
+T_Node newNode() {
+    return std::make_shared<GLS::Node>();
+}

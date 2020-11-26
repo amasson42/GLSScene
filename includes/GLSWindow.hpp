@@ -88,3 +88,6 @@ class GLSWindow {
     void loopOnce();
 
 };
+
+typedef std::shared_ptr<GLS::Node> T_Node;
+T_Node newNode();
