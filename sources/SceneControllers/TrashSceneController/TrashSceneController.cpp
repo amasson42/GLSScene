@@ -116,7 +116,7 @@ void ExplodingMesh::initAnimation() {
 }
 
 #define EXPLODING_TIME 0.25
-void ExplodingMesh::animate(timefloat deltaTime) {
+void ExplodingMesh::animate(GLS::timefloat deltaTime) {
     _lifeTime += deltaTime;
     glm::vec3 pos = glm::vec3(_node->getWorldTransformMatrix() * glm::vec4(0, 0, 0, 1));
     for (int i = 0; i < _node->childNodes().size(); i++) {

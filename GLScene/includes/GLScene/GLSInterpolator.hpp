@@ -11,9 +11,9 @@
 
 #include "GLSCurveFunction.hpp"
 
-float mix(float a, float b, timefloat t);
-glm::vec3 mix(glm::vec3 a, glm::vec3 b, timefloat t);
-glm::quat mix(glm::quat a, glm::quat b, timefloat t);
+float mix(float a, float b, GLS::timefloat t);
+glm::vec3 mix(glm::vec3 a, glm::vec3 b, GLS::timefloat t);
+glm::quat mix(glm::quat a, glm::quat b, GLS::timefloat t);
 
 namespace GLS {
 

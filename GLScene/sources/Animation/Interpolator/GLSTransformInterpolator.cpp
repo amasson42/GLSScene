@@ -9,11 +9,11 @@
 #include "GLSTransform.hpp"
 #include "GLSInterpolator.hpp"
 
-float mix(float a, float b, timefloat t) {
-    return glm::mix<float, timefloat>(a, b, t);
+float mix(float a, float b, GLS::timefloat t) {
+    return glm::mix<float, GLS::timefloat>(a, b, t);
 }
 
-glm::vec3 mix(glm::vec3 a, glm::vec3 b, timefloat t) {
+glm::vec3 mix(glm::vec3 a, glm::vec3 b, GLS::timefloat t) {
     return glm::vec3(
         mix(a.x, b.x, t),
         mix(a.y, b.y, t),
@@ -21,7 +21,7 @@ glm::vec3 mix(glm::vec3 a, glm::vec3 b, timefloat t) {
     );
 }
 
-glm::quat mix(glm::quat a, glm::quat b, timefloat t) {
+glm::quat mix(glm::quat a, glm::quat b, GLS::timefloat t) {
     if (a == b)
         return a;
     return glm::lerp<float>(a, b, t);

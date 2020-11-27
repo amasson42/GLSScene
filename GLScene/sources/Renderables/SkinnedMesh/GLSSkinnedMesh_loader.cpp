@@ -7,17 +7,19 @@
 //
 
 #include "GLSSkinnedMesh.hpp"
-
+// const float& mat4ValueAt(const glm::mat4& m, int l, int c) {
+//         return glm::value_ptr(m)[4 * c + l];
+//     }
 namespace GLS {
 
-    static glm::mat4 _assimpToGlmMat4(aiMatrix4x4 mat) {
+    glm::mat4 assimpMat4ToGlmMat4(aiMatrix4x4 mat) {
         aiVector3D scale;
         aiQuaternion rotation;
         aiVector3D translate;
         mat.Decompose(scale, rotation, translate);
         Transform t;
         t.setPosition(glm::vec3(translate.x, translate.y, translate.z));
-        t.setRotation(glm::quat(rotation.x, rotation.y, rotation.z, rotation.z));
+        t.setRotation(glm::quat(rotation.x, rotation.y, rotation.z, rotation.w));
         t.setScale(glm::vec3(scale.x, scale.y, scale.z));
         return t.matrix();
     }
@@ -63,7 +65,7 @@ namespace GLS {
                 nBone.node = sceneRootBone;
             else
                 nBone.node = sceneRootBone->childNodeNamed(boneName, true);
-            nBone.offset = _assimpToGlmMat4(mesh->mBones[i]->mOffsetMatrix);
+            nBone.offset = assimpMat4ToGlmMat4(mesh->mBones[i]->mOffsetMatrix);
             nMesh->_bones.push_back(nBone);
             for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
                 aiVertexWeight weight = mesh->mBones[i]->mWeights[j];

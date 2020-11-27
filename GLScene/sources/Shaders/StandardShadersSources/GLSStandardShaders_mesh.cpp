@@ -286,20 +286,36 @@ namespace GLS {
 
         "void main()\n"
         "{\n"
-        "    mat4 skin_matrix = (joint_weights.x * u_mat_joints[joint_ids.x])\n"
-        "        + (joint_weights.y * u_mat_joints[joint_ids.y])\n"
-        "        + (joint_weights.z * u_mat_joints[joint_ids.z])\n"
-        "        + (joint_weights.w * u_mat_joints[joint_ids.w]);\n"
-        // FIXME: skinned mesh why the maths ?
-        "    skin_matrix = mat4(vec4(1, 0, 0, 0), vec4(0, 1, 0, 0), vec4(0, 0, 1, 0), vec4(0, 0, 0, 1));"
+        "    vec4 position4 = vec4(position, 1.0);\n"
+        "    position4 = joint_weights.x * (u_mat_joints[joint_ids.x] * position4)\n"
+        "              + joint_weights.y * (u_mat_joints[joint_ids.y] * position4)\n"
+        "              + joint_weights.z * (u_mat_joints[joint_ids.z] * position4)\n"
+        "              + joint_weights.w * (u_mat_joints[joint_ids.w] * position4);\n"
 
-        "    vs_out.wposition = vec3(u_mat_model * skin_matrix * vec4(position, 1.0));\n"
+        "    vec4 normal4 = vec4(normal, 0.0);\n"
+        "    normal4 = joint_weights.x * (u_mat_joints[joint_ids.x] * normal4)\n"
+        "            + joint_weights.y * (u_mat_joints[joint_ids.y] * normal4)\n"
+        "            + joint_weights.z * (u_mat_joints[joint_ids.z] * normal4)\n"
+        "            + joint_weights.w * (u_mat_joints[joint_ids.w] * normal4);\n"
+
+        "    vec4 tangent4 = vec4(tangent, 0.0);\n"
+        "    tangent4 = joint_weights.x * (u_mat_joints[joint_ids.x] * tangent4)\n"
+        "             + joint_weights.y * (u_mat_joints[joint_ids.y] * tangent4)\n"
+        "             + joint_weights.z * (u_mat_joints[joint_ids.z] * tangent4)\n"
+        "             + joint_weights.w * (u_mat_joints[joint_ids.w] * tangent4);\n"
+
+        "    vec4 bitangent4 = vec4(normal, 0.0);\n"
+        "    bitangent4 = joint_weights.x * (u_mat_joints[joint_ids.x] * bitangent4)\n"
+        "               + joint_weights.y * (u_mat_joints[joint_ids.y] * bitangent4)\n"
+        "               + joint_weights.z * (u_mat_joints[joint_ids.z] * bitangent4)\n"
+        "               + joint_weights.w * (u_mat_joints[joint_ids.w] * bitangent4);\n"
+
+        "    vs_out.wposition = vec3(u_mat_model * position4);\n"
         "    gl_Position = u_mat_projection * u_mat_view * vec4(vs_out.wposition, 1.0);\n"
         "    vs_out.position = gl_Position;\n"
-        "    mat3 skin_normal = u_mat_normal * mat3(skin_matrix);\n"
-        "    vs_out.wnormal = skin_normal * normal;\n"
-        "    vs_out.wtangent = skin_normal * tangent;\n"
-        "    vs_out.wbitangent = skin_normal * bitangent;\n"
+        "    vs_out.wnormal = u_mat_normal * normal4.xyz;\n"
+        "    vs_out.wtangent = u_mat_normal * tangent4.xyz;\n"
+        "    vs_out.wbitangent = u_mat_normal * bitangent4.xyz;\n"
         "    vs_out.uv = uv;\n"
         "}\n";
         return std::make_shared<Shader>(src, GL_VERTEX_SHADER);

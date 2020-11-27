@@ -31,11 +31,14 @@ namespace GLS {
         }
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
-            if (false && mesh->HasBones()) {
+            if (mesh->HasBones()) {
+                std::cout << "This is a skinned mesh" << std::endl;
+                exit(0);
                 std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(mesh, rootNode, n);
                 nSkinnedMesh->setMaterial(materials[mesh->mMaterialIndex]);
                 n->addRenderable(nSkinnedMesh);
             } else {
+                std::cout << "Not a skinned mesh ! ------------ " << mesh->mNumBones << std::endl;
                 std::shared_ptr<Mesh> nMesh = Mesh::loadFromAiMesh(mesh);
                 nMesh->setMaterial(materials[mesh->mMaterialIndex]);
                 n->addRenderable(nMesh);
@@ -46,7 +49,7 @@ namespace GLS {
     void Node::loadFromFile(std::string path) {
         Assimp::Importer importer;
         const aiScene *scene = importer.ReadFile(path,
-            aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+            aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals);
         
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw FileLoadingException("can't load scene from " + path);

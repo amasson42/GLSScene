@@ -49,7 +49,7 @@ private:
 	std::shared_ptr<GLS::Node> _directionLightNode;
 	std::shared_ptr<GLS::Node> _ambiantlightNode;
     std::shared_ptr<GLS::Node> _axesNode;
-    timefloat lt;
+    GLS::timefloat lt;
 	std::shared_ptr<DynamicWorld> _dynamicWorld;
 
 	nanogui::Screen* _nanoguiScreen;

@@ -48,8 +48,6 @@ all:
 	mkdir build && cd build && cmake .. || echo
 	cd build && make -j4
 	./build/$(NAME)
-	# mkdir -p $(O_DIRS) $(OBJS)
-	# make $(NAME)
 
 install:
 	brew update

@@ -36,7 +36,7 @@ void GLSWindow::updateEvents() {
         glUniform2f(_postProcessShaderProgram->getLocation("u_mouse_position"), devicePos.x, devicePos.y);
         glUniform1f(_postProcessShaderProgram->getLocation("u_time"), _elapsedTime);
     }
-    timefloat newTime = static_cast<timefloat>(glfwGetTime());
+    GLS::timefloat newTime = static_cast<GLS::timefloat>(glfwGetTime());
     _deltaTime = newTime - _elapsedTime;
     _elapsedTime = newTime;
 }

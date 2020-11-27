@@ -52,13 +52,12 @@ void HumanSceneController::makeScene() {
 
         std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
         T_Node lightNode = newNode();
-        lightNode->transform().setPosition(glm::vec3(1, 5, 0));
-        lightNode->transform().setEulerAngles(-1.8, 0, 0.1);
+        lightNode->transform().setPosition(glm::vec3(0, 0, 0));
         light->type = (GLS::light_spot);
         light->cast_shadow = true;
         light->angle *= 1.5;
         lightNode->setLight(light);
-        scene.rootNode()->addChildNode(lightNode);
+        cameraNode->addChildNode(lightNode);
     }
 
     // just a nanosuit
@@ -67,14 +66,8 @@ void HumanSceneController::makeScene() {
         T_Node animNode = newNode();
         animNode->loadFromFile(*animationFilename);
         scene.rootNode()->addChildNode(animNode);
-    } else {
-
+        animNode->sendToFlux(std::cout, "");
     }
-
-    T_Node cube = newNode();
-    cube->setName("zeCube");
-    cube->addRenderable(GLS::Mesh::cube(1, 1, 1));
-    scene.rootNode()->addChildNode(cube);
 
     // create ground plane
     T_Node plane = newNode();
@@ -97,16 +90,6 @@ void HumanSceneController::update() {
     if (!mustUpdate)
         return;
     float currentTime = _window.expired() ? 0 : _window.lock()->elapsedTime();
-    
-    T_Node cube = _scene->rootNode()->childNodeNamed("zeCube");
 
-    GLS::Interpolator<float> interpolator;
-    interpolator.addKeyValueAt(0.0, 0.0);
-    interpolator.addKeyValueAt(3.0, 1.0, GLS::CurveFunction<timefloat>::elastic());
-    interpolator.addKeyValueAt(0.0, 2.5, GLS::CurveFunction<timefloat>::bounce());
-    interpolator.addKeyValueAt(0.0, 4.0);
 
-    float y = interpolator.valueAt(fmod(currentTime, interpolator.duration()));
-
-    cube->transform().setPosition(glm::vec3(0, y + 0.5, 0));
 }

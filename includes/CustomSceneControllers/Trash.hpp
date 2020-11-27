@@ -18,7 +18,7 @@
 
 class ExplodingMesh: public GLS::IAnimatable {
 	private:
-	timefloat _lifeTime;
+	GLS::timefloat _lifeTime;
 	std::shared_ptr<GLS::Node> _node; // contains multiples children node containing meshes
 
 	public:
@@ -30,7 +30,7 @@ class ExplodingMesh: public GLS::IAnimatable {
 
 	virtual void initAnimation();
 
-	virtual void animate(timefloat deltaTime);
+	virtual void animate(GLS::timefloat deltaTime);
 
 	virtual bool alive() const;
 

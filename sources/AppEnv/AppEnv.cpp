@@ -17,7 +17,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
     }
 
     try {
-        int win_w = 1200, win_h = 800;
+        int win_w = 600, win_h = 400;
         mainWindow = std::make_shared<GLSWindow>(this, glm::vec2(win_w, win_h), "Presque minecraft");
     } catch (std::exception& e) {
         std::cerr << "Error during main window creation" << std::endl;
