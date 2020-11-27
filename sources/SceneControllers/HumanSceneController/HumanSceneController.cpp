@@ -56,6 +56,7 @@ void HumanSceneController::makeScene() {
         lightNode->transform().setEulerAngles(-1.8, 0, 0.1);
         light->type = (GLS::light_spot);
         light->cast_shadow = true;
+        light->angle *= 1.5;
         lightNode->setLight(light);
         scene.rootNode()->addChildNode(lightNode);
     }
@@ -101,8 +102,8 @@ void HumanSceneController::update() {
 
     GLS::Interpolator<float> interpolator;
     interpolator.addKeyValueAt(0.0, 0.0);
-    interpolator.addKeyValueAt(3.0, 1.0, GLS::CurveFunction::elastic());
-    interpolator.addKeyValueAt(0.0, 2.5, GLS::CurveFunction::bounce());
+    interpolator.addKeyValueAt(3.0, 1.0, GLS::CurveFunction<timefloat>::elastic());
+    interpolator.addKeyValueAt(0.0, 2.5, GLS::CurveFunction<timefloat>::bounce());
     interpolator.addKeyValueAt(0.0, 4.0);
 
     float y = interpolator.valueAt(fmod(currentTime, interpolator.duration()));

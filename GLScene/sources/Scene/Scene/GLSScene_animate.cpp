@@ -19,7 +19,7 @@ namespace GLS {
         _animatables.erase(animatable);
     }
 
-    void Scene::updateAnimations(float deltaTime) {
+    void Scene::updateAnimations(timefloat deltaTime) {
         std::set<std::shared_ptr<IAnimatable> >::iterator it = _animatables.begin();
         while (it != _animatables.end()) {
             if ((*it)->alive()) {

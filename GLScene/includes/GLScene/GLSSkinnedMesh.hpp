@@ -120,7 +120,7 @@ namespace GLS {
         // Animating
 
         virtual void initAnimation();
-        virtual void animate(float deltaTime);
+        virtual void animate(timefloat deltaTime);
         virtual bool alive() const;
 
         // Shader uniforms

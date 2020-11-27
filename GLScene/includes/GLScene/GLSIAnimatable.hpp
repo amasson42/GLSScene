@@ -16,7 +16,7 @@ namespace GLS {
         public:
 
         virtual void initAnimation() = 0;
-        virtual void animate(float deltaTime) = 0;
+        virtual void animate(timefloat deltaTime) = 0;
         virtual bool alive() const = 0;
 
     };

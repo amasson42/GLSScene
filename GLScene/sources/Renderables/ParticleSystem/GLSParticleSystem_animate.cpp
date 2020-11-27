@@ -20,7 +20,7 @@ namespace GLS {
         }
     }
 
-    void ParticleSystem::animate(float deltaTime) {
+    void ParticleSystem::animate(timefloat deltaTime) {
         if (bufferGenerated()) {
             CLD::Kernel *uk = _device->kernel(_updateKernelIndex);
             uk->setArgument(2, deltaTime);

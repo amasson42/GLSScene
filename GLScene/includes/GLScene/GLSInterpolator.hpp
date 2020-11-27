@@ -11,9 +11,9 @@
 
 #include "GLSCurveFunction.hpp"
 
-float mix(float a, float b, double t);
-glm::vec3 mix(glm::vec3 a, glm::vec3 b, double t);
-glm::quat mix(glm::quat a, glm::quat b, double t);
+float mix(float a, float b, timefloat t);
+glm::vec3 mix(glm::vec3 a, glm::vec3 b, timefloat t);
+glm::quat mix(glm::quat a, glm::quat b, timefloat t);
 
 namespace GLS {
 
@@ -22,16 +22,16 @@ namespace GLS {
 
         struct Value {
             KeyValue value;
-            CurveFunction function;
+            CurveFunction<timefloat> function;
 
             Value() {}
-            Value(KeyValue newValue, CurveFunction newFunction) :
+            Value(KeyValue newValue, CurveFunction<timefloat> newFunction) :
             value(newValue),
             function(newFunction)
             {}
         };
 
-        std::map<double, Value> _keyValues;
+        std::map<timefloat, Value> _keyValues;
 
         public:
 
@@ -51,7 +51,7 @@ namespace GLS {
             return _keyValues.empty();
         }
 
-        double duration() const {
+        timefloat duration() const {
             if (_keyValues.empty()) {
                 return 0;
             } else {
@@ -59,7 +59,7 @@ namespace GLS {
             }
         }
 
-        void addKeyValueAt(const KeyValue& value, double time, CurveFunction function = CurveFunction::linear()) {
+        void addKeyValueAt(const KeyValue& value, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>::linear()) {
             _keyValues[time] = Value(value, function);
         }
 
@@ -71,14 +71,14 @@ namespace GLS {
             }
         }
 
-        void removeKeyValueAt(double time) {
+        void removeKeyValueAt(timefloat time) {
             auto it = _keyValues.lower_bound(time);
             if (it != _keyValues.end()) {
                 _keyValues.erase(it);
             }
         }
 
-        KeyValue valueAt(double time) const {
+        KeyValue valueAt(timefloat time) const {
             if (_keyValues.empty())
                 throw std::runtime_error("access value from empty Interpolator");
 
@@ -90,7 +90,7 @@ namespace GLS {
             if (next == _keyValues.end())
                 return prev->second.value;
             
-            double t = (time - prev->first) / (next->first - prev->first);
+            timefloat t = (time - prev->first) / (next->first - prev->first);
             t = next->second.function(t);
             return mix(prev->second.value, next->second.value, t);
         }
@@ -134,14 +134,14 @@ namespace GLS {
         Interpolator<glm::vec3>& keyScales();
         const Interpolator<glm::vec3>& keyScales() const;
 
-        void addPositionAt(glm::vec3 position, double time, CurveFunction function = CurveFunction::linear());
-        void addRotationAt(glm::quat rotation, double time, CurveFunction function = CurveFunction::linear());
-        void addScaleAt(glm::vec3 rotation, double time, CurveFunction function = CurveFunction::linear());
-        void addMatrixAt(glm::mat4 matrix, double time, CurveFunction function = CurveFunction::linear());
+        void addPositionAt(glm::vec3 position, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>());
+        void addRotationAt(glm::quat rotation, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>());
+        void addScaleAt(glm::vec3 rotation, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>());
+        void addMatrixAt(glm::mat4 matrix, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>());
 
-        Transform transformAt(double time) const;
+        Transform transformAt(timefloat time) const;
 
-        double duration() const;
+        timefloat duration() const;
 
     };
 

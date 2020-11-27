@@ -44,6 +44,8 @@ std::ostream& operator<<(std::ostream& stream, const glm::ivec3& v);
 std::ostream& operator<<(std::ostream& stream, const glm::ivec2& v);
 std::ostream& operator<<(std::ostream& stream, const glm::quat& q);
 
+typedef double timefloat;
+
 namespace GLS {
 
     std::shared_ptr<CLD::GPUDevice> getSharedDevice();

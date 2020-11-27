@@ -9,11 +9,11 @@
 #include "GLSTransform.hpp"
 #include "GLSInterpolator.hpp"
 
-float mix(float a, float b, double t) {
-    return glm::mix<float, double>(a, b, t);
+float mix(float a, float b, timefloat t) {
+    return glm::mix<float, timefloat>(a, b, t);
 }
 
-glm::vec3 mix(glm::vec3 a, glm::vec3 b, double t) {
+glm::vec3 mix(glm::vec3 a, glm::vec3 b, timefloat t) {
     return glm::vec3(
         mix(a.x, b.x, t),
         mix(a.y, b.y, t),
@@ -21,7 +21,7 @@ glm::vec3 mix(glm::vec3 a, glm::vec3 b, double t) {
     );
 }
 
-glm::quat mix(glm::quat a, glm::quat b, double t) {
+glm::quat mix(glm::quat a, glm::quat b, timefloat t) {
     if (a == b)
         return a;
     return glm::lerp<float>(a, b, t);
@@ -70,19 +70,19 @@ namespace GLS {
         return _keyRotations;
     }
 
-    void TransformInterpolator::addPositionAt(glm::vec3 position, double time, CurveFunction function) {
+    void TransformInterpolator::addPositionAt(glm::vec3 position, timefloat time, CurveFunction<timefloat> function) {
         _keyPositions.addKeyValueAt(position, time, function);
     }
 
-    void TransformInterpolator::addRotationAt(glm::quat rotation, double time, CurveFunction function) {
+    void TransformInterpolator::addRotationAt(glm::quat rotation, timefloat time, CurveFunction<timefloat> function) {
         _keyRotations.addKeyValueAt(rotation, time, function);
     }
 
-    void TransformInterpolator::addScaleAt(glm::vec3 rotation, double time, CurveFunction function) {
+    void TransformInterpolator::addScaleAt(glm::vec3 rotation, timefloat time, CurveFunction<timefloat> function) {
         _keyScales.addKeyValueAt(rotation, time, function);
     }
 
-    void TransformInterpolator::addMatrixAt(glm::mat4 matrix, double time, CurveFunction function) {
+    void TransformInterpolator::addMatrixAt(glm::mat4 matrix, timefloat time, CurveFunction<timefloat> function) {
         Transform t;
         t.setMatrix(matrix);
         addPositionAt(t.position(), time, function);
@@ -90,7 +90,7 @@ namespace GLS {
         addScaleAt(t.scale(), time, function);
     }
 
-    Transform TransformInterpolator::transformAt(double time) const {
+    Transform TransformInterpolator::transformAt(timefloat time) const {
         Transform transframe;
 
         if (!_keyPositions.isEmpty()) {
@@ -106,7 +106,7 @@ namespace GLS {
         return transframe;
     }
 
-    double TransformInterpolator::duration() const {
+    timefloat TransformInterpolator::duration() const {
         return std::max(_keyPositions.duration(),
                         std::max(_keyRotations.duration(),
                                 _keyScales.duration()));

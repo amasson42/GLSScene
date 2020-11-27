@@ -79,7 +79,7 @@ namespace GLS {
 
         void addAnimatable(std::shared_ptr<IAnimatable> animatable);
         void removeAnimatable(std::shared_ptr<IAnimatable> animatable);
-        void updateAnimations(float deltaTime);
+        void updateAnimations(timefloat deltaTime);
 
     };
     

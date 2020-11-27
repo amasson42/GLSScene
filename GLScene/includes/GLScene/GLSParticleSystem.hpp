@@ -86,7 +86,7 @@ namespace GLS {
         CLD::Kernel *getInitKernel();
         CLD::Kernel *getAnimationKernel();
         virtual void initAnimation();
-        virtual void animate(float deltaTime);
+        virtual void animate(timefloat deltaTime);
         virtual bool alive() const;
 
     };

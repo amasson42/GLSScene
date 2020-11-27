@@ -14,7 +14,7 @@ namespace GLS {
 
     }
 
-    void SkinnedMesh::animate(float deltaTime) {
+    void SkinnedMesh::animate(timefloat deltaTime) {
         (void)deltaTime;
     }
 
