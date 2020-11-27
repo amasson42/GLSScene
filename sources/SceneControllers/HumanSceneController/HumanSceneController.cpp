@@ -1,26 +1,27 @@
 
+
+// float mix(float a, float b, double t) {
+//     return glm::mix<float, double>(a, b, t);
+//     // return ((b - a) * t + a);
+// }
 #include "AppEnv.hpp"
 
-float floatLinearValue(float a, float b, double t) {
-    return ((b - a) * t + a);
-}
+// struct FloatFrame {
+//     float value;
 
-struct FloatFrame {
-    float value;
+//     FloatFrame(float v = 0) {
+//         value = v;
+//     }
 
-    FloatFrame(float v = 0) {
-        value = v;
-    }
+//     static FloatFrame linearValue(FloatFrame a, FloatFrame b, double t) {
+//         return FloatFrame(glm::mix(a.value, b.value, t));
+//     }
+// };
 
-    static FloatFrame linearValue(FloatFrame a, FloatFrame b, double t) {
-        return FloatFrame(floatLinearValue(a.value, b.value, t));
-    }
-};
-
-std::ostream& operator<<(std::ostream& out, const FloatFrame& frame) {
-    out << frame.value;
-    return out;
-}
+// std::ostream& operator<<(std::ostream& out, const FloatFrame& frame) {
+//     out << frame.value;
+//     return out;
+// }
 
 HumanSceneController::HumanSceneController(std::shared_ptr<GLSWindow> window) :
 ISceneController(window) {
@@ -67,19 +68,19 @@ void HumanSceneController::makeScene() {
 
     }
 
-    GLS::KeyFrames<FloatFrame> myKeys;
+    GLS::Interpolator<float> myKeys;
 
     std::cout << myKeys << std::endl;
 
-    myKeys.addKeyframeAt(0.5, FloatFrame(10.0));
-    myKeys.addKeyframeAt(0.6, FloatFrame(-2.0));
-    myKeys.addKeyframeAt(1.0, FloatFrame(1.0));
-    myKeys.addKeyframeAt(5.0, FloatFrame(0.0));
+    myKeys.addKeyValueAt(0.5, 10.0);
+    myKeys.addKeyValueAt(0.6, -2.0);
+    myKeys.addKeyValueAt(1.0, 1.0);
+    myKeys.addKeyValueAt(5.0, 0.0);
 
     std::cout << myKeys << std::endl;
 
     for (double i = 0; i < 5.0; i += 0.1) {
-        std::cout << "[" << i << "] => " << myKeys.frameAt(i) << std::endl;
+        std::cout << "[" << i << "] => " << myKeys.valueAt(i) << std::endl;
     }
 
     // create ground plane

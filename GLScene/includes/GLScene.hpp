@@ -12,7 +12,7 @@
 #include "GLScene/GLSStructs.hpp"
 #include "GLScene/GLSTransform.hpp"
 
-#include "GLScene/GLSAnimator.hpp"
+#include "GLScene/GLSInterpolator.hpp"
 
 #include "GLScene/GLSTexture.hpp"
 
