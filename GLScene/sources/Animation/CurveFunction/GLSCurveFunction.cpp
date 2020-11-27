@@ -10,12 +10,8 @@
 
 namespace GLS {
 
-    static double _linearCurve(double t) {
-        return t;
-    }
-
     CurveFunction::CurveFunction() :
-    _f(_linearCurve)
+    _f(linearCurve)
     {}
 
     CurveFunction::CurveFunction(double (*f)(double)) :
@@ -43,7 +39,28 @@ namespace GLS {
     }
 
     CurveFunction CurveFunction::linear() {
-        return custom(_linearCurve);
+        return CurveFunction();
     }
+
+    CurveFunction CurveFunction::easeIn() {
+        return CurveFunction(easeInQuad);
+    }
+
+    CurveFunction CurveFunction::easeOut() {
+        return CurveFunction(easeOutQuad);
+    }
+
+    CurveFunction CurveFunction::easeInOut() {
+        return CurveFunction(easeInOutQuad);
+    }
+
+    CurveFunction CurveFunction::elastic() {
+        return CurveFunction(easeOutElastic);
+    }
+
+    CurveFunction CurveFunction::bounce() {
+        return CurveFunction(easeOutBounce);
+    }
+
 
 }

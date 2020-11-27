@@ -79,7 +79,7 @@ namespace GLS {
         "        if (outOfLight)\n"
         "            return 1.0;\n"
         "        float current_depth = proj_coords.z;\n"
-        "        float bias = 0.0005;\n"// max(0.05 * (1.0 - dot(normal_direction, -light.direction)), 0.005);\n"
+        "        float bias = 0.00001;\n"// max(0.05 * (1.0 - dot(normal_direction, -light.direction)), 0.005);\n"
         "        vec2 texel_size = 1.0 / textureSize(light_casters[caster_index].depth_map, 0);\n"
         "        float shadow = 0.0;\n"
 		"        int total = 0;\n"

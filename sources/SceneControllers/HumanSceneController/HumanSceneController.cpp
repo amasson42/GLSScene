@@ -52,8 +52,10 @@ void HumanSceneController::makeScene() {
 
         std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
         T_Node lightNode = newNode();
-        lightNode->transform().setPosition(glm::vec3(3, 5, 3));
-        light->type = (GLS::light_point);
+        lightNode->transform().setPosition(glm::vec3(1, 5, 0));
+        lightNode->transform().setEulerAngles(-1.8, 0, 0.1);
+        light->type = (GLS::light_spot);
+        light->cast_shadow = true;
         lightNode->setLight(light);
         scene.rootNode()->addChildNode(lightNode);
     }
@@ -68,22 +70,16 @@ void HumanSceneController::makeScene() {
 
     }
 
-    GLS::Interpolator<float> myKeys;
-
-    std::cout << myKeys << std::endl;
-
-    myKeys.addKeyValueAt(0.5, 10.0);
-    myKeys.addKeyValueAt(0.6, -2.0);
-    myKeys.addKeyValueAt(1.0, 1.0);
-    myKeys.addKeyValueAt(5.0, 0.0);
-
-    std::cout << myKeys << std::endl;
-
-    for (double i = 0; i < 5.0; i += 0.1) {
-        std::cout << "[" << i << "] => " << myKeys.valueAt(i) << std::endl;
-    }
+    T_Node cube = newNode();
+    cube->setName("zeCube");
+    cube->addRenderable(GLS::Mesh::cube(1, 1, 1));
+    scene.rootNode()->addChildNode(cube);
 
     // create ground plane
+    T_Node plane = newNode();
+    plane->addRenderable(GLS::Mesh::plane(10, 10));
+    plane->transform().setEulerAngles(-M_PI / 2, 0, 0);
+    scene.rootNode()->addChildNode(plane);
 
     // create grass on it
 
@@ -100,6 +96,16 @@ void HumanSceneController::update() {
     if (!mustUpdate)
         return;
     float currentTime = _window.expired() ? 0 : _window.lock()->elapsedTime();
-    // float loopTime = fmod(currentTime, hoomanAnimator->duration());
     
+    T_Node cube = _scene->rootNode()->childNodeNamed("zeCube");
+
+    GLS::Interpolator<float> interpolator;
+    interpolator.addKeyValueAt(0.0, 0.0);
+    interpolator.addKeyValueAt(3.0, 1.0, GLS::CurveFunction::elastic());
+    interpolator.addKeyValueAt(0.0, 2.5, GLS::CurveFunction::bounce());
+    interpolator.addKeyValueAt(0.0, 4.0);
+
+    float y = interpolator.valueAt(fmod(currentTime, interpolator.duration()));
+
+    cube->transform().setPosition(glm::vec3(0, y + 0.5, 0));
 }

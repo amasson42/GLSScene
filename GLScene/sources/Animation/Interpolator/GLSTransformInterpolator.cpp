@@ -106,4 +106,10 @@ namespace GLS {
         return transframe;
     }
 
+    double TransformInterpolator::duration() const {
+        return std::max(_keyPositions.duration(),
+                        std::max(_keyRotations.duration(),
+                                _keyScales.duration()));
+    }
+
 }

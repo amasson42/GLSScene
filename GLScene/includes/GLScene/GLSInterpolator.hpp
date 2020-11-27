@@ -9,33 +9,13 @@
 #ifndef GLSInterpolator_h
 #define GLSInterpolator_h
 
-#include "GLSStructs.hpp"
+#include "GLSCurveFunction.hpp"
 
 float mix(float a, float b, double t);
 glm::vec3 mix(glm::vec3 a, glm::vec3 b, double t);
 glm::quat mix(glm::quat a, glm::quat b, double t);
 
 namespace GLS {
-
-    class CurveFunction {
-
-        double (*_f)(double);
-        
-        public:
-
-        CurveFunction();
-        CurveFunction(double (*f)(double));
-        CurveFunction(const CurveFunction& copy);
-        virtual ~CurveFunction();
-
-        CurveFunction& operator=(const CurveFunction& copy);
-
-        double operator()(double t) const;
-
-        static CurveFunction custom(double (*f)(double));
-        static CurveFunction linear();
-        // TODO: add all other functions
-    };
 
     template <typename KeyValue>
     class Interpolator {
@@ -160,6 +140,8 @@ namespace GLS {
         void addMatrixAt(glm::mat4 matrix, double time, CurveFunction function = CurveFunction::linear());
 
         Transform transformAt(double time) const;
+
+        double duration() const;
 
     };
 
