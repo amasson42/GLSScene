@@ -12,9 +12,6 @@
 #include "GLScene/GLSStructs.hpp"
 #include "GLScene/GLSTransform.hpp"
 
-#include "GLScene/GLSCurveFunction.hpp"
-#include "GLScene/GLSInterpolator.hpp"
-
 #include "GLScene/GLSTexture.hpp"
 
 #include "GLScene/GLSIRenderable.hpp"
@@ -34,5 +31,9 @@
 #include "GLScene/GLSShader.hpp"
 #include "GLScene/GLSNode.hpp"
 #include "GLScene/GLSScene.hpp"
+
+#include "GLScene/GLSCurveFunction.hpp"
+#include "GLScene/GLSInterpolator.hpp"
+#include "GLScene/GLSSkeleton.hpp"
 
 #endif /* GLScene_h */

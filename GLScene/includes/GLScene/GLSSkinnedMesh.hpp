@@ -14,6 +14,7 @@
 #include "GLSIRenderable.hpp"
 #include "GLSIAnimatable.hpp"
 #include "GLSMaterial.hpp"
+#include "GLSSkeleton.hpp"
 
 // TODO: make it work lol
 

@@ -13,6 +13,7 @@
 #include "GLSIRenderable.hpp"
 #include "GLSCamera.hpp"
 #include "GLSLight.hpp"
+#include "GLSSkeleton.hpp"
 
 namespace GLS {
     
@@ -24,11 +25,11 @@ namespace GLS {
         std::weak_ptr<Node> _parent;
         std::vector<std::shared_ptr<Node> > _childs;
 
+        bool _active;
         std::shared_ptr<Camera> _camera;
         std::shared_ptr<Light> _light;
         std::vector<std::shared_ptr<IRenderable> > _renderables;
-        bool _active;
-        
+        std::shared_ptr<Skeleton> _skeleton;
 
     public:
         
@@ -46,6 +47,7 @@ namespace GLS {
         
         Transform& transform();
         const Transform& transform() const;
+        void setTransform(const Transform& transform);
 
         const glm::mat4& getTransformMatrix();
         const glm::mat4 getTransformMatrix() const;
@@ -75,6 +77,7 @@ namespace GLS {
         bool isActive() const;
         void setActive(bool active);
 
+        bool hasRenderable() const;
         const std::vector<std::shared_ptr<IRenderable> >& renderables() const;
         std::vector<std::shared_ptr<IRenderable> >& renderables();
         void addRenderable(std::shared_ptr<IRenderable> renderable);
@@ -82,16 +85,23 @@ namespace GLS {
 
         std::pair<glm::vec3, glm::vec3> getBounds() const;
 
-        void loadFromFile(std::string path);
-
+        bool hasCamera() const;
         const std::shared_ptr<const Camera> camera() const;
         std::shared_ptr<Camera> camera();
         void setCamera(std::shared_ptr<Camera> camera);
-        
+
+        bool hasLight() const;
         const std::shared_ptr<const Light> light() const;
         std::shared_ptr<Light> light();
         void setLight(std::shared_ptr<Light> light);
         void getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix);
+
+        bool hasSkeleton() const;
+        const std::shared_ptr<Skeleton> skeleton() const;
+        std::shared_ptr<Skeleton> skeleton();
+        void setSkeleton(std::shared_ptr<Skeleton> skeleton);
+
+        void loadFromFile(std::string path);
 
         void renderInContext(Scene& scene, RenderUniforms uniforms);
         void renderInDepthContext(Scene& scene, RenderUniforms uniforms);

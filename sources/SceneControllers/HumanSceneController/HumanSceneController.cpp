@@ -4,6 +4,7 @@
 //     return glm::mix<float, double>(a, b, t);
 //     // return ((b - a) * t + a);
 // }
+#include "GLSSkeleton.hpp"
 #include "AppEnv.hpp"
 
 // struct FloatFrame {
@@ -30,6 +31,13 @@ ISceneController(window) {
 
 HumanSceneController::~HumanSceneController() {
     
+}
+
+void addCubeToNode(T_Node node, std::shared_ptr<GLS::Mesh> mesh) {
+    node->addRenderable(mesh);
+    for (size_t i = 0; i < node->childNodes().size(); i++) {
+        addCubeToNode(node->childNodeAt(i), mesh);
+    }
 }
 
 void HumanSceneController::makeScene() {
@@ -61,12 +69,26 @@ void HumanSceneController::makeScene() {
     }
 
     // just a nanosuit
-    std::shared_ptr<std::string> animationFilename = env->getArgument("-file");
-    if (animationFilename != nullptr) {
-        T_Node animNode = newNode();
-        animNode->loadFromFile(*animationFilename);
-        scene.rootNode()->addChildNode(animNode);
-        animNode->sendToFlux(std::cout, "");
+    std::shared_ptr<std::string> animationFilenamePtr = env->getArgument("-file");
+    std::string animationFilename = animationFilenamePtr == nullptr ? "/Users/giantwow/Documents/static.nosync/3dmodels/glTF-Sample-Models/sourceModels/WalkingLady/WalkingLady.dae" : *animationFilenamePtr;
+
+    T_Node offseter = newNode();
+    offseter->transform().moveBy(0, 0, 0);
+    scene.rootNode()->addChildNode(offseter);
+    T_Node animNode = newNode();
+    animNode->loadFromFile(animationFilename);
+    animNode->sendToFlux(std::cout, "~");
+    animNode->setName("animated");
+    offseter->addChildNode(animNode);
+
+    std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.10, 0.08);
+    addCubeToNode(animNode, cubeMesh);
+    if (animNode->hasSkeleton()) {
+        animNode->skeleton()->initAnimation();
+        std::cout << "animations: " << std::endl;
+        for (int i = 0; i < animNode->skeleton()->animationNames().size(); i++) {
+            std::cout << "  " << animNode->skeleton()->animationNames()[i] << std::endl;
+        }
     }
 
     // create ground plane
@@ -90,6 +112,12 @@ void HumanSceneController::update() {
     if (!mustUpdate)
         return;
     float currentTime = _window.expired() ? 0 : _window.lock()->elapsedTime();
+    float deltaTime = _window.expired() ? 0 : _window.lock()->deltaTime();
 
+    T_Node animateNode = _scene->rootNode()->childNodeNamed("animated", true);
+    if (animateNode != nullptr) {
+        if (animateNode->hasSkeleton())
+            animateNode->skeleton()->animate(deltaTime);
+    }
 
 }

@@ -3,7 +3,7 @@
 //  GLScene
 //
 //  Created by Arthur Masson on 23/11/2020.
-//  Copyright © 2018 Arthur Masson. All rights reserved.
+//  Copyright © 2020 Arthur Masson. All rights reserved.
 //
 
 #include "GLSTransform.hpp"
@@ -70,24 +70,24 @@ namespace GLS {
         return _keyRotations;
     }
 
-    void TransformInterpolator::addPositionAt(glm::vec3 position, timefloat time, CurveFunction<timefloat> function) {
+    void TransformInterpolator::addPositionAt(timefloat time, glm::vec3 position, CurveFunction<timefloat> function) {
         _keyPositions.addKeyValueAt(position, time, function);
     }
 
-    void TransformInterpolator::addRotationAt(glm::quat rotation, timefloat time, CurveFunction<timefloat> function) {
+    void TransformInterpolator::addRotationAt(timefloat time, glm::quat rotation, CurveFunction<timefloat> function) {
         _keyRotations.addKeyValueAt(rotation, time, function);
     }
 
-    void TransformInterpolator::addScaleAt(glm::vec3 rotation, timefloat time, CurveFunction<timefloat> function) {
+    void TransformInterpolator::addScaleAt(timefloat time, glm::vec3 rotation, CurveFunction<timefloat> function) {
         _keyScales.addKeyValueAt(rotation, time, function);
     }
 
-    void TransformInterpolator::addMatrixAt(glm::mat4 matrix, timefloat time, CurveFunction<timefloat> function) {
+    void TransformInterpolator::addMatrixAt(timefloat time, glm::mat4 matrix, CurveFunction<timefloat> function) {
         Transform t;
         t.setMatrix(matrix);
-        addPositionAt(t.position(), time, function);
-        addRotationAt(t.rotation(), time, function);
-        addScaleAt(t.scale(), time, function);
+        addPositionAt(time, t.position(), function);
+        addRotationAt(time, t.rotation(), function);
+        addScaleAt(time, t.scale(), function);
     }
 
     Transform TransformInterpolator::transformAt(timefloat time) const {

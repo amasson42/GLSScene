@@ -10,6 +10,7 @@
 #define GLSInterpolator_h
 
 #include "GLSCurveFunction.hpp"
+#include "GLSStructs.hpp"
 
 float mix(float a, float b, GLS::timefloat t);
 glm::vec3 mix(glm::vec3 a, glm::vec3 b, GLS::timefloat t);
@@ -125,6 +126,8 @@ namespace GLS {
 
         TransformInterpolator& operator=(const TransformInterpolator& copy);
 
+        static std::shared_ptr<TransformInterpolator> loadFromAiNodeAnim(const aiNodeAnim *nodeAnim);
+
         Interpolator<glm::vec3>& keyPositions();
         const Interpolator<glm::vec3>& keyPositions() const;
 
@@ -134,10 +137,10 @@ namespace GLS {
         Interpolator<glm::vec3>& keyScales();
         const Interpolator<glm::vec3>& keyScales() const;
 
-        void addPositionAt(glm::vec3 position, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>());
-        void addRotationAt(glm::quat rotation, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>());
-        void addScaleAt(glm::vec3 rotation, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>());
-        void addMatrixAt(glm::mat4 matrix, timefloat time, CurveFunction<timefloat> function = CurveFunction<timefloat>());
+        void addPositionAt(timefloat time, glm::vec3 position, CurveFunction<timefloat> function = CurveFunction<timefloat>());
+        void addRotationAt(timefloat time, glm::quat rotation, CurveFunction<timefloat> function = CurveFunction<timefloat>());
+        void addScaleAt(timefloat time, glm::vec3 rotation, CurveFunction<timefloat> function = CurveFunction<timefloat>());
+        void addMatrixAt(timefloat time, glm::mat4 matrix, CurveFunction<timefloat> function = CurveFunction<timefloat>());
 
         Transform transformAt(timefloat time) const;
 

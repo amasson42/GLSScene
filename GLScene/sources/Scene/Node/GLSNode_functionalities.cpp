@@ -26,6 +26,10 @@ namespace GLS {
         return _transform;
     }
 
+    void Node::setTransform(const Transform& transform) {
+        _transform = transform;
+    }
+
     const glm::mat4& Node::getTransformMatrix() {
         return _transform.matrix();
     }
@@ -72,6 +76,10 @@ namespace GLS {
         _active = active;
     }
 
+    bool Node::hasRenderable() const {
+        return !_renderables.empty();
+    }
+
     const std::vector<std::shared_ptr<IRenderable> >& Node::renderables() const {
         return _renderables;
     }
@@ -115,6 +123,10 @@ namespace GLS {
         return bounds;
     }
 
+    bool Node::hasCamera() const {
+        return _camera != nullptr;
+    }
+
     const std::shared_ptr<const Camera> Node::camera() const {
         return _camera;
     }
@@ -126,7 +138,11 @@ namespace GLS {
     void Node::setCamera(std::shared_ptr<Camera> camera) {
         _camera = camera;
     }
-    
+
+    bool Node::hasLight() const {
+        return _light != nullptr;
+    }
+
     const std::shared_ptr<const Light> Node::light() const {
         return _light;
     }
@@ -150,14 +166,30 @@ namespace GLS {
         }
     }
 
+    bool Node::hasSkeleton() const {
+        return _skeleton != nullptr;
+    }
+
+    const std::shared_ptr<Skeleton> Node::skeleton() const {
+        return _skeleton;
+    }
+
+    std::shared_ptr<Skeleton> Node::skeleton() {
+        return _skeleton;
+    }
+
+    void Node::setSkeleton(std::shared_ptr<Skeleton> skeleton) {
+        _skeleton = skeleton;
+    }
+
     void Node::sendToFlux(std::ostream& flux, std::string linePrefix) const {
         flux << linePrefix << "[Node] {" << std::endl;
         flux << linePrefix << "  id: " << this << std::endl;
         flux << linePrefix << "  name: " << _name << std::endl;
         flux << linePrefix << "  transform: {" << std::endl;
-        flux << linePrefix << "    position: " << _transform.position() << std::endl;
-        flux << linePrefix << "    rotation: " << _transform.rotation() << std::endl;
-        flux << linePrefix << "    scale: " << _transform.scale() << std::endl;
+        flux << linePrefix << "    position: " << "(" << _transform.position().x << "," << _transform.position().y << "," << _transform.position().z << ")" << std::endl;
+        flux << linePrefix << "    rotation: " << "(" << _transform.rotation().x << "," << _transform.rotation().y << "," << _transform.rotation().z << ")" << std::endl;
+        flux << linePrefix << "    scale: "    << "(" << _transform.scale().x << "," << _transform.scale().y << "," << _transform.scale().z << ")" << std::endl;
         flux << linePrefix << "  }" << std::endl;
         flux << linePrefix << "  camera: " << _camera.get() << std::endl;
         flux << linePrefix << "  light: " << _light.get() << std::endl;
