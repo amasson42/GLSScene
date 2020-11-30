@@ -39,9 +39,8 @@ namespace GLS {
         
         Node& operator=(const Node& copy);
         
-        std::string name() const;
-        void setName(std::string name);
-
+        static std::shared_ptr<Node> loadFromFile(std::string path);
+        static std::shared_ptr<Node> loadFromAiScene(const aiScene *scene, std::string directory = "");
 
         // Transformation
         
@@ -73,7 +72,10 @@ namespace GLS {
         
         
         // Node functionalities
-        
+
+        std::string name() const;
+        void setName(std::string name);
+
         bool isActive() const;
         void setActive(bool active);
 
@@ -100,8 +102,6 @@ namespace GLS {
         const std::shared_ptr<Skeleton> skeleton() const;
         std::shared_ptr<Skeleton> skeleton();
         void setSkeleton(std::shared_ptr<Skeleton> skeleton);
-
-        void loadFromFile(std::string path);
 
         void renderInContext(Scene& scene, RenderUniforms uniforms);
         void renderInDepthContext(Scene& scene, RenderUniforms uniforms);

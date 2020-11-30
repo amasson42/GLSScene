@@ -1,5 +1,5 @@
 //
-//  GLSSkeleton_loader.cpp
+//  GLSSkeleton_load.cpp
 //  GLScene
 //
 //  Created by Arthur Masson on 28/11/2020.

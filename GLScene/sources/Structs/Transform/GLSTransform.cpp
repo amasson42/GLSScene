@@ -36,6 +36,11 @@ namespace GLS {
         return *this;
     }
 
+    Transform Transform::loadFromAiMatrix(aiMatrix4x4 matrix) {
+        Transform t;
+        t.setMatrix(aiToGlm(matrix));
+        return t;
+    }
 
     // Position
 

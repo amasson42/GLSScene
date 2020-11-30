@@ -48,6 +48,41 @@ std::ostream& operator<<(std::ostream& stream, const glm::quat& q) {
     return stream;
 }
 
+glm::vec3 aiToGlm(aiVector3D vec) {
+    return glm::vec3(vec.x, vec.y, vec.z);
+}
+
+glm::quat aiToGlm(aiQuaternion quat) {
+    return glm::quat(quat.w, quat.x, quat.y, quat.z);
+}
+
+glm::mat4 aiToGlm(aiMatrix4x4 aiMat) {
+    glm::mat4 mat;
+    glm::f32 *ptr = glm::value_ptr(mat);
+
+    ptr[0] =    (aiMat.a1);
+    ptr[1] =    (aiMat.b1);
+    ptr[2] =    (aiMat.c1);
+    ptr[3] =    (aiMat.d1);
+
+    ptr[4] =    (aiMat.a2);
+    ptr[5] =    (aiMat.b2);
+    ptr[6] =    (aiMat.c2);
+    ptr[7] =    (aiMat.d2);
+
+    ptr[8] =    (aiMat.a3);
+    ptr[9] =    (aiMat.b3);
+    ptr[10] =   (aiMat.c3);
+    ptr[11] =   (aiMat.d3);
+
+    ptr[12] =   (aiMat.a4);
+    ptr[13] =   (aiMat.b4);
+    ptr[14] =   (aiMat.c4);
+    ptr[15] =   (aiMat.d4);
+
+    return mat;
+}
+
 namespace GLS {
     
     const float& mat4ValueAt(const glm::mat4& m, int l, int c) {

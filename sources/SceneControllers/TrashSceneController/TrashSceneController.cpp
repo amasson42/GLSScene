@@ -214,19 +214,17 @@ void TrashSceneController::makeScene() {
     planeNode->addChildNode(sphereNode);
 
     try {
-        std::shared_ptr<GLS::Node> nsNode = std::make_shared<GLS::Node>();
         std::string nsPath = "../models/nanosuit/nanosuit.obj";
         if (env->getArgument("-model") != nullptr)
             nsPath = *env->getArgument("-model");
-        nsNode->loadFromFile(nsPath);
+        std::shared_ptr<GLS::Node> nsNode = GLS::Node::loadFromFile(nsPath);
         scene.rootNode()->addChildNode(nsNode);
     } catch (std::exception& e) {
         std::cout << "can't load object with exception: " << e.what() << std::endl;
     }
 
     try {
-        std::shared_ptr<GLS::Node> ftNode = std::make_shared<GLS::Node>();
-        ftNode->loadFromFile("../models/42.obj");
+        std::shared_ptr<GLS::Node> ftNode = GLS::Node::loadFromFile("../models/42.obj");
         ftNode->setName("ft");
         scene.rootNode()->addChildNode(ftNode);
     } catch (std::exception& e) {

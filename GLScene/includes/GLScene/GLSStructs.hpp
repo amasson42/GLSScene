@@ -28,10 +28,6 @@
 #include <sys/stat.h>
 #include <iomanip>
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include "GLSTransform.hpp"
 
 #include "CLDevice.hpp"
@@ -43,7 +39,6 @@ std::ostream& operator<<(std::ostream& stream, const glm::vec2& v);
 std::ostream& operator<<(std::ostream& stream, const glm::ivec3& v);
 std::ostream& operator<<(std::ostream& stream, const glm::ivec2& v);
 std::ostream& operator<<(std::ostream& stream, const glm::quat& q);
-
 
 namespace GLS {
     

@@ -74,9 +74,13 @@ void HumanSceneController::makeScene() {
 
     T_Node offseter = newNode();
     offseter->transform().moveBy(0, 0, 0);
+    auto scalerIt = std::find(env->args.begin(), env->args.end(), "-scale");
+    if (scalerIt != env->args.end()) {
+        float scaler = std::stof(*(++scalerIt));
+        offseter->transform().setScale(glm::vec3(scaler));
+    }
     scene.rootNode()->addChildNode(offseter);
-    T_Node animNode = newNode();
-    animNode->loadFromFile(animationFilename);
+    T_Node animNode = GLS::Node::loadFromFile(animationFilename);
     animNode->sendToFlux(std::cout, "~");
     animNode->setName("animated");
     offseter->addChildNode(animNode);

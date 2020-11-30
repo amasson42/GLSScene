@@ -33,6 +33,14 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
+glm::vec3 aiToGlm(aiVector3D vec);
+glm::quat aiToGlm(aiQuaternion quat);
+glm::mat4 aiToGlm(aiMatrix4x4 mat);
+
 namespace GLS {
 
     const float& mat4ValueAt(const glm::mat4& m, int l, int c);
@@ -109,6 +117,7 @@ namespace GLS {
 
         Transform& operator=(const Transform& copy);
 
+        static Transform loadFromAiMatrix(aiMatrix4x4 matrix);
 
         // Position
 
