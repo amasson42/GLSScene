@@ -60,38 +60,41 @@ void HumanSceneController::makeScene() {
 
         std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
         T_Node lightNode = newNode();
-        lightNode->transform().setPosition(glm::vec3(0, 0, 0));
+        lightNode->transform().setPosition(glm::vec3(2, 5, 3));
+        lightNode->transform().setEulerAngles(-1.5, 0, -0.3);
         light->type = (GLS::light_spot);
         light->cast_shadow = true;
         light->angle *= 1.5;
         lightNode->setLight(light);
-        cameraNode->addChildNode(lightNode);
+        scene.rootNode()->addChildNode(lightNode);
     }
 
     // just a nanosuit
     std::shared_ptr<std::string> animationFilenamePtr = env->getArgument("-file");
-    std::string animationFilename = animationFilenamePtr == nullptr ? "/Users/giantwow/Documents/static.nosync/3dmodels/glTF-Sample-Models/sourceModels/WalkingLady/WalkingLady.dae" : *animationFilenamePtr;
+    if (animationFilenamePtr != nullptr) {
+        std::string animationFilename = animationFilenamePtr == nullptr ? "/Users/giantwow/Documents/static.nosync/3dmodels/glTF-Sample-Models/sourceModels/WalkingLady/WalkingLady.dae" : *animationFilenamePtr;
 
-    T_Node offseter = newNode();
-    offseter->transform().moveBy(0, 0, 0);
-    auto scalerIt = std::find(env->args.begin(), env->args.end(), "-scale");
-    if (scalerIt != env->args.end()) {
-        float scaler = std::stof(*(++scalerIt));
-        offseter->transform().setScale(glm::vec3(scaler));
-    }
-    scene.rootNode()->addChildNode(offseter);
-    T_Node animNode = GLS::Node::loadFromFile(animationFilename);
-    animNode->sendToFlux(std::cout, "~");
-    animNode->setName("animated");
-    offseter->addChildNode(animNode);
+        T_Node offseter = newNode();
+        offseter->transform().moveBy(0, 0, 0);
+        auto scalerIt = std::find(env->args.begin(), env->args.end(), "-scale");
+        if (scalerIt != env->args.end()) {
+            float scaler = std::stof(*(++scalerIt));
+            offseter->transform().setScale(glm::vec3(scaler));
+        }
+        scene.rootNode()->addChildNode(offseter);
+        T_Node animNode = GLS::Node::loadFromFile(animationFilename);
+        animNode->sendToFlux(std::cout, "~");
+        animNode->setName("animated");
+        offseter->addChildNode(animNode);
 
-    std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.10, 0.08);
-    addCubeToNode(animNode, cubeMesh);
-    if (animNode->hasSkeleton()) {
-        animNode->skeleton()->initAnimation();
-        std::cout << "animations: " << std::endl;
-        for (int i = 0; i < animNode->skeleton()->animationNames().size(); i++) {
-            std::cout << "  " << animNode->skeleton()->animationNames()[i] << std::endl;
+        std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.10, 0.08);
+        addCubeToNode(animNode, cubeMesh);
+        if (animNode->hasSkeleton()) {
+            animNode->skeleton()->initAnimation();
+            std::cout << "animations: " << std::endl;
+            for (int i = 0; i < animNode->skeleton()->animationNames().size(); i++) {
+                std::cout << "  " << animNode->skeleton()->animationNames()[i] << std::endl;
+            }
         }
     }
 

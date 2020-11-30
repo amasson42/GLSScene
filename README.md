@@ -6,3 +6,5 @@ stb_image from https://github.com/nothings/stb.git
 glfw
 glm
 assimp
+nanogui
+nlohmannjson

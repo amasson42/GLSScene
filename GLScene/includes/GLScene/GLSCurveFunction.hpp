@@ -214,6 +214,21 @@ namespace GLS {
             return n1 * xm * xm + 0.984375;
         }
     }
+
+    template <typename T = timefloat>
+    T easeInTeleport(T x) {
+        return x < 1.0 ? 0.0 : 1.0;
+    }
+
+    template <typename T = timefloat>
+    T easeOutTeleport(T x) {
+        return x < 0.0 ? 0.0 : 1.0;
+    }
+
+    template <typename T = timefloat>
+    T easeInOutTeleport(T x) {
+        return x < 0.5 ? 0.0 : 1.0;
+    }
     
     template <typename T = timefloat>
     T easeInOutBounce(T x) {

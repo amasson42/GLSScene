@@ -27,8 +27,11 @@ namespace GLS {
     public:
 
         Texture(GLsizei width, GLsizei height, GLint format = GL_RGB, GLenum type = GL_UNSIGNED_BYTE);
+        Texture(const aiTexture *aiTexture);
         Texture(std::string path);
         virtual ~Texture();
+
+        static std::shared_ptr<Texture> loadFromAiTexture(const aiTexture *aiTexture);
 
         GLuint buffer() const;
         void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program, std::string uniformName, int textureIndex) const;

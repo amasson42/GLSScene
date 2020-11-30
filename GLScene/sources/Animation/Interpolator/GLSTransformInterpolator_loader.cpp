@@ -18,21 +18,21 @@ namespace GLS {
             aiVectorKey posKey = anim->mPositionKeys[i];
             timefloat time = static_cast<timefloat>(posKey.mTime);
             glm::vec3 pos = aiToGlm(posKey.mValue);
-            ti->addPositionAt(time, pos);
+            ti->addPositionAt(time, pos, CurveFunction<timefloat>::linear());
         }
 
         for (unsigned int i = 0; i < anim->mNumRotationKeys; i++) {
             aiQuatKey rotKey = anim->mRotationKeys[i];
             timefloat time = static_cast<timefloat>(rotKey.mTime);
             glm::quat rot = aiToGlm(rotKey.mValue);
-            ti->addRotationAt(time, rot);
+            ti->addRotationAt(time, rot, CurveFunction<timefloat>::linear());
         }
 
         for (unsigned int i = 0; i < anim->mNumScalingKeys; i++) {
             aiVectorKey scaleKey = anim->mScalingKeys[i];
             timefloat time = static_cast<timefloat>(scaleKey.mTime);
             glm::vec3 scale = aiToGlm(scaleKey.mValue);
-            ti->addScaleAt(time, scale);
+            ti->addScaleAt(time, scale, CurveFunction<timefloat>::linear());
         }
 
         return ti;

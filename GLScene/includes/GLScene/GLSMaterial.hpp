@@ -55,7 +55,7 @@ namespace GLS {
 
         void sendUniformsToShaderProgram(std::shared_ptr<ShaderProgram> program) const;
 
-        static std::shared_ptr<Material> loadFromAiMaterial(aiMaterial *material, const std::string& directory);
+        static std::shared_ptr<Material> loadFromAiMaterial(const aiMaterial *material, const std::string& directory, aiTexture **textures);
 
     };
 

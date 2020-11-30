@@ -10,12 +10,17 @@
 
 namespace GLS {
 
-    static std::shared_ptr<Texture> _loadTextureTypeFromMaterial(aiMaterial *material, aiTextureType type, const std::string& directory) {
+    static std::shared_ptr<Texture> _loadTextureTypeFromMaterial(const aiMaterial *material, aiTextureType type, const std::string& directory, aiTexture **textures) {
         if (material->GetTextureCount(type) > 0) {
-            aiString textureName;
-            material->GetTexture(type, 0, &textureName);
-            std::cout << "load texture with name: " << textureName.C_Str() << std::endl;
-            std::string texturePath = directory + '/' + textureName.C_Str();
+            aiString aiTextureName;
+            if (material->GetTexture(type, 0, &aiTextureName) != AI_SUCCESS)
+                return nullptr;
+            std::string textureName(aiTextureName.C_Str());
+            if (textureName[0] == '*') {
+                int textureIndex = std::atoi(textureName.c_str() + 1);
+                return Texture::loadFromAiTexture(textures[textureIndex]);
+            }
+            std::string texturePath = directory + '/' + textureName;
             try {
                 return std::make_shared<Texture>(texturePath);
             } catch (std::exception& e) {
@@ -25,7 +30,7 @@ namespace GLS {
         return nullptr;
     }
 
-    std::shared_ptr<Material> Material::loadFromAiMaterial(aiMaterial *material, const std::string& directory) {
+    std::shared_ptr<Material> Material::loadFromAiMaterial(const aiMaterial *material, const std::string& directory, aiTexture **textures) {
         std::shared_ptr<Material> nMaterial = std::make_shared<Material>();
         
         aiColor3D diffuse;
@@ -44,14 +49,14 @@ namespace GLS {
             nMaterial->shininess = shininess;
         }
 
-        nMaterial->texture_diffuse = _loadTextureTypeFromMaterial(material, aiTextureType_DIFFUSE, directory);
-        nMaterial->texture_specular = _loadTextureTypeFromMaterial(material, aiTextureType_SPECULAR, directory);
+        nMaterial->texture_diffuse = _loadTextureTypeFromMaterial(material, aiTextureType_DIFFUSE, directory, textures);
+        nMaterial->texture_specular = _loadTextureTypeFromMaterial(material, aiTextureType_SPECULAR, directory, textures);
         // texture_roughness
         // texture_metalness
         // texture_occlusion
-        nMaterial->texture_shininess = _loadTextureTypeFromMaterial(material, aiTextureType_SHININESS, directory);
-        nMaterial->texture_normal = _loadTextureTypeFromMaterial(material, aiTextureType_NORMALS, directory);
-        nMaterial->texture_mask = _loadTextureTypeFromMaterial(material, aiTextureType_OPACITY, directory);
+        nMaterial->texture_shininess = _loadTextureTypeFromMaterial(material, aiTextureType_SHININESS, directory, textures);
+        nMaterial->texture_normal = _loadTextureTypeFromMaterial(material, aiTextureType_NORMALS, directory, textures);
+        nMaterial->texture_mask = _loadTextureTypeFromMaterial(material, aiTextureType_OPACITY, directory, textures);
         return nMaterial;
     }
 

@@ -47,6 +47,8 @@ PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" 
 all:
 	mkdir build && cd build && cmake .. || echo
 	cd build && make -j4
+
+run: all
 	./build/$(NAME)
 
 install:
@@ -72,6 +74,7 @@ $(OBJS)/%.o: %.cpp
 
 clean:
 	rm -fr $(O_FILES) $(OBJS)
+	make -C GLScene clean
 
 fclean: clean
 	make -C GLScene fclean
@@ -81,7 +84,7 @@ fclean: clean
 
 re: fclean all
 
-app:
+app: all
 	mkdir -p $(NAME).app/Contents/MacOS
 	mkdir -p $(NAME).app/Contents/Resources
 	cp build/$(NAME) $(NAME).app/Contents/MacOS/game 2> /dev/null \
