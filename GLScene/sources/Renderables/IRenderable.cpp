@@ -27,6 +27,7 @@ namespace GLS {
     }
 
     std::pair<glm::vec3, glm::vec3> IRenderable::getBounds(glm::mat4 transform) const {
+        (void)transform;
         return std::make_pair<glm::vec3, glm::vec3>(glm::vec3(0), glm::vec3(0));
     }
 

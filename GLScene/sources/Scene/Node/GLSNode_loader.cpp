@@ -67,7 +67,7 @@ namespace GLS {
             node->setSkeleton(Skeleton::loadFromAiSceneAnimations(scene, node.get()));
         }
 
-        for (int i = 0; i < nodeMeshes.size(); i++) {
+        for (size_t i = 0; i < nodeMeshes.size(); i++) {
             std::pair<std::shared_ptr<Node>, aiMesh*> nodeMesh = nodeMeshes[i];
             if (nodeMesh.second->HasBones()) {
                 std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(nodeMesh.second, node, nodeMesh.first);

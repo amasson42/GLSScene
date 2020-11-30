@@ -51,18 +51,18 @@ $(NAME).dylib: $(O_FILES)
 	@$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
 
 lib$(NAME).a: $(O_FILES)
-	ar rcs tmp_$@ $^
-	mkdir tmp_libmerge
-	cd tmp_libmerge \
+	@ar rcs tmp_$@ $^
+	@mkdir tmp_libmerge
+	@cd tmp_libmerge \
 		&& ar -x ../tmp_$@ \
 		&& ar -x ../CLDevice/libCLDevice.a \
 		&& ar rcs ../$@ *.o
-	rm -fr tmp_libmerge
-	rm -fr tmp_$@
-	$(PRINTDONE) && echo || exit
+	@rm -fr tmp_libmerge
+	@rm -fr tmp_$@
+	@$(PRINTDONE) && echo || exit
 
 $(OBJS)/%.o: %.cpp
-	clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $< && $(PRINTINC) || exit
+	@clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $< && $(PRINTINC) || exit
 
 clean:
 	rm -fr $(OBJS)

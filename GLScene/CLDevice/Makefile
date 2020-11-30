@@ -39,14 +39,14 @@ PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" 
 all: lib$(NAME).a $(NAME).dylib
 
 $(NAME).dylib: $(O_FILES)
-	$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
+	@$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
 
 lib$(NAME).a: $(O_FILES)
-	ar rcs $@ $^
-	$(PRINTDONE) && echo || exit
+	@ar rcs $@ $^
+	@$(PRINTDONE) && echo || exit
 
 $(OBJS)/%.o: %.cpp
-	clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $< && $(PRINTINC) || exit
+	@clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $< && $(PRINTINC) || exit
 
 clean:
 	rm -fr $(OBJS)

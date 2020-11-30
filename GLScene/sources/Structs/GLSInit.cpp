@@ -27,6 +27,8 @@ namespace GLS {
 			std::cout << "Glad Init Error" << std::endl;
 			exit(EXIT_FAILURE);
 		}
+        #else
+        (void)addr;
 		#endif
 
 		Framebuffer::_createRectBuffer();

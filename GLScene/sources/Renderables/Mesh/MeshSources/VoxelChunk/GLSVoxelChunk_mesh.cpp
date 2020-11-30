@@ -239,9 +239,10 @@ namespace GLS {
         }};
 
 		glm::ivec3 coord;
-        for (coord.x = 0; coord.x < VoxelChunk::chunkSize; coord.x++) {
-            for (coord.y = 0; coord.y < VoxelChunk::chunkSize; coord.y++) {
-                for (coord.z = 0; coord.z < VoxelChunk::chunkSize; coord.z++) {
+        const int chunkSize = static_cast<int>(VoxelChunk::chunkSize);
+        for (coord.x = 0; coord.x < chunkSize; coord.x++) {
+            for (coord.y = 0; coord.y < chunkSize; coord.y++) {
+                for (coord.z = 0; coord.z < chunkSize; coord.z++) {
 					glm::vec3 coords = glm::vec3(coord);
 					const VoxelBlock& block(blockAt(coord));
 
