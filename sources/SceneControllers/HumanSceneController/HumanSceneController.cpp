@@ -58,6 +58,15 @@ void HumanSceneController::makeScene() {
         scene.setCameraNode(cameraNode);
         scene.rootNode()->addChildNode(cameraNode);
 
+        std::shared_ptr<GLS::Light> followLight = std::make_shared<GLS::Light>();
+        T_Node followLightNode = newNode();
+        followLightNode->transform().setPosition(glm::vec3(0, 0, 0));
+        followLightNode->transform().setEulerAngles(0, 0, 0);
+        followLight->type = (GLS::light_spot);
+        followLight->angle *= 1.0;
+        followLightNode->setLight(followLight);
+        cameraNode->addChildNode(followLightNode);
+
         std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
         T_Node lightNode = newNode();
         lightNode->transform().setPosition(glm::vec3(2, 5, 3));
@@ -72,7 +81,7 @@ void HumanSceneController::makeScene() {
     // just a nanosuit
     std::shared_ptr<std::string> animationFilenamePtr = env->getArgument("-file");
     if (animationFilenamePtr != nullptr) {
-        std::string animationFilename = animationFilenamePtr == nullptr ? "/Users/giantwow/Documents/static.nosync/3dmodels/glTF-Sample-Models/sourceModels/WalkingLady/WalkingLady.dae" : *animationFilenamePtr;
+        std::string animationFilename = *animationFilenamePtr;
 
         T_Node offseter = newNode();
         offseter->transform().moveBy(0, 0, 0);
@@ -83,12 +92,13 @@ void HumanSceneController::makeScene() {
         }
         scene.rootNode()->addChildNode(offseter);
         T_Node animNode = GLS::Node::loadFromFile(animationFilename);
-        animNode->sendToFlux(std::cout, "~");
+        if (env->getArgument("-dump-node") != nullptr)
+            animNode->sendToFlux(std::cout, ":");
         animNode->setName("animated");
         offseter->addChildNode(animNode);
 
-        std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.10, 0.08);
-        addCubeToNode(animNode, cubeMesh);
+        // std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.8, 1.0, 0.8);
+        // addCubeToNode(animNode, cubeMesh);
         if (animNode->hasSkeleton()) {
             animNode->skeleton()->initAnimation();
             std::cout << "animations: " << std::endl;
@@ -102,7 +112,7 @@ void HumanSceneController::makeScene() {
     T_Node plane = newNode();
     plane->addRenderable(GLS::Mesh::plane(10, 10));
     plane->transform().setEulerAngles(-M_PI / 2, 0, 0);
-    scene.rootNode()->addChildNode(plane);
+    // scene.rootNode()->addChildNode(plane);
 
     // create grass on it
 

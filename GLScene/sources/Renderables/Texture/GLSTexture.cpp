@@ -34,11 +34,11 @@ namespace GLS {
         GLuint format = GL_RGBA8;
         if (texture->mWidth != 0 && texture->mHeight == 0) {
             int bpp;
-            data = stbi_load_from_memory((stbi_uc*)static_cast<void*>(texture->pcData), texture->mWidth, &_width, &_height, &bpp, 4);
+            data = stbi_load_from_memory((stbi_uc*)static_cast<void*>(texture->pcData), texture->mWidth, &_width, &_height, &bpp, 0);
             switch (bpp) {
                 case 1: format = GL_RED;  break;
                 case 3: format = GL_RGB;  break;
-                case 4: format = GL_RGBA; break;
+                case 4: format = GL_RGBA8; break;
                 default:
                     stbi_image_free(data);
                     throw InvalidDataException("unknown format of texture in aiTexture");

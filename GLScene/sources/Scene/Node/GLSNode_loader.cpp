@@ -56,6 +56,14 @@ namespace GLS {
 
         std::shared_ptr<Node> node = std::make_shared<Node>();
 
+        std::cout << "scene "
+            << "mNumAnimations " << scene->mNumAnimations << " | "
+            << "mNumCameras " << scene->mNumCameras << " | "
+            << "mNumLights " << scene->mNumLights << " | "
+            << "mNumMaterials " << scene->mNumMaterials << " | "
+            << "mNumMeshes " << scene->mNumMeshes << " | "
+            << "mNumTextures " << scene->mNumTextures << " | "
+            << std::endl;
         std::vector<std::shared_ptr<Material> > materials;
         for (unsigned int i = 0; i < scene->mNumMaterials; i++)
             materials.push_back(Material::loadFromAiMaterial(scene->mMaterials[i], directory, static_cast<aiTexture **>(scene->mTextures)));
