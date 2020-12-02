@@ -22,10 +22,8 @@ namespace GLS {
         _drawMode = mode;
     }
 
-    std::shared_ptr<Node> SkinnedMesh::rootBone() const {
-        if (_rootBone.node.expired())
-            return nullptr;
-        return _rootBone.node.lock();
+    const std::shared_ptr<Skeleton> SkinnedMesh::skeleton() const {
+        return _skeleton;
     }
 
     std::pair<glm::vec3, glm::vec3> SkinnedMesh::getBounds(glm::mat4 transform) const {

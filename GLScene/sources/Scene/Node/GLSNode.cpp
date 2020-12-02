@@ -15,7 +15,7 @@ namespace GLS {
     _transform(),
     _parent(), _childs(),
     _active(true),
-    _camera(nullptr), _renderables(), _skeleton(nullptr)
+    _camera(nullptr), _renderables(), _animatables()
     {
 
     }
@@ -25,7 +25,7 @@ namespace GLS {
     _transform(copy._transform),
     _parent(), _childs(),
     _active(copy._active),
-    _camera(copy._camera), _renderables(copy._renderables), _skeleton(copy._skeleton)
+    _camera(copy._camera), _renderables(copy._renderables), _animatables(copy._animatables)
     {
         for (size_t i = 0; i < copy._childs.size(); i++)
             addChildNode(std::make_shared<Node>(*copy._childs[i]));
@@ -41,7 +41,7 @@ namespace GLS {
         _active = copy._active;
         _camera = copy._camera;
         _renderables = copy._renderables;
-        _skeleton = copy._skeleton;
+        _animatables = copy._animatables;
         for (size_t i = 0; i < copy._childs.size(); i++)
             addChildNode(std::make_shared<Node>(*copy._childs[i]));
         return *this;

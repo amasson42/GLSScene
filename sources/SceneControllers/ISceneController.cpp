@@ -87,6 +87,9 @@ void ISceneController::update() {
     if (win->keyPressed(GLFW_KEY_O)) {
         mustUpdate = true;
     }
+    if (mustUpdate) {
+        _scene->updateAnimations(win->deltaTime());
+    }
 }
 
 void ISceneController::resizeWindowCallBack(glm::vec2 newSize) {

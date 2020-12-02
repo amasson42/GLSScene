@@ -9,6 +9,7 @@
 #include "GLSNode.hpp"
 #include "GLSMesh.hpp"
 #include "GLSSkinnedMesh.hpp"
+#include "GLSSkeleton.hpp"
 
 namespace GLS {
 
@@ -72,14 +73,16 @@ namespace GLS {
         std::vector<std::pair<std::shared_ptr<Node>, aiMesh*>> nodeMeshes;
         _processLoadNode(node, scene->mRootNode, scene, materials, nodeMeshes);
 
+        std::shared_ptr<Skeleton> skeleton = nullptr;
         if (scene->HasAnimations()) {
-            node->setSkeleton(Skeleton::loadFromAiSceneAnimations(scene, node.get()));
+            skeleton = Skeleton::loadFromAiSceneAnimations(scene, node);
+            node->addAnimatable(skeleton);
         }
 
         for (size_t i = 0; i < nodeMeshes.size(); i++) {
-            std::pair<std::shared_ptr<Node>, aiMesh*> nodeMesh = nodeMeshes[i];
+            std::pair<std::shared_ptr<Node>, aiMesh*>& nodeMesh(nodeMeshes[i]);
             if (nodeMesh.second->HasBones()) {
-                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(nodeMesh.second, node, nodeMesh.first);
+                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(nodeMesh.second, skeleton, nodeMesh.first);
                 nSkinnedMesh->setMaterial(materials[nodeMesh.second->mMaterialIndex]);
                 nodeMesh.first->addRenderable(nSkinnedMesh);
             } else {

@@ -23,13 +23,18 @@ std::ostream& operator<<(std::ostream& stream, const glm::mat3& m) {
     return stream;
 }
 
+std::ostream& operator<<(std::ostream& stream, const glm::vec2& v) {
+    stream << '(' << v.x << ',' << v.y << ')';
+    return stream;
+}
+
 std::ostream& operator<<(std::ostream& stream, const glm::vec3& v) {
     stream << '(' << v.x << ',' << v.y << ',' << v.z << ')';
     return stream;
 }
 
-std::ostream& operator<<(std::ostream& stream, const glm::vec2& v) {
-    stream << '(' << v.x << ',' << v.y << ')';
+std::ostream& operator<<(std::ostream& stream, const glm::vec4& v) {
+    stream << '(' << v.x << ',' << v.y << ',' << v.z << ',' << v.w << ')';
     return stream;
 }
 
@@ -85,6 +90,50 @@ glm::mat4 aiToGlm(aiMatrix4x4 aiMat) {
 
 namespace GLS {
     
+    std::ostream& operator<<(std::ostream& stream, const glm::mat4& m) {
+        for (int i = 0; i < 16; i++) {
+            stream << GLS::mat4ValueAt(m, i / 4, i % 4) << ((i + 1) % 4 ? ' ' : '\n');
+        }
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const glm::mat3& m) {
+        for (int i = 0; i < 9; i++) {
+            stream << GLS::mat3ValueAt(m, i / 3, i % 3) << ((i + 1) % 3 ? ' ' : '\n');
+        }
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const glm::vec2& v) {
+        stream << '(' << v.x << ',' << v.y << ')';
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const glm::vec3& v) {
+        stream << '(' << v.x << ',' << v.y << ',' << v.z << ')';
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const glm::vec4& v) {
+        stream << '(' << v.x << ',' << v.y << ',' << v.z << ',' << v.w << ')';
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const glm::ivec3& v) {
+        stream << '(' << v.x << ',' << v.y << ',' << v.z << ')';
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const glm::ivec2& v) {
+        stream << '(' << v.x << ',' << v.y << ')';
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const glm::quat& q) {
+        stream << '(' << q.x << ',' << q.y << ',' << q.z << ',' << q.w << ')';
+        return stream;
+    }
+
     const float& mat4ValueAt(const glm::mat4& m, int l, int c) {
         return glm::value_ptr(m)[4 * c + l];
     }

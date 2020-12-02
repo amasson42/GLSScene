@@ -14,7 +14,6 @@ namespace GLS {
     // skeleton
 
     Skeleton::Skeleton() :
-    _rootBoneIndex(-1),
     _bones(),
     _animations(),
     _currentAnimation() {
@@ -26,7 +25,6 @@ namespace GLS {
     }
 
     Skeleton& Skeleton::operator=(const Skeleton& copy) {
-        _rootBoneIndex = copy._rootBoneIndex;
         _bones = copy._bones;
         _animations = copy._animations;
         initAnimationNamed(copy.currentAnimationName(), copy.currentAnimationTime());

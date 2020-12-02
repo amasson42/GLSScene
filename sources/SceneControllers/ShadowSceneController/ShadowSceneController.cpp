@@ -176,7 +176,7 @@ void ShadowSceneController::makeScene() {
     ps->generateBuffers();
     ps->initAnimation();
     particleNode->addRenderable(ps);
+    particleNode->addAnimatable(ps);
     scene.rootNode()->addChildNode(particleNode);
     particleSystem = ps;
-    scene.addAnimatable(ps);
 }

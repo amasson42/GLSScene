@@ -11,9 +11,9 @@
 
 #include "GLSStructs.hpp"
 #include "GLSIRenderable.hpp"
+#include "GLSIAnimatable.hpp"
 #include "GLSCamera.hpp"
 #include "GLSLight.hpp"
-#include "GLSSkeleton.hpp"
 
 namespace GLS {
     
@@ -29,7 +29,7 @@ namespace GLS {
         std::shared_ptr<Camera> _camera;
         std::shared_ptr<Light> _light;
         std::vector<std::shared_ptr<IRenderable> > _renderables;
-        std::shared_ptr<Skeleton> _skeleton;
+        std::vector<std::shared_ptr<IAnimatable> > _animatables;
 
     public:
         
@@ -74,6 +74,7 @@ namespace GLS {
         // Node functionalities
 
         std::string name() const;
+        std::string globalName() const;
         void setName(std::string name);
 
         bool isActive() const;
@@ -84,6 +85,12 @@ namespace GLS {
         std::vector<std::shared_ptr<IRenderable> >& renderables();
         void addRenderable(std::shared_ptr<IRenderable> renderable);
         void removeRenderableAt(size_t i);
+
+        bool hasAnimatable() const;
+        const std::vector<std::shared_ptr<IAnimatable> >& animatables() const;
+        std::vector<std::shared_ptr<IAnimatable> >& animatables();
+        void addAnimatable(std::shared_ptr<IAnimatable> animatable);
+        void removeAnimatable(size_t i);
 
         std::pair<glm::vec3, glm::vec3> getBounds() const;
 
@@ -98,16 +105,53 @@ namespace GLS {
         void setLight(std::shared_ptr<Light> light);
         void getAllLights(std::vector<Light>& container, glm::mat4 parentMatrix);
 
-        bool hasSkeleton() const;
-        const std::shared_ptr<Skeleton> skeleton() const;
-        std::shared_ptr<Skeleton> skeleton();
-        void setSkeleton(std::shared_ptr<Skeleton> skeleton);
+        virtual void renderInContext(Scene& scene, RenderUniforms uniforms);
+        virtual void renderInDepthContext(Scene& scene, RenderUniforms uniforms);
 
-        void renderInContext(Scene& scene, RenderUniforms uniforms);
-        void renderInDepthContext(Scene& scene, RenderUniforms uniforms);
+        virtual void initAnimation(bool recursively = false);
+        virtual void animate(timefloat deltaTime, bool recursively = false);
 
-        void sendToFlux(std::ostream& flux, std::string linePrefix) const;
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix) const;
 
+        template <typename T>
+        const std::shared_ptr<T> getRenderable() const {
+            for (size_t i = 0; i < _renderables.size(); i++) {
+                std::shared_ptr<T> ptr = std::dynamic_pointer_cast<T>(_renderables[i]);
+                if (ptr != nullptr)
+                    return ptr;
+            }
+            return nullptr;
+        }
+
+        template <typename T>
+        std::shared_ptr<T> getRenderable() {
+            for (size_t i = 0; i < _renderables.size(); i++) {
+                std::shared_ptr<T> ptr = std::dynamic_pointer_cast<T>(_renderables[i]);
+                if (ptr != nullptr)
+                    return ptr;
+            }
+            return nullptr;
+        }
+
+        template <typename T>
+        const std::shared_ptr<T> getAnimatable() const {
+            for (size_t i = 0; i < _animatables.size(); i++) {
+                std::shared_ptr<T> ptr = std::dynamic_pointer_cast<T>(_animatables[i]);
+                if (ptr != nullptr)
+                    return ptr;
+            }
+            return nullptr;
+        }
+
+        template <typename T>
+        std::shared_ptr<T> getAnimatable() {
+            for (size_t i = 0; i < _animatables.size(); i++) {
+                std::shared_ptr<T> ptr = std::dynamic_pointer_cast<T>(_animatables[i]);
+                if (ptr != nullptr)
+                    return ptr;
+            }
+            return nullptr;
+        }
     };
 
 }

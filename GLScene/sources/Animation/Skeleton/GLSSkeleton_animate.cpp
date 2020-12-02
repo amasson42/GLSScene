@@ -101,8 +101,8 @@ namespace GLS {
 
             const int count = std::min(_bones.size(), interpolators.size());
             for (int i = 0; i < count; i++) {
-                if (_bones[i].node != nullptr) {
-                    static_cast<Node*>(_bones[i].node)->setTransform(interpolators[i].transformAt(time));
+                if (_bones[i].node.expired() == false) {
+                    _bones[i].node.lock()->setTransform(interpolators[i].transformAt(time));
                 }
             }
         }

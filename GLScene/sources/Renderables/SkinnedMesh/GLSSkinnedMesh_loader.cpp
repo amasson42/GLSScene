@@ -6,13 +6,16 @@
 //  Copyright © 2019 Arthur Masson. All rights reserved.
 //
 
+#include "GLSStructs.hpp"
 #include "GLSSkinnedMesh.hpp"
 
 namespace GLS {
 
-    std::shared_ptr<SkinnedMesh> SkinnedMesh::loadFromAiMesh(aiMesh *mesh, std::shared_ptr<Node> sceneRootBone, std::shared_ptr<Node> rootBone, bool generateBuffers) {
-        std::shared_ptr<SkinnedMesh> nMesh = std::make_shared<SkinnedMesh>();
-        nMesh->_rootBone.node = rootBone;
+    std::shared_ptr<SkinnedMesh> SkinnedMesh::loadFromAiMesh(const aiMesh *mesh, std::shared_ptr<Skeleton> skeleton, std::shared_ptr<Node> rootNode, bool generateBuffers) {
+        std::shared_ptr<SkinnedMesh> skMesh = std::make_shared<SkinnedMesh>();
+        skMesh->_skeleton = skeleton;
+
+        skMesh->_rootNode = rootNode;
         for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
             SkinnedVertex v;
             v.position = aiToGlm(mesh->mVertices[i]);
@@ -28,32 +31,38 @@ namespace GLS {
                 v.bitangent = aiToGlm(mesh->mBitangents[i]);
             } else
                 v = SkinnedVertex(v.position, v.normal, v.uv);
-            nMesh->verticesRef().push_back(v);
+            skMesh->verticesRef().push_back(v);
         }
         for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
             aiFace face = mesh->mFaces[i];
             for (unsigned int j = 0; j < face.mNumIndices; j++) {
-                nMesh->indicesRef().push_back(face.mIndices[j]);
+                skMesh->indicesRef().push_back(face.mIndices[j]);
             }
         }
         for (unsigned int i = 0; i < mesh->mNumBones; i++) {
-            std::string boneName(mesh->mBones[i]->mName.data);
-            Bone nBone;
-            if (rootBone->name() == boneName)
-                nBone.node = sceneRootBone;
-            else
-                nBone.node = sceneRootBone->childNodeNamed(boneName, true);
-            nBone.offset = aiToGlm(mesh->mBones[i]->mOffsetMatrix);
-            nMesh->_bones.push_back(nBone);
+            std::string boneName(mesh->mBones[i]->mName.C_Str());
+            int boneIndex = skeleton->indexOfBoneNamed(boneName);
+            if (boneIndex < 0) {
+                std::cerr << "What is the fuck please ??? we have unexisting bones" << std::endl;
+                std::cerr << "BoneName = " << boneName << std::endl;
+                for (size_t i = 0; i < skeleton->bones().size(); i++) {
+                    std::cerr << skeleton->bones()[i].node.lock()->name() << std::endl;
+                }
+                return nullptr;
+            }
             for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
                 aiVertexWeight weight = mesh->mBones[i]->mWeights[j];
-                if (!nMesh->verticesRef()[weight.mVertexId].addWeight(static_cast<int>(nMesh->_bones.size()) - 1, weight.mWeight))
+                if (!skMesh->verticesRef()[weight.mVertexId].addWeight(boneIndex, weight.mWeight))
                     std::cout << "join overflow" << std::endl;
             }
         }
+        for (size_t i = 0; i < skMesh->verticesRef().size(); i++) {
+            glm::vec4& v(skMesh->verticesRef()[i].joint_weights);
+            v = v / (v.x + v.y + v.z + v.w);
+        }
         if (generateBuffers)
-            nMesh->generateBuffers();
-        return nMesh;
+            skMesh->generateBuffers();
+        return skMesh;
     }
 
 }

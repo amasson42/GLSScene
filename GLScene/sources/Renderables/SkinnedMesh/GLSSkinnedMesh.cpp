@@ -14,7 +14,7 @@ namespace GLS {
     IRenderable(),
     _vertices(), _indices(), _drawMode(GL_TRIANGLES),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
-    _rootBone(), _bones(),
+    _skeleton(nullptr),
     _shaderProgram(nullptr),
     _material(nullptr),
     _outlined(false)
@@ -26,7 +26,7 @@ namespace GLS {
     IRenderable(copy),
     _vertices(copy._vertices), _indices(copy._indices), _drawMode(copy._drawMode),
     _verticesBuffer(0), _indicesBuffer(0), _elementsBuffer(0),
-    _rootBone(copy._rootBone), _bones(copy._bones),
+    _skeleton(copy._skeleton),
     _shaderProgram(copy._shaderProgram),
     _material(copy._material),
     _outlined(copy._outlined), _outlineColor(copy._outlineColor), _outlineSize(copy._outlineSize)
@@ -44,7 +44,7 @@ namespace GLS {
         _vertices = copy._vertices;
         _indices = copy._indices;
         _drawMode = copy._drawMode;
-        _rootBone = copy._rootBone;
+        _skeleton = copy._skeleton;
         _shaderProgram = copy._shaderProgram;
         deleteBuffers();
         if (copy.bufferGenerated())

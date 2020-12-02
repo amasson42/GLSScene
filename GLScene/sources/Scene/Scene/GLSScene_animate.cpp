@@ -10,24 +10,8 @@
 
 namespace GLS {
 
-    void Scene::addAnimatable(std::shared_ptr<IAnimatable> animatable) {
-        _animatables.insert(animatable);
-        animatable->initAnimation();
-    }
-
-    void Scene::removeAnimatable(std::shared_ptr<IAnimatable> animatable) {
-        _animatables.erase(animatable);
-    }
-
     void Scene::updateAnimations(timefloat deltaTime) {
-        std::set<std::shared_ptr<IAnimatable> >::iterator it = _animatables.begin();
-        while (it != _animatables.end()) {
-            if ((*it)->alive()) {
-                (*it)->animate(deltaTime);
-                ++it;
-            } else
-                it = _animatables.erase(it);
-        }
+        _rootNode->animate(deltaTime, true);
     }
 
 }

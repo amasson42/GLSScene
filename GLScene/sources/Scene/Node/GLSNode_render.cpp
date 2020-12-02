@@ -37,4 +37,26 @@ namespace GLS {
         }
     }
 
+    void Node::initAnimation(bool recursively) {
+        if (recursively) {
+            for (size_t i = 0; i < _childs.size(); i++) {
+                _childs[i]->initAnimation(recursively);
+            }
+        }
+        for (size_t i = 0; i < _animatables.size(); i++) {
+            _animatables[i]->initAnimation();
+        }
+    }
+
+    void Node::animate(timefloat deltaTime, bool recursively) {
+        if (recursively) {
+            for (size_t i = 0; i < _childs.size(); i++) {
+                _childs[i]->animate(deltaTime, recursively);
+            }
+        }
+        for (size_t i = 0; i < _animatables.size(); i++) {
+            _animatables[i]->animate(deltaTime);
+        }
+    }
+
 }

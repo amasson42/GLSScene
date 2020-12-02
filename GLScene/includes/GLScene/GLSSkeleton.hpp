@@ -12,6 +12,7 @@
 #include "GLSStructs.hpp"
 #include "GLSIAnimatable.hpp"
 #include "GLSInterpolator.hpp"
+#include "GLSNode.hpp"
 
 namespace GLS {
 
@@ -43,16 +44,16 @@ namespace GLS {
         static const int maxBones = 64;
 
         struct Bone {
-            void *node;
+            std::weak_ptr<Node> node;
+            glm::mat4 offset;
             glm::mat4 restPosition;
+            glm::mat4 inverseBindPosition;
 
-            Bone(void *node = nullptr);
-            Bone(void *node, glm::mat4 restPosition);
+            Bone(std::shared_ptr<Node> node, glm::mat4 restPosition, glm::mat4 inverseBindPosition);
         };
 
     protected:
 
-        int _rootBoneIndex;
         std::vector<Bone> _bones;
 
         std::map<std::string, SkeletonAnimation> _animations;
@@ -66,17 +67,15 @@ namespace GLS {
 
         Skeleton& operator=(const Skeleton& copy);
 
-        static std::shared_ptr<Skeleton> loadFromAiSceneAnimations(const aiScene *scene, void *hostNode);
+        static std::shared_ptr<Skeleton> loadFromAiSceneAnimations(const aiScene *scene, std::shared_ptr<Node> hostNode);
 
         // bones
 
-        void addRootBone(void *node);
-        void addRootBone(void *node, glm::mat4 rest);
-        void addBone(void *node);
-        void addBone(void *node, glm::mat4 rest);
-
+        void addBone(std::shared_ptr<Node> node);
+        void addBone(std::shared_ptr<Node> node, glm::mat4 offset);
         int boneCount() const;
         int indexOfBoneNamed(std::string name) const;
+        const std::vector<Bone>& bones() const;
 
         // animations
 

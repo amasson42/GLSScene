@@ -16,33 +16,32 @@ namespace GLS {
     }
 
     void SkinnedMesh::_sendBonesToShaderProgram(std::shared_ptr<ShaderProgram> program) {
-        if (_rootBone.node.expired()) {
-
-            // TODO: remove this when everything works
-            static bool expired_once = true;
-            if (expired_once) {
-                std::cout << "expired root bone" << std::endl;
-                expired_once = false;
-            }
-
-            return;
-        }
-        std::shared_ptr<Node> rootBone = _rootBone.node.lock();
         program->use();
-        for (size_t i = 0; i < _bones.size() && i < maxBones; i++) {
-            if (_bones[i].node.expired()) {
+        for (size_t i = 0; i < _skeleton->bones().size() && i < Skeleton::maxBones; i++) {
+
+            const Skeleton::Bone& bone(_skeleton->bones()[i]);
+
+            if (bone.node.expired()) {
 
                 // TODO: remove this when everything works
                 static bool expired_bone_once = true;
                 if (expired_bone_once) {
-                    std::cout << "expired bone" << std::endl;
+                    std::cout << "expired bone " << i << std::endl;
                     expired_bone_once = false;
                 }
 
                 continue;
             }
-            std::shared_ptr<Node> node = _bones[i].node.lock();
-            glm::mat4 modelMatrix = glm::inverse(rootBone->getTransformMatrix()) * node->getParentNodeRelativeTransformMatrix(rootBone) * _bones[i].offset;
+
+            std::shared_ptr<Node> node = bone.node.lock();
+            std::shared_ptr<Node> rootNode = _skeleton->bones()[0].node.lock();
+            // std::shared_ptr<Node> rootNode = _rootNode.lock();
+            
+            glm::mat4 rootRelative = node->getParentNodeRelativeTransformMatrix(rootNode);
+            // glm::mat4 rootRelative = node->getWorldTransformMatrix();
+
+            glm::mat4 modelMatrix = glm::inverse(rootNode->getWorldTransformMatrix()) * rootRelative * bone.offset;
+            // modelMatrix = rootRelative;
 
             // FIXME: what the maths ?
             // modelMatrix = glm::mat4(1);

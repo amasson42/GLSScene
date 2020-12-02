@@ -97,13 +97,14 @@ void HumanSceneController::makeScene() {
         animNode->setName("animated");
         offseter->addChildNode(animNode);
 
-        // std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.8, 1.0, 0.8);
-        // addCubeToNode(animNode, cubeMesh);
-        if (animNode->hasSkeleton()) {
-            animNode->skeleton()->initAnimation();
+        std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.1, 0.08);
+        addCubeToNode(animNode, cubeMesh);
+        if (animNode->hasAnimatable()) {
+            animNode->initAnimation();
             std::cout << "animations: " << std::endl;
-            for (int i = 0; i < animNode->skeleton()->animationNames().size(); i++) {
-                std::cout << "  " << animNode->skeleton()->animationNames()[i] << std::endl;
+            auto skeleton = animNode->getAnimatable<GLS::Skeleton>();
+            for (int i = 0; i < skeleton->animationNames().size(); i++) {
+                std::cout << "  " << skeleton->animationNames()[i] << std::endl;
             }
         }
     }
@@ -122,6 +123,7 @@ void HumanSceneController::makeScene() {
 
     // create random shit mesh
 
+    mustUpdate = false;
 }
 
 void HumanSceneController::update() {
@@ -130,11 +132,5 @@ void HumanSceneController::update() {
         return;
     float currentTime = _window.expired() ? 0 : _window.lock()->elapsedTime();
     float deltaTime = _window.expired() ? 0 : _window.lock()->deltaTime();
-
-    T_Node animateNode = _scene->rootNode()->childNodeNamed("animated", true);
-    if (animateNode != nullptr) {
-        if (animateNode->hasSkeleton())
-            animateNode->skeleton()->animate(deltaTime);
-    }
 
 }

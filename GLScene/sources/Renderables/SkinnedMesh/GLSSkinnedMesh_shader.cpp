@@ -26,7 +26,7 @@ namespace GLS {
         "uniform mat4 u_mat_view;\n"
         "uniform mat4 u_mat_model;\n"
         "uniform vec3 u_camera_position;\n"
-        "uniform mat4 u_mat_joints[" + std::to_string(maxBones) + "];\n"
+        "uniform mat4 u_mat_joints[" + std::to_string(Skeleton::maxBones) + "];\n"
         "\n"
         "out VS_OUT {\n"
         "    vec4 position;\n"

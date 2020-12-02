@@ -82,6 +82,7 @@ void ParticuleSystemSceneController::makeScene() {
 
     try {
         std::shared_ptr<GLS::Node> particleNode = std::make_shared<GLS::Node>();
+        particleNode->setName("particleNode");
         std::shared_ptr<GLS::ParticleSystem> ps = std::make_shared<GLS::ParticleSystem>(psProperties);
         ps->setTexture(particleTexture);
         ps->generateBuffers();
@@ -89,7 +90,7 @@ void ParticuleSystemSceneController::makeScene() {
         particleNode->addRenderable(ps);
         scene.rootNode()->addChildNode(particleNode);
         particleSystem = ps;
-        scene.addAnimatable(ps);
+        particleNode->addAnimatable(ps);
     } catch (CLD::GPUDevice::BuildProgramException& e) {
         std::cout << e.what() << std::endl;
     }
@@ -107,9 +108,16 @@ void ParticuleSystemSceneController::keyCallBack(int k, int s, int a, int m) {
     (void)a;
     (void)m;
     if (k == GLFW_KEY_P) {
-        scene()->removeAnimatable(particleSystem.lock());
+        auto particuleNode = scene()->rootNode()->childNodeNamed("particleNode", true);
+        if (particuleNode != nullptr) {
+            if (particuleNode->animatables().empty() == false)
+                particuleNode->removeAnimatable(0);
+        }
     }
     if (k == GLFW_KEY_O) {
-        scene()->addAnimatable(particleSystem.lock());
+        auto particuleNode = scene()->rootNode()->childNodeNamed("particleNode", true);
+        if (particuleNode != nullptr) {
+            particuleNode->addAnimatable(particleSystem.lock());
+        }
     }
 }

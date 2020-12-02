@@ -64,8 +64,6 @@ void GLSWindow::loopOnce() {
 
     updateEvents();
 
-    _scene->updateAnimations(_deltaTime);
-
     if (_framebuffer != nullptr) {
         _scene->renderInContext(_framebuffer);
         _framebuffer->unbind();

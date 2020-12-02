@@ -13,9 +13,21 @@ namespace GLS {
     std::string Node::name() const {
         return _name;
     }
+
+    std::string Node::globalName() const {
+        if (_parent.expired()) {
+            return _name;
+        } else {
+            return _parent.lock()->globalName() + "/" + _name;
+        }
+    }
     
     void Node::setName(std::string name) {
-        _name = name;
+        if (std::find(name.begin(), name.end(), '/') == name.end()) {
+            _name = name;
+        } else {
+            throw std::runtime_error("GLS::Node names can't contains character '/'");
+        }
     }
 
     Transform& Node::transform() {
@@ -100,6 +112,26 @@ namespace GLS {
         }
     }
 
+    bool Node::hasAnimatable() const {
+        return !_animatables.empty();
+    }
+
+    const std::vector<std::shared_ptr<IAnimatable> >& Node::animatables() const {
+        return _animatables;
+    }
+
+    std::vector<std::shared_ptr<IAnimatable> >& Node::animatables() {
+        return _animatables;
+    }
+
+    void Node::addAnimatable(std::shared_ptr<IAnimatable> animatable) {
+        _animatables.push_back(animatable);
+    }
+
+    void Node::removeAnimatable(size_t i) {
+        _animatables.erase(_animatables.begin() + i);
+    }
+
     static std::pair<glm::vec3, glm::vec3> mergeBounds(std::pair<glm::vec3, glm::vec3> b1, std::pair<glm::vec3, glm::vec3> b2) {
         std::pair<glm::vec3, glm::vec3> bounds;
         bounds.first = glm::vec3(std::min(b1.first.x, b2.first.x),
@@ -164,22 +196,6 @@ namespace GLS {
         for (size_t i = 0; i < _childs.size(); i++) {
             _childs[i]->getAllLights(container, mat);
         }
-    }
-
-    bool Node::hasSkeleton() const {
-        return _skeleton != nullptr;
-    }
-
-    const std::shared_ptr<Skeleton> Node::skeleton() const {
-        return _skeleton;
-    }
-
-    std::shared_ptr<Skeleton> Node::skeleton() {
-        return _skeleton;
-    }
-
-    void Node::setSkeleton(std::shared_ptr<Skeleton> skeleton) {
-        _skeleton = skeleton;
     }
 
     void Node::sendToFlux(std::ostream& flux, std::string linePrefix) const {

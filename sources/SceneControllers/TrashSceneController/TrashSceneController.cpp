@@ -104,7 +104,8 @@ ExplodingMesh::ExplodingMesh(const std::shared_ptr<GLS::Mesh>& mesh) {
 }
 
 ExplodingMesh::~ExplodingMesh() {
-    _node->removeFromParent();
+    if (_node != nullptr)
+        _node->removeFromParent();
 }
 
 std::shared_ptr<GLS::Node> ExplodingMesh::node() const {
@@ -135,6 +136,10 @@ void ExplodingMesh::animate(GLS::timefloat deltaTime) {
     float t = _lifeTime / EXPLODING_TIME;
     float powed = -1.3 * t * t + 0.3 * t + 1;
     _node->transform().setScale(glm::vec3(powed));
+    if (!alive()) {
+        _node->removeFromParent();
+        _node = nullptr;
+    }
 }
 
 bool ExplodingMesh::alive() const {
@@ -305,7 +310,7 @@ void TrashSceneController::makeScene() {
 
     std::shared_ptr<ExplodingMesh> expl = std::make_shared<ExplodingMesh>(cubeMesh);
     scene.rootNode()->addChildNode(expl->node());
-    scene.addAnimatable(expl);
+    expl->node()->addAnimatable(expl);
 
 }
 

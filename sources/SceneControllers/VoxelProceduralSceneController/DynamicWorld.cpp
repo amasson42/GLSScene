@@ -331,7 +331,7 @@ void DynamicWorld::setBlockAt(const glm::vec3& worldPosition, GLS::VoxelBlock bl
 
 			exploder->node()->transform().setPosition(worldPosition);
 			_worldScene->rootNode()->addChildNode(exploder->node());
-			_worldScene->addAnimatable(exploder);
+			exploder->node()->addAnimatable(exploder);
 		}
 
 		targetBigChunk->setUntouched(false);

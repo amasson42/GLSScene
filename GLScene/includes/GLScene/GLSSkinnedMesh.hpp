@@ -16,8 +16,6 @@
 #include "GLSMaterial.hpp"
 #include "GLSSkeleton.hpp"
 
-// TODO: make it work lol
-
 namespace GLS {
 
     struct SkinnedVertex {
@@ -44,15 +42,7 @@ namespace GLS {
         bool addWeight(int id, float weight);
     };
 
-    class SkinnedMesh : public IRenderable, public IAnimatable {
-
-    public:
-        static const int maxBones = 64;
-
-        struct Bone {
-            std::weak_ptr<Node> node;
-            glm::mat4 offset;
-        };
+    class SkinnedMesh : public IRenderable {
 
     protected:
         std::vector<SkinnedVertex> _vertices;
@@ -63,8 +53,8 @@ namespace GLS {
         GLuint _indicesBuffer;
         GLuint _elementsBuffer;
 
-        Bone _rootBone;
-        std::vector<Bone> _bones;
+        std::shared_ptr<Skeleton> _skeleton;
+        std::weak_ptr<Node> _rootNode;
         
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
@@ -82,7 +72,7 @@ namespace GLS {
         
         SkinnedMesh& operator=(const SkinnedMesh& copy);
 
-        static std::shared_ptr<SkinnedMesh> loadFromAiMesh(aiMesh* mesh, std::shared_ptr<Node> sceneRootNode, std::shared_ptr<Node> rootBone, bool generateBuffers = true);
+        static std::shared_ptr<SkinnedMesh> loadFromAiMesh(const aiMesh* mesh, std::shared_ptr<Skeleton> skeleton, std::shared_ptr<Node> rootNode, bool generateBuffers = true);
 
         // SkinnedMesh utilities
 
@@ -90,7 +80,7 @@ namespace GLS {
         std::vector<GLuint>& indicesRef();
         void setDrawMode(GLenum mode);
 
-        std::shared_ptr<Node> rootBone() const;
+        const std::shared_ptr<Skeleton> skeleton() const;
 
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;
         
@@ -117,12 +107,6 @@ namespace GLS {
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
 
-
-        // Animating
-
-        virtual void initAnimation();
-        virtual void animate(timefloat deltaTime);
-        virtual bool alive() const;
 
         // Shader uniforms
 
