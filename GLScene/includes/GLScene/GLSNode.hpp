@@ -156,4 +156,6 @@ namespace GLS {
 
 }
 
+std::ostream& operator<<(std::ostream& out, const GLS::Node& node);
+
 #endif /* GLSNode_h */

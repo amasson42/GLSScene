@@ -6,6 +6,7 @@
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
+#include "GLSStructs.hpp"
 #include "GLSTransform.hpp"
 
 namespace GLS {
@@ -154,4 +155,9 @@ namespace GLS {
         }
     }
 
+}
+
+std::ostream& operator<<(std::ostream& out, const GLS::Transform2D& t) {
+    out << "position: " << t.offset() << " - rotation: " << t.rotation() << " - scale:" << t.scale();
+    return out;
 }

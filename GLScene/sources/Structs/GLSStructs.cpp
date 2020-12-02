@@ -53,85 +53,41 @@ std::ostream& operator<<(std::ostream& stream, const glm::quat& q) {
     return stream;
 }
 
-glm::vec3 aiToGlm(aiVector3D vec) {
-    return glm::vec3(vec.x, vec.y, vec.z);
-}
-
-glm::quat aiToGlm(aiQuaternion quat) {
-    return glm::quat(quat.w, quat.x, quat.y, quat.z);
-}
-
-glm::mat4 aiToGlm(aiMatrix4x4 aiMat) {
-    glm::mat4 mat;
-    glm::f32 *ptr = glm::value_ptr(mat);
-
-    ptr[0] =    (aiMat.a1);
-    ptr[1] =    (aiMat.b1);
-    ptr[2] =    (aiMat.c1);
-    ptr[3] =    (aiMat.d1);
-
-    ptr[4] =    (aiMat.a2);
-    ptr[5] =    (aiMat.b2);
-    ptr[6] =    (aiMat.c2);
-    ptr[7] =    (aiMat.d2);
-
-    ptr[8] =    (aiMat.a3);
-    ptr[9] =    (aiMat.b3);
-    ptr[10] =   (aiMat.c3);
-    ptr[11] =   (aiMat.d3);
-
-    ptr[12] =   (aiMat.a4);
-    ptr[13] =   (aiMat.b4);
-    ptr[14] =   (aiMat.c4);
-    ptr[15] =   (aiMat.d4);
-
-    return mat;
-}
-
 namespace GLS {
-    
-    std::ostream& operator<<(std::ostream& stream, const glm::mat4& m) {
-        for (int i = 0; i < 16; i++) {
-            stream << GLS::mat4ValueAt(m, i / 4, i % 4) << ((i + 1) % 4 ? ' ' : '\n');
-        }
-        return stream;
+
+    glm::vec3 aiToGlm(aiVector3D vec) {
+        return glm::vec3(vec.x, vec.y, vec.z);
     }
 
-    std::ostream& operator<<(std::ostream& stream, const glm::mat3& m) {
-        for (int i = 0; i < 9; i++) {
-            stream << GLS::mat3ValueAt(m, i / 3, i % 3) << ((i + 1) % 3 ? ' ' : '\n');
-        }
-        return stream;
+    glm::quat aiToGlm(aiQuaternion quat) {
+        return glm::quat(quat.w, quat.x, quat.y, quat.z);
     }
 
-    std::ostream& operator<<(std::ostream& stream, const glm::vec2& v) {
-        stream << '(' << v.x << ',' << v.y << ')';
-        return stream;
-    }
+    glm::mat4 aiToGlm(aiMatrix4x4 aiMat) {
+        glm::mat4 mat;
+        glm::f32 *ptr = glm::value_ptr(mat);
 
-    std::ostream& operator<<(std::ostream& stream, const glm::vec3& v) {
-        stream << '(' << v.x << ',' << v.y << ',' << v.z << ')';
-        return stream;
-    }
+        ptr[0] =    (aiMat.a1);
+        ptr[1] =    (aiMat.b1);
+        ptr[2] =    (aiMat.c1);
+        ptr[3] =    (aiMat.d1);
 
-    std::ostream& operator<<(std::ostream& stream, const glm::vec4& v) {
-        stream << '(' << v.x << ',' << v.y << ',' << v.z << ',' << v.w << ')';
-        return stream;
-    }
+        ptr[4] =    (aiMat.a2);
+        ptr[5] =    (aiMat.b2);
+        ptr[6] =    (aiMat.c2);
+        ptr[7] =    (aiMat.d2);
 
-    std::ostream& operator<<(std::ostream& stream, const glm::ivec3& v) {
-        stream << '(' << v.x << ',' << v.y << ',' << v.z << ')';
-        return stream;
-    }
+        ptr[8] =    (aiMat.a3);
+        ptr[9] =    (aiMat.b3);
+        ptr[10] =   (aiMat.c3);
+        ptr[11] =   (aiMat.d3);
 
-    std::ostream& operator<<(std::ostream& stream, const glm::ivec2& v) {
-        stream << '(' << v.x << ',' << v.y << ')';
-        return stream;
-    }
+        ptr[12] =   (aiMat.a4);
+        ptr[13] =   (aiMat.b4);
+        ptr[14] =   (aiMat.c4);
+        ptr[15] =   (aiMat.d4);
 
-    std::ostream& operator<<(std::ostream& stream, const glm::quat& q) {
-        stream << '(' << q.x << ',' << q.y << ',' << q.z << ',' << q.w << ')';
-        return stream;
+        return mat;
     }
 
     const float& mat4ValueAt(const glm::mat4& m, int l, int c) {

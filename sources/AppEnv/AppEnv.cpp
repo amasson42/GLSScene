@@ -74,6 +74,10 @@ std::shared_ptr<std::string> AppEnv::getArgument(std::string key) const {
     return nullptr;
 }
 
+bool AppEnv::hasArgument(std::string key) const {
+    return std::find(args.begin(), args.end(), key) != args.end();
+}
+
 void AppEnv::loop() {
 
     while (mainWindow != nullptr) {

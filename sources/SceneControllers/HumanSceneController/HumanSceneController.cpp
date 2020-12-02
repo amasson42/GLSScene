@@ -55,6 +55,7 @@ void HumanSceneController::makeScene() {
             cameraNode->setCamera(camera);
         }
         cameraNode->transform().moveBy(0, 3, 5);
+        std::cout << "camera at: " << cameraNode->transform() << std::endl;
         scene.setCameraNode(cameraNode);
         scene.rootNode()->addChildNode(cameraNode);
 
@@ -92,7 +93,7 @@ void HumanSceneController::makeScene() {
         }
         scene.rootNode()->addChildNode(offseter);
         T_Node animNode = GLS::Node::loadFromFile(animationFilename);
-        if (env->getArgument("-dump-node") != nullptr)
+        if (env->hasArgument("-dump-node"))
             animNode->sendToFlux(std::cout, ":");
         animNode->setName("animated");
         offseter->addChildNode(animNode);

@@ -37,11 +37,12 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-glm::vec3 aiToGlm(aiVector3D vec);
-glm::quat aiToGlm(aiQuaternion quat);
-glm::mat4 aiToGlm(aiMatrix4x4 mat);
 
 namespace GLS {
+    
+    glm::vec3 aiToGlm(aiVector3D vec);
+    glm::quat aiToGlm(aiQuaternion quat);
+    glm::mat4 aiToGlm(aiMatrix4x4 mat);
 
     const float& mat4ValueAt(const glm::mat4& m, int l, int c);
     const float& mat3ValueAt(const glm::mat3& m, int l, int c);
@@ -160,5 +161,8 @@ namespace GLS {
     };
 
 }
+
+std::ostream& operator<<(std::ostream& out, const GLS::Transform2D& t);
+std::ostream& operator<<(std::ostream& out, const GLS::Transform& t);
 
 #endif // GLSTransform_h

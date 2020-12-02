@@ -27,6 +27,7 @@ struct AppEnv {
     virtual ~AppEnv();
 
     std::shared_ptr<std::string> getArgument(std::string key) const;
+    bool hasArgument(std::string key) const;
 
     void loop();
 };
