@@ -9,6 +9,8 @@
 #ifndef GLSAnimatable_h
 #define GLSAnimatable_h
 
+#include "GLSStructs.hpp"
+
 namespace GLS {
 
     class IAnimatable {
@@ -18,6 +20,8 @@ namespace GLS {
         virtual void initAnimation() = 0;
         virtual void animate(timefloat deltaTime) = 0;
         virtual bool alive() const = 0;
+
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const;
 
     };
 

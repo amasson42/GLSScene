@@ -43,7 +43,7 @@ namespace GLS {
         virtual void renderInDepthContext(Scene& scene, const RenderUniforms& uniforms);
         virtual void postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority);
 
-        virtual void sendToFlux(std::ostream& flux, std::string linePrefix) const;
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const;
 
         static std::string shaderUniformsVertex();
         static std::string shaderUniformsGeometry();

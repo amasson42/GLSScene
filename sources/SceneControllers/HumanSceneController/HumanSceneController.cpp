@@ -48,6 +48,7 @@ void HumanSceneController::makeScene() {
 
     {// camera and light
         T_Node cameraNode = newNode();
+        cameraNode->setName("cameraNode");
         {
             std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
             camera->aspect = (scene.getAspect());
@@ -61,6 +62,7 @@ void HumanSceneController::makeScene() {
 
         std::shared_ptr<GLS::Light> followLight = std::make_shared<GLS::Light>();
         T_Node followLightNode = newNode();
+        followLightNode->setName("followLightNode");
         followLightNode->transform().setPosition(glm::vec3(0, 0, 0));
         followLightNode->transform().setEulerAngles(0, 0, 0);
         followLight->type = (GLS::light_spot);
@@ -70,6 +72,7 @@ void HumanSceneController::makeScene() {
 
         std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
         T_Node lightNode = newNode();
+        lightNode->setName("lightNode");
         lightNode->transform().setPosition(glm::vec3(2, 5, 3));
         lightNode->transform().setEulerAngles(-1.5, 0, -0.3);
         light->type = (GLS::light_spot);
@@ -85,6 +88,7 @@ void HumanSceneController::makeScene() {
         std::string animationFilename = *animationFilenamePtr;
 
         T_Node offseter = newNode();
+        offseter->setName("offseter");
         offseter->transform().moveBy(0, 0, 0);
         auto scalerIt = std::find(env->args.begin(), env->args.end(), "-scale");
         if (scalerIt != env->args.end()) {
@@ -93,13 +97,14 @@ void HumanSceneController::makeScene() {
         }
         scene.rootNode()->addChildNode(offseter);
         T_Node animNode = GLS::Node::loadFromFile(animationFilename);
-        if (env->hasArgument("-dump-node"))
-            animNode->sendToFlux(std::cout, ":");
         animNode->setName("animated");
         offseter->addChildNode(animNode);
 
         std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.1, 0.08);
-        addCubeToNode(animNode, cubeMesh);
+        offseter->addRenderable(cubeMesh);
+        offseter->addRenderable(cubeMesh);
+        offseter->addRenderable(cubeMesh);
+        // addCubeToNode(animNode, cubeMesh);
         if (animNode->hasAnimatable()) {
             animNode->initAnimation();
             std::cout << "animations: " << std::endl;
@@ -114,7 +119,11 @@ void HumanSceneController::makeScene() {
     T_Node plane = newNode();
     plane->addRenderable(GLS::Mesh::plane(10, 10));
     plane->transform().setEulerAngles(-M_PI / 2, 0, 0);
-    // scene.rootNode()->addChildNode(plane);
+    scene.rootNode()->addChildNode(plane);
+    plane->setActive(false);
+
+    plane->addChildNode(newNode());
+    addCubeToNode(plane, GLS::Mesh::thinLine(glm::vec3(0), glm::vec3(1)));
 
     // create grass on it
 

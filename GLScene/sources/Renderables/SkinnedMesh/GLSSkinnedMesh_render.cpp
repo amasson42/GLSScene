@@ -34,13 +34,13 @@ namespace GLS {
             }
 
             std::shared_ptr<Node> node = bone.node.lock();
-            std::shared_ptr<Node> rootNode = _skeleton->bones()[0].node.lock();
-            // std::shared_ptr<Node> rootNode = _rootNode.lock();
+            // std::shared_ptr<Node> rootNode = _skeleton->bones()[0].node.lock();
+            std::shared_ptr<Node> rootNode = _rootNode.lock();
             
             glm::mat4 rootRelative = node->getParentNodeRelativeTransformMatrix(rootNode);
             // glm::mat4 rootRelative = node->getWorldTransformMatrix();
 
-            glm::mat4 modelMatrix = glm::inverse(rootNode->getWorldTransformMatrix()) * rootRelative * bone.offset;
+            glm::mat4 modelMatrix = glm::inverse(bone.globalRestPosition) * rootRelative;// * bone.offset;
             // modelMatrix = rootRelative;
 
             // FIXME: what the maths ?
@@ -100,27 +100,6 @@ namespace GLS {
                        GL_UNSIGNED_INT, 0);
     }
 
-    void SkinnedMesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
-        (void)scene;
-        if (_outlined && priority == 1) {
-            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-            glStencilMask(0x00);
-            std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramSkinnedMeshSimpleColor();
-            program->use();
-
-            RenderUniforms scaleUniforms(uniforms);
-            scaleUniforms.model = glm::scale(uniforms.model, glm::vec3(_outlineSize));
-            scaleUniforms.sendUniformsToShaderProgram(program);
-            glUniform3f(program->getLocation("material.diffuse"), _outlineColor.x, _outlineColor.y, _outlineColor.z);
-
-            _sendBonesToShaderProgram(program);
-
-            glBindVertexArray(_elementsBuffer);
-            glDrawElements(_drawMode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
-            glStencilMask(0xFF);
-        }
-    }
-
     void SkinnedMesh::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
         (void)scene;
         if (!bufferGenerated())
@@ -150,6 +129,27 @@ namespace GLS {
         glDrawElements(_drawMode,
                        static_cast<GLsizei>(_indices.size()),
                        GL_UNSIGNED_INT, 0);
+    }
+
+    void SkinnedMesh::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
+        (void)scene;
+        if (_outlined && priority == 1) {
+            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+            glStencilMask(0x00);
+            std::shared_ptr<ShaderProgram> program = ShaderProgram::standardShaderProgramSkinnedMeshSimpleColor();
+            program->use();
+
+            RenderUniforms scaleUniforms(uniforms);
+            scaleUniforms.model = glm::scale(uniforms.model, glm::vec3(_outlineSize));
+            scaleUniforms.sendUniformsToShaderProgram(program);
+            glUniform3f(program->getLocation("material.diffuse"), _outlineColor.x, _outlineColor.y, _outlineColor.z);
+
+            _sendBonesToShaderProgram(program);
+
+            glBindVertexArray(_elementsBuffer);
+            glDrawElements(_drawMode, static_cast<GLsizei>(_indices.size()), GL_UNSIGNED_INT, 0);
+            glStencilMask(0xFF);
+        }
     }
 
 }

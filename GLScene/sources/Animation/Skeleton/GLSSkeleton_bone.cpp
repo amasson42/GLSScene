@@ -11,41 +11,31 @@
 
 namespace GLS {
 
-    Skeleton::Bone::Bone(std::shared_ptr<Node> boneNode,
-        glm::mat4 boneRestPosition,
-        glm::mat4 boneInverseBindPosition) :
+    Skeleton::Bone::Bone(std::shared_ptr<Node> boneNode) :
     node(boneNode),
-    restPosition(boneRestPosition),
-    inverseBindPosition(boneInverseBindPosition)
+    offset(1),
+    globalRestPosition(1)
     {}
 
     void Skeleton::addBone(std::shared_ptr<Node> node) {
-        glm::mat4 rest;
-        glm::mat4 bind;
-        if (_bones.empty()) {
-            rest = glm::mat4(1);
-            bind = glm::mat4(1);
-        } else {
-            rest = node->getTransformMatrix();
-            bind = glm::inverse(node->getParentNodeRelativeTransformMatrix(_bones[0].node.lock()));
-        }
-        Bone bone(node, rest, bind);
+        Bone bone(node);
         bone.offset = glm::mat4(1);
+        if (_bones.empty()) {
+            bone.globalRestPosition = glm::mat4(1);
+        } else {
+            bone.globalRestPosition = node->getParentNodeRelativeTransformMatrix(_bones[0].node.lock());
+        }
         _bones.push_back(bone);
     }
 
     void Skeleton::addBone(std::shared_ptr<Node> node, glm::mat4 offset) {
-        glm::mat4 bind;
-        if (_bones.empty()) {
-            bind = glm::mat4(1);
-        } else {
-            // glm::mat4 tmpPose = node->getTransformMatrix();
-            // node->transform().setMatrix(rest);
-            bind = glm::inverse(node->getParentNodeRelativeTransformMatrix(_bones[0].node.lock()));
-            // node->transform().setMatrix(tmpPose);
-        }
-        Bone bone(node, offset, bind);
+        Bone bone(node);
         bone.offset = offset;
+        if (_bones.empty()) {
+            bone.globalRestPosition = glm::mat4(1);
+        } else {
+            bone.globalRestPosition = node->getParentNodeRelativeTransformMatrix(_bones[0].node.lock());
+        }
         _bones.push_back(bone);
     }
 

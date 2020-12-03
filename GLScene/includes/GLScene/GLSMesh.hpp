@@ -82,7 +82,7 @@ namespace GLS {
         void setOutline(float size, const glm::vec3& color);
         void removeOutline();
 
-        virtual void sendToFlux(std::ostream& flux, std::string linePrefix) const;
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const;
 
 
         // OpenGL Buffers
@@ -144,6 +144,8 @@ namespace GLS {
 
         const Transform& instanceTransformAt(size_t i) const;
         void setInstanceTransformAt(size_t i, Transform t);
+
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const;
 
 
         // OpenGL Buffers

@@ -67,4 +67,16 @@ namespace GLS {
         _outlined = false;
     }
 
+    void SkinnedMesh::sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const {
+        flux << firstPrefix << "[SkinnedMesh]" << std::endl;
+        flux << linePrefix << "  vertices: " << _vertices.size() << std::endl;
+        flux << linePrefix << "  indices: " << _indices.size() << std::endl;
+        flux << linePrefix << "  customShader: " << _shaderProgram << std::endl;
+        flux << linePrefix << "  material: " << _material << std::endl;
+        flux << linePrefix << "  outlined: " << _outlined << std::endl;
+        flux << linePrefix << "  skeleton: " << _skeleton << std::endl;
+        flux << linePrefix << "  rootNode: " << (_rootNode.expired() ? nullptr : _rootNode.lock()) << std::endl;
+        flux << lastPrefix << "" << std::endl;
+    }
+
 }

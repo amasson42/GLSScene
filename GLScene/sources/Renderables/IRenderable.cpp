@@ -40,8 +40,7 @@ namespace GLS {
     }
 
     void IRenderable::renderInDepthContext(Scene& scene, const RenderUniforms& uniforms) {
-        (void)scene;
-        (void)uniforms;
+        renderInContext(scene, uniforms);
     }
 
     void IRenderable::postRenderInContext(Scene& scene, const RenderUniforms& uniforms, float priority) {
@@ -50,8 +49,10 @@ namespace GLS {
         (void)priority;
     }
 
-    void IRenderable::sendToFlux(std::ostream& flux, std::string linePrefix) const {
-        flux << linePrefix << "[IRenderable]" << std::endl;
+    void IRenderable::sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const {
+        (void)linePrefix;
+        flux << firstPrefix << "[IRenderable]" << std::endl;
+        flux << lastPrefix << "" << std::endl;
     }
 
     std::string IRenderable::shaderUniformsVertex() {

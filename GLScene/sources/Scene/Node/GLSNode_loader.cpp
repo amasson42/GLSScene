@@ -82,7 +82,7 @@ namespace GLS {
         for (size_t i = 0; i < nodeMeshes.size(); i++) {
             std::pair<std::shared_ptr<Node>, aiMesh*>& nodeMesh(nodeMeshes[i]);
             if (nodeMesh.second->HasBones()) {
-                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(nodeMesh.second, skeleton, nodeMesh.first);
+                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(nodeMesh.second, skeleton, node /* nodeMesh.first*/);
                 nSkinnedMesh->setMaterial(materials[nodeMesh.second->mMaterialIndex]);
                 nodeMesh.first->addRenderable(nSkinnedMesh);
             } else {

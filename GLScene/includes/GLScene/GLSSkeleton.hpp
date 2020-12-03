@@ -46,10 +46,9 @@ namespace GLS {
         struct Bone {
             std::weak_ptr<Node> node;
             glm::mat4 offset;
-            glm::mat4 restPosition;
-            glm::mat4 inverseBindPosition;
+            glm::mat4 globalRestPosition;
 
-            Bone(std::shared_ptr<Node> node, glm::mat4 restPosition, glm::mat4 inverseBindPosition);
+            Bone(std::shared_ptr<Node> node);
         };
 
     protected:

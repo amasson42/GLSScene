@@ -186,4 +186,10 @@ namespace GLS {
         "}\n";
     }
 
+    void ParticleSystem::sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const {
+        (void)linePrefix;
+        flux << firstPrefix << "[ParticleSystem]" << std::endl;
+        flux << lastPrefix << "" << std::endl;
+    }
+
 }

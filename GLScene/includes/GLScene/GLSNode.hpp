@@ -78,6 +78,7 @@ namespace GLS {
         void setName(std::string name);
 
         bool isActive() const;
+        bool hasInactiveParent() const;
         void setActive(bool active);
 
         bool hasRenderable() const;
@@ -111,7 +112,7 @@ namespace GLS {
         virtual void initAnimation(bool recursively = false);
         virtual void animate(timefloat deltaTime, bool recursively = false);
 
-        virtual void sendToFlux(std::ostream& flux, std::string linePrefix) const;
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const;
 
         template <typename T>
         const std::shared_ptr<T> getRenderable() const {

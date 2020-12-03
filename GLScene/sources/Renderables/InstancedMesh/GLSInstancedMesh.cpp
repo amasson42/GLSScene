@@ -69,4 +69,18 @@ namespace GLS {
         _instancesTransforms[i] = t;
     }
 
+    void InstancedMesh::sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const {
+        flux << firstPrefix << "[InstancedMesh]" << std::endl;
+        flux << linePrefix << "  vertices: " << _vertices.size() << std::endl;
+        flux << linePrefix << "  indices: " << _indices.size() << std::endl;
+        flux << linePrefix << "  customShader: " << _shaderProgram << std::endl;
+        flux << linePrefix << "  material: " << _material << std::endl;
+        flux << linePrefix << "  outlined: " << _outlined << std::endl;
+        flux << linePrefix << "  instances: " << _instancesTransforms.size() << std::endl;
+        for (size_t i = 0; i < _instancesTransforms.size(); i++) {
+            flux << linePrefix << "    " << _instancesTransforms[i] << std::endl;
+        }
+        flux << lastPrefix << "" << std::endl;
+    }
+
 }

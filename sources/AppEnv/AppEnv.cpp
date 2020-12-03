@@ -57,6 +57,9 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
 
     sceneController->makeScene();
 
+    if (hasArgument("-dump-node"))
+        std::cout << sceneController->scene()->rootNode() << std::endl;
+
 }
 
 AppEnv::~AppEnv() {

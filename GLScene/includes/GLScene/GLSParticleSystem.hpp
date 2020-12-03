@@ -63,8 +63,13 @@ namespace GLS {
         ParticleSystem& operator=(const ParticleSystem& copy);
 
 
+        // utilities
+
         void setTexture(std::shared_ptr<Texture> texture);
         std::shared_ptr<Texture> getTexture() const;
+
+        virtual void sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const;
+
 
         // OpenGL Buffers
 

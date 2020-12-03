@@ -50,6 +50,6 @@ namespace GLS {
 }
 
 std::ostream& operator<<(std::ostream& out, const GLS::Node& node) {
-    node.sendToFlux(out, "");
+    node.sendToFlux(out, "", "", "");
     return out;
 }

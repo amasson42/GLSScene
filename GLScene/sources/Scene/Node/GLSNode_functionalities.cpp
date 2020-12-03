@@ -84,6 +84,15 @@ namespace GLS {
         return _active;
     }
 
+    bool Node::hasInactiveParent() const {
+        std::shared_ptr<Node> parent = getParentNode();
+        if (parent == nullptr) {
+            return false;
+        } else {
+            return parent->isActive() == false || parent->hasInactiveParent();
+        }
+    }
+
     void Node::setActive(bool active) {
         _active = active;
     }
@@ -198,30 +207,74 @@ namespace GLS {
         }
     }
 
-    void Node::sendToFlux(std::ostream& flux, std::string linePrefix) const {
+#define RESET       "\033[0m"
+#define BLACK       "\033[30m"
+#define RED         "\033[31m"
+#define GREEN       "\033[32m"
+#define YELLOW      "\033[33m"
+#define BLUE        "\033[34m"
+#define MAGENTA     "\033[35m"
+#define CYAN        "\033[36m"
+#define WHITE       "\033[37m"
+#define BOLDBLACK   "\033[1m\033[30m"
+#define BOLDRED     "\033[1m\033[31m"
+#define BOLDGREEN   "\033[1m\033[32m"
+#define BOLDYELLOW  "\033[1m\033[33m"
+#define BOLDBLUE    "\033[1m\033[34m"
+#define BOLDMAGENTA "\033[1m\033[35m"
+#define BOLDCYAN    "\033[1m\033[36m"
+#define BOLDWHITE   "\033[1m\033[37m"
+
+    void Node::sendToFlux(std::ostream& flux, std::string linePrefix, std::string firstPrefix, std::string lastPrefix) const {
         using ::operator<<;
-        flux << linePrefix << "┬─ [Node] " << (_active ? " " : "X") << " \"" << _name << "\" - " << this << std::endl;
-        flux << linePrefix << "│ " << _transform << std::endl;
+        const std::string COLOR = _active ? CYAN : BOLDCYAN;
+        if (firstPrefix == "")
+            firstPrefix = linePrefix;
+        flux << firstPrefix << COLOR << "┬─ [Node] " << (!isActive() ? std::string(RED) + "X" : hasInactiveParent() ? std::string(YELLOW) + "x" : " ") << COLOR << " \"" << _name << "\" - " << this << RESET << std::endl;
+        flux << linePrefix  << COLOR << "│  " << _transform << RESET << std::endl;
         if (hasCamera())
-            flux << linePrefix << "│ camera: " << _camera.get() << std::endl;
+            flux << linePrefix << COLOR << "├" << YELLOW << "── camera: " << _camera.get() << RESET << std::endl;
         if (hasLight())
-            flux << linePrefix << "│ light: " << _light.get() << std::endl;
+            flux << linePrefix << COLOR << "├" << YELLOW << "── light: " << _light.get() << RESET << std::endl;
         if (hasRenderable()) {
-            flux << linePrefix << "│ renderables: [" << std::endl;
             for (size_t i = 0; i < _renderables.size(); i++) {
-                _renderables[i]->sendToFlux(flux, linePrefix + "│ > ");
+                _renderables[i]->sendToFlux(flux,
+                    linePrefix + COLOR + "│ " + MAGENTA + "│ " + RESET,
+                    linePrefix + COLOR + "├" + MAGENTA + "─┬─" + RESET,
+                    linePrefix + COLOR + "│ " + MAGENTA + "└─" + RESET
+                );
             }
-            flux << linePrefix << "│ ]" << std::endl;
+        }
+        if (hasAnimatable()) {
+            for (size_t i = 0; i < _animatables.size(); i++) {
+                _animatables[i]->sendToFlux(flux,
+                    linePrefix + COLOR + "│ " + RED + "│ " + RESET,
+                    linePrefix + COLOR + "├" + RED + "─┬─" + RESET,
+                    linePrefix + COLOR + "│ " + RED + "└─" + RESET
+                );
+            }
         }
         if (_childs.size() > 0) {
-            flux << linePrefix << "│ childs: [" << std::endl;
             for (size_t i = 0; i < _childs.size(); i++) {
-                _childs[i]->sendToFlux(flux, linePrefix + "|   ");
+                if (i == _childs.size() - 1) {
+                    _childs[i]->sendToFlux(flux,
+                        linePrefix + COLOR + "   " + RESET,
+                        linePrefix + COLOR + "└──" + RESET,
+                        linePrefix + COLOR + "   " + RESET
+                    );
+                } else {
+                    _childs[i]->sendToFlux(flux,
+                        linePrefix + COLOR + "│  " + RESET,
+                        linePrefix + COLOR + "├──" + RESET,
+                        linePrefix + COLOR + "└──" + RESET
+                    );
+                }
             }
-            flux << linePrefix << "│ ]" << std::endl;
+        } else {
+            flux << linePrefix << COLOR << "└────" << RESET << std::endl;
         }
-        flux << linePrefix << "└─" << std::endl;
-    }
+        (void)lastPrefix;
+   }
     // │├─┬└
 
 }
