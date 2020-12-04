@@ -50,6 +50,8 @@ namespace GLS {
 
     void Node::animate(timefloat deltaTime, bool recursively) {
         if (recursively) {
+            if (!isActive())
+                return;
             for (size_t i = 0; i < _childs.size(); i++) {
                 _childs[i]->animate(deltaTime, recursively);
             }

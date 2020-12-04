@@ -77,8 +77,10 @@ namespace GLS {
         flux << linePrefix << "  material: " << _material << std::endl;
         flux << linePrefix << "  outlined: " << _outlined << std::endl;
         flux << linePrefix << "  instances: " << _instancesTransforms.size() << std::endl;
-        for (size_t i = 0; i < _instancesTransforms.size(); i++) {
-            flux << linePrefix << "    " << _instancesTransforms[i] << std::endl;
+        if (_instancesTransforms.size() < 42) {
+            for (size_t i = 0; i < _instancesTransforms.size(); i++) {
+                flux << linePrefix << "    " << _instancesTransforms[i] << std::endl;
+            }
         }
         flux << lastPrefix << "" << std::endl;
     }

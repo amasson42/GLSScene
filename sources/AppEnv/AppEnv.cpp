@@ -30,7 +30,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
     // #define ZeSceneController ParticuleSystemSceneController
     // #define ZeSceneController ShadowSceneController
     // #define ZeSceneController TrashSceneController
-    // #define ZeSceneController VoxelSceneController
+    // #define ZeSceneController VoxelProceduralSceneController
     sceneController = std::make_shared<ZeSceneController>(mainWindow);
     mainWindow->setController(sceneController);
 
@@ -58,7 +58,7 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
     sceneController->makeScene();
 
     if (hasArgument("-dump-node"))
-        std::cout << sceneController->scene()->rootNode() << std::endl;
+        std::cout << *sceneController->scene()->rootNode() << std::endl;
 
 }
 
