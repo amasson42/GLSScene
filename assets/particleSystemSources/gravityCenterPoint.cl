@@ -30,22 +30,23 @@ kernel void particlesystem_init(global float *buffer, const unsigned int count) 
         color(2) = (cubeWidth / 2 + position(2)) / cubeWidth;
 
         // size
-        size = 1;
+        size = 5;
         age = 0;
     }
 }
 
-kernel void particlesystem_update(global float *buffer, const unsigned int count, double dt, float3 gravityCenter) {
+kernel void particlesystem_update(global float *buffer, const unsigned int count, float dt, float3 gravityCenter) {
     unsigned int i = get_global_id(0);
     if (i < count) {
         int p_i = i * 11;
 
         float fdt = (float)dt;
+        age += fdt;
 
         position(0) += fdt * velocity(0);
         position(1) += fdt * velocity(1);
         position(2) += fdt * velocity(2);
-        age += fdt;
+        size = (sin(age) + 1.0) * 5.0 + 5.0;
 
         //float3 gravityCenter = (float3)(0, 1, 3);
         float3 f3position;
@@ -53,7 +54,7 @@ kernel void particlesystem_update(global float *buffer, const unsigned int count
         f3position.y = position(1);
         f3position.z = position(2);
         float distance = length(gravityCenter - f3position);
-        float squaredDistance = distance;
+        float squaredDistance = distance * distance;
         if (squaredDistance < 1)
             squaredDistance = 1;
         if (squaredDistance != 0) {

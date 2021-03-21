@@ -18,6 +18,9 @@
 # ifndef GLFW_INCLUDE_NONE
 #   include <gl/GL.h>
 # endif
+#else
+# include <GL/glew.h>
+# include <GL/gl.h>
 #endif
 
 #include <glm/glm.hpp>

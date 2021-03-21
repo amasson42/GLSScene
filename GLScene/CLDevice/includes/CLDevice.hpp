@@ -17,14 +17,19 @@
 #  include <CL/cl.h>
 #  include <CL/cl_gl.h>
 # else
-#  include <cl/cl.h>
-#  include <cl/cl_gl.h>
-#  include <cl/cl_gl_ext.h>
+#  include <GL/glew.h>
+#  include <GL/gl.h>
+#  define CL_TARGET_OPENCL_VERSION_220
+#  include <CL/cl.h>
+#  include <CL/cl_gl.h>
+#  include <CL/cl_gl_ext.h>
 # endif
 
 # include <vector>
 # include <string>
 # include <iostream>
+
+std::string file_to_string(const std::string file_path);
 
 namespace CLD {
 

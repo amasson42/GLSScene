@@ -9,9 +9,12 @@
 # define GL_SILENCE_DEPRECATION
 #endif
 
-
 #ifdef WIN32
-#include <glad/glad.h>
+# include <glad/glad.h>
+#endif
+
+#ifdef __linux__
+# define NANOGUI_USE_GLAD
 #endif
 
 #include <nanogui/nanogui.h>

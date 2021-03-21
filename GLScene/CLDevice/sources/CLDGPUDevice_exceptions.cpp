@@ -1,5 +1,18 @@
 
 #include "CLDevice.hpp"
+#include <fstream>
+
+std::string file_to_string(const std::string file_path) {
+    std::ifstream file(file_path, std::ios::binary);
+    std::string fileStr;
+
+    std::istreambuf_iterator<char> inputIt(file), emptyInputIt;
+    std::back_insert_iterator<std::string> stringInsert(fileStr);
+
+    copy(inputIt, emptyInputIt, stringInsert);
+
+    return fileStr;
+}
 
 namespace CLD {
 
