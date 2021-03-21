@@ -19,7 +19,7 @@
 # else
 #  include <GL/glew.h>
 #  include <GL/gl.h>
-#  define CL_TARGET_OPENCL_VERSION_220
+#  define CL_TARGET_OPENCL_VERSION 220
 #  include <CL/cl.h>
 #  include <CL/cl_gl.h>
 #  include <CL/cl_gl_ext.h>

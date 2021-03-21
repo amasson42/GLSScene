@@ -80,7 +80,7 @@ void GLSWindow::loopOnce() {
         _controller.lock()->update();
 
     glEnable(GL_DEPTH_TEST);
-    _nanoguiScreen->drawWidgets();
+    _nanoguiScreen->draw_widgets();
     glfwSwapBuffers(_glfwWindow);
 }
 

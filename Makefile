@@ -45,7 +45,8 @@ PRINT = printf "\r \033[31;1m%3s%%\033[0m\t -->>\t\033[31;1m%-65s\033[0m\r" "$(s
 PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" "$(shell echo $(ACTUAL)\*100\/$(TOTAL) | bc)" "$@"
 
 all:
-	mkdir build && cd build && cmake .. || echo
+	mkdir build || :
+	cd build && cmake .. || echo
 	cd build && make -j4
 
 run: all

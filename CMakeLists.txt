@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(game)
 
 if (UNIX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z -O3")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O2 -pthread")
 else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest /O2")
 endif()
@@ -13,8 +13,8 @@ endif()
 
 
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
-	execute_process(COMMAND git clone https://github.com/wjakob/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
-	# execute_process(COMMAND git clone https://github.com/mitsuba-renderer/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
+	#  execute_process(COMMAND git clone https://github.com/wjakob/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
+	execute_process(COMMAND git clone https://github.com/mitsuba-renderer/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
 endif()
 
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson)
@@ -45,6 +45,7 @@ include_directories(GLScene/CLDevice/includes/)
 
 find_package(OpenCL REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
 
 include_directories(${OpenCL_INCLUDE_DIRS})
 
