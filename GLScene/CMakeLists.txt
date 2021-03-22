@@ -48,6 +48,7 @@ file(GLOB_RECURSE SOURCE_FILES
 
 find_package(OpenCL REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
 
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL " " FORCE)
 add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/libs/assimp)

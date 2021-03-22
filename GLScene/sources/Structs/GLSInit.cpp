@@ -21,6 +21,9 @@ namespace GLS {
         _gpuDevice = std::make_shared<CLD::GPUDevice>();
         _gpuDevice->createContext(true);
 
+        #ifdef __linux__
+        glewInit();
+        #endif
 
 		#ifdef WIN32
 		if (!gladLoadGLLoader((GLADloadproc)addr)) {

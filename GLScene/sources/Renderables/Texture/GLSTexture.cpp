@@ -7,7 +7,12 @@
 //
 
 #define STB_IMAGE_IMPLEMENTATION
+
+// #pragma warning( push )
+// #pragma warning( disable : 5243 )
 #include "stb_image.h"
+// #pragma warning( pop )
+
 #include "GLSTexture.hpp"
 
 namespace GLS {

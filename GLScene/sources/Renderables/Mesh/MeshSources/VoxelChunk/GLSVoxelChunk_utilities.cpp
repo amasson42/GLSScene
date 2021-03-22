@@ -93,6 +93,7 @@ namespace GLS {
 			}
 			break;
 		}
+		return VoxelBlock();
 	}
 
     void VoxelChunk::setAdjacentChunk(std::shared_ptr<VoxelChunk> adjChunk, VoxelChunkEdge edge) {

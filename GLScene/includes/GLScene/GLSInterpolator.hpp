@@ -48,6 +48,11 @@ namespace GLS {
 
         }
 
+        Interpolator& operator=(const Interpolator<KeyValue>& copy) {
+            _keyValues = copy._keyValues;
+            return *this;
+        }
+
         bool isEmpty() const {
             return _keyValues.empty();
         }

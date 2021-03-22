@@ -11,6 +11,7 @@
 namespace GLS {
 
     Node::Node() :
+    std::enable_shared_from_this<Node>(),
     _name("empty_node"),
     _transform(),
     _parent(), _childs(),
@@ -21,6 +22,7 @@ namespace GLS {
     }
 
     Node::Node(const Node& copy) :
+    std::enable_shared_from_this<Node>(),
     _name(copy._name),
     _transform(copy._transform),
     _parent(), _childs(),

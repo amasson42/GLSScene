@@ -1,5 +1,5 @@
 
-CC := clang++
+CC := g++
 
 NAME := GLScene
 
@@ -14,16 +14,27 @@ INCLUDES := -I$(INCS) -I$(INCS)/GLScene \
 			`pkg-config assimp --cflags-only-I` \
 			-ICLDevice/includes \
 
-LIBS := -L/usr/lib \
-		-framework OpenCL \
-		-framework OpenGL \
-		`pkg-config --static --libs glm` \
-		`pkg-config --static --libs assimp` \
-		-L CLDevice -lCLDevice
+ifeq ($(UNAME_S),Linux)
+	LIBS := -L/usr/lib \
+			-lOpenCL \
+			-lOpenGL \
+			`pkg-config --static --libs glm` \
+			`pkg-config --static --libs assimp` \
+			-L CLDevice -lCLDevice
+endif
+ifeq ($(UNAME_S),Darwin)
+	LIBS := -L/usr/lib \
+			-framework OpenCL \
+			-framework OpenGL \
+			`pkg-config --static --libs glm` \
+			`pkg-config --static --libs assimp` \
+			-L CLDevice -lCLDevice
+
+endif
 
 CPP_FILES := $(shell find $(SRCS) -type f -name "*.cpp")
 CPP_DIRS := $(shell find $(SRCS) -depth -type d)
-CPP_FLAGS += -std=c++11 -Wall -Wextra -Werror
+CPP_FLAGS += -std=c++11 -Wall -Wextra -Werror -Wimplicit-fallthrough=0
 
 O_DIRS := $(addprefix $(OBJS)/,$(CPP_DIRS))
 O_FILES_TMP := $(CPP_FILES:%.cpp=$(OBJS)/%.o)
@@ -45,7 +56,6 @@ PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" 
 all:
 	make -C CLDevice
 	make lib$(NAME).a
-	make $(NAME).dylib
 
 $(NAME).dylib: $(O_FILES)
 	@$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
@@ -62,7 +72,7 @@ lib$(NAME).a: $(O_FILES)
 	@$(PRINTDONE) && echo || exit
 
 $(OBJS)/%.o: %.cpp
-	@clang $(CPP_FLAGS) $(INCLUDES) -o $@ -c $< && $(PRINTINC) || exit
+	@$(CC) $(CPP_FLAGS) $(INCLUDES) -o $@ -c $< && $(PRINTINC) || exit
 
 clean:
 	rm -fr $(OBJS)

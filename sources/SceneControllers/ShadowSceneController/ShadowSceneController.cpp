@@ -177,16 +177,21 @@ void ShadowSceneController::makeScene() {
     psProp.count = 1000;
     psProp.kernelSource = file_to_string("assets/particleSystemSources/gravityCenterPoint.cl");
     
-    std::shared_ptr<GLS::ParticleSystem> ps = std::make_shared<GLS::ParticleSystem>(psProp);
-    cl_float3 clf3;
-    clf3.s[0] = 0.5;
-    clf3.s[1] = 0.5;
-    clf3.s[2] = 0.5;
-    ps->getAnimationKernel()->setArgument(3, clf3);
-    ps->generateBuffers();
-    ps->initAnimation();
-    particleNode->addRenderable(ps);
-    particleNode->addAnimatable(ps);
-    scene.rootNode()->addChildNode(particleNode);
+    try {
+        std::shared_ptr<GLS::ParticleSystem> ps = std::make_shared<GLS::ParticleSystem>(psProp);
+
+        cl_float3 clf3;
+        clf3.s[0] = 0.5;
+        clf3.s[1] = 0.5;
+        clf3.s[2] = 0.5;
+        ps->getAnimationKernel()->setArgument(3, clf3);
+        ps->generateBuffers();
+        ps->initAnimation();
+        particleNode->addRenderable(ps);
+        particleNode->addAnimatable(ps);
+        scene.rootNode()->addChildNode(particleNode);
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    }
     // particleSystem = ps;
 }

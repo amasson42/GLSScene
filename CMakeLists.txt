@@ -92,4 +92,4 @@ if (WIN32)
 endif()
 
 add_executable(game ${SOURCE_FILES})
-target_link_libraries(game nanogui assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${OpenCL_LIBRARY} GLScene)
+target_link_libraries(game nanogui assimp ${GLFW_LIBRARIES} ${OPENGL_LIBRARIES} ${OpenCL_LIBRARY} ${GLEW_LIBRARIES} GLScene)
