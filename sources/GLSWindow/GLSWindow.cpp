@@ -23,12 +23,13 @@ _env(env),
 _postProcessShaderProgram(nullptr),
 _framebuffer(nullptr) {
 
-    glfwWindowHint(GLFW_SAMPLES, 1);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
     _width = size.x;
     _height = size.y;
@@ -42,6 +43,7 @@ _framebuffer(nullptr) {
 
 	_nanoguiScreen = new nanogui::Screen();
 	_nanoguiScreen->initialize(_glfwWindow, false);
+    _nanoguiScreen->set_visible(true);
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     glEnable(GL_MULTISAMPLE);
     glfwGetFramebufferSize(_glfwWindow, &_bufferWidth, &_bufferHeight);
