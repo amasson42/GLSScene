@@ -33,7 +33,7 @@ namespace CLD {
         return "could not load any device";
     }
 
-    GPUDevice::BuildProgramException::BuildProgramException(cl_program p, cl_device_id id)
+    GPUDevice::BuildProgramException::BuildProgramException(cl_program p, cl_device_id id) throw()
     {
         _buildInfo = "Program build error:\n";
         size_t error_size;
@@ -46,6 +46,10 @@ namespace CLD {
         } else {
             _buildInfo += "-you're so bad the error is too long to display-\n";
         }
+    }
+
+    GPUDevice::BuildProgramException::~BuildProgramException() throw() {
+
     }
 
     const char* GPUDevice::BuildProgramException::what() const throw() {
