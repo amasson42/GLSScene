@@ -57,7 +57,7 @@ PRINTDONE = printf "\r \033[32;1m%3s%%\033[0m\t -->>\t\033[32;1m%-65s\033[0m\r" 
 all: $(NAME_STATIC)
 
 $(EXAMPLES): $(NAME_STATIC)
-	$(CC) examples/$@/*.cpp $(INCLUDES) -L. -l$(NAME) $(LIBS) -l$(NAME) -o $@
+	$(CC) examples/$@/*.cpp $(CPP_FLAGS) $(INCLUDES) -L. -l$(NAME) $(LIBS) -o $@
 
 $(NAME_DYNAMIC): $(O_FILES)
 	@$(CC) -dynamiclib $(CPP_FLAGS) $(INCLUDES) $(LIBS) -o $@ $(O_FILES)
@@ -77,9 +77,10 @@ fclean: clean
 	rm -f $(NAME_DYNAMIC)
 	rm -f $(NAME_STATIC)
 	rm -f $(EXAMPLES)
+	rm -fr $(addsuffix .dSYM, $(EXAMPLES))
 
 re: fclean all
 
 -include $(DEPS)
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re $(NAME_STATIC)

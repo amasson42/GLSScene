@@ -46,7 +46,7 @@ namespace GLS {
     typedef float timefloat;
 
     std::shared_ptr<CLD::GPUDevice> getSharedDevice();
-    void glsInit(void* addr);
+    void glsInit(void* addr = nullptr);
     void glsDeinit();
 
     class ShaderProgram;
