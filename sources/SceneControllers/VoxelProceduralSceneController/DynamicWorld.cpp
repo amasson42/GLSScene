@@ -53,7 +53,7 @@ void DynamicWorld::_generateChunks(const glm::vec3& cameraFlatPosition, std::sha
 	std::shared_ptr<GLS::Camera> camera = cameraNode->camera();
 	if (camera == nullptr)
 		return;
-	float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * camera->aspect / 2));
+	// float minCosCameraVision = static_cast<float>(cos(1.4 * camera->fov * camera->aspect / 2));
 	glm::vec3 chunkMid = glm::vec3(CHUNKSIZE * BigChunk::bigChunkWidth / 2,
 									0,
 									CHUNKSIZE * BigChunk::bigChunkWidth / 2);
@@ -282,9 +282,6 @@ void DynamicWorld::reloadChunks() {
 }
 
 void DynamicWorld::saveLoadedChunks() {
-
-	std::vector < std::pair<glm::ivec2, std::shared_ptr<BigChunk>>>::iterator it = _loadedChunks.begin();
-
 	for (auto it = _loadedChunks.begin(); it != _loadedChunks.end(); it++) {
 		if (!it->second->isUntouched()) {
 			std::async(std::launch::async, &BigChunk::save, it->second, getBigChunkFileNameAt(it->first));

@@ -14,6 +14,7 @@ void CaveRunningSceneController::makeScene() {
     if (_window.expired())
         return;
     AppEnv *env = _window.lock()->getAppEnvPtr();
+    (void)env;
     GLS::Scene& scene(*_scene);
 
     std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
@@ -81,15 +82,18 @@ void CaveRunningSceneController::keyCallBack(int key, int scancode, int action, 
 }
 
 void CaveRunningSceneController::scrollCallBack(double x, double y) {
-
+    (void)x;
+    (void)y;
 }
 
 void CaveRunningSceneController::resizeWindowCallBack(glm::vec2 newSize) {
-
+    (void)newSize;
 }
 
 void CaveRunningSceneController::mouseButtonCallBack(int button, int action, int modifiers) {
-
+    (void)button;
+    (void)action;
+    (void)modifiers;
 }
 
 void CaveRunningSceneController::closeCallback() {

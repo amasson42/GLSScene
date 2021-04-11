@@ -24,8 +24,8 @@ _postProcessShaderProgram(nullptr),
 _framebuffer(nullptr) {
 
     glfwWindowHint(GLFW_SAMPLES, 0);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_DEPTH_BITS, 32);
@@ -43,7 +43,7 @@ _framebuffer(nullptr) {
 
 	_nanoguiScreen = new nanogui::Screen();
 	_nanoguiScreen->initialize(_glfwWindow, false);
-    _nanoguiScreen->set_visible(true);
+    _nanoguiScreen->setVisible(true);
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
     glEnable(GL_MULTISAMPLE);
     glfwGetFramebufferSize(_glfwWindow, &_bufferWidth, &_bufferHeight);
@@ -67,14 +67,14 @@ _framebuffer(nullptr) {
     glfwSetCursorPosCallback(_glfwWindow, [](GLFWwindow* win, double x, double y) {
 		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
 
-		window->nanoguiScreen()->cursor_pos_callback_event(x, y);
+		window->nanoguiScreen()->cursorPosCallbackEvent(x, y);
 	});
 
     glfwSetMouseButtonCallback(_glfwWindow, [](GLFWwindow* win, int button, int action, int modifiers) {
 		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
 
-        window->nanoguiScreen()->mouse_button_callback_event(button, action, modifiers);
-        // if (!window->nanoguiScreen()->mouse_button_callback_event(button, action, modifiers)) {
+        window->nanoguiScreen()->mouseButtonCallbackEvent(button, action, modifiers);
+        // if (!window->nanoguiScreen()->mouseButtonCallbackEvent(button, action, modifiers)) {
         // 	window->mouseButtonCallBack(button, action, modifiers);
 	    // }
     });
@@ -83,13 +83,13 @@ _framebuffer(nullptr) {
 		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
 
 		window->keyCallBack(key, scancode, action, mods);
-        window->nanoguiScreen()->key_callback_event(key, scancode, action, mods);
+        window->nanoguiScreen()->keyCallbackEvent(key, scancode, action, mods);
 	});
 
 	glfwSetCharCallback(_glfwWindow, [](GLFWwindow* win, unsigned int codepoint) {
 		GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
 
-    	window->nanoguiScreen()->char_callback_event(codepoint);
+    	window->nanoguiScreen()->charCallbackEvent(codepoint);
 	});
 
     glfwSetWindowCloseCallback(_glfwWindow, [](GLFWwindow* win) {
@@ -102,14 +102,14 @@ _framebuffer(nullptr) {
         GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
         if (window != NULL)
             window->updateSize();
-    	window->nanoguiScreen()->resize_callback_event(width, height);
+    	window->nanoguiScreen()->resizeCallbackEvent(width, height);
     });
 
     glfwSetScrollCallback(_glfwWindow, [](GLFWwindow* win, double x, double y) {
         GLSWindow* window = static_cast<GLSWindow*>(glfwGetWindowUserPointer(win));
 
-        window->nanoguiScreen()->scroll_callback_event(x, y);
-        // if (!window->nanoguiScreen()->scroll_callback_event(x, y)) {
+        window->nanoguiScreen()->scrollCallbackEvent(x, y);
+        // if (!window->nanoguiScreen()->scrollCallbackEvent(x, y)) {
         //     window->scrollCallBack(x, y);
 		// }
     });

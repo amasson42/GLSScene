@@ -99,6 +99,7 @@ fclean: clean
 	rm -f $(NAME_DYNAMIC)
 	rm -f $(NAME_STATIC)
 	rm -fr build
+	rm -fr $(EXAMPLES)
 	rm -fr $(addsuffix .dSYM, $(EXAMPLES))
 
 re: fclean all
