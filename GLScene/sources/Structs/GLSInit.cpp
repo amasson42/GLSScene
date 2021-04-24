@@ -48,6 +48,8 @@ namespace GLS {
         ShaderProgram::standardShaderProgramSkybox();
         ShaderProgram::standardShaderProgramDotParticleSystem();
         ShaderProgram::standardShaderProgramTexturedParticleSystem();
+
+        Node::_assimpImporter = std::make_shared<Assimp::Importer>();
     }
 
     void glsDeinit() {
@@ -65,6 +67,8 @@ namespace GLS {
         ShaderProgram::_standardShaderProgramSkybox = nullptr;
         ShaderProgram::_standardShaderProgramDotParticleSystem = nullptr;
         ShaderProgram::_standardShaderProgramTexturedParticleSystem = nullptr;
+
+        Node::_assimpImporter = nullptr;
 
         _gpuDevice = nullptr;
     }

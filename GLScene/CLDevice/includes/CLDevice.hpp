@@ -141,7 +141,8 @@ namespace CLD {
         class BuildProgramException: public std::exception {
             std::string _buildInfo;
             public:
-            BuildProgramException(cl_program p, cl_device_id id);
+            BuildProgramException(cl_program p, cl_device_id id) throw();
+            virtual ~BuildProgramException() throw();
             const char* what() const throw();
         };
 

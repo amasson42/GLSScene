@@ -78,6 +78,7 @@ static glm::ivec2 _addRoom(std::map<glm::ivec2, CaveMaze::Room>& rooms, glm::ive
 }
 
 void CaveMaze::generate(GenerationParameters params) {
+    (void)params;
     reset();
     glm::ivec2 diggerPos(0, 0);
     if (rand() % 3)

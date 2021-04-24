@@ -64,6 +64,10 @@ void CaveRunningWorldGenerator::deleteRoomGenerator() {
     _chunkCreationKernelIndex = -1;
 }
 
+unsigned int CaveRunningWorldGenerator::seed() const {
+    return _seed;
+}
+
 std::shared_ptr<CaveRunningRoom> CaveRunningWorldGenerator::generateRoom(glm::ivec2 roomPosition, CaveMaze::Room caveRoom) {
 	if (_chunkCreationKernelIndex < 0)
 		throw std::runtime_error("world generator was used before reading a kernel");

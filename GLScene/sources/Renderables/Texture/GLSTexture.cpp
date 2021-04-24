@@ -6,8 +6,6 @@
 //  Copyright © 2018 Arthur Masson. All rights reserved.
 //
 
-#define STB_IMAGE_IMPLEMENTATION
-
 // #pragma warning( push )
 // #pragma warning( disable : 5243 )
 #include "stb_image.h"

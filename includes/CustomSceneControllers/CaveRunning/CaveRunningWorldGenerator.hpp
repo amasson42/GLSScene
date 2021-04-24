@@ -47,4 +47,6 @@ class CaveRunningWorldGenerator {
 
     std::shared_ptr<CaveRunningRoom> generateRoom(glm::ivec2 roomPosition, CaveMaze::Room caveRoom);
 
+    unsigned int seed() const;
+
 };

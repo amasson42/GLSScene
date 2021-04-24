@@ -80,11 +80,8 @@ void GLSWindow::loopOnce() {
         _controller.lock()->update();
 
     glEnable(GL_DEPTH_TEST);
-    // _nanoguiScreen->draw_all();
-    // std::cout << "draw content" << std::endl;
-    // _nanoguiScreen->draw_contents();
-    // std::cout << "draw widgets" << std::endl;
-    // _nanoguiScreen->draw_widgets();
+    _nanoguiScreen->drawContents();
+    _nanoguiScreen->drawWidgets();
     glfwSwapBuffers(_glfwWindow);
 }
 
@@ -92,6 +89,8 @@ nanogui::Screen *GLSWindow::nanoguiScreen() {
     return _nanoguiScreen;
 }
 
-T_Node newNode() {
-    return std::make_shared<GLS::Node>();
+T_Node newNode(std::string name) {
+    T_Node node = std::make_shared<GLS::Node>();
+    node->setName(name);
+    return node;
 }

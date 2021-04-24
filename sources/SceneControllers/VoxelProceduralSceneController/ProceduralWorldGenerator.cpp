@@ -16,7 +16,7 @@ ProceduralWorldGenerator::ProceduralWorldGenerator() :
 		throw std::runtime_error("GLS was not initialized");
 
 	// With one queue, kernel will be executed one after each other
-	for (int i = 0; i < _commandQueueIndices.size(); i++) {
+	for (size_t i = 0; i < _commandQueueIndices.size(); i++) {
 		_device->createCommandQueue(&_commandQueueIndices[i]);
 		if (_commandQueueIndices[i] < 0) {
 			while (i-- > 0) {

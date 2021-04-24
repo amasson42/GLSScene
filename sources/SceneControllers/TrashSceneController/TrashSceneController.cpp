@@ -120,7 +120,7 @@ void ExplodingMesh::initAnimation() {
 void ExplodingMesh::animate(GLS::timefloat deltaTime) {
     _lifeTime += deltaTime;
     glm::vec3 pos = glm::vec3(_node->getWorldTransformMatrix() * glm::vec4(0, 0, 0, 1));
-    for (int i = 0; i < _node->childNodes().size(); i++) {
+    for (size_t i = 0; i < _node->childNodes().size(); i++) {
         GLS::Transform& transform(_node->childNodeAt(i)->transform());
         GLS::Mesh* triangleMesh = dynamic_cast<GLS::Mesh*>(_node->childNodeAt(i)->renderables()[0].get());
         glm::vec3 cen =

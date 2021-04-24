@@ -93,4 +93,4 @@ class GLSWindow {
 };
 
 typedef std::shared_ptr<GLS::Node> T_Node;
-T_Node newNode();
+T_Node newNode(std::string = "new_node");

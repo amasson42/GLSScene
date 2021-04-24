@@ -40,22 +40,22 @@ void VoxelProceduralSceneController::update() {
 
 		// Update the ui if needed
 		if (_displayInterface) {
-			_fpsValueLabel->set_caption(std::to_string(static_cast<int>(1.0f / _window.lock()->deltaTime())));
+			_fpsValueLabel->setCaption(std::to_string(static_cast<int>(1.0f / _window.lock()->deltaTime())));
 			glm::vec3 playerPosition = cameraNode->transform().position();
-			_playerPositionLabel[0]->set_value(static_cast<int>(playerPosition.x));
-			_playerPositionLabel[1]->set_value(static_cast<int>(playerPosition.y));
-			_playerPositionLabel[2]->set_value(static_cast<int>(playerPosition.z));
+			_playerPositionLabel[0]->setValue(static_cast<int>(playerPosition.x));
+			_playerPositionLabel[1]->setValue(static_cast<int>(playerPosition.y));
+			_playerPositionLabel[2]->setValue(static_cast<int>(playerPosition.z));
 
-			_speedValueField->set_value(cameraMoveSpeed);
+			_speedValueField->setValue(cameraMoveSpeed);
 
-			_nanoguiScreen->perform_layout();
+			_nanoguiScreen->performLayout();
 
 			int pickedBlockId = _pickableBlocks[_pickedBlockIndex].second.textureId;
 			float offsetX = static_cast<float>(3 * (pickedBlockId % 16));
 			float offsetY = static_cast<float>(2 * (pickedBlockId / 16));
-			float imgViewOffsetX = _pickedBlockTexture->width() * offsetX;
-			float imgViewOffsetY = _pickedBlockTexture->height() * offsetY;
-			_pickedBlockTexture->set_offset(nanogui::Vector2f(-imgViewOffsetX, -imgViewOffsetY));
+			float imgViewOffsetX = _pickedBlockTexture->sizeF().x() * offsetX;
+			float imgViewOffsetY = _pickedBlockTexture->sizeF().y() * offsetY;
+			_pickedBlockTexture->setOffset(nanogui::Vector2f(-imgViewOffsetX, -imgViewOffsetY));
 		}
 	}
 
@@ -79,29 +79,29 @@ void VoxelProceduralSceneController::updateUI() {
 		window->setMouseInputMode(GLFW_CURSOR_NORMAL);
 		this->setCameraMouseControl(false);
 		_axesNode->setActive(true);
-		_playerWindow->set_visible(true);
-		_environementWindow->set_visible(true);
+		_playerWindow->setVisible(true);
+		_environementWindow->setVisible(true);
 
 		nanogui::Vector2i playerWindowNewPos = _playerWindow->position();
 		if (_playerWindow->position().x() + _playerWindow->width() > window->size().x)
 			playerWindowNewPos.x() = window->size().x - _playerWindow->width();
 		if (_playerWindow->position().y() + _playerWindow->height() > window->size().y)
 			playerWindowNewPos.y() = window->size().y - _playerWindow->height();
-		_playerWindow->set_position(playerWindowNewPos);
+		_playerWindow->setPosition(playerWindowNewPos);
 
 		nanogui::Vector2i environementWindowNewPos = _environementWindow->position();
 		if (_environementWindow->position().x() + _environementWindow->width() > window->size().x)
 			environementWindowNewPos.x() = window->size().x - _environementWindow->width();
 		if (_environementWindow->position().y() + _environementWindow->height() > window->size().y)
 			environementWindowNewPos.y() = window->size().y - _environementWindow->height();
-		_environementWindow->set_position(environementWindowNewPos);
+		_environementWindow->setPosition(environementWindowNewPos);
 
 	} else {
 		window->setMouseInputMode(GLFW_CURSOR_DISABLED);
 		this->setCameraMouseControl(true);
 		_axesNode->setActive(false);
-		_playerWindow->set_visible(false);
-		_environementWindow->set_visible(false);
+		_playerWindow->setVisible(false);
+		_environementWindow->setVisible(false);
 	}
 }
 
@@ -139,8 +139,8 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 	if (action == GLFW_PRESS && key == GLFW_KEY_TAB) {
 		for (int i = 0; i < 2; i++) {
 			if (_playerPositionLabel[i]->focused()) {
-				_playerPositionLabel[i]->focus_event(false);
-				_playerPositionLabel[i + 1]->request_focus();
+				_playerPositionLabel[i]->focusEvent(false);
+				_playerPositionLabel[i + 1]->requestFocus();
 				break;
 			}
 		}
@@ -148,6 +148,8 @@ void VoxelProceduralSceneController::keyCallBack(int key, int scancode, int acti
 }
 
 void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
+	(void)x;
+	(void)y;
 	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
@@ -157,7 +159,7 @@ void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
 		_pickedBlockIndex = (--_pickedBlockIndex) < 0 ? _pickableBlocks.size() - 1 : _pickedBlockIndex;
 	}
 	if (y != 0.0) {
-		_pickedBlockLabel->set_caption(_pickableBlocks[_pickedBlockIndex].first);
+		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
 		_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
 		_updateHandBlock();
 		_handBlock->mesh->generateBuffers();
@@ -165,6 +167,7 @@ void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
 }
 
 void VoxelProceduralSceneController::mouseButtonCallBack(int button, int action, int modifiers) {
+	(void)modifiers;
 	if (_startupWindow != DisplayedWindow::Game) {
 		return;
 	}
@@ -200,17 +203,17 @@ void VoxelProceduralSceneController::makeScene() {
 	if (_startupWindow == DisplayedWindow::StartMenu) {
 		// Saved worlds scrolling list
 		if (_selectWorldWindow) {
-			_selectWorldWindow->set_visible(true);
+			_selectWorldWindow->setVisible(true);
 			return ;
 		}
 		_selectWorldWindow = new nanogui::Window(_nanoguiScreen, "Saved worlds");
-		_selectWorldWindow->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 0));
+		_selectWorldWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Fill, 0, 0));
 
 		nanogui::VScrollPanel* scrollPanel = new nanogui::VScrollPanel(_selectWorldWindow);
-		scrollPanel->set_fixed_size(nanogui::Vector2i(200, 300));
+		scrollPanel->setFixedSize(nanogui::Vector2i(200, 300));
 
 		nanogui::Widget* worldsWidget = new nanogui::Widget(scrollPanel);
-		worldsWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Minimum, 10, 0));
+		worldsWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Minimum, 10, 0));
 
 		DIR* dir;
 		struct dirent* ent;
@@ -225,8 +228,8 @@ void VoxelProceduralSceneController::makeScene() {
 						continue ;
 					}
 		 			nanogui::Button* l = new nanogui::Button(worldsWidget, (worldName.length() < 24 ? worldName : worldName.substr(0, 22) + "..."));
-					l->set_fixed_width(180);
-		 			l->set_callback([worldName, this]() {
+					l->setFixedWidth(180);
+		 			l->setCallback([worldName, this]() {
 		 				_startupWindow = DisplayedWindow::Game;
 		 				_setupWorld();
 		 				_setupGUI();
@@ -235,7 +238,7 @@ void VoxelProceduralSceneController::makeScene() {
 						} catch (const std::exception& e) {
 							throw std::runtime_error("world was deleted while being use by a dumbfuck corrector... seriously fuck that guy");
 						}
-		 				_selectWorldWindow->set_visible(false);
+		 				_selectWorldWindow->setVisible(false);
 		 			});
 				}
 			}
@@ -244,73 +247,76 @@ void VoxelProceduralSceneController::makeScene() {
 
 		// New world Button
 		nanogui::Widget* newWorldWidget = new nanogui::Widget(_selectWorldWindow);
-		newWorldWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Maximum, 10, 0));
+		newWorldWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Maximum, 10, 0));
 		nanogui::Button* newWorldButton = new nanogui::Button(newWorldWidget, "New World");
 		
-		newWorldButton->set_callback([this]() {
+		newWorldButton->setCallback([this]() {
 			_startupWindow = DisplayedWindow::NewWorld;
-			_selectWorldWindow->set_visible(false);
+			_selectWorldWindow->setVisible(false);
 			makeScene();
 		});
 
-		_nanoguiScreen->perform_layout();
+		_nanoguiScreen->performLayout();
 		_selectWorldWindow->center();
 		return ;
 	} else if (_startupWindow == DisplayedWindow::NewWorld) {
 		// New World window
 		if (_newWorldWindow) {
-			_newWorldWindow->set_visible(true);
+			_newWorldWindow->setVisible(true);
 			return;
 		}
 		_newWorldWindow = new nanogui::Window(_nanoguiScreen, "New World");
-		_newWorldWindow->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 10));
+		_newWorldWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 10));
 
 		// World Name
 		auto worldNameWidget = new nanogui::Widget(_newWorldWindow);
-		worldNameWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+		worldNameWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 		
 		auto worldNameLabel = new nanogui::Label(worldNameWidget, "World Name");
+		(void)worldNameLabel;
 
 		auto worldNameField = new nanogui::TextBox(worldNameWidget, "");
-		worldNameField->set_editable(true);
-		worldNameField->set_fixed_width(200);
+		worldNameField->setEditable(true);
+		worldNameField->setFixedWidth(200);
 
 		// World Seed
 		auto worldSeedWidget = new nanogui::Widget(_newWorldWindow);
-		worldSeedWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+		worldSeedWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 
 		auto worldSeedLabel = new nanogui::Label(worldNameWidget, "Seed");
+		(void)worldSeedLabel;
 
 		auto worldSeedField = new nanogui::IntBox<int>(worldNameWidget);
 		std::srand(std::time(nullptr));
-		worldSeedField->set_value(std::rand());
-		worldSeedField->set_editable(false);
-		worldSeedField->set_fixed_width(200);
+		worldSeedField->setValue(std::rand());
+		worldSeedField->setEditable(false);
+		worldSeedField->setFixedWidth(200);
 
 		// World Kernel Generator
 		auto worldGeneratorWidget = new nanogui::Widget(_newWorldWindow);
-		worldGeneratorWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+		worldGeneratorWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 
 		auto worldGeneratorLabel = new nanogui::Label(worldNameWidget, "Generator");
+		(void)worldGeneratorLabel;
 
 		auto worldGeneratorField = new nanogui::TextBox(worldNameWidget, _generatorFileName);
-		worldGeneratorField->set_editable(true);
-		worldGeneratorField->set_fixed_width(200);
+		worldGeneratorField->setEditable(true);
+		worldGeneratorField->setFixedWidth(200);
 
 		// Apply Buttons
 		nanogui::Widget* newWorldWidget = new nanogui::Widget(_newWorldWindow);
-		newWorldWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Maximum, 0, 10));
+		newWorldWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal, nanogui::Alignment::Maximum, 0, 10));
 		//		Back Button
 		nanogui::Button* backButton = new nanogui::Button(newWorldWidget, "Back");
-		backButton->set_callback([this]() {
+		backButton->setCallback([this]() {
 			_startupWindow = DisplayedWindow::StartMenu;
-			_newWorldWindow->set_visible(false);
+			_newWorldWindow->setVisible(false);
 			makeScene();
 		});
 
 		//		New World Button
 		nanogui::Button* newWorldButton = new nanogui::Button(newWorldWidget, "New World");
-		newWorldButton->set_callback([this, worldNameField, worldSeedField, worldGeneratorField]() {
+		newWorldButton->setCallback([this, worldNameField, worldSeedField, worldGeneratorField]() {
 			if (worldGeneratorField->value().empty() || worldNameField->value().empty()) {
 				return;
 			}
@@ -339,7 +345,7 @@ void VoxelProceduralSceneController::makeScene() {
 				_generatorFileName = worldGeneratorField->value();
 				_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + worldGeneratorField->value());
 				_startupWindow = DisplayedWindow::Game;
-				_newWorldWindow->set_visible(false);
+				_newWorldWindow->setVisible(false);
 				_dynamicWorld->getGenerator()->setSeed(worldSeedField->value());
 				_dynamicWorld->setWorldName(worldName);
 				_setupGUI();
@@ -350,7 +356,7 @@ void VoxelProceduralSceneController::makeScene() {
 				return ;
 			}
 		});
-		_nanoguiScreen->perform_layout();
+		_nanoguiScreen->performLayout();
 		_newWorldWindow->center();
 	}
 }
@@ -534,43 +540,43 @@ void VoxelProceduralSceneController::_setupCamera() {
 void VoxelProceduralSceneController::_setupGUI() {
 	// Player Window
 	_playerWindow = new nanogui::Window(_nanoguiScreen, "Player");
-	_playerWindow->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 3));
-	_playerWindow->set_position(nanogui::Vector2i(10, 10));
+	_playerWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 3));
+	_playerWindow->setPosition(nanogui::Vector2i(10, 10));
 
 	// Create a widget, with a layout
 	auto fpsCounterWidget = new nanogui::Widget(_playerWindow);
-	fpsCounterWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	fpsCounterWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 
 	// Add ui elements to this widget
 	new nanogui::Label(fpsCounterWidget, "FPS: ");
 	_fpsValueLabel = new nanogui::Label(fpsCounterWidget, "-");
 
 	auto playerPositionWidget = new nanogui::Widget(_playerWindow);
-	playerPositionWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	playerPositionWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 
 	for (int i = 0; i < 3; i++) {
 		_playerPositionLabel[i] = new nanogui::IntBox<int>(playerPositionWidget, 0);
-		_playerPositionLabel[i]->set_editable(true);
+		_playerPositionLabel[i]->setEditable(true);
 	}
 
 	// Callbacks for player teleportation (triggered when int box are modified)
-	_playerPositionLabel[0]->set_callback([this](int posX) {
+	_playerPositionLabel[0]->setCallback([this](int posX) {
 		this->cameraNode->transform().position().x = static_cast<float>(posX);
 	});
-	_playerPositionLabel[1]->set_callback([this](int posY) {
+	_playerPositionLabel[1]->setCallback([this](int posY) {
 		this->cameraNode->transform().position().y = static_cast<float>(posY);
 	});
-	_playerPositionLabel[2]->set_callback([this](int posZ) {
+	_playerPositionLabel[2]->setCallback([this](int posZ) {
 		this->cameraNode->transform().position().z = static_cast<float>(posZ);
 	});
 
 	// Speed
 	auto speedBox = new nanogui::Widget(_playerWindow);
-	speedBox->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	speedBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(speedBox, "Speed: ");
 	_speedValueField = new nanogui::FloatBox<float>(speedBox, cameraMoveSpeed);
-	_speedValueField->set_editable(true);
-	_speedValueField->set_callback([this](float speed) {
+	_speedValueField->setEditable(true);
+	_speedValueField->setCallback([this](float speed) {
 		speed = std::clamp(speed, 0.0f, 1000.0f);
 		this->cameraMoveSpeed = speed;
 	});
@@ -579,111 +585,111 @@ void VoxelProceduralSceneController::_setupGUI() {
 	const float minFov = static_cast<float>(M_PI * 0.16666f);
 	const float maxFov = static_cast<float>(M_PI * 0.83333f);
 	auto fovBox = new nanogui::Widget(_playerWindow);
-	fovBox->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	fovBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(fovBox, "Fov: ");
 	_fovSlider = new nanogui::Slider(fovBox);
-	_fovSlider->set_value((cameraNode->camera()->fov - minFov) / (maxFov - minFov));
+	_fovSlider->setValue((cameraNode->camera()->fov - minFov) / (maxFov - minFov));
 	_fovValue = new nanogui::FloatBox<float>(fovBox, static_cast<float>((cameraNode->camera()->fov * 180.0f) / M_PI));
-	_fovSlider->set_callback([this, minFov, maxFov](float value) {
-		cameraNode->camera()->fov = value * (maxFov - minFov) + minFov;
-		_fovValue->set_value(static_cast<float>((cameraNode->camera()->fov * 180.0f) / M_PI));
+	_fovSlider->setCallback([this, minFov, maxFov](float value) {
+		this->cameraNode->camera()->fov = value * (maxFov - minFov) + minFov;
+		this->_fovValue->setValue(static_cast<float>((cameraNode->camera()->fov * 180.0f) / M_PI));
 	});
 
 	// Picked Block
 	auto pickedBlockBox = new nanogui::Widget(_playerWindow);
-	pickedBlockBox->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+	pickedBlockBox->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 	
 	const int blockImageSize = 50;
-	// _pickedBlockTexture = new nanogui::ImageView(pickedBlockBox, _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->buffer());
-	_pickedBlockTexture = new nanogui::ImageView(pickedBlockBox);
-	// _pickedBlockTexture->set_image(_dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->buffer());
-	_pickedBlockTexture->set_fixed_size(nanogui::Vector2i(blockImageSize, blockImageSize));
-	_pickedBlockTexture->set_scale((float)blockImageSize / _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->width() * 3 * 16.0f); 
-	// _pickedBlockTexture->set_fixed_scale(true);
-	// _pickedBlockTexture->set_fixed_offset(false);
+	_pickedBlockTexture = new nanogui::ImageView(pickedBlockBox, _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->buffer());
+	_pickedBlockTexture->setFixedSize(nanogui::Vector2i(blockImageSize, blockImageSize));
+	_pickedBlockTexture->setScale((float)blockImageSize / _dynamicWorld->getGenerator()->usedMaterial->texture_diffuse->width() * 3 * 16.0f); 
+	_pickedBlockTexture->setFixedScale(true);
+	_pickedBlockTexture->setFixedOffset(false);
 	_pickedBlockLabel = new nanogui::Label(pickedBlockBox, _pickableBlocks[_pickedBlockIndex].first);
 
 	// Environement GUI
 
 	_environementWindow = new nanogui::Window(_nanoguiScreen, "Environement");
-	_environementWindow->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 3));
+	_environementWindow->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical, nanogui::Alignment::Middle, 10, 3));
 
 		// render distance
 	auto renderDistanceWidget = new nanogui::Widget(_environementWindow);
-	renderDistanceWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	renderDistanceWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	auto renderDistanceLabel = new nanogui::Label(renderDistanceWidget, "Render distance: ");
 	_renderDistanceSlider = new nanogui::Slider(renderDistanceWidget);
 	_renderDistanceValue = new nanogui::FloatBox<float>(renderDistanceWidget, _dynamicWorld->getRenderDistance());
-	_renderDistanceValue->number_format("%3.0f");
-	_renderDistanceValue->set_fixed_width(75);
-	renderDistanceLabel->set_fixed_width(125);
-	_renderDistanceSlider->set_callback([this](float value) {
+	_renderDistanceValue->numberFormat("%3.0f");
+	_renderDistanceValue->setFixedWidth(75);
+	renderDistanceLabel->setFixedWidth(125);
+	_renderDistanceSlider->setCallback([this](float value) {
 		float renderDistance = value * (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance)
 								+ DynamicWorld::minRenderDistance;
-		_renderDistanceValue->set_value(renderDistance);
+		_renderDistanceValue->setValue(renderDistance);
 		_dynamicWorld->setRenderDistance(renderDistance);
 		cameraNode->camera()->farZ = renderDistance;
 		cameraNode->camera()->fogFar = renderDistance;
 		cameraNode->camera()->fogNear = renderDistance * 0.9f;
 	});
-	_renderDistanceSlider->set_value((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
+	_renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
 
 		// meshmerize effect
 	auto meshmerizerWidget = new nanogui::Widget(_environementWindow);
-	meshmerizerWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	meshmerizerWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	auto meshmerizerLabel = new nanogui::Label(meshmerizerWidget, "Meshmerize effect: ");
-	meshmerizerLabel->set_fixed_width(125);
+	meshmerizerLabel->setFixedWidth(125);
 	_meshmerizerSlider = new nanogui::Slider(meshmerizerWidget);
 	_meshmerizerValue = new nanogui::FloatBox<float>(meshmerizerWidget, GameVoxelChunk::meshmerizerIntensity);
-	_meshmerizerValue->number_format("%.4f");
-	_meshmerizerValue->set_fixed_width(75);
-	_meshmerizerValue->set_value(GameVoxelChunk::meshmerizerIntensity);
-	_meshmerizerSlider->set_callback([this](float value) {
+	_meshmerizerValue->numberFormat("%.4f");
+	_meshmerizerValue->setFixedWidth(75);
+	_meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
+	_meshmerizerSlider->setCallback([this](float value) {
 		GameVoxelChunk::meshmerizerIntensity = value;
-		_meshmerizerValue->set_value(GameVoxelChunk::meshmerizerIntensity);
+		_meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
 	});
-	_renderDistanceSlider->set_value((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
+	_renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance)
 									/ (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
 
 		// cast shadow button
 	auto directionalLightWidget = new nanogui::Widget(_environementWindow);
-	directionalLightWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	directionalLightWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	_directionalLightCheckbox = new nanogui::CheckBox(directionalLightWidget, "Cast shadows");
-	_directionalLightCheckbox->set_callback([this](bool active) {
+	_directionalLightCheckbox->setCallback([this](bool active) {
 		_directionLightNode->light()->cast_shadow = active;
 	});
 
 		// useless button
 	auto uselessButtonWidget = new nanogui::Widget(_environementWindow);
-	uselessButtonWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	uselessButtonWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	auto uselessButton = new nanogui::Button(uselessButtonWidget, "Boutton inutile");
-	uselessButton->set_callback([]() {
+	uselessButton->setCallback([]() {
 		std::cout << "Je ne sert a rien" << std::endl;
 	});
 
 		// seed field
 	auto seedWidget = new nanogui::Widget(_environementWindow);
-	seedWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	seedWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	new nanogui::Label(seedWidget, "seed: ");
 	_seedField = new nanogui::IntBox<unsigned int>(seedWidget, _dynamicWorld->getGenerator()->getSeed());
-	_seedField->set_fixed_width(125);
-	_seedField->set_editable(true);
-	_seedField->set_callback([this](unsigned int value) {
+	_seedField->setFixedWidth(125);
+	_seedField->setEditable(true);
+	_seedField->setCallback([this](unsigned int value) {
+		(void)this;
+		(void)value;
 	});
 
 		// generator kernel choosing
 	auto generatorKernelWidget = new nanogui::Widget(_environementWindow);
-	generatorKernelWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
+	generatorKernelWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Vertical));
 	_generatorKernelField = new nanogui::TextBox(generatorKernelWidget, _generatorFileName);
-	_generatorKernelField->set_editable(true);
-	_generatorKernelField->set_fixed_width(200);
+	_generatorKernelField->setEditable(true);
+	_generatorKernelField->setFixedWidth(200);
 
 		// reload button
 	auto reloadWidget = new nanogui::Widget(_environementWindow);
-	reloadWidget->set_layout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
+	reloadWidget->setLayout(new nanogui::BoxLayout(nanogui::Orientation::Horizontal));
 	(new nanogui::Button(reloadWidget, "Reload"))
-		->set_callback([this]() {
+		->setCallback([this]() {
 		try {
 			_dynamicWorld->getGenerator()->setGenerationKernel(generatorFilePath + _generatorKernelField->value());
 		} catch (std::exception &e) {
@@ -695,9 +701,9 @@ void VoxelProceduralSceneController::_setupGUI() {
 	updateUI();
 
 	// Compute the layout (width, height)
-	_nanoguiScreen->perform_layout();
+	_nanoguiScreen->performLayout();
 
-	_environementWindow->set_position(nanogui::Vector2i(_window.lock()->size().x - _environementWindow->width() - 10, 10));
+	_environementWindow->setPosition(nanogui::Vector2i(_window.lock()->size().x - _environementWindow->width() - 10, 10));
 }
 
 void VoxelProceduralSceneController::_createWorldsFolder() {
@@ -794,13 +800,13 @@ void VoxelProceduralSceneController::_loadJsonFileInfo(nlohmann::json data) {
 		data.at("player").at("rotation")[1].get<float>()
 	);
 
-	_speedValueField->set_value(cameraMoveSpeed);
-	_playerPositionLabel[0]->set_value(cameraNode->transform().position().x);
-	_playerPositionLabel[1]->set_value(cameraNode->transform().position().x);
-	_playerPositionLabel[2]->set_value(cameraNode->transform().position().x);
-	_fovSlider->set_value((cameraNode->camera()->fov - minFov) / (maxFov - minFov));
-	_fovValue->set_value(cameraNode->camera()->fov * 180.0f / M_PI);
-	_pickedBlockLabel->set_caption(_pickableBlocks[_pickedBlockIndex].first);
+	_speedValueField->setValue(cameraMoveSpeed);
+	_playerPositionLabel[0]->setValue(cameraNode->transform().position().x);
+	_playerPositionLabel[1]->setValue(cameraNode->transform().position().x);
+	_playerPositionLabel[2]->setValue(cameraNode->transform().position().x);
+	_fovSlider->setValue((cameraNode->camera()->fov - minFov) / (maxFov - minFov));
+	_fovValue->setValue(cameraNode->camera()->fov * 180.0f / M_PI);
+	_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);
 	_handBlock->voxel->blockAt(glm::ivec3(0, 0, 0)) = _pickableBlocks[_pickedBlockIndex].second;
 	_updateHandBlock();
 
@@ -810,13 +816,13 @@ void VoxelProceduralSceneController::_loadJsonFileInfo(nlohmann::json data) {
 	GameVoxelChunk::meshmerizerIntensity = data.at("settings").at("meshmerizeEffect").get<float>();
 	_directionLightNode->light()->cast_shadow = data.at("settings").at("castShadow").get<bool>();
 
-	_renderDistanceSlider->set_value((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance) / (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
-	_renderDistanceValue->set_value(_dynamicWorld->getRenderDistance());
-	_meshmerizerSlider->set_value(GameVoxelChunk::meshmerizerIntensity);
-	_meshmerizerValue->set_value(GameVoxelChunk::meshmerizerIntensity);
-	_directionalLightCheckbox->set_checked(_directionLightNode->light()->cast_shadow);
-	_seedField->set_value(_dynamicWorld->getGenerator()->getSeed());
-	_generatorKernelField->set_value(data.at("settings").at("generator").get<std::string>());
+	_renderDistanceSlider->setValue((_dynamicWorld->getRenderDistance() - DynamicWorld::minRenderDistance) / (DynamicWorld::maxRenderDistance - DynamicWorld::minRenderDistance));
+	_renderDistanceValue->setValue(_dynamicWorld->getRenderDistance());
+	_meshmerizerSlider->setValue(GameVoxelChunk::meshmerizerIntensity);
+	_meshmerizerValue->setValue(GameVoxelChunk::meshmerizerIntensity);
+	_directionalLightCheckbox->setChecked(_directionLightNode->light()->cast_shadow);
+	_seedField->setValue(_dynamicWorld->getGenerator()->getSeed());
+	_generatorKernelField->setValue(data.at("settings").at("generator").get<std::string>());
 
 	_dynamicWorld->setWorldName(data.at("worldName").get<std::string>());
 }

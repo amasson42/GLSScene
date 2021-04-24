@@ -13,6 +13,8 @@
 
 namespace GLS {
 
+    std::shared_ptr<Assimp::Importer> Node::_assimpImporter = nullptr;
+
     static void _processLoadNode(std::shared_ptr<Node> n,
         aiNode *node,
         const aiScene *scene,
@@ -34,14 +36,13 @@ namespace GLS {
             pair.first = n;
             pair.second = mesh;
             nodeMeshes.push_back(pair);
-            // FIXME: Ok but wtf ?
+            // FIXME: Why can't we make it in one line ?
             // nodeMeshes.push_back(std::make_pair<std::shared_ptr<Node>, aiMesh*>(n, mesh));
         }
     }
 
     std::shared_ptr<Node> Node::loadFromFile(std::string path) {
-        Assimp::Importer importer;
-        const aiScene *scene = importer.ReadFile(path,
+        const aiScene *scene = _assimpImporter->ReadFile(path,
             aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals);
         try {
             return loadFromAiScene(scene, path.substr(0, path.find_last_of('/')));
@@ -51,20 +52,25 @@ namespace GLS {
     }
 
     std::shared_ptr<Node> Node::loadFromAiScene(const aiScene *scene, std::string directory) {
+        if (!scene) {
+            throw FileLoadingException("No scene input");
+        }
+        std::cout << "scene "
+                << "validated: " << (scene->mFlags & AI_SCENE_FLAGS_VALIDATED) << " | "
+                << "incomplete: " << (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) << " | "
+                << "mNumAnimations " << scene->mNumAnimations << " | "
+                << "mNumCameras " << scene->mNumCameras << " | " // TODO: Add them
+                << "mNumLights " << scene->mNumLights << " | " // TODO: Add them
+                << "mNumMaterials " << scene->mNumMaterials << " | "
+                << "mNumMeshes " << scene->mNumMeshes << " | "
+                << "mNumTextures " << scene->mNumTextures << " | "
+                << std::endl;
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw FileLoadingException("can't load scene from aiScene");
         }
 
         std::shared_ptr<Node> node = std::make_shared<Node>();
 
-        std::cout << "scene "
-            << "mNumAnimations " << scene->mNumAnimations << " | "
-            << "mNumCameras " << scene->mNumCameras << " | "
-            << "mNumLights " << scene->mNumLights << " | "
-            << "mNumMaterials " << scene->mNumMaterials << " | "
-            << "mNumMeshes " << scene->mNumMeshes << " | "
-            << "mNumTextures " << scene->mNumTextures << " | "
-            << std::endl;
         std::vector<std::shared_ptr<Material> > materials;
         for (unsigned int i = 0; i < scene->mNumMaterials; i++)
             materials.push_back(Material::loadFromAiMaterial(scene->mMaterials[i], directory, static_cast<aiTexture **>(scene->mTextures)));
