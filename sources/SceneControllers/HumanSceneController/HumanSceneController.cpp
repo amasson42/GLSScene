@@ -68,10 +68,11 @@ void HumanSceneController::makeScene() {
         offseter->addChildNode(animNode);
 
         std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.1, 0.08);
+        std::shared_ptr<GLS::Material> cubeMaterial = std::make_shared<GLS::Material>();
+        cubeMaterial->diffuse = glm::vec3(1, 0, 0);
+        cubeMesh->setMaterial(cubeMaterial);
         offseter->addRenderable(cubeMesh);
-        offseter->addRenderable(cubeMesh);
-        offseter->addRenderable(cubeMesh);
-        // addCubeToNode(animNode, cubeMesh);
+        addCubeToNode(animNode, cubeMesh);
         if (animNode->hasAnimatable()) {
             animNode->initAnimation();
             std::cout << "animations: " << std::endl;
@@ -96,7 +97,7 @@ void HumanSceneController::makeScene() {
         planeMaterial->texture_diffuse = texture;
         planeMesh->setMaterial(planeMaterial);
 
-        T_Node plane = newNode();
+        T_Node plane = newNode("ground_plane");
         plane->addRenderable(planeMesh);
         plane->transform().setEulerAngles(-M_PI / 2, M_PI, 0);
 
@@ -130,8 +131,7 @@ static void _createCameraAndLights(GLS::Scene& scene) {
     scene.rootNode()->addChildNode(cameraNode);
 
     std::shared_ptr<GLS::Light> followLight = std::make_shared<GLS::Light>();
-    T_Node followLightNode = newNode();
-    followLightNode->setName("followLightNode");
+    T_Node followLightNode = newNode("followLightNode");
     followLightNode->transform().setPosition(glm::vec3(0, 0, 0));
     followLightNode->transform().setEulerAngles(0, 0, 0);
     followLight->type = (GLS::light_spot);
@@ -140,8 +140,7 @@ static void _createCameraAndLights(GLS::Scene& scene) {
     cameraNode->addChildNode(followLightNode);
 
     std::shared_ptr<GLS::Light> light = std::make_shared<GLS::Light>();
-    T_Node lightNode = newNode();
-    lightNode->setName("lightNode");
+    T_Node lightNode = newNode("lightNode");
     lightNode->transform().setPosition(glm::vec3(2, 5, 3));
     lightNode->transform().setEulerAngles(-1.5, 0, -0.3);
     light->type = (GLS::light_spot);

@@ -89,6 +89,8 @@ nanogui::Screen *GLSWindow::nanoguiScreen() {
     return _nanoguiScreen;
 }
 
-T_Node newNode() {
-    return std::make_shared<GLS::Node>();
+T_Node newNode(std::string name) {
+    T_Node node = std::make_shared<GLS::Node>();
+    node->setName(name);
+    return node;
 }

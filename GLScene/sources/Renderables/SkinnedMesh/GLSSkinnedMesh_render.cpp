@@ -44,7 +44,7 @@ namespace GLS {
             // modelMatrix = rootRelative;
 
             // FIXME: what the maths ?
-            // modelMatrix = glm::mat4(1);
+            modelMatrix = glm::mat4(1);
 
             glUniformMatrix4fv(program->getLocation("u_mat_joints[" + std::to_string(i) + "]"),
                 1, GL_TRUE, glm::value_ptr(modelMatrix));

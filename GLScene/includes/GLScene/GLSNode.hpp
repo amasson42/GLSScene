@@ -31,6 +31,10 @@ namespace GLS {
         std::vector<std::shared_ptr<IRenderable> > _renderables;
         std::vector<std::shared_ptr<IAnimatable> > _animatables;
 
+        static std::shared_ptr<Assimp::Importer> _assimpImporter;
+        friend void glsInit(void* addr);
+        friend void glsDeinit();
+
     public:
         
         Node();
