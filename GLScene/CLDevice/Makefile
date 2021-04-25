@@ -19,7 +19,8 @@ INCLUDES := -I$(INCS)
 ifeq ($(UNAME_S),Linux)
 	LIBS := -L/usr/lib \
 			-lOpenCL \
-			-lOpenGL
+			-lOpenGL \
+			`pkg-config --libs --static glew`
 endif
 ifeq ($(UNAME_S),Darwin)
 	LIBS := -L/usr/lib \
