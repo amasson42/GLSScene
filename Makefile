@@ -36,12 +36,14 @@ LIBS = -lm \
 		-L libs/nanogui/build -lnanogui \
 
 ifeq ($(UNAME_S),Linux)
+	USE_GLAD = ON
 	LIBS += -L/usr/lib \
 			-lOpenCL \
 			-lOpenGL \
 
 endif
 ifeq ($(UNAME_S),Darwin)
+	USE_GLAD = OFF
 	LIBS += -L/usr/lib \
 			-framework OpenCL \
 			-framework OpenGL \
@@ -135,7 +137,7 @@ libs/nanogui/build: libs/nanogui
 
 libs/nanogui/build/Makefile: libs/nanogui/build
 	@if [ ! -f $@ ]; then \
-		cd libs/nanogui/build && cmake -DNANOGUI_BUILD_SHARED=OFF -DNANOGUI_BUILD_PYTHON=OFF -DNANOGUI_BUILD_EXAMPLE=OFF .. ; \
+		cd libs/nanogui/build && cmake -DNANOGUI_USE_GLAD=$(USE_GLAD) -DNANOGUI_BUILD_SHARED=OFF -DNANOGUI_BUILD_PYTHON=OFF -DNANOGUI_BUILD_EXAMPLE=OFF .. ; \
 	fi
 	@touch $@
 
