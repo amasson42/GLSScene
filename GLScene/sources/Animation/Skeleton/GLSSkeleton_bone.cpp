@@ -14,8 +14,7 @@ namespace GLS {
     Skeleton::Bone::Bone(std::shared_ptr<Node> boneNode) :
     node(boneNode),
     offset(1),
-    globalRestPosition(1),
-    parentRelativeOffset(boneNode->getTransformMatrix())
+    globalRestPosition(1)
     {}
 
     void Skeleton::addBone(std::shared_ptr<Node> node) {

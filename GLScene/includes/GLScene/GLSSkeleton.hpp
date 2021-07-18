@@ -49,7 +49,6 @@ namespace GLS {
             std::weak_ptr<Node> node;
             glm::mat4 offset;
             glm::mat4 globalRestPosition;
-            glm::mat4 parentRelativeOffset;
 
             Bone(std::shared_ptr<Node> node);
         };

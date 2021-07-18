@@ -63,8 +63,9 @@ namespace GLS {
             std::cerr << rootNode->name() << "-joints_overflows=" << joint_overflow << std::endl;
         }
         for (size_t i = 0; i < skMesh->verticesRef().size(); i++) {
-            glm::vec4& v(skMesh->verticesRef()[i].joint_weights);
-            v = v / (v.x + v.y + v.z + v.w);
+            skMesh->verticesRef()[i].balanceWeights();
+            // glm::vec4& v(skMesh->verticesRef()[i].joint_weights);
+            // v = v / (v.x + v.y + v.z + v.w);
         }
         if (generateBuffers)
             skMesh->generateBuffers();

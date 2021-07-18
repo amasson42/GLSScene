@@ -67,4 +67,9 @@ namespace GLS {
         return false;
     }
 
+    void SkinnedVertex::balanceWeights() {
+        glm::vec4& v(joint_weights);
+        v = v / (v.x + v.y + v.z + v.w);
+    }
+
 }

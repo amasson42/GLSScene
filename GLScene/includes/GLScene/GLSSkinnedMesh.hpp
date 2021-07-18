@@ -40,6 +40,8 @@ namespace GLS {
             const glm::vec2& u);
 
         bool addWeight(int id, float weight);
+        void balanceWeights();
+
     };
 
     class SkinnedMesh : public IRenderable {
@@ -55,7 +57,7 @@ namespace GLS {
 
         std::shared_ptr<Skeleton> _skeleton;
         std::weak_ptr<Node> _rootNode;
-        
+
         std::shared_ptr<ShaderProgram> _shaderProgram;
         std::shared_ptr<Material> _material;
 
@@ -80,6 +82,7 @@ namespace GLS {
         std::vector<GLuint>& indicesRef();
         void setDrawMode(GLenum mode);
 
+        void setSkeleton(std::shared_ptr<Skeleton> skeleton, std::shared_ptr<Node> rootNode);
         const std::shared_ptr<Skeleton> skeleton() const;
 
         virtual std::pair<glm::vec3, glm::vec3> getBounds(glm::mat4 transform = glm::mat4(1)) const;

@@ -82,6 +82,11 @@ all: $(NAME)
 run: all
 	./$(NAME)
 
+cmakerun:
+	mkdir build && cd build && cmake .. || echo
+	cd build && make -j4
+	./build/$(NAME)
+
 install:
 	brew update
 	brew install pkg-config || brew upgrade pkg-config

@@ -75,9 +75,7 @@ void HumanSceneController::makeScene() {
     _createAnimationModel(scene, env);
     _createGround(scene, env);
 
-    std::cout << "Creating tentacle..." << std::endl;
     std::shared_ptr<GLS::Node> tentacle = generateTentacle();
-    std::cout << "Done!..." << std::endl;
     scene.rootNode()->addChildNode(tentacle);
     addRenderableToNodeHierarchy(tentacle, std::make_shared<MeshDebugAxes>());
 

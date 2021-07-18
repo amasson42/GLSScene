@@ -22,6 +22,11 @@ namespace GLS {
         _drawMode = mode;
     }
 
+    void SkinnedMesh::setSkeleton(std::shared_ptr<Skeleton> skeleton, std::shared_ptr<Node> rootNode) {
+        _skeleton = skeleton;
+        _rootNode = rootNode;
+    }
+
     const std::shared_ptr<Skeleton> SkinnedMesh::skeleton() const {
         return _skeleton;
     }

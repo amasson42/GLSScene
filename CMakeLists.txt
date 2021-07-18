@@ -13,8 +13,8 @@ endif()
 
 
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
-	#  execute_process(COMMAND git clone https://github.com/wjakob/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
-	execute_process(COMMAND git clone https://github.com/mitsuba-renderer/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
+	 execute_process(COMMAND git clone https://github.com/wjakob/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
+	# execute_process(COMMAND git clone https://github.com/mitsuba-renderer/nanogui.git --recursive ${CMAKE_CURRENT_BINARY_DIR}/libs/nanogui)
 endif()
 
 if (NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libs/nlohmannjson)

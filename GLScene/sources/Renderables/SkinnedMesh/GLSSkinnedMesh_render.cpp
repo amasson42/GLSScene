@@ -52,6 +52,7 @@ namespace GLS {
                 // }
 
                 jointMat = modelMatrix;
+                jointMat = glm::mat4(1);
             }
 
             glUniformMatrix4fv(program->getLocation("u_mat_joints[" + std::to_string(i) + "]"),

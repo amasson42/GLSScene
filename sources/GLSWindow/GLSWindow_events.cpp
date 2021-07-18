@@ -63,7 +63,7 @@ void GLSWindow::mouseButtonCallBack(int button, int action, int modifier) {
 void GLSWindow::closeCallback() {
     if (!_controller.expired())
         _controller.lock()->closeCallback();
-	close();
+    close();
 }
 
 glm::vec2 GLSWindow::mousePosition() const {
