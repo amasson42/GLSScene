@@ -17,13 +17,13 @@
 # define NANOGUI_USE_GLAD
 #endif
 
+#include <GLFW/glfw3.h>
+#include "GLScene.hpp"
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #include <nanogui/nanogui.h>
 #pragma GCC diagnostic pop
-
-#include <GLFW/glfw3.h>
-#include "GLScene.hpp"
 
 #include "AppEnv.hpp"
 

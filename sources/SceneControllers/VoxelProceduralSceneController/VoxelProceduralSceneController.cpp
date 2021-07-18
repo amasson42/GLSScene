@@ -154,9 +154,9 @@ void VoxelProceduralSceneController::scrollCallBack(double x, double y) {
 		return;
 	}
 	if (y > 0.0) {
-		_pickedBlockIndex = (++_pickedBlockIndex) % _pickableBlocks.size();
+		_pickedBlockIndex = (_pickedBlockIndex + 1) % static_cast<int>(_pickableBlocks.size());
 	} else if (y < 0.0) {
-		_pickedBlockIndex = (--_pickedBlockIndex) < 0 ? _pickableBlocks.size() - 1 : _pickedBlockIndex;
+		_pickedBlockIndex = (_pickedBlockIndex - 1) < 0 ? _pickableBlocks.size() - 1 : (_pickedBlockIndex - 1);
 	}
 	if (y != 0.0) {
 		_pickedBlockLabel->setCaption(_pickableBlocks[_pickedBlockIndex].first);

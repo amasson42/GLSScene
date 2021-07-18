@@ -50,7 +50,6 @@ void ISceneController::update() {
 
         float cameraRotateSpeed = 3.0 * win->deltaTime();
         float cameraMouseRotateSpeed = 20.0 * win->deltaTime();
-        bool changeCamera = true;
         if (win->keyPressed(GLFW_KEY_LEFT))
             _cameraEulerAngles.y += cameraRotateSpeed;
         else if (win->keyPressed(GLFW_KEY_RIGHT))
@@ -59,8 +58,6 @@ void ISceneController::update() {
             _cameraEulerAngles.x -= cameraRotateSpeed;
         else if (win->keyPressed(GLFW_KEY_DOWN))
             _cameraEulerAngles.x += cameraRotateSpeed;
-		else
-			changeCamera = true;
 
 		if (_cameraMouseControlEnabled) {
 			glm::vec2 mousePosition = win->mouseContextPosition();
