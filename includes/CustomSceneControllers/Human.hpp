@@ -7,6 +7,7 @@ class HumanSceneController: public ISceneController {
     public:
     HumanSceneController(std::shared_ptr<GLSWindow> window);
     virtual ~HumanSceneController();
+    std::shared_ptr<GLS::Node> generateTentacle() const;
 
     virtual void makeScene();
     virtual void update();

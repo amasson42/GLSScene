@@ -7,6 +7,44 @@
 
 #include "AppEnv.hpp"
 
+class MeshDebugAxes : public GLS::IRenderable {
+
+    static std::array<std::shared_ptr<GLS::Mesh>, 3> _axes;
+    glm::mat4 _scaler;
+
+    public:
+
+    MeshDebugAxes(glm::vec3 scale = glm::vec3(1)) {
+        if (_axes[0] == nullptr) {
+            _axes[0] = GLS::Mesh::thinLine(glm::vec3(0, 0, 0), glm::vec3(1, 0, 0));
+            _axes[0]->setMaterial(std::make_shared<GLS::Material>());
+            _axes[0]->getMaterial()->diffuse = glm::vec3(1, 0, 0);
+        }
+        if (_axes[1] == nullptr) {
+            _axes[1] = GLS::Mesh::thinLine(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+            _axes[1]->setMaterial(std::make_shared<GLS::Material>());
+            _axes[1]->getMaterial()->diffuse = glm::vec3(0, 1, 0);
+        }
+        if (_axes[2] == nullptr) {
+            _axes[2] = GLS::Mesh::thinLine(glm::vec3(0, 0, 0), glm::vec3(0, 0, 1));
+            _axes[2]->setMaterial(std::make_shared<GLS::Material>());
+            _axes[2]->getMaterial()->diffuse = glm::vec3(0, 0, 1);
+        }
+        _scaler = glm::scale(glm::mat4(1), scale);
+    }
+
+    virtual void renderInContext(GLS::Scene& scene, const GLS::RenderUniforms& uniforms) {
+        GLS::RenderUniforms uniformsScaled = uniforms;
+        uniformsScaled.model *= _scaler;
+        _axes[0]->renderInContext(scene, uniformsScaled);
+        _axes[1]->renderInContext(scene, uniformsScaled);
+        _axes[2]->renderInContext(scene, uniformsScaled);
+    }
+
+};
+
+std::array<std::shared_ptr<GLS::Mesh>, 3> MeshDebugAxes::_axes = {nullptr, nullptr, nullptr};
+
 HumanSceneController::HumanSceneController(std::shared_ptr<GLSWindow> window) :
 ISceneController(window) {
 
@@ -27,7 +65,6 @@ static void _createCameraAndLights(GLS::Scene& scene);
 static void _createAnimationModel(GLS::Scene& scene, AppEnv* env);
 static void _createGround(GLS::Scene& scene, AppEnv* env);
 
-
 void HumanSceneController::makeScene() {
     if (_window.expired())
         return;
@@ -37,6 +74,12 @@ void HumanSceneController::makeScene() {
     _createCameraAndLights(scene);
     _createAnimationModel(scene, env);
     _createGround(scene, env);
+
+    std::cout << "Creating tentacle..." << std::endl;
+    std::shared_ptr<GLS::Node> tentacle = generateTentacle();
+    std::cout << "Done!..." << std::endl;
+    scene.rootNode()->addChildNode(tentacle);
+    addRenderableToNodeHierarchy(tentacle, std::make_shared<MeshDebugAxes>());
 
     mustUpdate = false;
 }

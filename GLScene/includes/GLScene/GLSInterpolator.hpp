@@ -144,7 +144,7 @@ namespace GLS {
 
         void addPositionAt(timefloat time, glm::vec3 position, CurveFunction<timefloat> function = CurveFunction<timefloat>());
         void addRotationAt(timefloat time, glm::quat rotation, CurveFunction<timefloat> function = CurveFunction<timefloat>());
-        void addScaleAt(timefloat time, glm::vec3 rotation, CurveFunction<timefloat> function = CurveFunction<timefloat>());
+        void addScaleAt(timefloat time, glm::vec3 scale, CurveFunction<timefloat> function = CurveFunction<timefloat>());
         void addMatrixAt(timefloat time, glm::mat4 matrix, CurveFunction<timefloat> function = CurveFunction<timefloat>());
 
         Transform transformAt(timefloat time) const;

@@ -37,6 +37,10 @@ namespace GLS {
         return *this;
     }
 
+    TransformInterpolator& SkeletonAnimation::interpolatorAt(int boneIndex) {
+        return _interpolations[boneIndex];
+    }
+
     void SkeletonAnimation::initAnimation() {
         _currentTime = 0;
     }
@@ -102,7 +106,7 @@ namespace GLS {
             const int count = std::min(_bones.size(), interpolators.size());
             for (int i = 0; i < count; i++) {
                 if (_bones[i].node.expired() == false) {
-                    _bones[i].node.lock()->setTransform(interpolators[i].transformAt(time));
+                    _bones[i].node.lock()->transform().setMatrix(_bones[i].parentRelativeOffset * interpolators[i].transformAt(time).matrix());
                 }
             }
         }
@@ -114,6 +118,15 @@ namespace GLS {
         } else {
             return false;
         }
+    }
+
+    SkeletonAnimation *Skeleton::createAnimation(std::string name, timefloat duration, bool loop) {
+        SkeletonAnimation animation;
+        animation._duration = duration;
+        animation._loop = loop;
+        animation._interpolations = std::vector<TransformInterpolator>(_bones.size());
+        _animations[name] = animation;
+        return &(_animations[name]);
     }
 
 }

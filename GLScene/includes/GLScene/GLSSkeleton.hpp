@@ -32,6 +32,8 @@ namespace GLS {
 
         SkeletonAnimation& operator=(const SkeletonAnimation& copy);
 
+        TransformInterpolator& interpolatorAt(int boneIndex);
+
         virtual void initAnimation();
         virtual void animate(timefloat deltaTime);
         virtual bool alive() const;
@@ -47,6 +49,7 @@ namespace GLS {
             std::weak_ptr<Node> node;
             glm::mat4 offset;
             glm::mat4 globalRestPosition;
+            glm::mat4 parentRelativeOffset;
 
             Bone(std::shared_ptr<Node> node);
         };
@@ -88,6 +91,8 @@ namespace GLS {
         virtual void initAnimationNamed(std::string name, timefloat offsetTime = 0);
         virtual void animate(timefloat deltaTime);
         virtual bool alive() const;
+
+        SkeletonAnimation *createAnimation(std::string name, timefloat duration, bool loop);
 
     };
 
