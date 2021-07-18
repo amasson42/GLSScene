@@ -18,7 +18,6 @@ namespace GLS {
     static void _processLoadNode(std::shared_ptr<Node> n,
         aiNode *node,
         const aiScene *scene,
-        std::vector<std::shared_ptr<Material> >& materials,
         std::vector<std::pair<std::shared_ptr<Node>, aiMesh*>>& nodeMeshes) {
         {
             n->setName(std::string(node->mName.C_Str()));
@@ -28,7 +27,7 @@ namespace GLS {
         for (unsigned int i = 0; i < node->mNumChildren; i++) {
             std::shared_ptr<Node> newChild = std::make_shared<Node>();
             n->addChildNode(newChild);
-            _processLoadNode(newChild, node->mChildren[i], scene, materials, nodeMeshes);
+            _processLoadNode(newChild, node->mChildren[i], scene, nodeMeshes);
         }
         for (unsigned int i = 0; i < node->mNumMeshes; i++) {
             aiMesh *mesh = scene->mMeshes[node->mMeshes[i]];
@@ -77,7 +76,7 @@ namespace GLS {
         materials.push_back(std::make_shared<Material>());
 
         std::vector<std::pair<std::shared_ptr<Node>, aiMesh*>> nodeMeshes;
-        _processLoadNode(node, scene->mRootNode, scene, materials, nodeMeshes);
+        _processLoadNode(node, scene->mRootNode, scene, nodeMeshes);
 
         std::shared_ptr<Skeleton> skeleton = nullptr;
         if (scene->HasAnimations()) {
@@ -88,7 +87,7 @@ namespace GLS {
         for (size_t i = 0; i < nodeMeshes.size(); i++) {
             std::pair<std::shared_ptr<Node>, aiMesh*>& nodeMesh(nodeMeshes[i]);
             if (nodeMesh.second->HasBones()) {
-                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(nodeMesh.second, skeleton, node /* nodeMesh.first*/);
+                std::shared_ptr<SkinnedMesh> nSkinnedMesh = SkinnedMesh::loadFromAiMesh(nodeMesh.second, skeleton, node /* nodeMesh.first */);
                 nSkinnedMesh->setMaterial(materials[nodeMesh.second->mMaterialIndex]);
                 nodeMesh.first->addRenderable(nSkinnedMesh);
             } else {

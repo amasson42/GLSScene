@@ -49,7 +49,7 @@ namespace GLS {
     }
 
     bool SkeletonAnimation::alive() const {
-        return !_loop || _currentTime <= _duration;
+        return _loop || _currentTime <= _duration;
     }
 
     std::vector<std::string> Skeleton::animationNames() const {

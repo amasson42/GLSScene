@@ -42,11 +42,12 @@ namespace GLS {
                     }
                 }
             }
+            // FIXME: This code is only here to check that all bones are existing !
             for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
                 aiAnimation *animation = scene->mAnimations[i];
                 std::cout << "animation with ticks " << animation->mTicksPerSecond << std::endl;
                 for (unsigned int j = 0; j < animation->mNumChannels; j++) {
-                    std::string boneName = std::string(animation->mChannels[j]->mNodeName.data);
+                    std::string boneName = std::string(animation->mChannels[j]->mNodeName.C_Str());
                     if (existingBones.find(boneName) == existingBones.end()) {
                         std::cout << "---- New bone from animations ----" << boneName << std::endl;
                         existingBones.insert(boneName);
@@ -67,9 +68,10 @@ namespace GLS {
                 aiNodeAnim *chan = animation->mChannels[j];
 
                 auto transpol = TransformInterpolator::loadFromAiNodeAnim(chan);
-                int boneIndex = skeleton->indexOfBoneNamed(std::string(chan->mNodeName.data));
+                int boneIndex = skeleton->indexOfBoneNamed(std::string(chan->mNodeName.C_Str()));
                 skAnimation._interpolations[boneIndex] = *transpol;
                 skAnimation._duration = std::max(skAnimation._duration, transpol->duration());
+                // skAnimation._loop |= animation->mChannels[j]->mPostState == aiAnimBehaviour_REPEAT;
                 skAnimation._loop = true;
             }
             skeleton->addAnimationWithName(std::string(animation->mName.data), skAnimation);

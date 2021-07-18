@@ -39,22 +39,28 @@ namespace GLS {
                 skMesh->indicesRef().push_back(face.mIndices[j]);
             }
         }
+        int joint_overflow = 0;
         for (unsigned int i = 0; i < mesh->mNumBones; i++) {
             std::string boneName(mesh->mBones[i]->mName.C_Str());
             int boneIndex = skeleton->indexOfBoneNamed(boneName);
             if (boneIndex < 0) {
-                std::cerr << "What is the fuck please ??? we have unexisting bones" << std::endl;
+                std::cerr << ">>>>" << std::endl;
+                std::cerr << "Located unexisting bone !" << std::endl;
                 std::cerr << "BoneName = " << boneName << std::endl;
                 for (size_t i = 0; i < skeleton->bones().size(); i++) {
                     std::cerr << skeleton->bones()[i].node.lock()->name() << std::endl;
                 }
+                std::cerr << "<<<<" << std::endl;
                 return nullptr;
             }
             for (unsigned int j = 0; j < mesh->mBones[i]->mNumWeights; j++) {
                 aiVertexWeight weight = mesh->mBones[i]->mWeights[j];
                 if (!skMesh->verticesRef()[weight.mVertexId].addWeight(boneIndex, weight.mWeight))
-                    std::cout << "join overflow" << std::endl;
+                    joint_overflow++;
             }
+        }
+        if (joint_overflow > 0) {
+            std::cerr << rootNode->name() << "-joints_overflows=" << joint_overflow << std::endl;
         }
         for (size_t i = 0; i < skMesh->verticesRef().size(); i++) {
             glm::vec4& v(skMesh->verticesRef()[i].joint_weights);

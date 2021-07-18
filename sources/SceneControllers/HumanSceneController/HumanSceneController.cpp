@@ -7,23 +7,6 @@
 
 #include "AppEnv.hpp"
 
-// struct FloatFrame {
-//     float value;
-
-//     FloatFrame(float v = 0) {
-//         value = v;
-//     }
-
-//     static FloatFrame linearValue(FloatFrame a, FloatFrame b, double t) {
-//         return FloatFrame(glm::mix(a.value, b.value, t));
-//     }
-// };
-
-// std::ostream& operator<<(std::ostream& out, const FloatFrame& frame) {
-//     out << frame.value;
-//     return out;
-// }
-
 HumanSceneController::HumanSceneController(std::shared_ptr<GLSWindow> window) :
 ISceneController(window) {
 
@@ -33,14 +16,17 @@ HumanSceneController::~HumanSceneController() {
     
 }
 
-void addCubeToNode(T_Node node, std::shared_ptr<GLS::Mesh> mesh) {
+void addRenderableToNodeHierarchy(T_Node node, std::shared_ptr<GLS::IRenderable> mesh) {
     node->addRenderable(mesh);
     for (size_t i = 0; i < node->childNodes().size(); i++) {
-        addCubeToNode(node->childNodeAt(i), mesh);
+        addRenderableToNodeHierarchy(node->childNodeAt(i), mesh);
     }
 }
 
 static void _createCameraAndLights(GLS::Scene& scene);
+static void _createAnimationModel(GLS::Scene& scene, AppEnv* env);
+static void _createGround(GLS::Scene& scene, AppEnv* env);
+
 
 void HumanSceneController::makeScene() {
     if (_window.expired())
@@ -49,69 +35,8 @@ void HumanSceneController::makeScene() {
     GLS::Scene& scene(*_scene);
 
     _createCameraAndLights(scene);
-
-    std::shared_ptr<std::string> animationFilenamePtr = env->getArgument("-file");
-    if (animationFilenamePtr != nullptr) {
-        std::string animationFilename = *animationFilenamePtr;
-
-        T_Node offseter = newNode();
-        offseter->setName("offseter");
-        offseter->transform().moveBy(0, 0, 0);
-        auto scalerIt = std::find(env->args.begin(), env->args.end(), "-scale");
-        if (scalerIt != env->args.end()) {
-            float scaler = std::stof(*(++scalerIt));
-            offseter->transform().setScale(glm::vec3(scaler));
-        }
-        scene.rootNode()->addChildNode(offseter);
-        T_Node animNode = GLS::Node::loadFromFile(animationFilename);
-        animNode->setName("animated");
-        offseter->addChildNode(animNode);
-
-        std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.1, 0.08);
-        std::shared_ptr<GLS::Material> cubeMaterial = std::make_shared<GLS::Material>();
-        cubeMaterial->diffuse = glm::vec3(1, 0, 0);
-        cubeMesh->setMaterial(cubeMaterial);
-        offseter->addRenderable(cubeMesh);
-        addCubeToNode(animNode, cubeMesh);
-        if (animNode->hasAnimatable()) {
-            animNode->initAnimation();
-            std::cout << "animations: " << std::endl;
-            auto skeleton = animNode->getAnimatable<GLS::Skeleton>();
-            for (size_t i = 0; i < skeleton->animationNames().size(); i++) {
-                std::cout << "  " << skeleton->animationNames()[i] << std::endl;
-            }
-        }
-    }
-
-    // create ground plane
-    std::shared_ptr<std::string> groundFileNamePtr = env->getArgument("-image");
-    if (groundFileNamePtr != nullptr) {
-        std::shared_ptr<GLS::Texture> texture = std::make_shared<GLS::Texture>(groundFileNamePtr->c_str());
-        texture->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        texture->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        float scaleFactor = 10.0 / (float)std::max(texture->width(), texture->height());
-
-        std::shared_ptr<GLS::Material> planeMaterial = std::make_shared<GLS::Material>();
-
-        std::shared_ptr<GLS::Mesh> planeMesh = GLS::Mesh::plane(texture->width(), texture->height());
-        planeMaterial->texture_diffuse = texture;
-        planeMesh->setMaterial(planeMaterial);
-
-        T_Node plane = newNode("ground_plane");
-        plane->addRenderable(planeMesh);
-        plane->transform().setEulerAngles(-M_PI / 2, M_PI, 0);
-
-        plane->transform().setScale(glm::vec3(scaleFactor, scaleFactor, scaleFactor));
-        scene.rootNode()->addChildNode(plane);
-    }
-
-    // create grass on it
-
-    // create beautiful car
-
-    // create some trees
-
-    // create random shit mesh
+    _createAnimationModel(scene, env);
+    _createGround(scene, env);
 
     mustUpdate = false;
 }
@@ -148,8 +73,72 @@ static void _createCameraAndLights(GLS::Scene& scene) {
     light->angle *= 1.5;
     lightNode->setLight(light);
     scene.rootNode()->addChildNode(lightNode);
+
+    std::shared_ptr<GLS::Light> ambiantLight = std::make_shared<GLS::Light>();
+    T_Node ambiantLightNode = newNode("ambiantLightNode");
+    ambiantLight->type = (GLS::light_ambiant);
+    ambiantLightNode->setLight(ambiantLight);
+    scene.rootNode()->addChildNode(ambiantLightNode);
 }
 
+static void _createAnimationModel(GLS::Scene& scene, AppEnv *env) {
+    std::shared_ptr<std::string> animationFilenamePtr = env->getArgument("-file");
+    if (animationFilenamePtr != nullptr) {
+        std::string animationFilename = *animationFilenamePtr;
+
+        T_Node offseter = newNode();
+        offseter->setName("offseter");
+        offseter->transform().moveBy(0, 0, 0);
+        auto scalerIt = std::find(env->args.begin(), env->args.end(), "-scale");
+        if (scalerIt != env->args.end()) {
+            float scaler = std::stof(*(++scalerIt));
+            offseter->transform().setScale(glm::vec3(scaler));
+        }
+        scene.rootNode()->addChildNode(offseter);
+        T_Node animNode = GLS::Node::loadFromFile(animationFilename);
+        animNode->setName("animated");
+        offseter->addChildNode(animNode);
+
+        std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(0.08, 0.1, 0.08);
+        std::shared_ptr<GLS::Material> cubeMaterial = std::make_shared<GLS::Material>();
+        cubeMaterial->diffuse = glm::vec3(1, 0, 0);
+        cubeMesh->setMaterial(cubeMaterial);
+        offseter->addRenderable(cubeMesh);
+        addRenderableToNodeHierarchy(animNode, cubeMesh);
+        if (animNode->hasAnimatable()) {
+            animNode->initAnimation();
+            std::cout << "animations: " << std::endl;
+            auto skeleton = animNode->getAnimatable<GLS::Skeleton>();
+            for (size_t i = 0; i < skeleton->animationNames().size(); i++) {
+                std::cout << "  " << skeleton->animationNames()[i] << std::endl;
+            }
+        }
+    }
+}
+
+static void _createGround(GLS::Scene& scene, AppEnv *env) {
+    // create ground plane
+    std::shared_ptr<std::string> groundFileNamePtr = env->getArgument("-image");
+    if (groundFileNamePtr != nullptr) {
+        std::shared_ptr<GLS::Texture> texture = std::make_shared<GLS::Texture>(groundFileNamePtr->c_str());
+        texture->setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        texture->setParameter(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        float scaleFactor = 10.0 / (float)std::max(texture->width(), texture->height());
+
+        std::shared_ptr<GLS::Material> planeMaterial = std::make_shared<GLS::Material>();
+
+        std::shared_ptr<GLS::Mesh> planeMesh = GLS::Mesh::plane(texture->width(), texture->height());
+        planeMaterial->texture_diffuse = texture;
+        planeMesh->setMaterial(planeMaterial);
+
+        T_Node plane = newNode("ground_plane");
+        plane->addRenderable(planeMesh);
+        plane->transform().setEulerAngles(-M_PI / 2, M_PI, 0);
+
+        plane->transform().setScale(glm::vec3(scaleFactor, scaleFactor, scaleFactor));
+        scene.rootNode()->addChildNode(plane);
+    }
+}
 
 void HumanSceneController::update() {
     ISceneController::update();
@@ -160,4 +149,19 @@ void HumanSceneController::update() {
 
     (void)currentTime;
     (void)deltaTime;
+}
+
+void HumanSceneController::keyCallBack(int key, int scancode, int action, int mods) {
+    std::cout << "{key: " << key << ", scancode: " << scancode
+        << ", action: " << action << ", mods: " << mods << "}" << std::endl;
+    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        // std::string nodeName = "Bip01_Spine";
+        // T_Node node = scene()->rootNode()->childNodeNamed(nodeName, true);
+        // if (node != nullptr) {
+        //     node->removeFromParent();
+        //     std::cout << "removing node " << nodeName << std::endl;
+        // } else {
+        //     std::cout << "node not found" << std::endl;
+        // }
+    }
 }
