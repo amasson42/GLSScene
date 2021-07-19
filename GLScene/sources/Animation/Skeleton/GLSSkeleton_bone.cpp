@@ -13,29 +13,20 @@ namespace GLS {
 
     Skeleton::Bone::Bone(std::shared_ptr<Node> boneNode) :
     node(boneNode),
-    offset(1),
-    globalRestPosition(1)
+    inverseBind(1)
     {}
 
     void Skeleton::addBone(std::shared_ptr<Node> node) {
         Bone bone(node);
-        bone.offset = glm::mat4(1);
-        if (_bones.empty()) {
-            bone.globalRestPosition = glm::mat4(1);
-        } else {
-            bone.globalRestPosition = node->getParentNodeRelativeTransformMatrix(_bones[0].node.lock());
+        if (!_bones.empty()) {
+            bone.inverseBind = glm::inverse(node->getParentNodeRelativeTransformMatrix(_bones[0].node.lock()));
         }
         _bones.push_back(bone);
     }
 
     void Skeleton::addBone(std::shared_ptr<Node> node, glm::mat4 offset) {
         Bone bone(node);
-        bone.offset = offset;
-        if (_bones.empty()) {
-            bone.globalRestPosition = glm::mat4(1);
-        } else {
-            bone.globalRestPosition = node->getParentNodeRelativeTransformMatrix(_bones[0].node.lock());
-        }
+        bone.inverseBind = offset;
         _bones.push_back(bone);
     }
 

@@ -106,7 +106,14 @@ namespace GLS {
             const int count = std::min(_bones.size(), interpolators.size());
             for (int i = 0; i < count; i++) {
                 if (_bones[i].node.expired() == false) {
-                    _bones[i].node.lock()->setTransform(interpolators[i].transformAt(time));
+                    std::shared_ptr<GLS::Node> boneNode = _bones[i].node.lock();
+                    GLS::Transform framePos = interpolators[i].transformAt(time);
+                    if (!interpolators[i].keyPositions().isEmpty())
+                        boneNode->transform().setPosition(framePos.position());
+                    if (!interpolators[i].keyRotations().isEmpty())
+                        boneNode->transform().setRotation(framePos.rotation());
+                    if (!interpolators[i].keyScales().isEmpty())
+                        boneNode->transform().setScale(framePos.scale());
                 }
             }
         }

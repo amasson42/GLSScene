@@ -16,10 +16,6 @@ namespace GLS {
     }
 
     void SkinnedMesh::_sendBonesToShaderProgram(std::shared_ptr<ShaderProgram> program) {
-
-        // static float roamer = 0.0;
-        // roamer = fmod(roamer + 0.001, 1);
-
         program->use();
         const std::vector<GLS::Skeleton::Bone>& bones(_skeleton->bones());
         for (size_t i = 0; i < bones.size() && i < Skeleton::maxBones; i++) {
@@ -29,34 +25,13 @@ namespace GLS {
 
             if (!bone.node.expired()) {
                 std::shared_ptr<Node> node = bone.node.lock();
-                // std::shared_ptr<Node> rootNode = bones[0].node.lock();
                 std::shared_ptr<Node> rootNode = _rootNode.lock();
-                
                 glm::mat4 rootRelative = node->getParentNodeRelativeTransformMatrix(rootNode);
-                // glm::mat4 rootRelative = node->getWorldTransformMatrix();
-
-                glm::mat4 modelMatrix = bone.globalRestPosition * glm::inverse(rootRelative);// * bone.offset;
-                modelMatrix = rootRelative * node->getTransformMatrix() * glm::inverse(bone.globalRestPosition) * bone.offset;
-                // modelMatrix = glm::inverse(bone.offset) * rootRelative;
-                // modelMatrix = node->getTransformMatrix() * bone.offset;
-                // modelMatrix = rootRelative;
-
-                // FIXME: what the maths ?
-                // modelMatrix = glm::mat4(1);
-                // if (node->name() == "Bip01_L_Thigh") {
-                    // modelMatrix = glm::scale(modelMatrix, glm::vec3(2 * std::abs(roamer - 0.5), 1, 1));
-                    // modelMatrix = glm::translate(modelMatrix, glm::vec3(0, roamer, 0));
-                    // modelMatrix = modelMatrix * glm::toMat4(glm::quat(glm::vec3(0, roamer, 0)));
-                // } else {
-                    // modelMatrix = glm::mat4(1);
-                // }
-
-                jointMat = modelMatrix;
-                jointMat = glm::mat4(1);
+                jointMat = rootRelative * bone.inverseBind;
             }
 
             glUniformMatrix4fv(program->getLocation("u_mat_joints[" + std::to_string(i) + "]"),
-                1, GL_TRUE, glm::value_ptr(jointMat));
+                1, GL_FALSE, glm::value_ptr(jointMat));
         }
     }
 

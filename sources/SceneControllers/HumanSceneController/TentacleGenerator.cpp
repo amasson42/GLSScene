@@ -34,11 +34,14 @@ std::shared_ptr<GLS::Node> HumanSceneController::generateTentacle() const {
     int it3 = skeleton->indexOfBoneNamed("tentacle_t3");
 
     animation->interpolatorAt(it0).addScaleAt(0, glm::vec3(1, 1, 1));
+    animation->interpolatorAt(it0).addPositionAt(0, glm::vec3(0, 0, 0));
+    animation->interpolatorAt(it0).addPositionAt(1, glm::vec3(2, 0, 0), GLS::CurveFunction<GLS::timefloat>::easeOut());
+    animation->interpolatorAt(it0).addPositionAt(2, glm::vec3(0, 0, 0), GLS::CurveFunction<GLS::timefloat>::easeOut());
 
     animation->interpolatorAt(it1).addPositionAt(0, glm::vec3(0, 1, 0));
     animation->interpolatorAt(it1).addRotationAt(0, glm::quat());
-    animation->interpolatorAt(it1).addRotationAt(0.5, glm::quat(glm::vec3(0, 0, 0.6)));
-    animation->interpolatorAt(it1).addRotationAt(1.5, glm::quat(glm::vec3(0, 0, -0.6)));
+    animation->interpolatorAt(it1).addRotationAt(0.5, glm::quat(glm::vec3(0, 0, 0.6)), GLS::CurveFunction<GLS::timefloat>::bounce());
+    animation->interpolatorAt(it1).addRotationAt(1.5, glm::quat(glm::vec3(0, 0, -0.6)), GLS::CurveFunction<GLS::timefloat>::bounce());
     animation->interpolatorAt(it1).addRotationAt(2.0, glm::quat());
 
     animation->interpolatorAt(it2).addPositionAt(0, glm::vec3(0, 1, 0));
