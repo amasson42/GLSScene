@@ -46,7 +46,10 @@ class MeshDebugAxes : public GLS::IRenderable {
 std::array<std::shared_ptr<GLS::Mesh>, 3> MeshDebugAxes::_axes = {nullptr, nullptr, nullptr};
 
 HumanSceneController::HumanSceneController(std::shared_ptr<GLSWindow> window) :
-ISceneController(window) {
+ISceneController(window),
+_mainNode(nullptr),
+_toolsWindow(nullptr)
+ {
 
 }
 
@@ -62,7 +65,7 @@ void addRenderableToNodeHierarchy(T_Node node, std::shared_ptr<GLS::IRenderable>
 }
 
 static void _createCameraAndLights(GLS::Scene& scene);
-static bool _createAnimationModel(GLS::Scene& scene, AppEnv* env);
+static std::shared_ptr<GLS::Node> _createAnimationModel(GLS::Scene& scene, AppEnv* env);
 static void _createGround(GLS::Scene& scene, AppEnv* env);
 
 void HumanSceneController::makeScene() {
@@ -72,12 +75,16 @@ void HumanSceneController::makeScene() {
     GLS::Scene& scene(*_scene);
 
     _createCameraAndLights(scene);
-    if (!_createAnimationModel(scene, env)) {
+    _mainNode = _createAnimationModel(scene, env);
+    if (_mainNode == nullptr) {
         std::shared_ptr<GLS::Node> tentacle = generateTentacle();
         scene.rootNode()->addChildNode(tentacle);
         addRenderableToNodeHierarchy(tentacle, std::make_shared<MeshDebugAxes>());
+        _mainNode = tentacle;
     }
     _createGround(scene, env);
+
+    _generateUI();
 
     mustUpdate = false;
 }
@@ -122,7 +129,7 @@ static void _createCameraAndLights(GLS::Scene& scene) {
     scene.rootNode()->addChildNode(ambiantLightNode);
 }
 
-static bool _createAnimationModel(GLS::Scene& scene, AppEnv *env) {
+static std::shared_ptr<GLS::Node> _createAnimationModel(GLS::Scene& scene, AppEnv *env) {
     std::shared_ptr<std::string> animationFilenamePtr = env->getArgument("-file");
     if (animationFilenamePtr != nullptr) {
         std::string animationFilename = *animationFilenamePtr;
@@ -140,23 +147,25 @@ static bool _createAnimationModel(GLS::Scene& scene, AppEnv *env) {
         // animNode->setName("animated");
         offseter->addChildNode(animNode);
 
-        std::shared_ptr<GLS::IRenderable> cubeMesh = std::make_shared<MeshDebugAxes>(glm::vec3(0.1, 0.1, 0.1)); // GLS::Mesh::cube(0.08, 0.1, 0.08);
-        // std::shared_ptr<GLS::Material> cubeMaterial = std::make_shared<GLS::Material>();
-        // cubeMaterial->diffuse = glm::vec3(1, 0, 0);
-        // cubeMesh->setMaterial(cubeMaterial);
+        std::shared_ptr<GLS::IRenderable> cubeMesh = std::make_shared<MeshDebugAxes>(glm::vec3(0.1, 0.1, 0.1));
         offseter->addRenderable(cubeMesh);
         addRenderableToNodeHierarchy(animNode, cubeMesh);
         if (animNode->hasAnimatable()) {
-            animNode->initAnimation();
+            std::shared_ptr<std::string> animationNamePtr = env->getArgument("-animation");
+            if (animationNamePtr != nullptr) {
+                animNode->getAnimatable<GLS::Skeleton>()->initAnimationNamed(*animationNamePtr);
+            } else {
+                animNode->initAnimation();
+            }
             std::cout << "animations: " << std::endl;
             auto skeleton = animNode->getAnimatable<GLS::Skeleton>();
             for (size_t i = 0; i < skeleton->animationNames().size(); i++) {
                 std::cout << "  " << skeleton->animationNames()[i] << std::endl;
             }
         }
-        return true;
+        return offseter;
     } else {
-        return false;
+        return nullptr;
     }
 }
 

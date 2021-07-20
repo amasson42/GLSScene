@@ -16,11 +16,13 @@ class ISceneController {
 
     bool mustUpdate;
 	float cameraMoveSpeed;
+    float playSpeed;
 
     ISceneController(std::shared_ptr<GLSWindow> window);
     virtual ~ISceneController();
 
     std::shared_ptr<GLS::Scene> scene();
+    nanogui::Screen *nanoguiScreen();
 
     virtual void makeScene() = 0;
     virtual void update();

@@ -54,6 +54,10 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
             std::cerr << "Can't open shader effect " << *effectFilename << std::endl;
         }
     }
+    std::shared_ptr<std::string> playSpeedPtr = getArgument("-playSpeed");
+    if (playSpeedPtr != nullptr) {
+        sceneController->playSpeed = std::atof(playSpeedPtr->c_str());
+    }
 
     sceneController->makeScene();
 

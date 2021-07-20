@@ -9,6 +9,7 @@ ISceneController::ISceneController(std::shared_ptr<GLSWindow> window) :
 	_cameraEulerAngles(0, 0) {
     mustUpdate = true;
 	cameraMoveSpeed = 1;
+    playSpeed = 1;
 }
 
 ISceneController::~ISceneController() {
@@ -17,6 +18,13 @@ ISceneController::~ISceneController() {
 
 std::shared_ptr<GLS::Scene> ISceneController::scene() {
     return _scene;
+}
+
+nanogui::Screen *ISceneController::nanoguiScreen() {
+    if (_window.expired())
+        return nullptr;
+    else
+        return _window.lock()->nanoguiScreen();
 }
 
 void ISceneController::update() {
@@ -43,9 +51,9 @@ void ISceneController::update() {
             cam.transform().moveBy(-cameraSpeed * cameraRight);
         if (win->keyPressed(GLFW_KEY_D))
             cam.transform().moveBy(cameraSpeed * cameraRight);
-        if (win->keyPressed(GLFW_KEY_SPACE))
+        if (win->keyPressed(GLFW_KEY_E))
             cam.transform().moveBy(cameraSpeed * cameraUp);
-        if (win->keyPressed(GLFW_KEY_LEFT_SHIFT))
+        if (win->keyPressed(GLFW_KEY_Q))
             cam.transform().moveBy(-cameraSpeed * cameraUp);
 
         float cameraRotateSpeed = 3.0 * win->deltaTime();
@@ -85,7 +93,7 @@ void ISceneController::update() {
         mustUpdate = true;
     }
     if (mustUpdate) {
-        _scene->updateAnimations(win->deltaTime());
+        _scene->updateAnimations(playSpeed * win->deltaTime());
     }
 }
 
