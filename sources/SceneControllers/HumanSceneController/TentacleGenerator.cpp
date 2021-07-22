@@ -56,7 +56,7 @@ std::shared_ptr<GLS::Node> HumanSceneController::generateTentacle() const {
     animation->interpolatorAt(it3).addRotationAt(1.5, glm::quat(glm::vec3(0, 0, -1.5)));
     animation->interpolatorAt(it3).addRotationAt(2.0, glm::quat());
 
-    skeleton->initAnimationNamed("waving");
+    skeleton->setAnimationBlend("waving", 0, 1);
 
     std::shared_ptr<GLS::SkinnedMesh> mesh = std::make_shared<GLS::SkinnedMesh>();
     mesh->setSkeleton(skeleton, root);

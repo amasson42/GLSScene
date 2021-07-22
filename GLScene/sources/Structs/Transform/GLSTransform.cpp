@@ -184,7 +184,24 @@ namespace GLS {
         _transform = calculTransformMatrix(_position, _rotation, _scale);
         _transformUpdated = true;
     }
-    
+
+
+    // Others
+
+    void Transform::blendWith(const Transform& blender, float currentBlend, float targetBlend) {
+        // if (currentBlend <= 0) {
+        //     *this = blender;
+        //     return ;
+        // }
+        // if (targetBlend <= 0)
+        //     return ;
+        float totalBlend = currentBlend + targetBlend;
+        _position = ((_position * currentBlend) + (blender._position * targetBlend)) / totalBlend;
+        _rotation = ((_rotation * currentBlend) + (blender._rotation * targetBlend)) / totalBlend;
+        _scale = ((_scale * currentBlend) + (blender._scale * targetBlend)) / totalBlend;
+        _transformUpdated = false;
+    }
+
 }
 
 std::ostream& operator<<(std::ostream& out, const GLS::Transform& t) {

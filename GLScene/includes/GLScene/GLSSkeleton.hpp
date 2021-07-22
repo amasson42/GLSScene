@@ -34,9 +34,24 @@ namespace GLS {
 
         TransformInterpolator& interpolatorAt(int boneIndex);
 
+        timefloat duration() const;
+        void setDuration(timefloat d);
+        void setMinDuration(timefloat d);
+        void setMaxDuration(timefloat d);
+
+        bool loop() const;
+        void setLoop(bool l);
+
+        timefloat currentTime() const;
+
         virtual void initAnimation();
         virtual void animate(timefloat deltaTime);
         virtual bool alive() const;
+    };
+
+    struct AnimationBlender {
+        std::map<std::string, SkeletonAnimation>::iterator iterator;
+        float blendValue;
     };
 
     class Skeleton : public IAnimatable {
@@ -55,9 +70,8 @@ namespace GLS {
     protected:
 
         std::vector<Bone> _bones;
-
         std::map<std::string, SkeletonAnimation> _animations;
-        std::map<std::string, SkeletonAnimation>::iterator _currentAnimation;
+        std::vector<std::shared_ptr<AnimationBlender>> _activeAnimations;
 
     public:
 
@@ -80,17 +94,16 @@ namespace GLS {
         // animations
 
         std::vector<std::string> animationNames() const;
-        void addAnimationWithName(std::string name, const SkeletonAnimation& animation);
+        SkeletonAnimation *createAnimation(std::string name, timefloat duration, bool loop);
 
-        std::string currentAnimationName() const;
-        timefloat currentAnimationTime() const;
+        std::map<std::string, float> getAnimationBlends() const;
+        timefloat getAnimationTime(std::string name) const;
 
         virtual void initAnimation();
-        virtual void initAnimationNamed(std::string name, timefloat offsetTime = 0);
+        virtual std::shared_ptr<AnimationBlender> setAnimationBlend(std::string name, timefloat offsetTime = 0, float blend = 1.0f);
+        virtual void stopAnimations();
         virtual void animate(timefloat deltaTime);
         virtual bool alive() const;
-
-        SkeletonAnimation *createAnimation(std::string name, timefloat duration, bool loop);
 
     };
 

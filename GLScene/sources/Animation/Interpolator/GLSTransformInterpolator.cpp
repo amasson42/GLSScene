@@ -90,9 +90,7 @@ namespace GLS {
         addScaleAt(time, t.scale(), function);
     }
 
-    Transform TransformInterpolator::transformAt(timefloat time) const {
-        Transform transframe;
-
+    Transform TransformInterpolator::transformAt(timefloat time, Transform transframe) const {
         if (!_keyPositions.isEmpty()) {
             transframe.setPosition(_keyPositions.valueAt(time));
         }
@@ -102,7 +100,6 @@ namespace GLS {
         if (!_keyScales.isEmpty()) {
             transframe.setScale(_keyScales.valueAt(time));
         }
-
         return transframe;
     }
 

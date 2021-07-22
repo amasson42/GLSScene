@@ -78,9 +78,11 @@ void HumanSceneController::makeScene() {
     _mainNode = _createAnimationModel(scene, env);
     if (_mainNode == nullptr) {
         std::shared_ptr<GLS::Node> tentacle = generateTentacle();
-        scene.rootNode()->addChildNode(tentacle);
+        T_Node offseter = newNode("offseter");
+        scene.rootNode()->addChildNode(offseter);
+        offseter->addChildNode(tentacle);
         addRenderableToNodeHierarchy(tentacle, std::make_shared<MeshDebugAxes>());
-        _mainNode = tentacle;
+        _mainNode = offseter;
     }
     _createGround(scene, env);
 
@@ -153,7 +155,7 @@ static std::shared_ptr<GLS::Node> _createAnimationModel(GLS::Scene& scene, AppEn
         if (animNode->hasAnimatable()) {
             std::shared_ptr<std::string> animationNamePtr = env->getArgument("-animation");
             if (animationNamePtr != nullptr) {
-                animNode->getAnimatable<GLS::Skeleton>()->initAnimationNamed(*animationNamePtr);
+                animNode->getAnimatable<GLS::Skeleton>()->setAnimationBlend(*animationNamePtr, 0, 1);
             } else {
                 animNode->initAnimation();
             }

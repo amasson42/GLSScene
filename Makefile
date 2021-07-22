@@ -95,7 +95,7 @@ install:
 	brew install assimp || brew upgrade assimp
 
 GLScene:
-	@make -C GLScene
+	@make -C GLScene release=$(release)
 
 $(NAME): GLScene libs/nanogui/build/libnanogui.a libs/nlohmannjson $(O_FILES)
 	@$(CC) $(CPP_FLAGS) \

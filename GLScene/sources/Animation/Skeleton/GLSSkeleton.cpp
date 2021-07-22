@@ -16,8 +16,18 @@ namespace GLS {
     Skeleton::Skeleton() :
     _bones(),
     _animations(),
-    _currentAnimation() {
-        _currentAnimation = _animations.end();
+    _activeAnimations() {
+
+    }
+
+    Skeleton::Skeleton(const Skeleton& copy) :
+    _bones(copy._bones),
+    _animations(copy._animations),
+    _activeAnimations() {
+        for (size_t i = 0; i < copy._activeAnimations.size(); i++) {
+            std::shared_ptr<AnimationBlender> anim = copy._activeAnimations[i];
+            setAnimationBlend(anim->iterator->first, anim->iterator->second._currentTime, anim->blendValue);
+        }
     }
 
     Skeleton::~Skeleton() {
@@ -27,7 +37,11 @@ namespace GLS {
     Skeleton& Skeleton::operator=(const Skeleton& copy) {
         _bones = copy._bones;
         _animations = copy._animations;
-        initAnimationNamed(copy.currentAnimationName(), copy.currentAnimationTime());
+        _activeAnimations.clear();
+        for (size_t i = 0; i < copy._activeAnimations.size(); i++) {
+            std::shared_ptr<AnimationBlender> anim = copy._activeAnimations[i];
+            setAnimationBlend(anim->iterator->first, anim->iterator->second._currentTime, anim->blendValue);
+        }
         return *this;
     }
 

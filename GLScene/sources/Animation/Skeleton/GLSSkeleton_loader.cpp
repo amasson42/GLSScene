@@ -62,19 +62,16 @@ namespace GLS {
         for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
             aiAnimation *animation = scene->mAnimations[i];
 
-            SkeletonAnimation skAnimation;
-            skAnimation._interpolations.resize(skeleton->boneCount());
+            SkeletonAnimation* skAnimation = skeleton->createAnimation(animation->mName.data, 0, true);
             for (unsigned int j = 0; j < animation->mNumChannels; j++) {
                 aiNodeAnim *chan = animation->mChannels[j];
 
-                auto transpol = TransformInterpolator::loadFromAiNodeAnim(chan);
                 int boneIndex = skeleton->indexOfBoneNamed(std::string(chan->mNodeName.C_Str()));
-                skAnimation._interpolations[boneIndex] = *transpol;
-                skAnimation._duration = std::max(skAnimation._duration, transpol->duration());
+                skAnimation->interpolatorAt(boneIndex) = *TransformInterpolator::loadFromAiNodeAnim(chan);
+                skAnimation->setMinDuration(0);
+                // skAnimation->setLoop(skAnimation->loop() || animation->mChannels[j]->mPostState == aiAnimBehaviour_REPEAT);
                 // skAnimation._loop |= animation->mChannels[j]->mPostState == aiAnimBehaviour_REPEAT;
-                skAnimation._loop = true;
             }
-            skeleton->addAnimationWithName(std::string(animation->mName.data), skAnimation);
         }
 
         return skeleton;

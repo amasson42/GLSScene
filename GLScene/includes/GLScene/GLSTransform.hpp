@@ -161,6 +161,10 @@ namespace GLS {
         const glm::mat4 matrix() const;
         void updateMatrix();
 
+
+        // Others
+
+        void blendWith(const Transform& blender, float currentBlend, float targetBlend);
     };
 
 }
