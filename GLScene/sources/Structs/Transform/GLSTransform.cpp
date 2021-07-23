@@ -197,7 +197,7 @@ namespace GLS {
         //     return ;
         float totalBlend = currentBlend + targetBlend;
         _position = ((_position * currentBlend) + (blender._position * targetBlend)) / totalBlend;
-        _rotation = ((_rotation * currentBlend) + (blender._rotation * targetBlend)) / totalBlend;
+        _rotation = glm::slerp(_rotation, blender._rotation, targetBlend / totalBlend);
         _scale = ((_scale * currentBlend) + (blender._scale * targetBlend)) / totalBlend;
         _transformUpdated = false;
     }

@@ -21,8 +21,6 @@ namespace GLS {
 
             existingBones.insert(hostNode->name());
             skeleton->addBone(hostNode);
-            std::cout << " bone[0]-" << hostNode->name() << std::endl;
-            std::cout << "  >" << hostNode->globalName() << std::endl;
 
             for (unsigned int k = 0; k < scene->mNumMeshes; k++) {
                 const aiMesh *mesh = scene->mMeshes[k];
@@ -35,8 +33,6 @@ namespace GLS {
                         std::shared_ptr<Node> boneNode = hostNode->childNodeNamed(boneName, true);
                         if (boneNode == nullptr)
                             continue;
-                        std::cout << " bone[" << existingBones.size() << "]-" << boneName << std::endl;
-                        std::cout << "  >" << boneNode->globalName() << std::endl;
                         skeleton->addBone(boneNode, aiToGlm(bone->mOffsetMatrix));
                         existingBones.insert(boneName);
                     }
@@ -45,7 +41,6 @@ namespace GLS {
             // FIXME: This code is only here to check that all bones are existing !
             for (unsigned int i = 0; i < scene->mNumAnimations; i++) {
                 aiAnimation *animation = scene->mAnimations[i];
-                std::cout << "animation with ticks " << animation->mTicksPerSecond << std::endl;
                 for (unsigned int j = 0; j < animation->mNumChannels; j++) {
                     std::string boneName = std::string(animation->mChannels[j]->mNodeName.C_Str());
                     if (existingBones.find(boneName) == existingBones.end()) {

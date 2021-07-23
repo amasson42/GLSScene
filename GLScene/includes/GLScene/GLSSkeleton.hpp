@@ -63,6 +63,7 @@ namespace GLS {
         struct Bone {
             std::weak_ptr<Node> node;
             glm::mat4 inverseBind;
+            Transform restPose;
 
             Bone(std::shared_ptr<Node> node);
         };

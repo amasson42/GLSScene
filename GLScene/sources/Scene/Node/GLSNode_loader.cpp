@@ -54,16 +54,16 @@ namespace GLS {
         if (!scene) {
             throw FileLoadingException("No scene input");
         }
-        std::cout << "scene "
-                << "validated: " << (scene->mFlags & AI_SCENE_FLAGS_VALIDATED) << " | "
-                << "incomplete: " << (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) << " | "
-                << "mNumAnimations " << scene->mNumAnimations << " | "
-                << "mNumCameras " << scene->mNumCameras << " | " // TODO: Add them
-                << "mNumLights " << scene->mNumLights << " | " // TODO: Add them
-                << "mNumMaterials " << scene->mNumMaterials << " | "
-                << "mNumMeshes " << scene->mNumMeshes << " | "
-                << "mNumTextures " << scene->mNumTextures << " | "
-                << std::endl;
+        // std::cout << "scene "
+        //         << "validated: " << (scene->mFlags & AI_SCENE_FLAGS_VALIDATED) << " | "
+        //         << "incomplete: " << (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) << " | "
+        //         << "mNumAnimations " << scene->mNumAnimations << " | "
+        //         << "mNumCameras " << scene->mNumCameras << " | " // TODO: Add them
+        //         << "mNumLights " << scene->mNumLights << " | " // TODO: Add them
+        //         << "mNumMaterials " << scene->mNumMaterials << " | "
+        //         << "mNumMeshes " << scene->mNumMeshes << " | "
+        //         << "mNumTextures " << scene->mNumTextures << " | "
+        //         << std::endl;
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
             throw FileLoadingException("can't load scene from aiScene");
         }

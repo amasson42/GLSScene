@@ -13,7 +13,8 @@ namespace GLS {
 
     Skeleton::Bone::Bone(std::shared_ptr<Node> boneNode) :
     node(boneNode),
-    inverseBind(1)
+    inverseBind(1),
+    restPose(boneNode->transform())
     {}
 
     void Skeleton::addBone(std::shared_ptr<Node> node) {

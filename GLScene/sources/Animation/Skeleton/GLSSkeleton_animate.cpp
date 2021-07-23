@@ -187,8 +187,7 @@ namespace GLS {
                     totalBlend += blendValue;
                 }
                 if (1 - totalBlend >= 0) {
-                    // totalTransform.blendWith(Transform(), totalBlend, 1 - totalBlend);
-                    totalTransform.blendWith(node->transform(), totalBlend, 1 - totalBlend);
+                    totalTransform.blendWith(_bones[boneIndex].restPose, totalBlend, 1 - totalBlend);
                 }
                 totalTransform.updateMatrix();
                 node->setTransform(totalTransform);
