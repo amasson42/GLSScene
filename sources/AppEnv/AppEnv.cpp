@@ -26,9 +26,9 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
     }
 
     // #define ZeSceneController GrosSceneController
-    #define ZeSceneController HumanSceneController
+    // #define ZeSceneController HumanSceneController
     // #define ZeSceneController ParticuleSystemSceneController
-    // #define ZeSceneController ShadowSceneController
+    #define ZeSceneController ShadowSceneController
     // #define ZeSceneController TrashSceneController
     // #define ZeSceneController VoxelProceduralSceneController
     sceneController = std::make_shared<ZeSceneController>(mainWindow);

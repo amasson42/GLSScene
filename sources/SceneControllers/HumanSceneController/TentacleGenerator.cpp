@@ -1,7 +1,7 @@
 
 #include "AppEnv.hpp"
 
-std::shared_ptr<GLS::Node> HumanSceneController::generateTentacle() const {
+std::shared_ptr<GLS::Node> HumanSceneController::generateTentacle() {
     // Create node hierarchy
     T_Node root = newNode("tentacle_root");
     T_Node t0 = newNode("tentacle_t0");

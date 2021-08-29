@@ -194,4 +194,10 @@ void ShadowSceneController::makeScene() {
         std::cerr << e.what() << std::endl;
     }
     // particleSystem = ps;
+
+    std::shared_ptr<GLS::Node> tentacleNode = HumanSceneController::generateTentacle();
+    tentacleNode->transform().setPosition(glm::vec3(1.0, 0.0, 2));
+    tentacleNode->transform().scaleBy(glm::vec3(0.5));
+    scene.rootNode()->addChildNode(tentacleNode);
+
 }
