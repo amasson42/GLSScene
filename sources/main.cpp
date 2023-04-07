@@ -9,18 +9,25 @@
 #include "AppEnv.hpp"
 
 void printHelp(const char *argv0) {
-    static bool didOnce = false;
-    if (didOnce) return;
-    didOnce = true;
+    std::cout << "usage: " << std::endl
+    << argv0 << " -scene [human | particles | shadow | voxel | cave]" << std::endl
+    << " [-effect post_processing_effect.glsl]" << std::endl
+    << " [-file path/to/file]" << std::endl
+    << " [-image path/to/image]" << std::endl
+    << " [-count n]" << std::endl
+    << " [-leaksloop]" << std::endl
+    << std::endl
+    << ""
+    << std::endl;
 
-    std::cout << "usage: " << argv0 << " [-effect post_processing_effect.glsl]" << std::endl;
+    exit(0);
 }
 
 int main(int argc, const char * argv[]) {
     bool loopLeaks = false;
     std::vector<std::string> args;
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "-leaks") == 0) {
+        if (strcmp(argv[i], "-leaksloop") == 0) {
             loopLeaks = true;
         } else if (strcmp(argv[i], "-help") == 0) {
             printHelp(argv[0]);
@@ -28,6 +35,8 @@ int main(int argc, const char * argv[]) {
             args.push_back(argv[i]);
         }
     }
+    if (argc == 1)
+        printHelp(argv[0]);
     try {
         AppEnv env(args);
         env.loop();

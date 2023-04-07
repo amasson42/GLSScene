@@ -52,7 +52,7 @@ float randFloat() {
 
 void ShadowSceneController::keyCallBack(int key, int scancode, int action, int mods) {
     (void)scancode;(void)mods;
-    if (key == 84) {
+    if (key == 84) { // keycode = T
         if (action) {
             cubesPivotNode->removeFromParent();
         } else {
@@ -174,7 +174,7 @@ void ShadowSceneController::makeScene() {
     std::shared_ptr<GLS::Node> particleNode = std::make_shared<GLS::Node>();
 
     GLS::ParticleSystemProperties psProp;
-    psProp.count = 1000;
+    psProp.count = 1000000;
     psProp.kernelSource = file_to_string("assets/particleSystemSources/gravityCenterPoint.cl");
     
     try {

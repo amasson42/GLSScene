@@ -162,6 +162,26 @@ void TrashSceneController::makeScene() {
     GLS::Scene& scene(*_scene);
     AppEnv *env = _window.lock()->getAppEnvPtr();
 
+    auto pointlightNode = std::make_shared<GLS::Node>();
+    auto pointlight = std::make_shared<GLS::Light>();
+    pointlight->type = GLS::light_spot;
+    pointlight->color = glm::vec3(1);
+    pointlight->cast_shadow = false;
+    pointlightNode->setLight(pointlight);
+
+    std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
+    {
+        std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
+        camera->aspect = (scene.getAspect());
+        cameraNode->setCamera(camera);
+    }
+    cameraNode->transform().moveBy(0, 2, 5);
+    scene.setCameraNode(cameraNode);
+    scene.rootNode()->addChildNode(cameraNode);
+    cameraNode->addChildNode(pointlightNode);
+    pointlightNode->transform().moveBy(1, 0, 0);
+    pointlightNode->transform().rotateEulerAnglesBy(0, 0.2, 0);
+
     std::shared_ptr<GLS::Node> triangleNode = std::make_shared<GLS::Node>();
     triangleNode->setName("triangles");
     {
@@ -246,13 +266,13 @@ void TrashSceneController::makeScene() {
     spotlightNode->setName("spotlight");
     scene.rootNode()->addChildNode(spotlightNode);
 
-    std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
-    std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
-    pointlight->type = (GLS::light_point);
-    pointLightNode->transform().setPosition(glm::vec3(0, 15, -7));
-    pointLightNode->setLight(pointlight);
-    pointLightNode->setName("pointight");
-    scene.rootNode()->addChildNode(pointLightNode);
+    // std::shared_ptr<GLS::Node> pointLightNode = std::make_shared<GLS::Node>();
+    // std::shared_ptr<GLS::Light> pointlight = std::make_shared<GLS::Light>();
+    // pointlight->type = (GLS::light_point);
+    // pointLightNode->transform().setPosition(glm::vec3(0, 15, -7));
+    // pointLightNode->setLight(pointlight);
+    // pointLightNode->setName("pointight");
+    // scene.rootNode()->addChildNode(pointLightNode);
 
     std::shared_ptr<GLS::Node> cubeNode = std::make_shared<GLS::Node>();
     std::shared_ptr<GLS::Mesh> cubeMesh = GLS::Mesh::cube(1.5, 1.5, 1.5);
@@ -277,16 +297,16 @@ void TrashSceneController::makeScene() {
     cubeNode->setName("cube");
     scene.rootNode()->addChildNode(cubeNode);
 
-    std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
-    {
-        std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
-        camera->aspect = (scene.getAspect());
-        camera->farZ = (300.0);
-        cameraNode->setCamera(camera);
-    }
-    cameraNode->transform().moveBy(0, 3, 6);
-    scene.setCameraNode(cameraNode);
-    scene.rootNode()->addChildNode(cameraNode);
+    // std::shared_ptr<GLS::Node> cameraNode = std::make_shared<GLS::Node>();
+    // {
+    //     std::shared_ptr<GLS::Camera> camera = std::make_shared<GLS::Camera>();
+    //     camera->aspect = (scene.getAspect());
+    //     camera->farZ = (300.0);
+    //     cameraNode->setCamera(camera);
+    // }
+    // cameraNode->transform().moveBy(0, 3, 6);
+    // scene.setCameraNode(cameraNode);
+    // scene.rootNode()->addChildNode(cameraNode);
 
     std::vector<std::string> skyboxFaces;
     // skyboxFaces.push_back("assets/textures/skybox/lac_skybox/right.jpg");

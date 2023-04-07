@@ -88,7 +88,7 @@ void HumanSceneController::makeScene() {
 
     _generateUI();
 
-    mustUpdate = false;
+    mustUpdate = true;
 }
 
 static void _createCameraAndLights(GLS::Scene& scene) {
@@ -146,7 +146,7 @@ static std::shared_ptr<GLS::Node> _createAnimationModel(GLS::Scene& scene, AppEn
         }
         scene.rootNode()->addChildNode(offseter);
         T_Node animNode = GLS::Node::loadFromFile(animationFilename);
-        // animNode->setName("animated");
+        animNode->setName("animated");
         offseter->addChildNode(animNode);
 
         std::shared_ptr<GLS::IRenderable> cubeMesh = std::make_shared<MeshDebugAxes>(glm::vec3(0.1, 0.1, 0.1));
@@ -207,16 +207,6 @@ void HumanSceneController::update() {
 }
 
 void HumanSceneController::keyCallBack(int key, int scancode, int action, int mods) {
-    std::cout << "{key: " << key << ", scancode: " << scancode
-        << ", action: " << action << ", mods: " << mods << "}" << std::endl;
-    if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-        // std::string nodeName = "Bip01_Spine";
-        // T_Node node = scene()->rootNode()->childNodeNamed(nodeName, true);
-        // if (node != nullptr) {
-        //     node->removeFromParent();
-        //     std::cout << "removing node " << nodeName << std::endl;
-        // } else {
-        //     std::cout << "node not found" << std::endl;
-        // }
-    }
+    ISceneController::keyCallBack(key, scancode, action, mods);
+
 }

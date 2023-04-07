@@ -143,7 +143,7 @@ namespace GLS {
         "out vec4 FragColor;\n"
         "\n"
         "void main() {\n"
-        "    FragColor = texture(particle_texture, fs_in.uv);\n"
+        "    FragColor = vec4(fs_in.color, 1) * texture(particle_texture, fs_in.uv);\n"
         "    if (FragColor.a == 0.0) discard;\n"
         "}\n"
         "\n";

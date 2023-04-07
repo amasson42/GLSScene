@@ -52,7 +52,7 @@ endif
 
 CPP_FILES = $(shell find $(SRCS) -type f -name *.cpp)
 CPP_DIRS = $(shell find $(SRCS) -depth -type d)
-CPP_FLAGS += -std=c++17 -Wall -Wextra -Werror
+CPP_FLAGS += -std=c++17 -Wall -Wextra
 
 ifeq ($(release), )
 	CPP_FLAGS += -g -DDEBUG

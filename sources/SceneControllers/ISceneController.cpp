@@ -108,12 +108,12 @@ void ISceneController::resizeWindowCallBack(glm::vec2 newSize) {
 }
 
 void ISceneController::keyCallBack(int key, int scancode, int action, int mods) {
-    (void)key;
-    (void)scancode;
-    (void)action;
-    (void)mods;
-    // std::cout << "{key: " << key << ", scancode: " << scancode
-    //     << ", action: " << action << ", mods: " << mods << "}" << std::endl;
+    std::cout << "{key: " << key << ", scancode: " << scancode
+        << ", action: " << action << ", mods: " << mods << "}" << std::endl;
+
+    if (key == GLFW_KEY_BACKSLASH && action == GLFW_PRESS) {
+        std::cout << *(this->scene()->rootNode()) << std::endl;
+    }
 }
 
 void ISceneController::scrollCallBack(double x, double y) {

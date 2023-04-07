@@ -25,13 +25,26 @@ AppEnv::AppEnv(const std::vector<std::string>& as) :
         throw e;
     }
 
-    // #define ZeSceneController GrosSceneController
-    #define ZeSceneController HumanSceneController
-    // #define ZeSceneController ParticuleSystemSceneController
-    // #define ZeSceneController ShadowSceneController
-    // #define ZeSceneController TrashSceneController
-    // #define ZeSceneController VoxelProceduralSceneController
-    sceneController = std::make_shared<ZeSceneController>(mainWindow);
+    std::shared_ptr<std::string> sceneName = getArgument("-scene");
+
+    if (sceneName != nullptr) {
+        
+        if (*sceneName == "human") {
+            this->sceneController = std::make_shared<HumanSceneController>(mainWindow);
+        } else if (*sceneName == "particles") {
+            this->sceneController = std::make_shared<ParticuleSystemSceneController>(mainWindow);
+        } else if (*sceneName == "shadow") {
+            this->sceneController = std::make_shared<ShadowSceneController>(mainWindow);
+        } else if (*sceneName == "voxel") {
+            this->sceneController = std::make_shared<VoxelProceduralSceneController>(mainWindow);
+        } else if (*sceneName == "cave") {
+            this->sceneController = std::make_shared<CaveRunningSceneController>(mainWindow);
+        } else {
+            this->sceneController = std::make_shared<TrashSceneController>(mainWindow);
+        }
+    } else {
+        this->sceneController = std::make_shared<ShadowSceneController>(mainWindow);
+    }
     mainWindow->setController(sceneController);
 
     std::shared_ptr<std::string> effectFilename = getArgument("-effect");

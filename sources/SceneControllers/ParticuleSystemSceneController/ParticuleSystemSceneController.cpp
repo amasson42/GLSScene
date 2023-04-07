@@ -24,11 +24,13 @@ void ParticuleSystemSceneController::update() {
         std::shared_ptr<GLS::ParticleSystem> ps = particleSystem.lock();
         glm::vec3 gc(0);
         if (cameraNode != nullptr) {
-            gc = glm::vec3(cameraNode->getWorldTransformMatrix() * glm::vec4(windowMousePos.x, windowMousePos.y, -10, 1));
+            float aspect = static_cast<float>(win->size().x) / static_cast<float>(win->size().y);
+            gc = glm::vec3(cameraNode->getWorldTransformMatrix() * glm::vec4(aspect * 10 * windowMousePos.x, 10 * windowMousePos.y, -10, 1));
         }
         ps->getAnimationKernel()->setArgument(3, gc.x, gc.y, gc.z);
-        if (gravityCenterNode != nullptr)
+        if (gravityCenterNode != nullptr) {
             gravityCenterNode->transform().setPosition(gc);
+        }
 
         if (win->keyPressed(GLFW_KEY_T)) {
             ps->setTexture(nullptr);
@@ -56,8 +58,15 @@ void ParticuleSystemSceneController::makeScene() {
     scene.setCameraNode(cameraNode);
     scene.rootNode()->addChildNode(cameraNode);
 
+    auto pointlightNode = std::make_shared<GLS::Node>();
+    auto pointlight = std::make_shared<GLS::Light>();
+    pointlight->type = GLS::light_point;
+    pointlight->color = glm::vec3(1);
+    pointlightNode->setLight(pointlight);
+    cameraNode->addChildNode(pointlightNode);
+
     GLS::ParticleSystemProperties psProperties;
-    std::shared_ptr<std::string> kernelFilename = env->getArgument("-kernel");
+    std::shared_ptr<std::string> kernelFilename = env->getArgument("-file");
     if (kernelFilename != nullptr) {
         std::ifstream file(*kernelFilename);
         file.seekg(0, file.end);
@@ -75,7 +84,7 @@ void ParticuleSystemSceneController::makeScene() {
         psProperties.count = atoi(particleCount->c_str());
     }
 
-    std::shared_ptr<std::string> textureFilename = env->getArgument("-texture");
+    std::shared_ptr<std::string> textureFilename = env->getArgument("-image");
     if (textureFilename != nullptr) {
         particleTexture = std::make_shared<GLS::Texture>(*textureFilename);
     }
@@ -96,10 +105,8 @@ void ParticuleSystemSceneController::makeScene() {
     }
 
     gravityCenterNode = std::make_shared<GLS::Node>();
-    gravityCenterNode->addRenderable(GLS::Mesh::sphere(0.05));
+    gravityCenterNode->addRenderable(GLS::Mesh::sphere(0.15));
     scene.rootNode()->addChildNode(gravityCenterNode);
-
-    GLS::Particle();
 
 }
 
