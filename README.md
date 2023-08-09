@@ -33,7 +33,13 @@ The structure of a scene is a bit inspired from the gltf file format organizatio
 
 The engine is independent from the window management. It is only used to render a frame. The render loop is a behavior that should be implemented from the window management system.
 
+A scene is composed of node objects from a root class `GLS::Node` that have a transformation matrix and an array of child nodes of the same type.
+It's a recusive tree organisation that can group nodes together.
+When modifying a transformation matrix, it will have an effect on the rendering, but also on the child node that will move along the parent.
+All of those nodes also contains properties like a set of renderables objects `GLS::IRenderable`. It's an interface class that is subclassed by anything that can be drawn on screen. Like 3d meshes, particle system, skybox or post-processing effects.
+
 ### Casting shadows
+
 ![shadow-scene-plus](preview/shadow-scene-plus.gif)
 
 In this scene there are multiple elements that are drawn on the same image to test the compatibility of drawing between different objects:
@@ -50,9 +56,12 @@ To cast a shadow, elements have two ways of rendering. One that behaves using mu
 
 ![skybox-scene](preview/skybox-scene.gif)
 
-This previous scene contains a skybox and a static mesh loaded from external file asset using assimp.
+We can import external 3d scene from popular formats like fbx, dae or gltf. It's mostly done using Assimp to parse a scene from a file, then the result is maped to the coresponding engine class.
+Images are also imported but using the famous `stb_image` repo.
 
-The skybox is rendered using a sampler cube on a texture cube map. The render is a basic cube but unlike every other elements of a scene, it ignores the camera translation and scale but only uses the rotation to give the background effect.
+This previous scene contains a skybox and a static mesh loaded from external file.
+
+The skybox is rendered using a sampler cube on a texture cube map. The render is a basic cube but unlike every other elements of a scene, it ignores the camera translation and scale but only uses the rotation to give the background effect and is overwritten by any other rendered object.
 
 ### Particles system
 
@@ -60,7 +69,12 @@ The skybox is rendered using a sampler cube on a texture cube map. The render is
 
 <img src="https://www.khronos.org/assets/images/api_logos/opencl.svg" alt="openCL-logo" width="100"/> <img src="preview/fusion.png" alt="fusion" width="120"/> <img src="https://www.khronos.org/assets/images/api_logos/opengl.svg" alt="openGL-logo" width="100"/>
 
-There is a small module in the engine that manages openCL functionalities. One of those functionalities is to create a buffer shared by OpenCL and OpenGL. Ideal to create particle systems.
+Another project from school was to lean OpenCL to create particle systems.
+OpenCL is used to do parallel computation for custom shaders (unrelated to rendering). It comes really handy when creating things like particle systems. We could have one million particles and make OpenCL update all of their positions *blazingly* fast. Then with a small trick, we can make an interoperability with buffers between openCL and openGL.
+
+I therefore created a small module in the engine to manage openCL functionalities. One of those functionalities is to create a buffer shared by OpenCL and OpenGL.
+
+So I merged this project with my engine, turned the particle system into a `GLS::IRenderable` and apply my node transformation to all particles when rendering, then the integration was complete.
 
 Those are rendered using a cloud of dots and updated with an openCL kernel applied to each of the particles.
 
@@ -74,11 +88,11 @@ We can also apply a texture to the particles. This will make the rendering pipel
 
 ### Skinned mesh
 
-![skinned-scene](preview/skinned-scene.gif)
-
 The engine can render skinned meshes with skeletal animation and blend multiple animations inside single skeletal mesh.
 
 The skeleton has different articulations which can be moved and rotated using manual or pre defined animation with custom speed. We can cover the skeleton with the skin which follows the skeleton bones.
+
+![skinned-scene](preview/skinned-scene.gif)
 
 ### Voxel engine
 
@@ -93,6 +107,11 @@ Here are some presentations of the generation algorithm from `assets/voxelProced
 ![voxel-forest](preview/VoxelWorld-forest.png)
 ![voxel-ice](preview/VoxelWorld-ice.png)
 ![voxel-mountain](preview/VoxelWorld-mountain.png)
+
+Another project from school was to make a voxel engine that render in real-time. I experimented with geometry shader that could generate just the right meshes during the rendering so we could simply send a 3d matrix of blocks to the GPU and the voxel will draw at each frames.
+That was a *wrong good idea*. The rendering took just too long, and for a single chunck of 128x128x128 blocks, the framerate dropped to 20 fps.
+
+A better solution was to bake the chuck into a mesh and render it. The downside of it is that we have to rebuild the mesh when one block changes. It's still better than rebuilding the mesh in the geometry shader at each frames. But to make it less impactful, the chucks were split into smaller 16x16x16 blocks.
 
 ### Postprocess effects
 
@@ -115,3 +134,11 @@ Some examples are in assets/postProcessEffects
 
 > As the position of the camera is sent to the post process shader, we can imagine many thing even unrelated to our scene. Like drawing a 3D fractal calculated with a ray marching algorithm above our scene.
 ![postprocess-raymarch](preview/postprocess-raymarch.png)
+
+The possibilities could be greatly improved if I implemented a multi buffered rendering so the shader could also compute effect using depth, normal or world position along with the color.
+
+## Conclusion
+
+It was really fun to work on this project and discover the possibilities and features of the GPU. I started this project before learning about Rust and Vulkan that were just emerging. Also I did not have any global knowledge about game development so I figured out a bit late that I could take a totally different approach. A better separation between the framework and the engine, an entity-component sytem for nodes and renderable things and many other things that can be better engineered.
+
+I won't fix those, I think I'm done with this project and with openGL as the future is written with Vulkan and I'm also starting to love using fully featured game engine like UE5.
